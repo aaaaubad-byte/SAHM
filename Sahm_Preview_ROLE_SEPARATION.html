@@ -1,7 +1,7 @@
 <!doctype html>
 <html lang="ar" dir="rtl">
 <head>
-<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no"><meta name="theme-color" content="#142f39">
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no"><meta name="theme-color" content="#3158d6">
 <meta name="application-name" content="سهم">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="سهم">
@@ -48,20 +48,270 @@
 .manager-action b,.member-action b{font-size:11px}
 .manager-action small,.member-action small{font-size:9px;color:#788783}
 .member-tabs button.active{color:#745b34;border-bottom-color:#c3a16a}
+
+/* Sahm visual system — redesigned for a calm, finance-first Arabic experience */
+:root{
+ --ink:#172338;--ink2:#2b3d59;--teal:#3158d6;--mint:#edf2ff;--gold:#f1c56b;
+ --bg:#f4f6fa;--card:#fff;--muted:#68778d;--line:#e5eaf1;--red:#b5434a;--blue:#41658d;
+ --shadow:0 8px 28px rgba(25,44,78,.07);--radius:20px;
+ --primary:#3158d6;--primary-dark:#2345b5;--surface:#fff;--surface-2:#f8f9fc;
+}
+html,body{background:#e9edf4;color:var(--ink);font-family:system-ui,-apple-system,"Segoe UI","Noto Sans Arabic",Tahoma,Arial,sans-serif}
+button,input,select,textarea{font:inherit}
+button{touch-action:manipulation}
+.workspace{background:radial-gradient(ellipse at 50% 0%,#e4eaf7 0,#e9edf4 48%,#e9edf4 100%);padding:20px}
+.phone{width:min(100%,480px);height:min(940px,calc(100dvh - 40px));min-height:660px;border:1px solid #d8dfeb;border-radius:30px;background:var(--bg);box-shadow:0 28px 90px rgba(23,38,69,.18)}
+.statusbar{display:none}
+.topbar{height:70px;background:#fff;color:var(--ink);padding:0 20px;border-bottom:1px solid var(--line);box-shadow:none}
+.brand{gap:11px;font-size:15px}
+.brand-mark{height:38px;width:38px;border-radius:13px;background:var(--primary);color:#fff;font-size:18px;box-shadow:0 5px 12px #3158d626}
+.top-brand-copy{display:flex;flex-direction:column;gap:2px}
+.top-brand-copy strong{font-size:15px;font-weight:850;line-height:1.2}
+.top-brand-copy small{font-size:10px;color:var(--muted);font-weight:600}
+.top-actions{gap:8px}
+.icon-btn{width:42px;height:42px;min-width:42px;border-radius:14px;background:#f4f6fb;color:#3d4e68;display:grid;place-items:center;position:relative;border:1px solid #edf0f6}
+.icon-btn svg{width:19px;height:19px}
+.dot{width:8px;height:8px;background:#e25d67;border:2px solid #fff;top:7px;left:7px}
+.screen{background:var(--bg);padding:22px 18px calc(28px + env(safe-area-inset-bottom));scrollbar-color:#cad3e1 transparent}
+.screen::-webkit-scrollbar-thumb{background:#cad3e1}
+.bottomnav{height:78px;background:#fff;border-top:1px solid var(--line);padding:8px 8px calc(8px + env(safe-area-inset-bottom));gap:4px;box-shadow:0 -8px 22px rgba(24,41,75,.035)}
+.navitem{flex:1;min-width:0;min-height:54px;gap:4px;border-radius:15px;color:#8792a4;font-size:10px;font-weight:650;transition:background .18s,color .18s}
+.navitem .ni{height:24px;line-height:24px;display:grid;place-items:center}
+.navitem .ni svg{width:21px;height:21px;stroke:currentColor;stroke-width:1.8;fill:none;stroke-linecap:round;stroke-linejoin:round}
+.navitem.active{color:var(--primary);background:#edf2ff}
+.navitem.active .ni{transform:none}
+.page-title{font-size:21px;font-weight:850;letter-spacing:-.35px;margin:0 0 4px}
+.page-sub{display:block;color:var(--muted);font-size:11px;line-height:1.8;margin:0;max-width:44ch}
+.screen-head{display:flex;align-items:center;justify-content:space-between;gap:12px;margin:2px 0 17px}
+.back-btn{height:40px;min-width:44px;padding:0 12px;border:1px solid var(--line);background:#fff;color:#4b5c73;border-radius:13px;display:inline-flex;align-items:center;justify-content:center;gap:6px;font-size:11px;font-weight:750}
+.back-btn svg{width:17px;height:17px}
+.section-head{margin:21px 1px 11px}
+.section-head h3{font-size:13px;font-weight:850}
+.link-btn{font-size:11px;color:var(--primary);font-weight:800;padding:8px 4px;min-height:32px}
+.card{background:#fff;border:1px solid var(--line);border-radius:19px;padding:15px;margin-bottom:11px;box-shadow:0 3px 10px rgba(23,43,79,.025)}
+.hero{background:linear-gradient(125deg,#1b2d53 0%,#3158d6 100%);color:#fff;border:0;border-radius:22px;padding:19px;box-shadow:0 12px 24px rgba(39,75,177,.16)}
+.hero:after{content:"س";font-family:serif;left:12px;top:-36px;font-size:166px;color:#ffffff0b}
+.hero .eyebrow{color:#d6e0ff}
+.hero .page-sub{color:#dce5ff}
+.hero-num{font-size:29px;font-weight:850;letter-spacing:-.7px;margin-top:7px}
+.hero-row{align-items:center;margin-top:11px}
+.hero .btn.gold{background:#f3ca76;color:#28324a}
+.eyebrow{color:#7c899c;font-size:10px;font-weight:650;letter-spacing:0}
+.pill{padding:6px 10px;border-radius:999px;font-size:10px;font-weight:750;background:#f0f2f6;color:#5d6b80}
+.pill.green{background:#e5f5ed;color:#18744f}.pill.gold{background:#fff3dc;color:#93641b}
+.pill.red{background:#fbecee;color:#a83f4a}.pill.blue{background:#eaf1ff;color:#3158a6}
+.pill.dark{background:#e9edfa;color:#344a8c}
+.grid2{gap:10px}
+.stat{padding:14px;border-radius:17px;background:#fff;border:1px solid var(--line);min-width:0}
+.stat b{font-size:23px;font-weight:850;color:var(--ink);margin:5px 0 2px;letter-spacing:-.4px}
+.stat span{font-size:10px;color:var(--muted)}
+.stat .sicon{float:left;color:var(--primary);font-size:18px}
+.progress{height:7px;background:#edf0f5;border-radius:10px;margin:9px 0}
+.progress i{background:linear-gradient(90deg,#3158d6,#6380eb)}
+.btn{min-height:46px;padding:11px 15px;border-radius:14px;font-size:12px;font-weight:800;letter-spacing:0;transition:transform .12s,filter .12s}
+.btn:active{transform:scale(.985)}
+.btn.primary{background:var(--primary);box-shadow:0 5px 12px #3158d622}
+.btn.primary:hover{background:var(--primary-dark)}
+.btn.gold{background:#f2c66f;color:#29344a}
+.btn.soft{background:#edf2ff;color:#3158b7}
+.btn.outline{background:#fff;border:1px solid #dce3ed;color:#44546d}
+.btn.danger{background:#fbecee;color:#a83f4a}
+.btn.small{min-height:36px;padding:7px 11px;font-size:10px;border-radius:11px}
+.btn.full{width:100%}
+.btn:disabled{box-shadow:none}
+.row{gap:11px}
+.avatar{height:40px;width:40px;border-radius:14px;background:#edf2ff;color:#3158b7;font-size:14px}
+.avatar.gold{background:#fff3df;color:#94651d}.avatar.dark{background:#263958;color:#fff}
+.listrow{gap:11px;padding:13px 0;border-color:#edf0f5}
+.listrow strong{font-size:12px;font-weight:800}
+.listrow small{font-size:10px;line-height:1.65;color:#78869a}
+.amount{font-size:12px;font-weight:850;color:var(--ink)}
+.field{margin:13px 0}
+.field label{font-size:11px;font-weight:800;color:#35445d;margin-bottom:7px}
+.field input,.field select,.field textarea,.searchbox{min-height:48px;padding:12px 13px;border:1px solid #dfe5ee;background:#fbfcfe;border-radius:13px;font-size:12px;color:var(--ink)}
+.field input:focus,.field select:focus,.field textarea:focus{border-color:#6c87e8;box-shadow:0 0 0 3px #3158d61c}
+.field textarea{min-height:88px}
+.hint{display:block;font-size:10px;color:#738198;line-height:1.8;margin-top:6px}
+.formgrid{gap:0 11px}
+.segmented{background:#eef1f7;border-radius:14px;padding:4px;gap:4px}
+.segmented button{padding:10px 7px;border-radius:11px;font-size:10px}
+.segmented button.active{color:var(--primary);box-shadow:0 2px 8px #20355b10}
+.tabs{gap:18px;overflow-x:auto;scrollbar-width:none}
+.tabs button{white-space:nowrap;font-size:11px;padding:11px 2px;color:#78869a;min-height:42px}
+.tabs button.active{color:var(--primary);border-color:var(--primary)}
+.notice{display:block;margin:11px 0;padding:12px 13px;background:#eef3ff;color:#40568e;border:1px solid #e0e8ff;border-radius:14px;font-size:10px;line-height:1.85}
+.notice.warn{background:#fff5e5;color:#8b641e;border-color:#f6e5c3}
+.notice.error{background:#fbecee;color:#97414a;border-color:#f6dfe2}
+.notice.info{background:#eff5fb;color:#49647e;border-color:#e2ebf5}
+.toolbar{gap:8px;margin:13px 0}
+.searchbox{min-width:0}
+.keyvalue{padding:11px 0;border-color:#edf0f5;font-size:11px}
+.keyvalue b{color:#26364f;font-weight:800}
+.keyvalue span{color:#7a879a}
+.receipt{border-color:#d5deea;background:#fcfdff}
+.chatbubble{background:#edf2ff;font-size:11px;padding:10px 13px}
+.chatbubble.mine{background:#e8f4ee}
+.empty{padding:30px 14px}
+.empty .big{font-size:31px;color:#8290a6}
+.empty b{font-size:13px}
+.empty p{font-size:10px;line-height:1.8}
+.overlay{background:#172338a8;backdrop-filter:blur(4px)}
+.dialog{border-radius:24px 24px 18px 18px;padding:19px;max-height:88%}
+.dialog h3{font-size:16px;font-weight:850}
+.dialog .dialog-body{font-size:11px;line-height:1.9}
+.toast{bottom:88px;border-radius:14px;padding:12px 16px;font-size:11px;max-width:calc(100% - 36px);white-space:normal;text-align:center}
+.auth-screen{background:radial-gradient(circle at 50% 0%,#3d65d0 0,#20345f 48%,#172843 100%);padding:24px 20px}
+.auth-brand{margin:clamp(26px,9vh,75px) 0 26px}
+.auth-brand .brand-mark{width:68px;height:68px;border-radius:21px;background:#fff;color:var(--primary);font-size:33px;box-shadow:0 12px 25px #0b1d3e55}
+.auth-brand h1{font-size:28px;letter-spacing:-.4px}
+.auth-card{border-radius:23px;padding:20px;box-shadow:0 15px 35px #0c1d3b20}
+.auth-foot{display:block}
+.role-chip{font-size:10px;padding:6px 10px}
+.manager-chip{background:#e9efff;color:#3153b4}
+.member-chip{background:#eaf5f1;color:#26745e}
+.manager-identity{background:linear-gradient(135deg,#202f53,#365bc0);color:#fff;border:0}
+.member-identity{background:linear-gradient(135deg,#eaf0ff,#fff);color:#263755;border:1px solid #dce5ff}
+.group-card{border:1px solid var(--line);border-right:1px solid var(--line);cursor:pointer;transition:transform .15s,box-shadow .15s}
+.group-card:active{transform:scale(.99)}
+.manager-card{border-right:1px solid var(--line)}
+.member-card{border-right:1px solid var(--line)}
+.manager-panel{border-color:#e0e7f2}
+.member-panel{border-color:#e2e9f4;background:#fff}
+.manager-action-grid,.member-action-grid{gap:9px}
+.manager-action,.member-action{min-height:96px;border-radius:16px;padding:13px;border:1px solid #e2e8f1;background:#fafbfe;color:#273954;align-items:flex-start;justify-content:center}
+.member-action{background:#fbfcff;color:#34465f;border-color:#e2e8f1}
+.manager-action span,.member-action span{font-size:19px;color:var(--primary)}
+.manager-action b,.member-action b{font-size:11px;font-weight:850}
+.manager-action small,.member-action small{font-size:10px;color:#7a8799;line-height:1.65}
+.member-tabs button.active{color:#28765f;border-bottom-color:#28765f}
+.group-identity .hero-num{font-size:25px}
+.group-identity .eyebrow{color:inherit;opacity:.75}
+.page-sub,.hint,.notice,.auth-foot,.empty p,.dialog .notice,.dialog .hint{display:block!important}
+.phone-indicator{display:none}
+button:focus-visible,a:focus-visible,input:focus-visible,select:focus-visible,textarea:focus-visible{outline:3px solid #8da4f4;outline-offset:2px}
+@media(max-width:600px){
+ .workspace{padding:0;background:var(--bg)}
+ .phone{max-width:none;width:100%;height:100dvh;min-height:100dvh;border:0;border-radius:0;box-shadow:none}
+ .topbar{height:66px;padding-inline:17px}
+ .screen{padding:19px 16px calc(28px + env(safe-area-inset-bottom))}
+ .bottomnav{height:calc(76px + env(safe-area-inset-bottom));padding-bottom:calc(8px + env(safe-area-inset-bottom))}
+ .auth-screen{padding-top:calc(20px + env(safe-area-inset-top))}
+}
+@media(min-width:900px){
+ .phone{width:480px;height:min(940px,calc(100dvh - 40px))}
+}
+@media(prefers-reduced-motion:reduce){
+ *,*::before,*::after{scroll-behavior:auto!important;animation-duration:.01ms!important;transition-duration:.01ms!important}
+}
+
+
+.group-card-metrics{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px;margin:16px 0 8px;padding-top:12px;border-top:1px solid #edf0f5}
+.group-card-metrics div{min-width:0;display:flex;flex-direction:column;gap:5px}
+.group-card-metrics span,.member-summary span{font-size:9px;color:#7c899b;font-weight:700}
+.group-card-metrics b{font-size:11px;color:#253650;font-weight:850;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.progress-caption{display:flex;justify-content:space-between;color:#7d8999;font-size:9px;margin-top:-4px}
+.progress-caption b{color:#3158d6}
+.group-card-footer{display:flex;justify-content:space-between;align-items:center;margin-top:10px;color:#8490a1;font-size:10px}
+.group-card-footer>span:last-child{display:flex;align-items:center;gap:5px;color:#3158d6;font-weight:800}
+.home-welcome{display:flex;justify-content:space-between;align-items:center;margin:0 2px 16px}
+.home-welcome h1{font-size:21px;margin:4px 0 4px;letter-spacing:-.4px}
+.home-welcome p{font-size:10px;color:#77859a;margin:0}
+.home-user-mark{width:43px;height:43px;border-radius:15px;background:#e4eaff;color:#3158d6;display:grid;place-items:center;font-size:18px;font-weight:850}
+.hero-topline{display:flex;justify-content:space-between;align-items:center}
+.hero-label{font-size:10px;color:#d6e1ff;font-weight:750}
+.hero-live{display:flex;align-items:center;gap:6px;color:#d5e1ff;font-size:9px}
+.hero-live i{width:6px;height:6px;background:#77e1b4;border-radius:50%}
+.hero-total{font-size:35px;font-weight:900;letter-spacing:-1px;margin:10px 0 12px;line-height:1}
+.hero-total small{display:block;font-size:10px;font-weight:600;color:#d4dfff;letter-spacing:0;margin-top:7px}
+.hero-stats{display:flex;gap:0;border-top:1px solid #ffffff26;padding-top:12px}
+.hero-stats div{flex:1;display:flex;flex-direction:column;gap:3px}
+.hero-stats div+div{border-right:1px solid #ffffff26;padding-right:15px}
+.hero-stats b{font-size:16px}.hero-stats span{font-size:9px;color:#dbe4ff}
+.home-create{display:flex;width:100%;margin-top:15px;background:#f2c66f;color:#25334d}
+.pending-task{width:100%;display:flex;align-items:center;gap:12px;text-align:right;padding:13px;border-color:#f3e6c9;background:#fffaf0}
+.pending-task .task-icon{width:39px;height:39px;border-radius:13px;background:#fff0d4;color:#9a6a1d;display:grid;place-items:center}
+.pending-task .grow{display:flex;flex-direction:column;gap:4px}
+.pending-task b{font-size:11px}.pending-task small{font-size:10px;color:#88724f}
+.task-arrow{color:#a07a36}
+.home-footnote{font-size:9px;color:#8a95a6;text-align:center;margin:21px 8px 4px;line-height:1.8}
+.member-summary{display:grid;grid-template-columns:1fr 1fr;gap:9px;margin-bottom:12px}
+.member-summary.three{grid-template-columns:repeat(3,minmax(0,1fr))}
+.member-summary>div{background:#fff;border:1px solid var(--line);border-radius:16px;padding:13px;display:flex;flex-direction:column;gap:6px;min-width:0}
+.member-summary b{font-size:18px;color:#243650;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.payment-progress{padding:14px 15px;background:#fff;border:1px solid var(--line);border-radius:17px;margin-bottom:13px}
+.payment-progress .between b{font-size:11px}.payment-progress .between strong{color:#3158d6;font-size:13px}
+.payment-progress small{font-size:9px;color:#7b899d}
+.draw-quorum .draw-percent{font-size:34px;font-weight:900;color:#253653;margin:13px 0 2px;letter-spacing:-1px}
+.draw-percent small{font-size:15px}
+.vote-panel{border-color:#f0e4cc;background:#fffcf6}
+.vote-panel b{font-size:11px}
+.vote-panel p{font-size:10px;color:#7b6b50;line-height:1.8}
+.vote-number{font-size:25px;font-weight:900;color:#3158d6;margin:8px 0}
+.draw-card .draw-sub{display:block;font-size:9px;color:#7d8999;margin-top:4px}
+.draw-card .wheel{border-color:#edf0f7;background:conic-gradient(#3158d6 0 45deg,#eabf64 45deg 90deg,#344b7b 90deg 135deg,#a6b7ef 135deg 180deg,#e9d8b3 180deg 225deg,#4b69bc 225deg 270deg,#b7c5ef 270deg 315deg,#d6a94f 315deg);box-shadow:inset 0 0 0 5px #fff,0 5px 16px #1b37621b}
+.draw-card .wheel:before{color:#263653}
+.empty-icon{display:grid;place-items:center;margin:0 auto 9px;color:#8b9ab3}
+.compact-empty{font-size:10px;color:#8591a2;padding:15px 0;text-align:center}
+@media(max-width:360px){
+ .group-card-metrics{gap:5px}.group-card-metrics b{font-size:10px}
+ .home-welcome h1{font-size:19px}
+ .member-summary b{font-size:16px}
+}
+
 </style></head>
 <body><noscript><main dir="rtl" style="font-family:Arial,sans-serif;padding:24px;color:#142f39"><h1>سهم</h1></main></noscript><div class="workspace"><div class="phone" id="app">
-<div class="statusbar"><span>9:41 ◉</span><span>●●●  ▰</span></div>
+<div class="statusbar" aria-hidden="true"></div>
 <div id="topbar" class="topbar" style="display:none"></div><main id="screen" class="auth-screen">
 <div class="auth-brand"><div class="brand-mark">س</div><h1>سهم</h1></div>
 
 <div class="auth-card"><div style="text-align:center"><b style="font-size:15px">أهلاً بك في سهم</b><p class="page-sub">نظّم مساهماتك وتابع الجمعيات التي تديرها أو تشارك فيها.</p></div><button class="btn primary full" style="margin-top:12px" data-go="phone">إنشاء حساب / تسجيل الدخول</button><div class="notice" style="margin-top:13px">سهم لا يستقبل الأموال ولا ينفذ التحويلات. جميع المدفوعات تتم خارج التطبيق، ويقتصر دوره على تسجيلها ومراجعتها وتوثيقها.</div></div>
 
-</main><nav id="bottomnav" class="bottomnav" style="display:none"></nav><div class="phone-indicator"></div><div id="modal-root"></div><div id="toast" class="toast"></div>
+</main><nav id="bottomnav" class="bottomnav" style="display:none"></nav><div class="phone-indicator"></div><div id="modal-root"></div><div id="toast" class="toast" role="status" aria-live="polite"></div>
 </div></div>
 <script>
 const $=s=>document.querySelector(s);const money=(n,c='YER_SAN')=>new Intl.NumberFormat('ar-YE').format(n)+' '+({YER_SAN:'ر.ي (صنعاء)',YER_ADE:'ر.ي (عدن)',USD:'دولار',SAR:'ريال سعودي'}[c]||c);const today=()=>new Date().toISOString().slice(0,10);
-const seed={user:{name:'أحمد محمد',phone:'+967 777 123 456',city:'تعز',avatar:'أم',notifications:true,biometric:false},groups:[{id:'G-2401',name:'جمعية الأهل',currency:'YER_SAN',share:50000,total:12,maxPer:3,start:'2026-11-20',first:'2026-11-27',period:'أسبوعية',quorum:66,role:'manager',myShares:2,status:'ACTIVE_REVOLVING',members:9,shares:12,paid:7,cycle:3,admin:'أحمد محمد',contrib:50000,publicLink:'sahm.app/join/G-2401',draws:[{cycle:1,winner:'خالد عبدالله',shareNo:1,ticketNo:5,date:'2026-10-30'},{cycle:2,winner:'سارة أحمد',shareNo:1,ticketNo:3,date:'2026-11-06'}]},{id:'G-2402',name:'زملاء العمل',currency:'USD',share:100,total:8,maxPer:2,start:'2026-12-01',first:'2026-12-08',period:'أسبوعية',quorum:66,role:'member',myShares:1,status:'PENDING_MEMBERS',members:6,shares:6,paid:0,cycle:0,admin:'مروان علي',contrib:100,publicLink:'sahm.app/join/G-2402',draws:[]},{id:'G-2403',name:'جمعية الجيران',currency:'SAR',share:300,total:10,maxPer:2,start:'2026-11-01',first:'2026-11-01',period:'شهرية',quorum:66,role:'manager',myShares:1,status:'READY_FOR_DRAW',members:8,shares:10,paid:10,cycle:1,admin:'أحمد محمد',contrib:300,publicLink:'sahm.app/join/G-2403',draws:[] }],payments:[{id:'P-001',group:'G-2401',person:'مروان علي',cycle:3,amount:50000,ref:'TRX-982113',status:'UNDER_REVIEW',date:'2026-11-10',proof:'إشعار_التحويل.jpg'},{id:'P-002',group:'G-2401',person:'سارة أحمد',cycle:3,amount:50000,ref:'TRX-982098',status:'VERIFIED_PAID',date:'2026-11-09',proof:'إشعار_بنكي.png'}],receipts:[{id:'SH-2026-0008',group:'G-2401',person:'سارة أحمد',amount:50000,cycle:3,ref:'TRX-982098',date:'2026-11-09'}],invites:[{id:'I-01',group:'G-2401',name:'علي حسن',phone:'777000111',shares:1,status:'PENDING'}],wall:[{group:'G-2401',type:'system',text:'بدأت الدورة الثالثة من جمعية الأهل',date:'2026-11-08',reactions:3},{group:'G-2401',type:'system',text:'تم اعتماد إيصال سداد سارة أحمد للدورة الثالثة',date:'2026-11-09',reactions:2},{group:'G-2401',type:'system',text:'تم إعلان نتيجة قرعة الدورة الثانية: سارة أحمد',date:'2026-11-06',reactions:5}],messages:[{group:'G-2401',name:'خالد عبدالله',text:'بالتوفيق للجميع في هذه الدورة',time:'10:42'},{group:'G-2401',name:'أحمد محمد',mine:true,text:'يرجى إرسال إثبات السداد قبل الموعد',time:'11:05'}],notifications:[{title:'موعد القسط القادم',text:'قسط جمعية الأهل يستحق في 14 نوفمبر',date:'منذ ساعتين',read:false},{title:'تم اعتماد السداد',text:'تم اعتماد مساهمة سارة أحمد',date:'أمس',read:false},{title:'موعد القرعة',text:'قرعة جمعية الجيران في 20 نوفمبر',date:'منذ يومين',read:true}],audit:[{action:'اعتماد إيصال سداد',actor:'أحمد محمد',date:'2026-11-09 11:22'},{action:'إرسال إثبات تحويل',actor:'سارة أحمد',date:'2026-11-09 10:14'},{action:'تحديث بيانات الجمعية',actor:'أحمد محمد',date:'2026-11-08 18:45'},{action:'بدء الدورة الثالثة',actor:'النظام',date:'2026-11-08 08:00'}],currentGroup:'G-2401',tab:'managed',session:false,otp:'246810',verified:false,unread:2};
+const seed={user:{name:'أحمد محمد',phone:'+967 777 123 456',city:'تعز',avatar:'أم',notifications:true,biometric:false},groups:[{id:'G-2401',name:'جمعية الأهل',currency:'YER_SAN',share:50000,total:12,maxPer:3,start:'2026-11-20',first:'2026-11-27',period:'أسبوعية',quorum:66,role:'manager',myShares:2,status:'ACTIVE_REVOLVING',members:9,shares:12,paid:7,cycle:3,admin:'أحمد محمد',contrib:50000,publicLink:'sahm.app/join/G-2401',draws:[{cycle:1,winner:'خالد عبدالله',shareNo:1,ticketNo:5,date:'2026-10-30'},{cycle:2,winner:'سارة أحمد',shareNo:1,ticketNo:3,date:'2026-11-06'}]},{id:'G-2402',name:'زملاء العمل',currency:'USD',share:100,total:8,maxPer:2,start:'2026-12-01',first:'2026-12-08',period:'أسبوعية',quorum:66,role:'member',myShares:1,status:'PENDING_MEMBERS',members:6,shares:6,paid:0,cycle:0,admin:'مروان علي',contrib:100,publicLink:'sahm.app/join/G-2402',draws:[]},{id:'G-2403',name:'جمعية الجيران',currency:'SAR',share:300,total:10,maxPer:2,start:'2026-11-01',first:'2026-11-01',period:'شهرية',quorum:66,role:'manager',myShares:1,status:'READY_FOR_DRAW',members:8,shares:10,paid:10,cycle:1,admin:'أحمد محمد',contrib:300,publicLink:'sahm.app/join/G-2403',draws:[] }],payments:[{id:'P-001',group:'G-2401',person:'مروان علي',cycle:3,amount:50000,ref:'TRX-982113',status:'UNDER_REVIEW',date:'2026-11-10',proof:'إشعار_التحويل.jpg'},{id:'P-002',group:'G-2401',person:'سارة أحمد',cycle:3,amount:50000,ref:'TRX-982098',status:'VERIFIED_PAID',date:'2026-11-09',proof:'إشعار_بنكي.png'}],receipts:[{id:'SH-2026-0008',group:'G-2401',person:'سارة أحمد',amount:50000,cycle:3,ref:'TRX-982098',date:'2026-11-09'}],invites:[{id:'I-01',group:'G-2401',name:'علي حسن',phone:'777000111',shares:1,status:'PENDING'}],wall:[{group:'G-2401',type:'system',text:'بدأت الدورة الثالثة من جمعية الأهل',date:'2026-11-08',reactions:3},{group:'G-2401',type:'system',text:'تم اعتماد إيصال سداد سارة أحمد للدورة الثالثة',date:'2026-11-09',reactions:2},{group:'G-2401',type:'system',text:'تم إعلان نتيجة قرعة الدورة الثانية: سارة أحمد',date:'2026-11-06',reactions:5}],messages:[{group:'G-2401',name:'خالد عبدالله',text:'بالتوفيق للجميع في هذه الدورة',time:'10:42'},{group:'G-2401',name:'أحمد محمد',mine:true,text:'يرجى إرسال إثبات السداد قبل الموعد',time:'11:05'}],notifications:[{title:'موعد القسط القادم',text:'قسط جمعية الأهل يستحق في 14 نوفمبر',date:'منذ ساعتين',read:false},{title:'تم اعتماد السداد',text:'تم اعتماد مساهمة سارة أحمد',date:'أمس',read:false},{title:'موعد القرعة',text:'قرعة جمعية الجيران في 20 نوفمبر',date:'منذ يومين',read:true}],audit:[{action:'اعتماد إيصال سداد',actor:'أحمد محمد',date:'2026-11-09 11:22'},{action:'إرسال إثبات تحويل',actor:'سارة أحمد',date:'2026-11-09 10:14'},{action:'تحديث بيانات الجمعية',actor:'أحمد محمد',date:'2026-11-08 18:45'},{action:'بدء الدورة الثالثة',actor:'النظام',date:'2026-11-08 08:00'}],participants:[
+ {group:'G-2401',name:'أحمد محمد',shares:2,role:'manager',present:true},
+ {group:'G-2401',name:'سارة أحمد',shares:2,role:'member',present:true},
+ {group:'G-2401',name:'خالد عبدالله',shares:1,role:'member',present:true},
+ {group:'G-2401',name:'مروان علي',shares:2,role:'member',present:true},
+ {group:'G-2401',name:'ريم صالح',shares:1,role:'member',present:true},
+ {group:'G-2401',name:'نبيل سالم',shares:1,role:'member',present:true},
+ {group:'G-2401',name:'هدى ياسين',shares:1,role:'member',present:false},
+ {group:'G-2401',name:'سمير قاسم',shares:1,role:'member',present:false},
+ {group:'G-2401',name:'فهد ياسين',shares:1,role:'member',present:false},
+ {group:'G-2402',name:'أحمد محمد',shares:1,role:'member',present:true},
+ {group:'G-2402',name:'مروان علي',shares:1,role:'member',present:true},
+ {group:'G-2402',name:'خالد عبدالله',shares:1,role:'member',present:true},
+ {group:'G-2402',name:'سارة أحمد',shares:1,role:'member',present:true},
+ {group:'G-2402',name:'هدى ياسين',shares:1,role:'member',present:false},
+ {group:'G-2402',name:'نبيل سالم',shares:1,role:'member',present:false},
+ {group:'G-2403',name:'أحمد محمد',shares:1,role:'manager',present:true},
+ {group:'G-2403',name:'سارة أحمد',shares:2,role:'member',present:true},
+ {group:'G-2403',name:'خالد عبدالله',shares:1,role:'member',present:true},
+ {group:'G-2403',name:'مروان علي',shares:1,role:'member',present:true},
+ {group:'G-2403',name:'ريم صالح',shares:1,role:'member',present:true},
+ {group:'G-2403',name:'نبيل سالم',shares:1,role:'member',present:true},
+ {group:'G-2403',name:'هدى ياسين',shares:2,role:'member',present:true},
+ {group:'G-2403',name:'سمير قاسم',shares:1,role:'member',present:true}
+],currentGroup:'G-2401',tab:'managed',session:false,otp:'246810',verified:false,unread:2};
 let db=load(),screenName=db.session?'home':'welcome',stack=[],params={},groupTab='managed',groupDetailTab='overview',selectedPayment=null,toastTimer;
+
+function uiIcon(name,size=20){
+ const paths={
+  home:'M3 10.8 12 3l9 7.8V21h-6v-6H9v6H3z',
+  groups:'m12 3 9 5-9 5-9-5 9-5zm-9 9 9 5 9-5M3 17l9 5 9-5',
+  wall:'M4 5h16v11H9l-5 4V5zm4 4h8m-8 4h5',
+  bell:'M18 8a6 6 0 0 0-12 0c0 7-3 7-3 9h18c0-2-3-2-3-9m-8 12a2 2 0 0 0 4 0',
+  user:'M20 21a8 8 0 0 0-16 0m8-10a5 5 0 1 0 0-10 5 5 0 0 0 0 10z',
+  back:'m15 18-6-6 6-6',
+  arrow:'M5 12h14m-6-6 6 6-6 6',
+  plus:'M12 5v14m-7-7h14',
+  search:'m20 20-4.5-4.5M18 10a8 8 0 1 1-16 0 8 8 0 0 1 16 0z'
+ };
+ return '<svg viewBox="0 0 24 24" width="'+size+'" height="'+size+'" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="'+(paths[name]||paths.groups)+'"/></svg>';
+}
+
 function load(){try{const v=JSON.parse(localStorage.getItem('sahm_preview_db'));return v?{...seed,...v,user:{...seed.user,...v.user}}:JSON.parse(JSON.stringify(seed))}catch(e){return JSON.parse(JSON.stringify(seed))}}function save(){try{localStorage.setItem('sahm_preview_db',JSON.stringify(db))}catch(e){/* تبقى الحالة في الذاكرة عند منع التخزين المحلي */}}function log(action,actor=db.user.name){db.audit.unshift({action,actor,date:new Date().toLocaleString('ar-YE')});save()}
 function currentGroup(){return db.groups.find(g=>g.id===db.currentGroup)||db.groups[0]}function isManager(g=currentGroup()){return g.role==='manager'}function statusText(s){return({DRAFT:'مسودة',PENDING_MEMBERS:'استقبال الأعضاء',READY_FOR_DRAW:'جاهزة للقرعة',ACTIVE_REVOLVING:'نشطة',PAUSED_DEFAULT:'متوقفة مؤقتاً',COMPLETED:'مكتملة',UNPAID:'غير مسدد',PROOF_SUBMITTED:'تم إرسال الإثبات',UNDER_REVIEW:'قيد المراجعة',VERIFIED_PAID:'تم الاعتماد',REJECTED:'مرفوض',OVERDUE:'متأخر',PENDING:'بانتظار القبول',ACCEPTED:'مقبول',REJECTED_INV:'مرفوض'})[s]||s}function pill(s){let c=['ACTIVE_REVOLVING','VERIFIED_PAID','ACCEPTED'].includes(s)?'green':['READY_FOR_DRAW','UNDER_REVIEW','PENDING','PROOF_SUBMITTED'].includes(s)?'gold':['PAUSED_DEFAULT','OVERDUE','REJECTED'].includes(s)?'red':['PENDING_MEMBERS'].includes(s)?'blue':'';return `<span class="pill ${c}">${statusText(s)}</span>`}
 function go(s,p={}){
@@ -73,31 +323,41 @@ if(s==='create-group'&&currentGroup()?.role==='member')db.currentGroup=db.groups
 stack.push({screenName,params});screenName=s;params=p;render()
 }function back(){if(stack.length){const x=stack.pop();screenName=x.screenName;params=x.params;render()}else go('home')}
 function toast(t){const el=$('#toast');el.textContent=t;el.classList.add('show');clearTimeout(toastTimer);toastTimer=setTimeout(()=>el.classList.remove('show'),2300)}
-function header(title,sub=''){return `<div class="between"><div><div class="page-title">${title}</div></div><button class="btn outline small" data-action="back">رجوع ←</button></div>`}
-function renderTopbar(title='سهم'){const el=$('#topbar');el.style.display='flex';el.innerHTML=`<div class="brand"><span class="brand-mark">س</span><span>${title}</span></div><div class="top-actions"><button class="icon-btn" data-go="notifications">♧${db.unread?'<i class="dot"></i>':''}</button><button class="icon-btn" data-go="profile">◉</button></div>`}
-function nav(active){const items=[['home','⌂','الرئيسية'],['groups','▤','جمعياتي'],['wall','▧','الحائط'],['notifications','♧','التنبيهات'],['profile','◉','حسابي']];$('#bottomnav').style.display='flex';$('#bottomnav').innerHTML=items.map(([s,i,t])=>`<button class="navitem ${active===s?'active':''}" data-go="${s}"><span class="ni">${i}</span>${t}</button>`).join('')}
+function header(title,sub=''){
+ return `<div class="screen-head"><div><h1 class="page-title">${escapeHtml(title)}</h1>${sub?`<p class="page-sub">${escapeHtml(sub)}</p>`:''}</div><button class="back-btn" data-action="back" aria-label="العودة إلى الشاشة السابقة">${uiIcon('back',17)}<span>رجوع</span></button></div>`
+}
+function renderTopbar(title='سهم'){
+ const el=$('#topbar');el.style.display='flex';
+ el.innerHTML=`<div class="brand"><span class="brand-mark">س</span><div class="top-brand-copy"><strong>سهم</strong><small>${escapeHtml(title)}</small></div></div><div class="top-actions"><button class="icon-btn" data-go="notifications" aria-label="التنبيهات">${uiIcon('bell')}${db.unread?'<i class="dot"></i>':''}</button><button class="icon-btn" data-go="profile" aria-label="حسابي">${uiIcon('user')}</button></div>`
+}
+function nav(active){
+ const items=[['home','home','الرئيسية'],['groups','groups','جمعياتي'],['wall','wall','الحائط'],['notifications','bell','التنبيهات'],['profile','user','حسابي']];
+ $('#bottomnav').style.display='flex';
+ $('#bottomnav').innerHTML=items.map(([s,i,t])=>`<button class="navitem ${active===s?'active':''}" data-go="${s}" aria-label="${t}" ${active===s?'aria-current="page"':''}><span class="ni">${uiIcon(i,21)}</span><span>${t}</span></button>`).join('')
+}
 function shell(title,active,html){renderTopbar(title);nav(active);$('#screen').className='screen';$('#screen').innerHTML=html}
 function auth(html){$('#topbar').style.display='none';$('#bottomnav').style.display='none';$('#screen').className='auth-screen';$('#screen').innerHTML=html}
 function groupCard(g){
-const manager=g.role==='manager';
-return `<div class="card group-card ${manager?'manager-card':'member-card'}" data-action="open-group" data-id="${g.id}">
-<div class="between"><div class="row"><div class="avatar ${manager?'dark':'gold'}">${g.name.slice(0,1)}</div><div><strong style="font-size:12px">${g.name}</strong><div class="eyebrow">${g.id}</div></div></div><span class="role-chip ${manager?'manager-chip':'member-chip'}">${manager?'إدارة':'مشاركة'}</span></div>
-<div class="between" style="margin-top:12px">${pill(g.status)}<span class="eyebrow">${g.members} مشاركين · ${g.period}</span></div>
-<div class="grid2" style="margin-top:10px"><div><div class="eyebrow">قيمة السهم</div><b style="font-size:12px">${money(g.share,g.currency)}</b></div><div><div class="eyebrow">${manager?'إجمالي الأسهم':'أسهمك'}</div><b style="font-size:12px">${manager?`${g.shares} / ${g.total}`:`${g.myShares||1} سهم`}</b></div></div>
-${manager?`<div class="progress"><i style="width:${Math.min(100,g.shares/g.total*100)}%"></i></div>`:''}
-<div class="between"><small class="eyebrow">${manager?'إدارة الجمعية':'عضويتك في الجمعية'}</small><span class="link-btn">${manager?'فتح لوحة الإدارة':'فتح مساحة المشاركة'} ←</span></div></div>`
+ const manager=g.role==='manager',total=Number(g.total)||0,shares=Number(g.shares)||0,percent=total?Math.min(100,Math.round(shares/total*100)):0;
+ return `<article class="card group-card ${manager?'manager-card':'member-card'}" data-action="open-group" data-id="${escapeHtml(g.id)}" tabindex="0" role="button" aria-label="فتح جمعية ${escapeHtml(g.name)}">
+ <div class="between"><div class="row"><div class="avatar ${manager?'dark':''}">${escapeHtml(g.name.slice(0,1))}</div><div class="grow"><strong>${escapeHtml(g.name)}</strong><small class="eyebrow">${escapeHtml(g.id)} · ${manager?'إدارة الجمعية':'عضوية مشاركة'}</small></div></div>${pill(g.status)}</div>
+ <div class="group-card-metrics"><div><span>قيمة السهم</span><b>${money(g.share,g.currency)}</b></div><div><span>${manager?'الأسهم المكتملة':'أسهمك'}</span><b>${manager?`${shares} / ${total}`:`${g.myShares||1} سهم`}</b></div><div><span>المشاركون</span><b>${g.members}</b></div></div>
+ ${manager?`<div class="progress"><i style="width:${percent}%"></i></div><div class="progress-caption"><span>اكتمال الأسهم</span><b>${percent}%</b></div>`:''}
+ <div class="group-card-footer"><span>${escapeHtml(g.period||'')}</span><span>التفاصيل ${uiIcon('arrow',15)}</span></div></article>`
 }
 function home(){
-const managed=db.groups.filter(g=>g.role==='manager'),joined=db.groups.filter(g=>g.role==='member');
-const managedIds=new Set(managed.map(g=>g.id));
-const pending=db.payments.filter(p=>managedIds.has(p.group)&&['PROOF_SUBMITTED','UNDER_REVIEW'].includes(p.status)).length;
-shell('سهم','home',`
-<div class="card hero"><div class="eyebrow" style="color:#d8e5e1">مرحباً بعودتك</div><div style="font-size:18px;font-weight:800;margin-top:3px">${db.user.name}</div><div class="hero-row"><div><div class="eyebrow" style="color:#d2dfdc">الجمعيات المرتبطة بحسابك</div><div class="hero-num">${managed.length+joined.length}</div></div><button class="btn gold small" data-go="create-group">＋ جمعية جديدة</button></div></div>
-<div class="grid2"><div class="stat"><span class="sicon">▤</span><span>إدارة</span><b>${managed.length}</b><span>جمعيات تديرها</span></div><div class="stat"><span class="sicon">♙</span><span>مشاركة</span><b>${joined.length}</b><span>جمعيات أنت عضو فيها</span></div></div>
-<div class="section-head"><h3>جمعيات تديرها</h3><button class="link-btn" data-action="home-managed">عرض الكل ←</button></div>${managed.slice(0,2).map(groupCard).join('')||'<div class="card empty"><b>لا توجد جمعيات تديرها</b><button class="btn primary full" data-go="create-group">إنشاء جمعية</button></div>'}
-${pending?`<div class="card manager-panel"><div class="between"><b>مهام الإدارة</b><span class="pill gold">${pending} إثباتات معلقة</span></div><button class="btn primary full" data-action="open-manager-review">مراجعة إثباتات السداد</button></div>`:''}
-<div class="section-head"><h3>جمعيات تشارك فيها</h3><button class="link-btn" data-action="home-member">عرض الكل ←</button></div>${joined.slice(0,2).map(groupCard).join('')||'<div class="card empty"><b>لا توجد جمعيات تشارك فيها</b><button class="btn outline full" data-go="join-group">الانضمام إلى جمعية</button></div>'}
-`)
+ const managed=db.groups.filter(g=>g.role==='manager'),joined=db.groups.filter(g=>g.role==='member');
+ const pending=db.payments.filter(p=>managed.some(g=>g.id===p.group)&&['PROOF_SUBMITTED','UNDER_REVIEW'].includes(p.status)).length;
+ const active=db.groups.filter(g=>['ACTIVE_REVOLVING','READY_FOR_DRAW'].includes(g.status)).length;
+ shell('الرئيسية','home',`
+ <section class="home-welcome"><div><span class="eyebrow">مساحتك في سهم</span><h1>مرحباً، ${escapeHtml(db.user.name.split(' ')[0])}</h1><p>إدارة ومتابعة جمعياتك من مكان واحد.</p></div><div class="home-user-mark">${escapeHtml(db.user.name.slice(0,1))}</div></section>
+ <section class="card hero"><div class="hero-topline"><span class="hero-label">ملخص حسابك</span><span class="hero-live"><i></i> نظرة عامة</span></div><div class="hero-total">${managed.length+joined.length}<small>جمعية مرتبطة</small></div><div class="hero-stats"><div><b>${managed.length}</b><span>تديرها</span></div><div><b>${joined.length}</b><span>تشارك فيها</span></div><div><b>${active}</b><span>نشطة</span></div></div><button class="btn gold home-create" data-go="create-group">${uiIcon('plus',16)} إنشاء جمعية جديدة</button></section>
+ ${pending?`<button class="card pending-task" data-action="open-manager-review"><span class="task-icon">${uiIcon('bell',20)}</span><span class="grow"><b>تحتاج إلى مراجعة</b><small>${pending} إثباتات سداد تنتظر قرارك</small></span><span class="task-arrow">${uiIcon('arrow',17)}</span></button>`:''}
+ <div class="section-head"><h3>جمعيات تديرها</h3><button class="link-btn" data-action="home-managed">عرض الكل ${uiIcon('arrow',14)}</button></div>
+ ${managed.slice(0,2).map(groupCard).join('')||`<div class="card empty"><div class="empty-icon">${uiIcon('groups',27)}</div><b>لم تنشئ جمعية بعد</b><p>ابدأ بإنشاء جمعية وحدد قيمة السهم وعدد الأسهم.</p><button class="btn primary" data-go="create-group">إنشاء أول جمعية</button></div>`}
+ <div class="section-head"><h3>جمعيات تشارك فيها</h3><button class="link-btn" data-action="home-member">عرض الكل ${uiIcon('arrow',14)}</button></div>
+ ${joined.slice(0,2).map(groupCard).join('')||`<div class="card empty"><div class="empty-icon">${uiIcon('user',27)}</div><b>لا توجد عضويات حالياً</b><p>يمكنك الانضمام باستخدام رمز أو رابط دعوة.</p><button class="btn outline" data-go="join-group">الانضمام إلى جمعية</button></div>`}
+ <div class="home-footnote">سهم يوثّق المساهمات والقرارات؛ ولا يستقبل الأموال أو ينفّذ التحويلات.</div>`)
 }
 function groups(){const own=db.groups.filter(g=>groupTab==='managed'?g.role==='manager':g.role==='member');shell('جمعياتي','groups',`${header('جمعياتي','حسابك الموحد')}<div class="segmented"><button class="${groupTab==='managed'?'active':''}" data-action="group-tab" data-tab="managed">جمعيات أديرها (${db.groups.filter(g=>g.role==='manager').length})</button><button class="${groupTab==='member'?'active':''}" data-action="group-tab" data-tab="member">جمعيات أشارك فيها (${db.groups.filter(g=>g.role==='member').length})</button></div><div class="toolbar"><input class="searchbox" id="groupSearch" placeholder="ابحث باسم الجمعية أو رمزها..."><button class="btn primary small" data-go="create-group">＋ إنشاء</button></div><div id="groupList">${own.length?own.map(groupCard).join(''):'<div class="card empty"><div class="big">▤</div><b>لا توجد جمعيات في هذا القسم</b><p>يمكنك إنشاء جمعية أو الانضمام إلى جمعية بدعوة.</p><button class="btn primary" data-go="create-group">إنشاء جمعية</button></div>'}</div><button class="btn outline full" data-go="join-group">الانضمام إلى جمعية برمز أو رابط</button>`)}
 function createGroup(){shell('إنشاء جمعية','groups',`${header('إنشاء جمعية جديدة','إعداد جمعية تديرها')}<div class="notice">ستنشأ الجمعية أولاً لاستقبال الأعضاء. لن تبدأ القرعة إلا بعد اكتمال الأسهم وقبول العضويات.</div><form id="createForm"><div class="field"><label>اسم الجمعية</label><input name="name" required placeholder="مثال: جمعية الأهل"></div><div class="field"><label>عملة الجمعية</label><select name="currency"><option value="YER_SAN">ريال يمني - صنعاء</option><option value="YER_ADE">ريال يمني - عدن</option><option value="USD">دولار أمريكي</option><option value="SAR">ريال سعودي</option></select><div class="hint">تثبت العملة عند الإنشاء ولا يمكن خلط العملات داخل الجمعية.</div></div><div class="formgrid"><div class="field"><label>قيمة مساهمة السهم</label><input type="number" name="share" min="1" required placeholder="50000"></div><div class="field"><label>إجمالي الأسهم المستهدفة</label><input type="number" name="total" min="2" max="500" required placeholder="12"></div><div class="field"><label>الحد الأقصى لأسهم الفرد</label><input type="number" name="maxPer" min="1" required value="3"></div><div class="field"><label>نصاب الحضور الافتراضي</label><input type="number" name="quorum" min="1" max="100" value="66" required></div><div class="field"><label>تاريخ البداية</label><input type="date" name="start" value="${today()}" required></div><div class="field"><label>موعد أول قسط</label><input type="date" name="first" required></div></div><div class="field"><label>دورية السداد</label><select name="period"><option>أسبوعية</option><option>شهرية</option></select></div><button class="btn primary full" type="submit">إنشاء الجمعية وتوليد رابط الدعوة</button></form>`)}
@@ -132,7 +392,17 @@ body=`<div class="card member-panel"><div class="listrow"><div class="avatar">�
 }
 shell(g.name,'groups',`${top}${body}`)
 }
-function members(){const g=currentGroup();if(!isManager()){toast('هذه الوظيفة متاحة لمدير الجمعية فقط');go('group-detail');return}const list=[{name:'أحمد محمد',shares:2,role:g.role==='manager'?'المدير':'مشارك'},{name:'سارة أحمد',shares:2,role:'مشاركة'},{name:'خالد عبدالله',shares:1,role:'مشارك'},{name:'مروان علي',shares:2,role:'مشارك'},{name:'علي حسن',shares:1,role:'مشارك'},{name:'ريم صالح',shares:1,role:'مشاركة'}];shell('المشاركون والأسهم','groups',`${header('المشاركون والأسهم',g.name)}<div class="grid2"><div class="stat"><span>عدد المشاركين</span><b>${g.members}</b></div><div class="stat"><span>الأسهم المسجلة</span><b>${g.shares}/${g.total}</b></div></div><div class="toolbar"><input class="searchbox" placeholder="بحث عن مشارك..." id="memberSearch">${isManager()?'<button class="btn primary small" data-go="invite">＋ دعوة</button>':''}</div><div class="card" id="membersList">${list.map((m,i)=>`<div class="listrow"><div class="avatar">${m.name.slice(0,1)}</div><div class="grow"><strong>${m.name}</strong><small>${m.role} · ${m.shares} ${m.shares===1?'سهم':'أسهم'}</small></div><span class="pill">${m.shares} سهم</span></div>`).join('')}</div><div class="card"><div class="between"><b style="font-size:11px">الدعوات المعلقة</b><button class="link-btn" data-go="invites">عرض الكل</button></div>${db.invites.filter(i=>i.group===g.id&&i.status==='PENDING').map(i=>`<div class="listrow"><div class="avatar gold">${i.name.slice(0,1)}</div><div class="grow"><strong>${i.name}</strong><small>${i.phone} · ${i.shares} سهم</small></div>${pill('PENDING')}</div>`).join('')||'<div class="hint">لا توجد دعوات معلقة.</div>'}</div>`)}
+function members(){
+ const g=currentGroup();
+ if(!isManager()){toast('هذه الوظيفة متاحة لمدير الجمعية فقط');go('group-detail');return}
+ const list=(db.participants||[]).filter(m=>m.group===g.id);
+ const totalShares=list.reduce((n,m)=>n+(Number(m.shares)||0),0);
+ shell('المشاركون','groups',`${header('المشاركون والأسهم',g.name)}
+ <div class="member-summary"><div><span>المشاركون</span><b>${list.length||g.members}</b></div><div><span>الأسهم المسجلة</span><b>${totalShares||g.shares} / ${g.total}</b></div></div>
+ <div class="toolbar"><input class="searchbox" placeholder="ابحث عن اسم مشارك..." id="memberSearch" aria-label="بحث عن مشارك"><button class="btn primary small" data-go="invite">${uiIcon('plus',15)} دعوة</button></div>
+ <div class="card" id="membersList">${list.map(m=>`<div class="listrow"><div class="avatar ${m.role==='manager'?'dark':''}">${escapeHtml(m.name.slice(0,1))}</div><div class="grow"><strong>${escapeHtml(m.name)}</strong><small>${m.role==='manager'?'مدير الجمعية':'مشارك'} · ${m.shares} ${m.shares===1?'سهم':'أسهم'}</small></div><span class="pill ${m.role==='manager'?'blue':''}">${m.shares} سهم</span></div>`).join('')||'<div class="empty"><b>لا توجد سجلات مشاركين</b></div>'}</div>
+ <div class="card"><div class="between"><b>طلبات العضوية المعلقة</b><button class="link-btn" data-go="invites">إدارة الطلبات ${uiIcon('arrow',14)}</button></div>${db.invites.filter(i=>i.group===g.id&&i.status==='PENDING').map(i=>`<div class="listrow"><div class="avatar gold">${escapeHtml(i.name.slice(0,1))}</div><div class="grow"><strong>${escapeHtml(i.name)}</strong><small>${escapeHtml(i.phone)} · ${i.shares} سهم</small></div>${pill('PENDING')}</div>`).join('')||'<div class="empty compact-empty">لا توجد طلبات معلقة</div>'}</div>`)
+}
 function invite(){if(!isManager()){toast('هذه الوظيفة متاحة لمدير الجمعية فقط');go('group-detail');return}shell('دعوة مشارك','groups',`${header('دعوة مشارك','إضافة عضو إلى '+currentGroup().name)}<div class="segmented"><button class="active" data-action="invite-mode" data-mode="direct">دعوة مباشرة</button><button data-action="invite-mode" data-mode="link">رابط عام</button></div><div id="inviteContent"><form id="inviteForm"><div class="field"><label>اسم المدعو</label><input name="name" required placeholder="اسم المشارك"></div><div class="field"><label>رقم الهاتف</label><input name="phone" inputmode="tel" required placeholder="777 000 000"></div><div class="field"><label>عدد الأسهم المطلوبة</label><input name="shares" type="number" min="1" max="${currentGroup().maxPer}" value="1" required></div><div class="hint">سيظهر للمدعو طلب معلق يمكنه قبوله أو رفضه. لا تُحتسب الأسهم قبل القبول.</div><button class="btn primary full" type="submit">إرسال الدعوة</button></form></div>`)}
 function invites(){
 if(!isManager()){toast('هذه الوظيفة متاحة لمدير الجمعية فقط');go('group-detail');return}
@@ -141,14 +411,25 @@ shell('طلبات العضوية','groups',`${header('طلبات العضوية'
 }
 function joinGroup(){shell('الانضمام إلى جمعية','groups',`${header('الانضمام إلى جمعية','استخدم رابطاً أو رمز دعوة')}<div class="card"><form id="joinForm"><div class="field"><label>رابط الدعوة أو رمز الجمعية</label><input name="code" placeholder="sahm.app/join/G-2401 أو G-2401" required></div><button class="btn primary full" type="submit">عرض الجمعية</button></form></div><div class="notice">يمكنك معاينة تفاصيل الجمعية وعدد الأسهم المتاح قبل إرسال طلب الانضمام. لا تُضاف العضوية تلقائياً.</div>`)}
 function installments(){
-const g=currentGroup();
-if(!isManager()){
-const mine=db.payments.filter(p=>p.group===g.id&&p.person===db.user.name);
-shell('مساهماتي','groups',`${header('مساهماتي',g.name)}<div class="grid2"><div class="stat"><span>عدد أسهمك</span><b>${g.myShares||1}</b></div><div class="stat"><span>القسط الحالي</span><b>${money(g.share*(g.myShares||1),g.currency)}</b></div></div><div class="card"><div class="between"><b>سجل مساهماتك</b>${mine[0]?pill(mine[0].status):pill('UNPAID')}</div>${mine.map(p=>`<div class="listrow"><div class="avatar">▤</div><div class="grow"><strong>الدورة ${p.cycle}</strong><small>${p.ref} · ${p.date}</small></div>${pill(p.status)}</div>`).join('')||'<div class="empty"><b>لا توجد إثباتات سداد مرسلة</b></div>'}</div><button class="btn primary full" data-go="payment-submit">إرسال إثبات السداد</button>`);
-return
-}
-const rows=[{name:'أحمد محمد',shares:2,status:'VERIFIED_PAID',amount:g.share*2,ref:'TRX-100111'},{name:'سارة أحمد',shares:2,status:'VERIFIED_PAID',amount:g.share*2,ref:'TRX-100112'},{name:'مروان علي',shares:2,status:'UNDER_REVIEW',amount:g.share*2,ref:'TRX-100113'},{name:'خالد عبدالله',shares:1,status:'UNPAID',amount:g.share,ref:'—'},{name:'ريم صالح',shares:1,status:'OVERDUE',amount:g.share,ref:'—'}];
-shell('متابعة الأقساط','groups',`${header('متابعة أقساط الجمعية',g.name)}<div class="grid2"><div class="stat"><span>الدورة الحالية</span><b>${g.cycle||1}</b></div><div class="stat"><span>قيمة السهم</span><b>${money(g.share,g.currency)}</b></div></div><div class="segmented"><button class="active" data-action="installment-filter" data-filter="all">الكل</button><button data-action="installment-filter" data-filter="pending">بانتظار السداد</button><button data-action="installment-filter" data-filter="VERIFIED_PAID">المعتمد</button></div><div class="card" id="installmentRows">${rows.map(r=>`<div class="listrow"><div class="avatar">${r.name.slice(0,1)}</div><div class="grow"><strong>${r.name} · ${r.shares} سهم</strong><small>${r.ref} · ${money(r.amount,g.currency)}</small></div>${pill(r.status)}</div>`).join('')}</div><button class="btn outline full" data-go="members">عرض الأعضاء والأسهم</button>`)
+ const g=currentGroup();
+ if(!isManager()){
+  const mine=db.payments.filter(p=>p.group===g.id&&p.person===db.user.name).sort((a,b)=>b.cycle-a.cycle);
+  shell('مساهماتي','groups',`${header('سجل مساهماتي',g.name)}<div class="member-summary"><div><span>عدد أسهمك</span><b>${g.myShares||1}</b></div><div><span>قيمة القسط</span><b>${money(g.share*(g.myShares||1),g.currency)}</b></div></div><div class="card"><div class="between"><b>سجل السداد</b><span class="pill">${mine.length} عمليات</span></div>${mine.map(p=>`<div class="listrow"><div class="avatar">${uiIcon('groups',18)}</div><div class="grow"><strong>الدورة ${p.cycle}</strong><small>${escapeHtml(p.ref)} · ${escapeHtml(p.date)}</small></div>${pill(p.status)}</div>`).join('')||'<div class="empty"><b>لا توجد إثباتات سداد مرسلة</b></div>'}</div><button class="btn primary full" data-go="payment-submit">إرسال إثبات السداد</button>`);
+  return;
+ }
+ const members=(db.participants||[]).filter(m=>m.group===g.id);
+ const rows=members.map(m=>{
+  const p=db.payments.filter(x=>x.group===g.id&&x.person===m.name&&Number(x.cycle)==Number(g.cycle||1)).sort((a,b)=>b.date.localeCompare(a.date))[0];
+  return {name:m.name,shares:m.shares,status:p?.status||'UNPAID',amount:g.share*m.shares,ref:p?.ref||'—'};
+ });
+ const paid=rows.filter(r=>r.status==='VERIFIED_PAID').length;
+ const inReview=rows.filter(r=>['PROOF_SUBMITTED','UNDER_REVIEW'].includes(r.status)).length;
+ const outstanding=rows.filter(r=>!['VERIFIED_PAID'].includes(r.status)).length;
+ shell('الأقساط','groups',`${header('متابعة الأقساط',g.name)}
+ <div class="member-summary three"><div><span>الدورة الحالية</span><b>${g.cycle||1}</b></div><div><span>معتمد</span><b>${paid}</b></div><div><span>قيد المتابعة</span><b>${outstanding}</b></div></div>
+ <div class="payment-progress"><div class="between"><b>حالة تحصيل الدورة</b><strong>${rows.length?Math.round(paid/rows.length*100):0}%</strong></div><div class="progress"><i style="width:${rows.length?paid/rows.length*100:0}%"></i></div><small>${inReview} إثباتات بانتظار المراجعة</small></div>
+ <div class="segmented"><button class="active" data-action="installment-filter" data-filter="all">الكل</button><button data-action="installment-filter" data-filter="pending">غير المعتمد</button><button data-action="installment-filter" data-filter="VERIFIED_PAID">المعتمد</button></div>
+ <div class="card" id="installmentRows">${rows.map(r=>`<div class="listrow"><div class="avatar">${escapeHtml(r.name.slice(0,1))}</div><div class="grow"><strong>${escapeHtml(r.name)} · ${r.shares} سهم</strong><small>${escapeHtml(r.ref)} · ${money(r.amount,g.currency)}</small></div>${pill(r.status)}</div>`).join('')||'<div class="empty"><b>لا توجد عضويات مسجلة</b></div>'}</div><button class="btn outline full" data-go="review">فتح مراجعة إثباتات السداد</button>`)
 }
 function paymentSubmit(){
 const g=currentGroup(),shares=g.myShares||1;
@@ -160,7 +441,41 @@ if(!isManager()){toast('هذه الوظيفة متاحة لمدير الجمعي
 const items=db.payments.filter(p=>p.group===g.id&&['PROOF_SUBMITTED','UNDER_REVIEW'].includes(p.status));
 shell('مراجعة السداد','groups',`${header('مراجعة إثباتات السداد',g.name)}${items.length?items.map(p=>`<div class="card"><div class="between"><b style="font-size:12px">${p.person}</b>${pill(p.status)}</div><div class="keyvalue"><span>الدورة</span><b>${p.cycle}</b></div><div class="keyvalue"><span>المبلغ</span><b>${money(p.amount,g.currency)}</b></div><div class="keyvalue"><span>رقم العملية</span><b>${p.ref}</b></div><div class="keyvalue"><span>مرفق</span><b>${p.proof}</b></div>${p.status==='PROOF_SUBMITTED'?`<button class="btn primary full" data-action="start-review" data-id="${p.id}">بدء المراجعة</button>`:`<div class="dialog-actions"><button class="btn primary" data-action="approve-payment" data-id="${p.id}">اعتماد وإصدار إيصال</button><button class="btn danger" data-action="reject-payment" data-id="${p.id}">رفض الإثبات</button></div>`}</div>`).join(''):'<div class="card empty"><b>لا توجد طلبات معلقة لهذه الجمعية</b></div>'}<button class="btn outline full" data-go="receipts">سجل الإيصالات</button>`)
 }
-function ticketOwners(g){const base=['أحمد محمد','أحمد محمد','سارة أحمد','سارة أحمد','خالد عبدالله','مروان علي','مروان علي','علي حسن','ريم صالح','خالد عبدالله','مروان علي','سارة أحمد'];return Array.from({length:g.total},(_,i)=>({ticketNo:i+1,owner:base[i%base.length]}))}function eligibleTickets(g){const excluded=new Set(g.draws.map(d=>d.ticketNo).filter(Boolean));return ticketOwners(g).filter(t=>!excluded.has(t.ticketNo))}function secureIndex(n){if(!n)throw new Error('No eligible tickets');if(window.crypto?.getRandomValues){const a=new Uint32Array(1),limit=Math.floor(0x100000000/n)*n;let x;do{window.crypto.getRandomValues(a);x=a[0]}while(x>=limit);return x%n}return Math.floor(Math.random()*n)}function drawRoom(){if(!isManager()){toast('إجراء القرعة من صلاحيات مدير الجمعية');go('group-detail');return}const g=currentGroup(),present=Math.min(g.shares,Math.max(1,g.members-1)),percent=Math.round(present/g.total*100),quorum=percent>=g.quorum,tickets=eligibleTickets(g),canDraw=['READY_FOR_DRAW','ACTIVE_REVOLVING'].includes(g.status);shell('غرفة القرعة','groups',`${header('غرفة القرعة',g.name)}<div class="card"><div class="between"><b style="font-size:12px">نصاب الحضور</b>${pill(quorum?'ACTIVE_REVOLVING':'PENDING_MEMBERS')}</div><div class="hero-num" style="color:var(--ink);font-size:25px">${percent}%</div><div class="progress"><i style="width:${Math.min(100,percent)}%"></i></div><div class="between"><small class="eyebrow">${present} سهم حاضر من ${g.total}</small><small class="eyebrow">النصاب المطلوب ${g.quorum}%</small></div></div>${!quorum?`<div class="card"><b style="font-size:11px">النصاب غير مكتمل</b><p class="page-sub">يمكن التصويت على تنفيذ القرعة بمن حضر. يحتسب التصويت بعدد الأسهم لا بعدد الأشخاص.</p><div class="between"><span class="eyebrow">موافقة الأسهم المصوتة</span><b id="votePct">${db.drawVote?.yes?Math.round(db.drawVote.yes/(db.drawVote.yes+db.drawVote.no)*100)+'%':'—'}</b></div><button class="btn primary full" data-action="vote-draw">التصويت بالموافقة على التنفيذ</button><div class="hint">يلزم أكثر من 50% من الأسهم المصوتة. التصويت هنا محاكاة محلية مرجحة بالأسهم.</div></div>`:`<div class="notice">النصاب مكتمل. يمكن الانتقال لإجراء القرعة وفق موعد الدورة.</div>`}<div class="card"><div class="between"><b style="font-size:12px">الأسهم المؤهلة</b><span class="pill green">${tickets.length} سهم</span></div><p class="hint">لكل سهم رقم مستقل. يُستبعد رقم السهم الفائز وحده من السحب التالي، ولا تُستبعد بقية أسهم صاحبه.</p><div class="wheel-wrap"><div class="wheel" id="wheel"></div></div><button class="btn gold full" data-action="run-draw" ${(!canDraw||!tickets.length||(!quorum&&!(db.drawVote&&db.drawVote.yes/(db.drawVote.yes+db.drawVote.no)>.5)))?'disabled':''}>إجراء القرعة الآن</button>${!canDraw?'<div class="hint">لا يمكن إجراء القرعة قبل اكتمال العضوية والأسهم ووصول الجمعية إلى حالة الجاهزية.</div>':''}<div class="hint">تنبيه: السحب في هذه المعاينة محلي باستخدام عشوائية المتصفح. يجب أن يتم السحب النهائي باستخدام CSPRNG على الخادم.</div></div><button class="btn outline full" data-go="draw-history">محاضر ونتائج القرعات السابقة</button>`)}
+function ticketOwners(g){
+ const participants=(db.participants||[]).filter(m=>m.group===g.id);
+ const tickets=[];
+ for(const member of participants){
+  for(let n=0;n<Math.max(0,Number(member.shares)||0);n++)tickets.push({ticketNo:tickets.length+1,owner:member.name});
+ }
+ return tickets;
+}
+function eligibleTickets(g){
+ const excluded=new Set((g.draws||[]).map(d=>Number(d.ticketNo)).filter(Boolean));
+ return ticketOwners(g).filter(t=>!excluded.has(t.ticketNo));
+}
+function secureIndex(n){
+ if(!n)throw new Error('No eligible tickets');
+ if(!window.crypto||!window.crypto.getRandomValues)throw new Error('Secure random generator unavailable');
+ const a=new Uint32Array(1),limit=Math.floor(0x100000000/n)*n;let x;
+ do{window.crypto.getRandomValues(a);x=a[0]}while(x>=limit);
+ return x%n;
+}
+
+function drawRoom(){
+ if(!isManager()){toast('إجراء القرعة من صلاحيات مدير الجمعية');go('group-detail');return}
+ const g=currentGroup(),participants=(db.participants||[]).filter(m=>m.group===g.id);
+ const registered=participants.reduce((n,m)=>n+(Number(m.shares)||0),0);
+ const present=participants.reduce((n,m)=>n+(m.present===false?0:(Number(m.shares)||0)),0);
+ const presentShares=present||Math.min(g.shares,Math.max(1,g.members-1));
+ const percent=g.total?Math.round(presentShares/g.total*100):0,quorum=percent>=g.quorum;
+ const vote=db.drawVotes?.[g.id],voteTotal=(vote?.yes||0)+(vote?.no||0),votePct=voteTotal?Math.round(vote.yes/voteTotal*100):0,approved=voteTotal>0&&votePct>50;
+ const tickets=eligibleTickets(g),canDraw=['READY_FOR_DRAW','ACTIVE_REVOLVING'].includes(g.status);
+ shell('القرعة','groups',`${header('غرفة القرعة',g.name)}
+ <div class="card draw-quorum"><div class="between"><b>نصاب الحضور</b>${pill(quorum?'ACTIVE_REVOLVING':'PENDING_MEMBERS')}</div><div class="draw-percent">${percent}<small>%</small></div><div class="progress"><i style="width:${Math.min(100,percent)}%"></i></div><div class="between"><small>${presentShares} سهم حاضر من ${g.total}</small><small>المطلوب ${g.quorum}%</small></div></div>
+ ${!quorum?`<div class="card vote-panel"><div class="between"><b>التصويت عند عدم اكتمال النصاب</b><span class="pill ${approved?'green':'gold'}">${approved?'موافقة المحاكاة':'بانتظار القرار'}</span></div><div class="vote-number">${voteTotal?votePct+'%':'—'}</div><p>يلزم أن تتجاوز الموافقات نصف الأسهم المصوّتة. هذا الإجراء يحاكي التصويت محلياً فقط.</p><button class="btn primary full" data-action="vote-draw">${approved?'إعادة محاكاة التصويت':'محاكاة موافقة الحاضرين'}</button></div>`:`<div class="notice info">النصاب مكتمل وفق بيانات الحضور التجريبية لهذه الجمعية.</div>`}
+ <div class="card draw-card"><div class="between"><div><b>الأسهم المؤهلة للسحب</b><small class="draw-sub">كل سهم له رقم مستقل</small></div><span class="pill blue">${tickets.length} سهم</span></div><div class="wheel-wrap"><div class="wheel" id="wheel"></div></div><button class="btn primary full" data-action="run-draw" ${(!canDraw||!tickets.length||(!quorum&&!approved))?'disabled':''}>إجراء القرعة</button>${!canDraw?'<div class="hint">تتاح القرعة بعد اكتمال الأسهم ووصول الجمعية إلى حالة الجاهزية.</div>':''}<div class="notice warn">هذه محاكاة للواجهة والبيانات على هذا الجهاز. القرعة النهائية تحتاج خدمة خادم موثوقة وسجل تدقيق لا يمكن تعديله.</div></div>
+ <button class="btn outline full" data-go="draw-history">عرض المحاضر والنتائج السابقة</button>`)
+}
 function memberVote(){
 const g=currentGroup(),myShares=g.myShares||1,present=Math.min(g.shares,Math.max(1,g.members-1)),percent=Math.round(present/g.total*100),quorum=percent>=g.quorum;
 const vote=db.memberVotes?.[g.id]||false;
@@ -193,8 +508,8 @@ function render(){if(['welcome','phone','otp','profile-setup','logged-out'].incl
 function showModal(title,body,buttons=[['إغلاق','close','outline']]){$('#modal-root').innerHTML=`<div class="overlay" data-action="overlay-close"><div class="dialog" onclick="event.stopPropagation()"><h3>${title}</h3><div class="dialog-body">${body}</div><div class="dialog-actions">${buttons.map(([label,act,style='primary'])=>`<button class="btn ${style}" data-action="${act}">${label}</button>`).join('')}</div></div></div>`}function closeModal(){$('#modal-root').innerHTML=''}
 function createReceipt(p){const id='SH-2026-'+String(db.receipts.length+9).padStart(4,'0');db.receipts.unshift({id,group:p.group,person:p.person,amount:p.amount,cycle:p.cycle,ref:p.ref,date:today()});db.wall.unshift({group:p.group,type:'system',text:`تم اعتماد إيصال سداد ${p.person} للدورة ${p.cycle}`,date:today(),reactions:0});log('اعتماد إثبات سداد وإصدار إيصال',db.user.name);return id}
 // Navigation, actions and forms are delegated to keep every visible control operational.
-document.addEventListener('click',e=>{const el=e.target.closest('[data-go],[data-action]');if(!el)return;const goTo=el.dataset.go,act=el.dataset.action;if(goTo){if(goTo==='group-detail')db.currentGroup=el.dataset.id||db.currentGroup;go(goTo);return}if(act==='back'){back();return}if(act==='overlay-close'){closeModal();return}if(act==='close'){closeModal();return}switch(act){case'open-manager-review':{const g=db.groups.find(x=>x.role==='manager'&&db.payments.some(p=>p.group===x.id&&['PROOF_SUBMITTED','UNDER_REVIEW'].includes(p.status)));if(g){db.currentGroup=g.id;go('review')}else toast('لا توجد إثباتات معلقة في جمعياتك');break}case'open-group':db.currentGroup=el.dataset.id;groupDetailTab='overview';save();go('group-detail');break;case'home-managed':groupTab='managed';go('groups');break;case'home-member':groupTab='member';go('groups');break;case'group-tab':groupTab=el.dataset.tab;groups();break;case'detail-tab':groupDetailTab=el.dataset.tab;groupDetail();break;case'invite-mode':if(el.dataset.mode==='link'){$('#inviteContent').innerHTML=`<div class="card"><div class="eyebrow">رابط الانضمام العام</div><b style="font-size:12px">${currentGroup().publicLink}</b><div class="hint">افتح الرابط لعرض الجمعية واختيار عدد الأسهم وإرسال طلب الانضمام.</div><button class="btn primary full" style="margin-top:12px" data-action="share-link">نسخ رابط الدعوة</button><button class="btn outline full" style="margin-top:8px" data-action="whatsapp-link">مشاركة عبر واتساب</button></div>`}else{$('#inviteContent').innerHTML=`<form id="inviteForm"><div class="field"><label>اسم المدعو</label><input name="name" required></div><div class="field"><label>رقم الهاتف</label><input name="phone" required inputmode="tel"></div><div class="field"><label>عدد الأسهم</label><input name="shares" type="number" min="1" max="${currentGroup().maxPer}" value="1" required></div><button class="btn primary full" type="submit">إرسال الدعوة</button></form>`}document.querySelectorAll('[data-action="invite-mode"]').forEach(b=>b.classList.toggle('active',b===el));break;case'share-link':if(navigator.clipboard?.writeText){navigator.clipboard.writeText(currentGroup().publicLink).then(()=>toast('تم نسخ رابط الدعوة')).catch(()=>toast(currentGroup().publicLink))}else toast(currentGroup().publicLink);break;case'whatsapp-link':window.open('https://wa.me/?text='+encodeURIComponent('انضم إلى جمعية '+currentGroup().name+' عبر الرابط '+currentGroup().publicLink),'_blank');break;case'invite-accept':{if(!isManager()){toast('لا تملك صلاحية إدارة العضويات');break}let i=db.invites.find(x=>x.id===el.dataset.id);if(i){let g=db.groups.find(x=>x.id===i.group);if(g.shares+i.shares>g.total){toast('اكتمل عدد الأسهم المستهدف');break}i.status='ACCEPTED';g.members++;g.shares+=i.shares;if(g.shares>=g.total)g.status='READY_FOR_DRAW';log('قبول دعوة '+i.name);save();invites()}break}case'invite-reject':{if(!isManager()){toast('لا تملك صلاحية إدارة العضويات');break}let i=db.invites.find(x=>x.id===el.dataset.id);if(i){i.status='REJECTED_INV';log('رفض دعوة '+i.name);save();invites()}break}case'pause-group':{if(!isManager()){toast('لا تملك صلاحية إدارة هذه الجمعية');break}const g=currentGroup();if(g.status==='PAUSED_DEFAULT'){g.status=g.statusBeforePause||'ACTIVE_REVOLVING';delete g.statusBeforePause;log('إعادة تفعيل الجمعية')}else{g.statusBeforePause=g.status;g.status='PAUSED_DEFAULT';log('إيقاف الجمعية مؤقتاً')}save();groupDetail();break}case'start-review':{let p=db.payments.find(x=>x.id===el.dataset.id);if(p){p.status='UNDER_REVIEW';log('بدء مراجعة إثبات السداد');save();review()}break}case'approve-payment':{if(!isManager()){toast('لا تملك صلاحية مراجعة السداد');break}let p=db.payments.find(x=>x.id===el.dataset.id);if(p){p.status='VERIFIED_PAID';let id=createReceipt(p);save();showModal('تم اعتماد السداد',`تم إنشاء الإيصال رقم <b>${id}</b>. يمكنك فتحه من سجل الإيصالات.`,[['عرض الإيصال','open-new-receipt','primary'],['إغلاق','close','outline']]);$('#modal-root').dataset.receipt=id}break}case'open-new-receipt':{const id=$('#modal-root').dataset.receipt;closeModal();go('receipt-detail',{id});break}case'reject-payment':{if(!isManager()){toast('لا تملك صلاحية مراجعة السداد');break}const p=db.payments.find(x=>x.id===el.dataset.id);if(p){p.status='REJECTED';log('رفض إثبات السداد');save();toast('تم رفض الإثبات');review()}break}case'member-vote':db.memberVotes=db.memberVotes||{};db.memberVotes[currentGroup().id]=true;save();memberVote();toast('تم تسجيل تصويتك بعدد أسهمك');break;case'vote-draw':db.drawVote=true;$('#votePct').textContent='100% موافقة';toast('اكتمل التصويت بالموافقة');break;case'run-draw':{const g=currentGroup(),wheel=$('#wheel');if(wheel){wheel.classList.add('spin');el.disabled=true;setTimeout(()=>{const eligible=eligibleTickets(g);if(!eligible.length){toast('لا توجد أسهم مؤهلة متبقية');return}const picked=eligible[secureIndex(eligible.length)];const winner=picked.owner;const shareNo=ticketOwners(g).filter(t=>t.owner===winner&&t.ticketNo<=picked.ticketNo).length;const cycle=(g.cycle||0)+1;const d={cycle,winner,shareNo,ticketNo:picked.ticketNo,date:today()};g.draws.push(d);g.cycle=cycle;g.status='ACTIVE_REVOLVING';db.wall.unshift({group:g.id,type:'system',text:`أعلنت نتيجة قرعة الدورة ${cycle}: فاز ${winner} بالسهم رقم ${d.shareNo}`,date:today(),reactions:0});log('تنفيذ قرعة الدورة '+cycle,'النظام');delete db.drawVote;save();showModal('نتيجة القرعة',`<div style="text-align:center"><div class="receipt-mark">★</div><div style="font-size:17px;font-weight:800;color:var(--ink);margin:8px">${winner}</div><div>السهم الفائز رقم ${d.shareNo}</div><div class="hint">الدورة ${cycle} · ${today()}</div></div><div class="notice warn">نتيجة محاكاة محلية وليست سحباً موثوقاً. يلزم تنفيذ CSPRNG والتحقق على الخادم في التطبيق الفعلي.</div>`,[['عرض المحضر','open-draw-history','primary'],['إغلاق','close','outline']])},2050)}break}case'open-draw-history':closeModal();go('draw-history');break;case'replay-draw':showModal('إعادة محاكاة النتيجة',`هذه إعادة عرض للنتيجة المسجلة للدورة ${el.dataset.cycle}. لا يتم إجراء سحب جديد ولا تغيير النتيجة.`,[['عرض النتيجة','replay-animation','primary'],['إغلاق','close','outline']]);$('#modal-root').dataset.cycle=el.dataset.cycle;break;case'replay-animation':{const c=$('#modal-root').dataset.cycle;const d=currentGroup().draws.find(x=>x.cycle==c);closeModal();showModal('نتيجة الدورة '+c,`الفائز المسجل: <b>${d?.winner||'—'}</b> · السهم رقم ${d?.shareNo||'—'}.<div class="wheel-wrap"><div class="wheel"></div></div>`,[['إغلاق','close','primary']]);break}case'receipt-open':go('receipt-detail',{id:el.dataset.id});break;case'verify-receipt':showModal('نتيجة التحقق',`الإيصال موجود ضمن بيانات المعاينة ورقمه ${params.id||''}. لا يمكن إجراء تحقق تشفيري حقيقي دون خدمة الخادم.`,[['حسناً','close','primary']]);break;case'react':{const idx=Number(el.dataset.index);const arr=db.wall.filter(w=>w.group===currentGroup().id);if(arr[idx])arr[idx].reactions=(arr[idx].reactions||0)+1;save();wall();toast('تم تسجيل تفاعلك');break}case'logout-confirm':showModal('تسجيل الخروج',`هل تريد إنهاء جلستك الحالية؟ لن يتم حذف بيانات المعاينة المحفوظة على هذا الجهاز.`,[['نعم، تسجيل الخروج','logout-now','danger'],['إلغاء','close','outline']]);break;case'logout-now':db.session=false;save();stack=[];closeModal();screenName='logged-out';render();break;default:break}});
-document.addEventListener('submit',e=>{e.preventDefault();const f=e.target;if(f.id==='createForm'){const d=Object.fromEntries(new FormData(f));const newId='G-'+Math.floor(2404+Math.random()*500);const g={id:newId,name:d.name,currency:d.currency,share:+d.share,total:+d.total,maxPer:+d.maxPer,start:d.start,first:d.first,period:d.period,quorum:+d.quorum,role:'manager',myShares:1,status:'PENDING_MEMBERS',members:1,shares:0,paid:0,cycle:0,admin:db.user.name,contrib:+d.share,publicLink:'sahm.app/join/'+newId,draws:[]};db.groups.unshift(g);db.currentGroup=g.id;log('إنشاء جمعية جديدة: '+g.name);save();go('group-detail');toast('تم إنشاء الجمعية وتوليد رابط الدعوة');}
+document.addEventListener('click',e=>{const el=e.target.closest('[data-go],[data-action]');if(!el)return;const goTo=el.dataset.go,act=el.dataset.action;if(goTo){if(goTo==='group-detail')db.currentGroup=el.dataset.id||db.currentGroup;go(goTo);return}if(act==='back'){back();return}if(act==='overlay-close'){closeModal();return}if(act==='close'){closeModal();return}switch(act){case'open-manager-review':{const g=db.groups.find(x=>x.role==='manager'&&db.payments.some(p=>p.group===x.id&&['PROOF_SUBMITTED','UNDER_REVIEW'].includes(p.status)));if(g){db.currentGroup=g.id;go('review')}else toast('لا توجد إثباتات معلقة في جمعياتك');break}case'open-group':db.currentGroup=el.dataset.id;groupDetailTab='overview';save();go('group-detail');break;case'home-managed':groupTab='managed';go('groups');break;case'home-member':groupTab='member';go('groups');break;case'group-tab':groupTab=el.dataset.tab;groups();break;case'detail-tab':groupDetailTab=el.dataset.tab;groupDetail();break;case'invite-mode':if(el.dataset.mode==='link'){$('#inviteContent').innerHTML=`<div class="card"><div class="eyebrow">رابط الانضمام العام</div><b style="font-size:12px">${currentGroup().publicLink}</b><div class="hint">افتح الرابط لعرض الجمعية واختيار عدد الأسهم وإرسال طلب الانضمام.</div><button class="btn primary full" style="margin-top:12px" data-action="share-link">نسخ رابط الدعوة</button><button class="btn outline full" style="margin-top:8px" data-action="whatsapp-link">مشاركة عبر واتساب</button></div>`}else{$('#inviteContent').innerHTML=`<form id="inviteForm"><div class="field"><label>اسم المدعو</label><input name="name" required></div><div class="field"><label>رقم الهاتف</label><input name="phone" required inputmode="tel"></div><div class="field"><label>عدد الأسهم</label><input name="shares" type="number" min="1" max="${currentGroup().maxPer}" value="1" required></div><button class="btn primary full" type="submit">إرسال الدعوة</button></form>`}document.querySelectorAll('[data-action="invite-mode"]').forEach(b=>b.classList.toggle('active',b===el));break;case'share-link':if(navigator.clipboard?.writeText){navigator.clipboard.writeText(currentGroup().publicLink).then(()=>toast('تم نسخ رابط الدعوة')).catch(()=>toast(currentGroup().publicLink))}else toast(currentGroup().publicLink);break;case'whatsapp-link':window.open('https://wa.me/?text='+encodeURIComponent('انضم إلى جمعية '+currentGroup().name+' عبر الرابط '+currentGroup().publicLink),'_blank');break;case'invite-accept':{if(!isManager()){toast('لا تملك صلاحية إدارة العضويات');break}let i=db.invites.find(x=>x.id===el.dataset.id);if(i){let g=db.groups.find(x=>x.id===i.group);if(g.shares+i.shares>g.total){toast('اكتمل عدد الأسهم المستهدف');break}i.status='ACCEPTED';g.members++;g.shares+=i.shares;db.participants=db.participants||[];db.participants.push({group:g.id,name:i.name,shares:i.shares,role:'member',present:false});if(g.shares>=g.total)g.status='READY_FOR_DRAW';log('قبول دعوة '+i.name);save();invites()}break}case'invite-reject':{if(!isManager()){toast('لا تملك صلاحية إدارة العضويات');break}let i=db.invites.find(x=>x.id===el.dataset.id);if(i){i.status='REJECTED_INV';log('رفض دعوة '+i.name);save();invites()}break}case'pause-group':{if(!isManager()){toast('لا تملك صلاحية إدارة هذه الجمعية');break}const g=currentGroup();if(g.status==='PAUSED_DEFAULT'){g.status=g.statusBeforePause||'ACTIVE_REVOLVING';delete g.statusBeforePause;log('إعادة تفعيل الجمعية')}else{g.statusBeforePause=g.status;g.status='PAUSED_DEFAULT';log('إيقاف الجمعية مؤقتاً')}save();groupDetail();break}case'start-review':{let p=db.payments.find(x=>x.id===el.dataset.id);if(p){p.status='UNDER_REVIEW';log('بدء مراجعة إثبات السداد');save();review()}break}case'approve-payment':{if(!isManager()){toast('لا تملك صلاحية مراجعة السداد');break}let p=db.payments.find(x=>x.id===el.dataset.id);if(p){p.status='VERIFIED_PAID';let id=createReceipt(p);save();showModal('تم اعتماد السداد',`تم إنشاء الإيصال رقم <b>${id}</b>. يمكنك فتحه من سجل الإيصالات.`,[['عرض الإيصال','open-new-receipt','primary'],['إغلاق','close','outline']]);$('#modal-root').dataset.receipt=id}break}case'open-new-receipt':{const id=$('#modal-root').dataset.receipt;closeModal();go('receipt-detail',{id});break}case'reject-payment':{if(!isManager()){toast('لا تملك صلاحية مراجعة السداد');break}const p=db.payments.find(x=>x.id===el.dataset.id);if(p){p.status='REJECTED';log('رفض إثبات السداد');save();toast('تم رفض الإثبات');review()}break}case'member-vote':db.memberVotes=db.memberVotes||{};db.memberVotes[currentGroup().id]=true;save();memberVote();toast('تم تسجيل تصويتك بعدد أسهمك');break;case'vote-draw':{const g=currentGroup(),participants=(db.participants||[]).filter(m=>m.group===g.id);const present=participants.reduce((n,m)=>n+(m.present===false?0:(Number(m.shares)||0)),0)||1;const yes=Math.max(1,Math.ceil(present*.6)),no=Math.max(0,present-yes);db.drawVotes=db.drawVotes||{};db.drawVotes[g.id]={yes,no,simulation:true};save();drawRoom();toast('تم تحديث محاكاة التصويت');break;}case'run-draw':{const g=currentGroup(),wheel=$('#wheel');if(wheel){wheel.classList.add('spin');el.disabled=true;setTimeout(()=>{const eligible=eligibleTickets(g);if(!eligible.length){toast('لا توجد أسهم مؤهلة متبقية');return}let picked;try{picked=eligible[secureIndex(eligible.length)]}catch(err){toast('تعذر توفير عشوائية آمنة في هذا المتصفح');return}const winner=picked.owner;const shareNo=ticketOwners(g).filter(t=>t.owner===winner&&t.ticketNo<=picked.ticketNo).length;const cycle=(g.cycle||0)+1;const d={cycle,winner,shareNo,ticketNo:picked.ticketNo,date:today()};g.draws.push(d);g.cycle=cycle;g.status='ACTIVE_REVOLVING';db.wall.unshift({group:g.id,type:'system',text:`أعلنت نتيجة قرعة الدورة ${cycle}: فاز ${winner} بالسهم رقم ${d.shareNo}`,date:today(),reactions:0});log('تنفيذ قرعة الدورة '+cycle,'النظام');if(db.drawVotes)delete db.drawVotes[g.id];save();showModal('نتيجة القرعة',`<div style="text-align:center"><div class="receipt-mark">★</div><div style="font-size:17px;font-weight:800;color:var(--ink);margin:8px">${winner}</div><div>السهم الفائز رقم ${d.shareNo}</div><div class="hint">الدورة ${cycle} · ${today()}</div></div><div class="notice warn">نتيجة محاكاة محلية وليست سحباً موثوقاً. يلزم تنفيذ CSPRNG والتحقق على الخادم في التطبيق الفعلي.</div>`,[['عرض المحضر','open-draw-history','primary'],['إغلاق','close','outline']])},2050)}break}case'open-draw-history':closeModal();go('draw-history');break;case'replay-draw':showModal('إعادة محاكاة النتيجة',`هذه إعادة عرض للنتيجة المسجلة للدورة ${el.dataset.cycle}. لا يتم إجراء سحب جديد ولا تغيير النتيجة.`,[['عرض النتيجة','replay-animation','primary'],['إغلاق','close','outline']]);$('#modal-root').dataset.cycle=el.dataset.cycle;break;case'replay-animation':{const c=$('#modal-root').dataset.cycle;const d=currentGroup().draws.find(x=>x.cycle==c);closeModal();showModal('نتيجة الدورة '+c,`الفائز المسجل: <b>${d?.winner||'—'}</b> · السهم رقم ${d?.shareNo||'—'}.<div class="wheel-wrap"><div class="wheel"></div></div>`,[['إغلاق','close','primary']]);break}case'receipt-open':go('receipt-detail',{id:el.dataset.id});break;case'verify-receipt':showModal('نتيجة التحقق',`الإيصال موجود ضمن بيانات المعاينة ورقمه ${params.id||''}. لا يمكن إجراء تحقق تشفيري حقيقي دون خدمة الخادم.`,[['حسناً','close','primary']]);break;case'react':{const idx=Number(el.dataset.index);const arr=db.wall.filter(w=>w.group===currentGroup().id);if(arr[idx])arr[idx].reactions=(arr[idx].reactions||0)+1;save();wall();toast('تم تسجيل تفاعلك');break}case'logout-confirm':showModal('تسجيل الخروج',`هل تريد إنهاء جلستك الحالية؟ لن يتم حذف بيانات المعاينة المحفوظة على هذا الجهاز.`,[['نعم، تسجيل الخروج','logout-now','danger'],['إلغاء','close','outline']]);break;case'logout-now':db.session=false;save();stack=[];closeModal();screenName='logged-out';render();break;default:break}});
+document.addEventListener('submit',e=>{e.preventDefault();const f=e.target;if(f.id==='createForm'){const d=Object.fromEntries(new FormData(f));const newId='G-'+Math.floor(2404+Math.random()*500);const g={id:newId,name:d.name,currency:d.currency,share:+d.share,total:+d.total,maxPer:+d.maxPer,start:d.start,first:d.first,period:d.period,quorum:+d.quorum,role:'manager',myShares:1,status:'PENDING_MEMBERS',members:1,shares:1,paid:0,cycle:0,admin:db.user.name,contrib:+d.share,publicLink:'sahm.app/join/'+newId,draws:[]};db.groups.unshift(g);db.participants=db.participants||[];db.participants.unshift({group:g.id,name:db.user.name,shares:1,role:'manager',present:true});db.currentGroup=g.id;log('إنشاء جمعية جديدة: '+g.name);save();go('group-detail');toast('تم إنشاء الجمعية وتوليد رابط الدعوة');}
 else if(f.id==='inviteForm'){const d=Object.fromEntries(new FormData(f));const g=currentGroup(),pending=db.invites.filter(i=>i.group===g.id&&i.status==='PENDING').reduce((n,i)=>n+i.shares,0);if(g.shares+pending+(+d.shares)>g.total){toast('عدد الأسهم المطلوبة يتجاوز الأسهم المتبقية');return}db.invites.unshift({id:'I-'+Date.now(),group:g.id,name:d.name,phone:d.phone,shares:+d.shares,status:'PENDING'});log('إرسال دعوة إلى '+d.name);save();go('invites');toast('تم إرسال الدعوة');}
 else if(f.id==='joinForm'){const code=f.code.value.toUpperCase().match(/G-\d+/)?.[0];const g=db.groups.find(x=>x.id===code);if(!g){toast('لم نعثر على جمعية بهذا الرمز');return}showModal('تفاصيل الجمعية',`<b>${g.name}</b><div class="keyvalue"><span>العملة</span><b>${g.currency}</b></div><div class="keyvalue"><span>قيمة السهم</span><b>${money(g.share,g.currency)}</b></div><div class="keyvalue"><span>الأسهم المستهدفة</span><b>${g.shares}/${g.total}</b></div><div class="field"><label>عدد الأسهم التي ترغب بها</label><input type="number" id="joinShares" min="1" max="${g.maxPer}" value="1"></div>`,[['إرسال طلب الانضمام','submit-join','primary'],['إغلاق','close','outline']]);$('#modal-root').dataset.group=code;}
 else if(f.id==='paymentForm'){const d=Object.fromEntries(new FormData(f));const p={id:'P-'+Date.now(),group:currentGroup().id,person:db.user.name,cycle:+d.cycle,amount:+d.shares*currentGroup().share,ref:d.ref,status:'PROOF_SUBMITTED',date:today(),proof:f.proof.files[0]?.name||'إشعار التحويل'};db.payments.unshift(p);log('إرسال إثبات سداد '+p.ref);save();go('installments');toast('تم إرسال الإثبات إلى مدير الجمعية');}
