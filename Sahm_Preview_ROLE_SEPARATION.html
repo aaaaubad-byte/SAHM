@@ -374,6 +374,47 @@ html,body{height:100%;min-height:100%;overflow:hidden}
 #bottomnav .navitem{display:flex!important;visibility:visible!important;opacity:1!important;color:#68778d;}
 #bottomnav .navitem.active{color:#3158d6;background:#edf2ff;}
 @media(max-width:600px){#topbar.topbar{flex-basis:calc(70px + env(safe-area-inset-top))!important;height:calc(70px + env(safe-area-inset-top))!important;min-height:calc(70px + env(safe-area-inset-top))!important;}#bottomnav.bottomnav:not([hidden]){flex-basis:calc(78px + env(safe-area-inset-bottom))!important;height:calc(78px + env(safe-area-inset-bottom))!important;min-height:calc(78px + env(safe-area-inset-bottom))!important;}}
+
+/* Floating bottom navigation with icon-only active emphasis. */
+#bottomnav.bottomnav:not([hidden]){
+  position:relative!important;
+  flex:0 0 70px!important;
+  height:70px!important;
+  min-height:70px!important;
+  max-height:70px!important;
+  margin:0 14px calc(10px + env(safe-area-inset-bottom))!important;
+  padding:6px 8px!important;
+  box-sizing:border-box!important;
+  border:1px solid #e5eaf2!important;
+  border-top:1px solid #e5eaf2!important;
+  border-radius:23px!important;
+  background:#fff!important;
+  box-shadow:0 7px 24px rgba(28,48,83,.13)!important;
+  justify-content:space-around!important;
+  align-items:center!important;
+  overflow:hidden!important;
+}
+#bottomnav .navitem,
+#bottomnav .navitem.active{
+  background:transparent!important;
+  border:0!important;
+  border-radius:0!important;
+  box-shadow:none!important;
+  outline:none;
+  transform:none!important;
+}
+#bottomnav .navitem{color:#8793a6!important;gap:3px!important;}
+#bottomnav .navitem .ni{color:inherit!important;transform:none!important;}
+#bottomnav .navitem .ni svg{stroke:currentColor!important;fill:none!important;transition:color .18s ease,stroke .18s ease;}
+#bottomnav .navitem.active{color:#3158d6!important;font-weight:800!important;}
+#bottomnav .navitem.active .ni{color:#244fc9!important;}
+#bottomnav .navitem.active .ni svg{stroke:#244fc9!important;stroke-width:2.35!important;}
+@media(max-width:600px){
+ #bottomnav.bottomnav:not([hidden]){
+  flex-basis:70px!important;height:70px!important;min-height:70px!important;max-height:70px!important;
+  margin:0 13px calc(10px + env(safe-area-inset-bottom))!important;
+ }
+}
 </style></head>
 <body><noscript><main dir="rtl" style="font-family:Arial,sans-serif;padding:24px;color:#142f39"><h1>سهم</h1></main></noscript><div class="workspace"><div class="phone" id="app">
 <div class="statusbar" aria-hidden="true"></div>
