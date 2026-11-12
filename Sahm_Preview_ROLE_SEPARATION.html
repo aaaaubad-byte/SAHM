@@ -3039,6 +3039,27 @@ body {
   }
 }
 
+
+/* Final footer sizing authority: keep the navigation bar and its items inside the app viewport. */
+html, body { height:100%; min-height:0; }
+.workspace { height:100dvh; min-height:0; }
+#app.phone { height:100dvh !important; max-height:100dvh !important; min-height:0 !important; display:flex !important; flex-direction:column !important; overflow:hidden !important; }
+#screen.screen { flex:1 1 auto !important; height:auto !important; min-height:0 !important; max-height:none !important; overflow-x:hidden !important; overflow-y:auto !important; padding-bottom:16px !important; }
+#bottomnav.bottomnav:not([hidden]) {
+  position:relative !important; inset:auto !important; display:flex !important;
+  flex:0 0 calc(64px + env(safe-area-inset-bottom,0px)) !important;
+  width:100% !important; height:calc(64px + env(safe-area-inset-bottom,0px)) !important;
+  min-height:calc(64px + env(safe-area-inset-bottom,0px)) !important;
+  max-height:calc(64px + env(safe-area-inset-bottom,0px)) !important;
+  margin:0 !important; padding:4px 10px env(safe-area-inset-bottom,0px) !important;
+  box-sizing:border-box !important; align-items:stretch !important; overflow:hidden !important;
+  visibility:visible !important; opacity:1 !important; z-index:60 !important;
+}
+#bottomnav .navitem, #bottomnav .navitem.active {
+  display:flex !important; flex:1 1 0 !important; width:auto !important;
+  height:100% !important; min-height:0 !important; max-height:100% !important;
+  align-self:stretch !important; box-sizing:border-box !important;
+}
 </style></head>
 <body><noscript><main dir="rtl" style="font-family:Arial,sans-serif;padding:24px;color:#142f39"><h1>سهم</h1></main></noscript><div class="workspace"><div class="phone" id="app">
 <div id="topbar" class="topbar" style="display:none"></div><main id="screen" class="auth-screen">
