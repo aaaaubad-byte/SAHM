@@ -528,11 +528,24 @@ document.addEventListener('click',e=>{const a=e.target.closest('[data-action]')?
 try{render()}catch(err){document.querySelector('#screen').className='auth-screen';document.querySelector('#screen').innerHTML='<div style="background:white;color:#142f39;border-radius:18px;padding:20px;margin-top:35px"><h2>تعذر تشغيل المعاينة</h2><p>حدث خطأ أثناء تشغيل الواجهة. أعد فتح الملف في متصفح Chrome.</p><small>'+String(err&&err.message||err)+'</small></div>';console.error(err)}
 </script>
 <script>
-/* Sahm PWA: register the root-scoped offline shell. */
+/* Sahm PWA: check for releases and refresh open app windows automatically. */
 if ('serviceWorker' in navigator) {
-  window.addEventListener('load', () => {
-    navigator.serviceWorker.register('/sw.js', { scope: '/' })
-      .catch(error => console.warn('تعذر تفعيل وضع التطبيق:', error));
+  let sahmReloadingForUpdate = false;
+  navigator.serviceWorker.addEventListener('controllerchange', () => {
+    if (sahmReloadingForUpdate) return;
+    sahmReloadingForUpdate = true;
+    window.location.reload();
+  });
+  window.addEventListener('load', async () => {
+    try {
+      const registration = await navigator.serviceWorker.register('/sw.js', {
+        scope: '/',
+        updateViaCache: 'none'
+      });
+      await registration.update();
+    } catch (error) {
+      console.warn('تعذر التحقق من تحديث سهم:', error);
+    }
   });
 }
 </script></div></body></html>
