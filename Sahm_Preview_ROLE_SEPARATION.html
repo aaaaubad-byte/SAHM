@@ -3314,9 +3314,11 @@ function setHomeSlide(index){const ss=document.querySelectorAll('#homeCarousel .
  shell('جمعية جديدة',null,html);
  const form=$('#createForm');
  const todayDate=today();
+ const tomorrow=new Date();tomorrow.setDate(tomorrow.getDate()+1);
+ const tomorrowDate=[tomorrow.getFullYear(),String(tomorrow.getMonth()+1).padStart(2,'0'),String(tomorrow.getDate()).padStart(2,'0')].join('-');
  const firstDraw=form.elements.firstDraw;
  const firstPayment=form.elements.firstPayment;
- firstDraw.value=todayDate;
+ firstDraw.value=tomorrowDate;
  firstPayment.value=todayDate;
  const update=()=>{
   const val=n=>form.elements[n]?.value||'';
