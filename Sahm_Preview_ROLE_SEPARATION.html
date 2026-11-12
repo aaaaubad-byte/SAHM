@@ -2876,7 +2876,7 @@ body {
   border-bottom:1px solid #e2e8f1 !important;
   box-shadow:0 2px 10px rgba(23,35,56,.045) !important;
 }
-#topbar .home-topbar { direction:rtl; }
+#topbar .home-topbar { direction:rtl;justify-content:flex-end; }
 .home-topbar-actions { display:flex;align-items:center;gap:8px; }
 .home-topbar-actions .icon-btn { position:relative;color:var(--primary); }
 .home-notification-dot { position:absolute;top:7px;right:7px;width:7px;height:7px;border-radius:50%;background:#e25d67;border:1px solid #fff; }
@@ -2885,9 +2885,9 @@ body {
   height:100%;
   display:flex;
   align-items:center;
-  justify-content:space-between;
+  justify-content:flex-start;
   direction:rtl;
-  gap:12px;
+  gap:8px;
 }
 #topbar .topbar-screen-title {
   min-width:0;
@@ -3097,10 +3097,10 @@ function renderTopbar(title){
  }
  el.hidden=false;el.removeAttribute('hidden');el.style.setProperty('display','flex','important');el.style.visibility='visible';el.setAttribute('aria-label','الشريط العلوي');
  if(screenName==='home'){
-  el.innerHTML=`<div class="topbar-screenbar home-topbar"><strong class="topbar-screen-title">سهم</strong><div class="home-topbar-actions"><button class="icon-btn" type="button" data-go="profile" aria-label="الحساب">${uiIcon('user',23)}</button><button class="icon-btn" type="button" data-go="notifications" aria-label="الإشعارات">${uiIcon('bell',23)}${db.unread>0?'<span class="home-notification-dot" aria-hidden="true"></span>':''}</button></div></div>`;
+  el.innerHTML=`<div class="topbar-screenbar home-topbar"><div class="home-topbar-actions"><button class="icon-btn" type="button" data-go="profile" aria-label="الحساب">${uiIcon('user',23)}</button><button class="icon-btn" type="button" data-go="notifications" aria-label="الإشعارات">${uiIcon('bell',23)}${db.unread>0?'<span class="home-notification-dot" aria-hidden="true"></span>':''}</button></div></div>`;
   return;
  }
- el.innerHTML=`<div class="topbar-screenbar"><strong class="topbar-screen-title">${escapeHtml(String(title||'سهم'))}</strong><button class="icon-btn topbar-back" type="button" data-action="back" aria-label="رجوع">${uiIcon('back-screen',22)}</button></div>`;
+ el.innerHTML=`<div class="topbar-screenbar"><strong class="topbar-screen-title">${escapeHtml(String(title||'سهم'))}</strong><button class="icon-btn topbar-back" type="button" data-action="back" aria-label="رجوع">${uiIcon('back',22)}</button></div>`;
 }
 function nav(active){const items=[['groups','groups','الجمعيات'],['home','home','الرئيسية'],['wall','messages','الدردشات']];const bar=$('#bottomnav');bar.hidden=false;bar.removeAttribute('hidden');bar.setAttribute('aria-hidden','false');bar.style.display='flex';bar.style.visibility='visible';bar.style.opacity='1';bar.innerHTML=items.map(([s,i,t])=>`<button class="navitem ${active===s?'active':''}" data-go="${s}" aria-label="${t}" ${active===s?'aria-current="page"':''}><span class="ni">${uiIcon(i,23)}</span><span>${t}</span></button>`).join('')}
 function shell(title,active,html){renderTopbar(title);nav(active);const screen=$('#screen');screen.className='screen'+(active==='home'?' home-screen':'')+(screenName==='create-group'?' create-group-screen':'');screen.innerHTML=html;if(active!=='home'&&homeSlideTimer){clearInterval(homeSlideTimer);homeSlideTimer=null}}function auth(html){
