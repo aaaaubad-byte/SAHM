@@ -3189,7 +3189,7 @@ body {
 
 
 /* First create stage: one continuous card for all fields and actions. */
-#screen.create-group-screen .create-form:has(#create-step-1:not([hidden])){
+#screen.create-group-screen .create-form.create-step-active-1{
   display:flex!important;flex-direction:column!important;gap:0!important;
   padding:17px 16px 13px!important;border:1px solid #e0e7f1!important;
   border-radius:17px!important;background:#fff!important;
@@ -3292,7 +3292,7 @@ body {
   font-size:10px!important;line-height:1.4!important;font-weight:750!important;
   text-align:center!important;white-space:normal!important;
 }
-#create-step-1 .create-manager-options label:has(input:checked){
+#create-step-1 .create-manager-options label:focus-within{
   border-color:#9aafea!important;background:#eef3ff!important;color:#294fae!important;
 }
 #create-step-1 .create-manager-options input{
@@ -3301,18 +3301,18 @@ body {
 }
 #create-step-1 #manager-shares-field{margin:12px 0 0!important}
 #create-step-1 #manager-shares-field[hidden]{display:none!important}
-#createForm:has(#create-step-1:not([hidden])) .create-step-actions{
+#createForm.create-step-active-1 .create-step-actions{
   margin:17px 0 0!important;padding:13px 0 0!important;
   border-top:1px solid #edf1f6!important;
 }
-#createForm:has(#create-step-1:not([hidden])) .create-step-actions .btn{
+#createForm.create-step-active-1 .create-step-actions .btn{
   min-height:48px!important;border-radius:11px!important;font-size:12.5px!important;
 }
-#createForm:has(#create-step-1:not([hidden])) #create-next{
+#createForm.create-step-active-1 #create-next{
   flex:1 1 100%!important;max-width:none!important;
 }
 @media(max-width:380px){
-  #screen.create-group-screen .create-form:has(#create-step-1:not([hidden])){padding:14px 12px 12px!important}
+  #screen.create-group-screen .create-form.create-step-active-1{padding:14px 12px 12px!important}
   #create-step-1 .create-fields-grid{column-gap:8px!important;row-gap:12px!important}
   #create-step-1 .create-manager-choice{grid-template-columns:1fr!important}
   #create-step-1 .create-manager-options label{font-size:10px!important}
@@ -3489,6 +3489,7 @@ function setHomeSlide(index){const ss=document.querySelectorAll('#homeCarousel .
 let createWizardStep=1,inviteCandidates=[],createdGroupId=null;
 function setCreateWizardStep(step){
  createWizardStep=Math.max(1,Math.min(3,step));
+ const createFormRoot=document.getElementById('createForm');if(createFormRoot){createFormRoot.classList.remove('create-step-active-1','create-step-active-2','create-step-active-3');createFormRoot.classList.add('create-step-active-'+createWizardStep);}
  document.querySelectorAll('.create-step').forEach((node,i)=>node.hidden=i+1!==createWizardStep);
  const names=['بيانات الجمعية','القرعة والسداد','القواعد والمراجعة'];
  const title=document.getElementById('create-stage-title');if(title)title.textContent=names[createWizardStep-1];
