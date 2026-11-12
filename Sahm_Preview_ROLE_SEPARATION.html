@@ -3073,6 +3073,53 @@ body {
 @media(min-width:601px) {
   #app.phone { height:min(940px,calc(100dvh - 40px)) !important; max-height:100dvh !important; }
 }
+
+/* New-group setup: same compact cards, typography, blue accent and quiet surfaces as Sahm home. */
+#screen.create-group-screen{background:var(--bg)!important;padding:14px 14px 28px!important}
+.create-group-page{width:100%;max-width:560px;margin:0 auto;color:var(--ink)}
+.create-intro{display:flex;align-items:center;gap:12px;padding:14px;margin:0 0 10px;border:1px solid #dfe6f2;border-radius:12px;background:linear-gradient(115deg,#eaf0fc,#fff);box-shadow:0 3px 10px rgba(23,43,79,.035)}
+.create-intro-icon{width:42px;height:42px;display:grid;place-items:center;flex:none;border-radius:10px;background:#3158d6;color:#fff}
+.create-intro-copy{min-width:0}.create-kicker{display:block;font-size:9px;font-weight:800;color:#5272b9;margin-bottom:2px}
+.create-intro h1{font-size:16px;line-height:1.5;margin:0;color:#172338;font-weight:850}
+.create-intro p{font-size:10px;line-height:1.7;color:#748198;margin:2px 0 0}
+.create-form{display:flex;flex-direction:column;gap:9px}
+.create-section{padding:13px!important;margin:0!important;border:1px solid #e2e8f1!important;border-radius:12px!important;background:#fff!important;box-shadow:0 2px 8px rgba(23,35,56,.035)!important;scroll-margin-top:12px}
+.create-section-head{display:flex;align-items:center;gap:9px;margin:0 0 10px!important}
+.create-section-icon{display:grid;place-items:center;width:25px;height:25px;flex:none;color:#3158d6!important}
+.create-section-icon svg{width:20px;height:20px;stroke:currentColor;stroke-width:1.9}
+.create-section-head h2{font-size:13px!important;font-weight:850!important;color:#172338!important;margin:0!important}
+.create-section-head p{font-size:9px;color:#7d899c;margin:1px 0 0;line-height:1.5}
+.create-field{margin:8px 0 0!important;min-width:0}
+.create-field label{display:block;font-size:10px!important;font-weight:800!important;color:#35445d!important;margin:0 0 5px!important}
+.create-field input,.create-field select,.create-field textarea{width:100%;min-height:42px;padding:9px 10px;border:1px solid #dce3ed!important;border-radius:9px!important;background:#fbfcfe!important;color:#172338!important;font:inherit;font-size:11px!important;outline:none;box-shadow:none!important}
+.create-field textarea{min-height:64px;resize:vertical}
+.create-field input:focus,.create-field select:focus,.create-field textarea:focus{border-color:#6f8be4!important;background:#fff!important;box-shadow:0 0 0 3px rgba(49,88,214,.11)!important}
+.create-fields-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:0 9px}
+.create-optional{font-weight:500;color:#8793a5}
+.create-manager-choice{display:flex;flex-direction:column;gap:9px;padding:11px;margin-top:10px;border:1px solid #e7ebf2;border-radius:10px;background:#fafbfe}
+.create-manager-choice strong{display:block;font-size:11px;color:#273954}
+.create-manager-choice small{display:block;font-size:9px;color:#7c899b;margin-top:3px}
+.create-manager-options{display:flex;gap:8px;flex-wrap:wrap}
+.create-manager-options label{display:flex;align-items:center;gap:6px;padding:8px 10px;border:1px solid #e0e6ef;border-radius:8px;background:#fff;font-size:10px;font-weight:700;color:#42536e}
+.create-manager-options input{accent-color:#3158d6}
+.create-note{display:flex;align-items:flex-start;gap:8px;padding:9px 10px;margin-top:10px;border-radius:9px;background:#f2f5fc;color:#5270ad}
+.create-note>span{display:flex;flex:none;margin-top:2px}
+.create-note svg{width:15px;height:15px}
+.create-note p{font-size:9px;line-height:1.8;color:#65748c;margin:0}
+.create-live-summary{border-color:#d9e3f5!important}
+.create-summary-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.create-summary-grid>div{display:flex;flex-direction:column;gap:4px;min-width:0;padding:10px;border-radius:9px;background:#f5f7fc}
+.create-summary-grid span{font-size:9px;color:#7a879a}
+.create-summary-grid b{font-size:12px;color:#263955;overflow-wrap:anywhere}
+.create-summary-total{display:flex;flex-direction:column;gap:5px;padding:12px;margin-top:9px;border-radius:9px;background:#edf2ff}
+.create-summary-total span{font-size:9px;color:#5e7197}
+.create-summary-total strong{font-size:19px;color:#3158d6;font-weight:900}
+.create-summary-foot{font-size:9px;line-height:1.8;color:#7a879a;margin-top:9px}
+.create-submit-area{padding:2px 0 10px!important}
+.create-submit{min-height:46px!important;border-radius:10px!important;background:#3158d6!important;box-shadow:0 4px 11px rgba(49,88,214,.16)!important;font-size:12px!important}
+.create-submit-area>p{margin:7px 0 0;text-align:center;color:#8995a6;font-size:9px;line-height:1.7}
+@media(max-width:380px){.create-section{padding:11px!important}.create-fields-grid{gap:0 7px}.create-intro{padding:11px}.create-summary-grid>div{padding:8px}.create-summary-total strong{font-size:17px}}
+
 </style></head>
 <body><noscript><main dir="rtl" style="font-family:Arial,sans-serif;padding:24px;color:#142f39"><h1>سهم</h1></main></noscript><div class="workspace"><div class="phone" id="app">
 <div id="topbar" class="topbar" style="display:none"></div><main id="screen" class="auth-screen">
@@ -3198,7 +3245,7 @@ function groupCard(g){
  const manager=g.role==='manager',total=Number(g.total)||0,shares=Number(g.shares)||0,percent=total?Math.min(100,Math.round(shares/total*100)):0;
  return `<article class="card group-card ${manager?'manager-card':'member-card'}" data-action="open-group" data-id="${escapeHtml(g.id)}" tabindex="0" role="button" aria-label="فتح جمعية ${escapeHtml(g.name)}">
  <div class="between"><div class="row"><div class="avatar ${manager?'dark':''}">${escapeHtml(g.name.slice(0,1))}</div><div class="grow"><strong>${escapeHtml(g.name)}</strong><small class="eyebrow">${escapeHtml(g.id)} · ${manager?'إدارة الجمعية':'عضوية مشاركة'}</small></div></div>${pill(g.status)}</div>
- <div class="group-card-metrics"><div><span>قيمة السهم</span><b>${money(g.share,g.currency)}</b></div><div><span>${manager?'الأسهم المكتملة':'أسهمك'}</span><b>${manager?`${shares} / ${total}`:`${g.myShares||1} سهم`}</b></div><div><span>المشاركون</span><b>${g.members}</b></div></div>
+ <div class="group-card-metrics"><div><span>قيمة السهم</span><b>${money(g.share,g.currency)}</b></div><div><span>${manager?'الأسهم المكتملة':'أسهمك'}</span><b>${manager?`${shares} / ${total}`:`${Number(g.myShares)||0} سهم`}</b></div><div><span>المشاركون</span><b>${g.members}</b></div></div>
  ${manager?`<div class="progress"><i style="width:${percent}%"></i></div><div class="progress-caption"><span>اكتمال الأسهم</span><b>${percent}%</b></div>`:''}
  <div class="group-card-footer"><span>${escapeHtml(g.period||'')}</span><span>التفاصيل ${uiIcon('arrow',15)}</span></div></article>`
 }
@@ -3228,37 +3275,99 @@ function home(){
  homeSlideTimer=setInterval(()=>setHomeSlide(homeSlideIndex+1),5000);
 }
 function setHomeSlide(index){const ss=document.querySelectorAll('#homeCarousel .summary-slide'),dd=document.querySelectorAll('.home-dots button');if(!ss.length)return;homeSlideIndex=((index%ss.length)+ss.length)%ss.length;ss.forEach((x,i)=>{x.classList.toggle('active',i===homeSlideIndex);x.setAttribute('aria-hidden',i!==homeSlideIndex?'true':'false')});dd.forEach((x,i)=>{x.classList.toggle('active',i===homeSlideIndex);x.setAttribute('aria-pressed',i===homeSlideIndex?'true':'false')})}function groups(){const own=db.groups.filter(g=>groupTab==='all'||g.role===groupTab);const empty=groupTab==='manager'?'لا توجد جمعيات تديرها':groupTab==='member'?'لا توجد جمعيات تشارك فيها':'لا توجد جمعيات حتى الآن';shell('الجمعيات','groups',`<div class="toolbar"><input class="searchbox" id="groupSearch" placeholder="ابحث باسم الجمعية أو رمزها..."><button class="btn primary small" data-go="create-group">${uiIcon('plus',15)} إنشاء</button></div><div id="groupList">${own.length?own.map(groupCard).join(''):`<div class="card empty"><div class="big">${uiIcon('groups',27)}</div><b>${empty}</b><button class="btn primary" data-go="create-group">إنشاء جمعية</button></div>`}</div><button class="btn outline full" data-go="join-group">الانضمام إلى جمعية برمز أو رابط</button>`)}function createGroup(){
- shell('جمعية جديدة',null,`<div class="create-group-page">
-  <form id="createForm" class="create-form">
-   <section class="create-section">
-    <div class="create-section-head"><span class="create-section-icon">${uiIcon('landmark',19)}</span><h2>بيانات الجمعية</h2></div>
-    <div class="field create-field"><label>اسم الجمعية</label><input name="name" placeholder="" autocomplete="off" required></div>
-    <div class="field create-field"><label>عملة الجمعية</label><select name="currency"><option value="YER_SAN">ريال يمني - صنعاء</option><option value="YER_ADE">ريال يمني - عدن</option><option value="USD">دولار أمريكي</option><option value="SAR">ريال سعودي</option></select></div>
-   </section>
-   <section class="create-section">
-    <div class="create-section-head"><span class="create-section-icon">${uiIcon('wallet',19)}</span><h2>المساهمة والأسهم</h2></div>
-    <div class="create-fields-grid">
-     <div class="field create-field"><label>قيمة مساهمة السهم</label><input type="number" name="share" min="1" inputmode="numeric" placeholder="" required></div>
-     <div class="field create-field"><label>إجمالي الأسهم المستهدفة</label><input type="number" name="total" min="2" max="500" inputmode="numeric" placeholder="" required></div>
-     <div class="field create-field"><label>الحد الأقصى لأسهم الفرد</label><input type="number" name="maxPer" min="1" inputmode="numeric" value="3" required></div>
-     <div class="field create-field"><label>نصاب الحضور الافتراضي (%)</label><input type="number" name="quorum" min="1" max="100" inputmode="numeric" value="66" required></div>
-    </div>
-   </section>
-   <section class="create-section">
-    <div class="create-section-head"><span class="create-section-icon">${uiIcon('calendar-days',19)}</span><h2>مواعيد الجمعية</h2></div>
-    <div class="field create-field"><label>دورية السداد</label><select name="period"><option>أسبوعية</option><option>شهرية</option></select></div>
-    <div class="create-fields-grid">
-     <div class="field create-field"><label>تاريخ البداية</label><input type="date" name="start" value="${today()}" required></div>
-     <div class="field create-field"><label>موعد أول قسط</label><input type="date" name="first" required></div>
-    </div>
-   </section>
-   <div class="create-submit-area"><button class="btn primary full create-submit" type="submit">إنشاء الجمعية</button></div>
-  </form>
- </div>`);
+ const html = [
+ '<div class="create-group-page">',
+ '<div class="create-intro"><span class="create-intro-icon">'+uiIcon('layers',25)+'</span><div class="create-intro-copy"><span class="create-kicker">تأسيس جمعية جديدة</span><h1>ابدأ بتحديد نظام جمعيتك</h1><p>اضبط الأسهم والقرعة والسداد، وسيحسب سهم الجدول والمبالغ تلقائياً.</p></div></div>',
+ '<form id="createForm" class="create-form">',
+ '<section class="create-section" id="create-basics"><div class="create-section-head"><span class="create-section-icon">'+uiIcon('landmark',20)+'</span><div><h2>بيانات الجمعية</h2><p>معلومات تعريفية تظهر للأعضاء</p></div></div>',
+ '<div class="field create-field"><label for="cg-name">اسم الجمعية</label><input id="cg-name" name="name" maxlength="70" autocomplete="off" placeholder="مثلاً: جمعية زملاء العمل" required></div>',
+ '<div class="create-fields-grid"><div class="field create-field"><label for="cg-currency">عملة الجمعية</label><select id="cg-currency" name="currency"><option value="YER_SAN">ريال يمني - صنعاء</option><option value="YER_ADE">ريال يمني - عدن</option><option value="USD">دولار أمريكي</option><option value="SAR">ريال سعودي</option></select></div>',
+ '<div class="field create-field"><label for="cg-start">بداية استقبال المساهمات</label><input id="cg-start" name="start" type="date" value="'+today()+'" required></div></div>',
+ '<div class="field create-field"><label for="cg-description">وصف مختصر <span class="create-optional">اختياري</span></label><textarea id="cg-description" name="description" rows="2" maxlength="240" placeholder="معلومات توضح هدف الجمعية أو شروطها"></textarea></div></section>',
+ '<section class="create-section" id="create-shares"><div class="create-section-head"><span class="create-section-icon">'+uiIcon('users',20)+'</span><div><h2>الأسهم والمشاركة</h2><p>عدد الأسهم هو عدد فرص الاستحقاق، وليس عدد الأشخاص</p></div></div>',
+ '<div class="create-fields-grid"><div class="field create-field"><label for="cg-total">إجمالي الأسهم المستهدفة</label><input id="cg-total" name="total" type="number" min="2" max="500" step="1" inputmode="numeric" placeholder="مثلاً 20" required></div>',
+ '<div class="field create-field"><label for="cg-maxper">الحد الأقصى لأسهم الفرد</label><input id="cg-maxper" name="maxPer" type="number" min="1" max="500" step="1" inputmode="numeric" value="3" required></div></div>',
+ '<div class="create-manager-choice"><div><strong>هل ستشارك بأسهم في جمعيتك؟</strong><small>يمكنك إدارة الجمعية دون أن تكون مشاركاً مالياً فيها.</small></div><div class="create-manager-options"><label><input type="radio" name="managerMode" value="manager" checked> مدير فقط</label><label><input type="radio" name="managerMode" value="participant"> مدير ومشارك</label></div></div>',
+ '<div class="field create-field" id="manager-shares-field" hidden><label for="cg-manager-shares">عدد أسهمك كمشارك</label><input id="cg-manager-shares" name="managerShares" type="number" min="1" max="3" value="1" step="1" inputmode="numeric"></div></section>',
+ '<section class="create-section" id="create-draw"><div class="create-section-head"><span class="create-section-icon">'+uiIcon('shuffle',20)+'</span><div><h2>نظام القرعة</h2><p>حدد موعد الاستحقاق وتكرار القرعات بشكل مستقل عن السداد</p></div></div>',
+ '<div class="field create-field"><label for="cg-draw-period">دورية القرعة</label><select id="cg-draw-period" name="drawPeriod"><option value="monthly">شهرية</option><option value="weekly">أسبوعية</option><option value="fortnightly">كل أسبوعين</option><option value="daily">يومية</option><option value="custom">فترة مخصصة</option></select></div>',
+ '<div class="field create-field" id="draw-custom-field" hidden><label for="cg-draw-interval">تكرار القرعة كل (عدد الأيام)</label><input id="cg-draw-interval" name="drawInterval" type="number" min="1" max="365" value="30" inputmode="numeric"></div>',
+ '<div class="field create-field"><label for="cg-first-draw">موعد أول قرعة</label><input id="cg-first-draw" name="firstDraw" type="date" required></div>',
+ '<div class="create-note"><span>'+uiIcon('info',16)+'</span><p>في النموذج الحالي، تمنح كل قرعة الاستحقاق لسهم واحد. بعد فوزه تُستبعد فرصة هذا السهم، وتبقى أسهم صاحبه الأخرى مستقلة ومؤهلة.</p></div></section>',
+ '<section class="create-section" id="create-payment"><div class="create-section-head"><span class="create-section-icon">'+uiIcon('wallet',20)+'</span><div><h2>طريقة السداد</h2><p>حدد ما يدفعه صاحب السهم ومتى يدفعه</p></div></div>',
+ '<div class="create-fields-grid"><div class="field create-field"><label for="cg-amount">قيمة الدفعة لكل سهم</label><input id="cg-amount" name="paymentAmount" type="number" min="1" step="1" inputmode="numeric" placeholder="مثلاً 5000" required></div>',
+ '<div class="field create-field"><label for="cg-payment-period">دورية السداد</label><select id="cg-payment-period" name="paymentPeriod"><option value="daily">يومي</option><option value="weekly">أسبوعي</option><option value="fortnightly">كل أسبوعين</option><option value="monthly">شهري</option><option value="once">دفعة واحدة</option><option value="custom">فترة مخصصة</option></select></div></div>',
+ '<div class="field create-field" id="payment-custom-field" hidden><label for="cg-payment-interval">تكرار الدفعة كل (عدد الأيام)</label><input id="cg-payment-interval" name="paymentInterval" type="number" min="1" max="365" value="1" inputmode="numeric"></div>',
+ '<div class="create-fields-grid"><div class="field create-field"><label for="cg-first-payment">موعد أول دفعة</label><input id="cg-first-payment" name="firstPayment" type="date" required></div>',
+ '<div class="field create-field"><label for="cg-calendar-mode">طريقة احتساب المواعيد</label><select id="cg-calendar-mode" name="calendarMode"><option value="calendar">حسب التقويم</option><option value="fixed">فترات ثابتة</option></select></div></div>',
+ '<div class="create-note"><span>'+uiIcon('calendar-clock',16)+'</span><p>يمكن أن يكون السداد يومياً أو أسبوعياً بينما القرعة شهرية. سيحسب التطبيق عدد الدفعات الواقعة قبل موعد القرعة من التواريخ الفعلية.</p></div></section>',
+ '<section class="create-section" id="create-rules"><div class="create-section-head"><span class="create-section-icon">'+uiIcon('shield-check',20)+'</span><div><h2>الحضور وقواعد المشاركة</h2><p>إعدادات تؤثر في أهلية القرعة وإدارتها</p></div></div>',
+ '<div class="field create-field"><label for="cg-quorum">نصاب الحضور المطلوب (%)</label><input id="cg-quorum" name="quorum" type="number" min="1" max="100" value="66" step="1" inputmode="numeric" required></div>',
+ '<div class="create-note"><span>'+uiIcon('users',16)+'</span><p>يُحتسب النصاب من عدد الأعضاء الحاضرين فعلياً، وليس من عدد الأسهم. لن يُفترض وجود حضور عند عدم تسجيله.</p></div></section>',
+ '<section class="create-section create-live-summary" id="create-summary"><div class="create-section-head"><span class="create-section-icon">'+uiIcon('calculator',20)+'</span><div><h2>ملخص الجمعية المتوقع</h2><p>يتحدث تلقائياً عند تعديل الإعدادات</p></div></div>',
+ '<div class="create-summary-grid"><div><span>عدد الأسهم</span><b id="cs-total">—</b></div><div><span>دورية القرعة</span><b id="cs-draw">شهرية</b></div><div><span>عدد الدفعات حتى القرعة الأولى</span><b id="cs-count">—</b></div><div><span>مساهمة السهم في الدورة</span><b id="cs-share">—</b></div></div>',
+ '<div class="create-summary-total"><span>إجمالي التحصيل المتوقع من جميع الأسهم في الدورة الأولى</span><strong id="cs-grand">—</strong></div>',
+ '<div class="create-summary-foot" id="cs-dates">أدخل المبالغ والتواريخ لعرض الحسابات والمواعيد.</div></section>',
+ '<div class="create-submit-area"><button class="btn primary full create-submit" type="submit">'+uiIcon('plus-circle',17)+' إنشاء الجمعية وفتح المشاركة</button><p>ستُحفظ الإعدادات في سجل الجمعية، ويمكن مراجعتها قبل بدء نشاطها.</p></div>',
+ '</form></div>'
+ ].join('');
+ shell('جمعية جديدة',null,html);
+ const form=$('#createForm');
+ const todayDate=today();
+ const firstDraw=form.elements.firstDraw;
+ const firstPayment=form.elements.firstPayment;
+ firstDraw.value=todayDate;
+ firstPayment.value=todayDate;
+ const update=()=>{
+  const val=n=>form.elements[n]?.value||'';
+  const num=n=>Math.max(0,Number(val(n))||0);
+  const labels={daily:'يومية',weekly:'أسبوعية',fortnightly:'كل أسبوعين',monthly:'شهرية',once:'دفعة واحدة',custom:'مخصصة'};
+  const drawLabels={daily:'يومية',weekly:'أسبوعية',fortnightly:'كل أسبوعين',monthly:'شهرية',custom:'مخصصة'};
+  const amount=num('paymentAmount'),total=num('total'),draw=val('drawPeriod'),pay=val('paymentPeriod');
+  const drawDate=val('firstDraw'),payDate=val('firstPayment'),mode=val('calendarMode');
+  let interval=draw==='daily'?1:draw==='weekly'?7:draw==='fortnightly'?14:draw==='monthly'?null:num('drawInterval');
+  const paymentInterval=pay==='daily'?1:pay==='weekly'?7:pay==='fortnightly'?14:pay==='monthly'?null:pay==='once'?0:num('paymentInterval');
+  const parse=d=>{if(!d)return null;const a=d.split('-').map(Number);return new Date(a[0],a[1]-1,a[2],12)};
+  const fmt=d=>d?d.toLocaleDateString('ar',{day:'numeric',month:'short',year:'numeric'}):'—';
+  const addMonth=d=>{const day=d.getDate(),next=new Date(d.getFullYear(),d.getMonth()+1,1,12);next.setDate(Math.min(day,new Date(next.getFullYear(),next.getMonth()+1,0,12).getDate()));return next};
+  const start=parse(payDate),end=parse(drawDate);
+  let count=0,dates=[];
+  if(start&&end&&start<end&&amount>0){
+   let cursor=new Date(start);
+   for(let i=0;i<500&&cursor<end;i++){
+    count++;if(dates.length<3)dates.push(fmt(cursor));
+    if(pay==='once')break;
+    if(pay==='monthly'&&mode==='calendar')cursor=addMonth(cursor);
+    else cursor.setDate(cursor.getDate()+(paymentInterval||num('paymentInterval')||1));
+   }
+  }
+  const perShare=count*amount,grand=perShare*total;
+  const put=(id,value)=>{const el=document.getElementById(id);if(el)el.textContent=value};
+  put('cs-total',total?total+' سهم':'—');put('cs-draw',drawLabels[draw]||'—');put('cs-count',start&&end?(count+' دفعة'):'—');
+  put('cs-share',perShare?money(perShare,val('currency')):'—');put('cs-grand',grand?money(grand,val('currency')):'—');
+  const dateText=start&&end?(start>=end?'موعد أول دفعة يجب أن يسبق موعد القرعة الأولى.':'أول دفعة: '+fmt(start)+' · أول قرعة: '+fmt(end)+' · '+(dates.length?'معاينة الدفعات: '+dates.join('، '):'لا توجد دفعات قبل القرعة.')):'أدخل موعد أول دفعة وموعد أول قرعة لعرض الجدول.';
+  put('cs-dates',dateText);
+  const managerField=document.getElementById('manager-shares-field');
+  const participant=form.querySelector('input[name="managerMode"]:checked')?.value==='participant';
+  managerField.hidden=!participant;
+  form.elements.managerShares.required=participant;
+  form.elements.managerShares.max=String(Math.max(1,Math.min(num('maxPer')||3,total||500)));
+  document.getElementById('draw-custom-field').hidden=draw!=='custom';
+  form.elements.drawInterval.required=draw==='custom';
+  document.getElementById('payment-custom-field').hidden=pay!=='custom';
+  form.elements.paymentInterval.required=pay==='custom';
+ };
+ form.addEventListener('input',update);
+ form.addEventListener('change',update);
+ form.addEventListener('click',e=>{
+  const jump=e.target.closest('[data-create-jump]');
+  if(jump){document.getElementById(jump.dataset.createJump)?.scrollIntoView({behavior:'smooth',block:'start'});}
+ });
+ update();
 }
 
 function groupDetail(){
-const g=currentGroup(),manager=isManager(),myShares=g.myShares||1;
+const g=currentGroup(),manager=isManager(),myShares=Number(g.myShares)||0;
 const personalPayments=db.payments.filter(p=>p.group===g.id&&p.person===db.user.name);
 const latest=personalPayments[0],myReceipts=db.receipts.filter(r=>r.group===g.id&&r.person===db.user.name);
 const managerTabs=`<div class="tabs"><button class="${groupDetailTab==='overview'?'active':''}" data-action="detail-tab" data-tab="overview">لوحة الإدارة</button><button class="${groupDetailTab==='cycles'?'active':''}" data-action="detail-tab" data-tab="cycles">الدورات والقرعات</button><button class="${groupDetailTab==='tools'?'active':''}" data-action="detail-tab" data-tab="tools">إدارة الجمعية</button></div>`;
@@ -3310,7 +3419,7 @@ function installments(){
  const g=currentGroup();
  if(!isManager()){
   const mine=db.payments.filter(p=>p.group===g.id&&p.person===db.user.name).sort((a,b)=>b.cycle-a.cycle);
-  shell('مساهماتي','groups',`${header('سجل مساهماتي',g.name)}<div class="member-summary"><div><span>عدد أسهمك</span><b>${g.myShares||1}</b></div><div><span>قيمة القسط</span><b>${money(g.share*(g.myShares||1),g.currency)}</b></div></div><div class="card"><div class="between"><b>سجل السداد</b><span class="pill">${mine.length} عمليات</span></div>${mine.map(p=>`<div class="listrow"><div class="avatar">${uiIcon('groups',18)}</div><div class="grow"><strong>الدورة ${p.cycle}</strong><small>${escapeHtml(p.ref)} · ${escapeHtml(p.date)}</small></div>${pill(p.status)}</div>`).join('')||'<div class="empty"><b>لا توجد إثباتات سداد مرسلة</b></div>'}</div><button class="btn primary full" data-go="payment-submit">إرسال إثبات السداد</button>`);
+  shell('مساهماتي','groups',`${header('سجل مساهماتي',g.name)}<div class="member-summary"><div><span>عدد أسهمك</span><b>${Number(g.myShares)||0}</b></div><div><span>قيمة القسط</span><b>${money(g.share*(Number(g.myShares)||0),g.currency)}</b></div></div><div class="card"><div class="between"><b>سجل السداد</b><span class="pill">${mine.length} عمليات</span></div>${mine.map(p=>`<div class="listrow"><div class="avatar">${uiIcon('groups',18)}</div><div class="grow"><strong>الدورة ${p.cycle}</strong><small>${escapeHtml(p.ref)} · ${escapeHtml(p.date)}</small></div>${pill(p.status)}</div>`).join('')||'<div class="empty"><b>لا توجد إثباتات سداد مرسلة</b></div>'}</div><button class="btn primary full" data-go="payment-submit">إرسال إثبات السداد</button>`);
   return;
  }
  const members=(db.participants||[]).filter(m=>m.group===g.id);
@@ -3328,7 +3437,7 @@ function installments(){
  <div class="card" id="installmentRows">${rows.map(r=>`<div class="listrow"><div class="avatar">${escapeHtml(r.name.slice(0,1))}</div><div class="grow"><strong>${escapeHtml(r.name)} · ${r.shares} سهم</strong><small>${escapeHtml(r.ref)} · ${money(r.amount,g.currency)}</small></div>${pill(r.status)}</div>`).join('')||'<div class="empty"><b>لا توجد عضويات مسجلة</b></div>'}</div><button class="btn outline full" data-go="review">فتح مراجعة إثباتات السداد</button>`)
 }
 function paymentSubmit(){
-const g=currentGroup(),shares=g.myShares||1;
+const g=currentGroup(),shares=Number(g.myShares)||0;
 shell('إرسال إثبات السداد','groups',`${header('إرسال إثبات السداد',g.name)}<div class="card member-panel"><div class="keyvalue"><span>عدد أسهمك</span><b>${shares}</b></div><div class="keyvalue"><span>قيمة القسط</span><b>${money(g.share*shares,g.currency)}</b></div><div class="keyvalue"><span>الدورة</span><b>${g.cycle||1}</b></div></div><form id="paymentForm"><input type="hidden" name="cycle" value="${g.cycle||1}"><input type="hidden" name="shares" value="${shares}"><div class="field"><label>رقم عملية التحويل الخارجي</label><input name="ref" required></div><div class="field"><label>صورة إشعار الدفع</label><input type="file" name="proof" accept="image/*" required></div><button class="btn primary full" type="submit">إرسال الإثبات للمراجعة</button></form>`)
 }
 function review(){
@@ -3436,7 +3545,21 @@ function handleAuxiliaryClick(e){
 }
 document.addEventListener('keydown',e=>{const card=e.target.closest?.('.group-card[role="button"]');if(card&&(e.key==='Enter'||e.key===' ')){e.preventDefault();card.click()}});
 document.addEventListener('click',e=>{if(handleAuxiliaryClick(e))return;const el=e.target.closest('[data-go],[data-action]');if(!el)return;const goTo=el.dataset.go,act=el.dataset.action;if(goTo){if(goTo==='group-detail')db.currentGroup=el.dataset.id||db.currentGroup;if(goTo==='groups')groupTab='all';go(goTo);return}if(act==='back'){back();return}if(act==='overlay-close'){closeModal();return}if(act==='close'){closeModal();return}switch(act){case'open-manager-review':{const g=db.groups.find(x=>x.role==='manager'&&db.payments.some(p=>p.group===x.id&&['PROOF_SUBMITTED','UNDER_REVIEW'].includes(p.status)));if(g){db.currentGroup=g.id;go('review')}else toast('لا توجد إثباتات معلقة في جمعياتك');break}case'open-group':db.currentGroup=el.dataset.id;groupDetailTab='overview';save();go('group-detail');break;case'home-managed':groupTab='manager';go('groups');break;case'home-member':groupTab='member';go('groups');break;case'home-slide':setHomeSlide(Number(el.dataset.index)||0);break;case'group-tab':groupTab=el.dataset.tab;groups();break;case'detail-tab':groupDetailTab=el.dataset.tab;groupDetail();break;case'invite-mode':if(el.dataset.mode==='link'){$('#inviteContent').innerHTML=`<div class="card"><div class="eyebrow">رابط الانضمام العام</div><b style="font-size:12px">${currentGroup().publicLink}</b><button class="btn primary full" style="margin-top:12px" data-action="share-link">نسخ رابط الدعوة</button><button class="btn outline full" style="margin-top:8px" data-action="whatsapp-link">مشاركة عبر واتساب</button></div>`}else{$('#inviteContent').innerHTML=`<form id="inviteForm"><div class="field"><label>اسم المدعو</label><input name="name" required></div><div class="field"><label>رقم الهاتف</label><input name="phone" required inputmode="tel"></div><div class="field"><label>عدد الأسهم</label><input name="shares" type="number" min="1" max="${currentGroup().maxPer}" value="1" required></div><button class="btn primary full" type="submit">إرسال الدعوة</button></form>`}document.querySelectorAll('[data-action="invite-mode"]').forEach(b=>b.classList.toggle('active',b===el));break;case'share-link':if(navigator.clipboard?.writeText){navigator.clipboard.writeText(currentGroup().publicLink).then(()=>toast('تم نسخ رابط الدعوة')).catch(()=>toast(currentGroup().publicLink))}else toast(currentGroup().publicLink);break;case'whatsapp-link':window.open('https://wa.me/?text='+encodeURIComponent('انضم إلى جمعية '+currentGroup().name+' عبر الرابط '+currentGroup().publicLink),'_blank');break;case'invite-accept':{if(!isManager()){toast('لا تملك صلاحية إدارة العضويات');break}let i=db.invites.find(x=>x.id===el.dataset.id);if(i){let g=db.groups.find(x=>x.id===i.group);if(g.shares+i.shares>g.total){toast('اكتمل عدد الأسهم المستهدف');break}i.status='ACCEPTED';g.members++;g.shares+=i.shares;db.participants=db.participants||[];db.participants.push({group:g.id,name:i.name,shares:i.shares,role:'member',present:false});if(g.shares>=g.total)g.status='READY_FOR_DRAW';log('قبول دعوة '+i.name);save();invites()}break}case'invite-reject':{if(!isManager()){toast('لا تملك صلاحية إدارة العضويات');break}let i=db.invites.find(x=>x.id===el.dataset.id);if(i){i.status='REJECTED_INV';log('رفض دعوة '+i.name);save();invites()}break}case'pause-group':{if(!isManager()){toast('لا تملك صلاحية إدارة هذه الجمعية');break}const g=currentGroup();if(g.status==='PAUSED_DEFAULT'){g.status=g.statusBeforePause||'ACTIVE_REVOLVING';delete g.statusBeforePause;log('إعادة تفعيل الجمعية')}else{g.statusBeforePause=g.status;g.status='PAUSED_DEFAULT';log('إيقاف الجمعية مؤقتاً')}save();groupDetail();break}case'start-review':{let p=db.payments.find(x=>x.id===el.dataset.id);if(p){p.status='UNDER_REVIEW';log('بدء مراجعة إثبات السداد');save();review()}break}case'approve-payment':{if(!isManager()){toast('لا تملك صلاحية مراجعة السداد');break}let p=db.payments.find(x=>x.id===el.dataset.id);if(p){p.status='VERIFIED_PAID';let id=createReceipt(p);save();showModal('تم اعتماد السداد',`تم إنشاء الإيصال رقم <b>${id}</b>. يمكنك فتحه من سجل الإيصالات.`,[['عرض الإيصال','open-new-receipt','primary'],['إغلاق','close','outline']]);$('#modal-root').dataset.receipt=id}break}case'open-new-receipt':{const id=$('#modal-root').dataset.receipt;closeModal();go('receipt-detail',{id});break}case'reject-payment':{if(!isManager()){toast('لا تملك صلاحية مراجعة السداد');break}const p=db.payments.find(x=>x.id===el.dataset.id);if(p){p.status='REJECTED';log('رفض إثبات السداد');save();toast('تم رفض الإثبات');review()}break}case'member-vote':{const g=currentGroup();db.memberVotes=db.memberVotes||{};db.memberVotes[g.id]=true;const me=(db.participants||[]).find(m=>m.group===g.id&&m.name===db.user.name);if(me)me.present=true;save();memberVote();toast('تم تسجيل حضورك وتصويتك بعدد أسهمك');break;}case'vote-draw':{const g=currentGroup(),participants=(db.participants||[]).filter(m=>m.group===g.id);const present=participants.reduce((n,m)=>n+(m.present===false?0:(Number(m.shares)||0)),0)||1;const yes=Math.max(1,Math.ceil(present*.6)),no=Math.max(0,present-yes);db.drawVotes=db.drawVotes||{};db.drawVotes[g.id]={yes,no,simulation:true};save();drawRoom();toast('تم تحديث محاكاة التصويت');break;}case'run-draw':{const g=currentGroup(),wheel=$('#wheel');if(wheel){wheel.classList.add('spin');el.disabled=true;setTimeout(()=>{const eligible=eligibleTickets(g);if(!eligible.length){toast('لا توجد أسهم مؤهلة متبقية');return}let picked;try{picked=eligible[secureIndex(eligible.length)]}catch(err){toast('تعذر توفير عشوائية آمنة في هذا المتصفح');return}const winner=picked.owner;const shareNo=ticketOwners(g).filter(t=>t.owner===winner&&t.ticketNo<=picked.ticketNo).length;const cycle=(g.cycle||0)+1;const d={cycle,winner,shareNo,ticketNo:picked.ticketNo,date:today()};g.draws.push(d);g.cycle=cycle;g.status='ACTIVE_REVOLVING';db.wall.unshift({group:g.id,type:'system',text:`أعلنت نتيجة قرعة الدورة ${cycle}: فاز ${winner} بالسهم رقم ${d.shareNo}`,date:today(),reactions:0});log('تنفيذ قرعة الدورة '+cycle,'النظام');if(db.drawVotes)delete db.drawVotes[g.id];save();showModal('نتيجة القرعة',`<div style="text-align:center"><div class="receipt-mark">★</div><div style="font-size:17px;font-weight:800;color:var(--ink);margin:8px">${winner}</div><div>السهم الفائز رقم ${d.shareNo}</div></div>`,[['عرض المحضر','open-draw-history','primary'],['إغلاق','close','outline']])},2050)}break}case'open-draw-history':closeModal();go('draw-history');break;case'replay-draw':showModal('إعادة محاكاة النتيجة',`هذه إعادة عرض للنتيجة المسجلة للدورة ${el.dataset.cycle}. لا يتم إجراء سحب جديد ولا تغيير النتيجة.`,[['عرض النتيجة','replay-animation','primary'],['إغلاق','close','outline']]);$('#modal-root').dataset.cycle=el.dataset.cycle;break;case'replay-animation':{const c=$('#modal-root').dataset.cycle;const d=currentGroup().draws.find(x=>x.cycle==c);closeModal();showModal('نتيجة الدورة '+c,`الفائز المسجل: <b>${d?.winner||'—'}</b> · السهم رقم ${d?.shareNo||'—'}.<div class="wheel-wrap"><div class="wheel"></div></div>`,[['إغلاق','close','primary']]);break}case'receipt-open':go('receipt-detail',{id:el.dataset.id});break;case'verify-receipt':showModal('نتيجة التحقق',`الإيصال موجود ضمن بيانات المعاينة ورقمه ${params.id||''}. لا يمكن إجراء تحقق تشفيري حقيقي دون خدمة الخادم.`,[['حسناً','close','primary']]);break;case'react':{const idx=Number(el.dataset.index);const arr=db.wall.filter(w=>w.group===currentGroup().id);if(arr[idx])arr[idx].reactions=(arr[idx].reactions||0)+1;save();wall();toast('تم تسجيل تفاعلك');break}case'logout-confirm':showModal('تسجيل الخروج',`هل تريد إنهاء جلستك الحالية؟ لن يتم حذف بيانات المعاينة المحفوظة على هذا الجهاز.`,[['نعم، تسجيل الخروج','logout-now','danger'],['إلغاء','close','outline']]);break;case'logout-now':db.session=false;save();stack=[];closeModal();screenName='logged-out';render();break;default:break}});
-document.addEventListener('submit',e=>{e.preventDefault();const f=e.target;if(f.id==='createForm'){const d=Object.fromEntries(new FormData(f));const newId='G-'+Math.floor(2404+Math.random()*500);const g={id:newId,name:d.name,currency:d.currency,share:+d.share,total:+d.total,maxPer:+d.maxPer,start:d.start,first:d.first,period:d.period,quorum:+d.quorum,role:'manager',myShares:1,status:'PENDING_MEMBERS',members:1,shares:1,paid:0,cycle:0,admin:db.user.name,contrib:+d.share,publicLink:'sahm.app/join/'+newId,draws:[]};db.groups.unshift(g);db.participants=db.participants||[];db.participants.unshift({group:g.id,name:db.user.name,shares:1,role:'manager',present:true});db.currentGroup=g.id;log('إنشاء جمعية جديدة: '+g.name);save();go('group-detail');toast('تم إنشاء الجمعية وتوليد رابط الدعوة');}
+document.addEventListener('submit',e=>{e.preventDefault();const f=e.target;if(f.id==='createForm'){
+ const d=Object.fromEntries(new FormData(f));
+ const total=Number(d.total),maxPer=Number(d.maxPer),managerShares=d.managerMode==='participant'?Number(d.managerShares):0;
+ if(!Number.isInteger(total)||total<2||total>500||!Number.isInteger(maxPer)||maxPer<1||maxPer>total){toast('راجع عدد الأسهم والحد الأقصى للفرد');return}
+ if(managerShares<0||managerShares>maxPer||managerShares>total){toast('عدد أسهمك يتجاوز الحد المسموح');return}
+ const amount=Number(d.paymentAmount),drawDate=d.firstDraw,payDate=d.firstPayment;
+ if(!Number.isFinite(amount)||amount<=0||!drawDate||!payDate||payDate>=drawDate){toast('تأكد من مبلغ الدفعة وأن موعدها يسبق القرعة الأولى');return}
+ const newId='G-'+Date.now().toString().slice(-8);
+ const drawLabels={daily:'يومية',weekly:'أسبوعية',fortnightly:'كل أسبوعين',monthly:'شهرية',custom:'مخصصة'};
+ const payLabels={daily:'يومية',weekly:'أسبوعية',fortnightly:'كل أسبوعين',monthly:'شهرية',once:'دفعة واحدة',custom:'مخصصة'};
+ const g={id:newId,name:d.name.trim(),description:d.description||'',currency:d.currency,share:amount,installmentAmount:amount,contributionPerCycle:amount,start:d.start,first:payDate,firstPayment:payDate,firstDraw:drawDate,period:payLabels[d.paymentPeriod]||'مخصصة',paymentPeriod:d.paymentPeriod,paymentInterval:d.paymentPeriod==='custom'?Number(d.paymentInterval):null,calendarMode:d.calendarMode,drawPeriod:d.drawPeriod,drawInterval:d.drawPeriod==='custom'?Number(d.drawInterval):null,drawPeriodLabel:drawLabels[d.drawPeriod]||'مخصصة',maxPer:maxPer,total:total,quorum:Number(d.quorum),role:'manager',myShares:managerShares,status:'PENDING_MEMBERS',members:managerShares?1:0,shares:managerShares,paid:0,cycle:0,admin:db.user.name,contrib:amount,publicLink:'sahm.app/join/'+newId,draws:[],rulesVersion:1};
+ db.groups.unshift(g);db.participants=db.participants||[];
+ if(managerShares)db.participants.unshift({group:g.id,name:db.user.name,shares:managerShares,role:'manager',present:false});
+ db.currentGroup=g.id;log('إنشاء جمعية جديدة: '+g.name);save();go('group-detail');toast('تم إنشاء الجمعية وحفظ إعداداتها');
+}
 else if(f.id==='inviteForm'){const d=Object.fromEntries(new FormData(f));const g=currentGroup(),pending=db.invites.filter(i=>i.group===g.id&&i.status==='PENDING').reduce((n,i)=>n+i.shares,0);if(g.shares+pending+(+d.shares)>g.total){toast('عدد الأسهم المطلوبة يتجاوز الأسهم المتبقية');return}db.invites.unshift({id:'I-'+Date.now(),group:g.id,name:d.name,phone:d.phone,shares:+d.shares,status:'PENDING'});log('إرسال دعوة إلى '+d.name);save();go('invites');toast('تم إرسال الدعوة');}
 else if(f.id==='joinForm'){const code=f.code.value.toUpperCase().match(/G-\d+/)?.[0];const g=db.groups.find(x=>x.id===code);if(!g){toast('لم نعثر على جمعية بهذا الرمز');return}showModal('تفاصيل الجمعية',`<b>${g.name}</b><div class="keyvalue"><span>العملة</span><b>${g.currency}</b></div><div class="keyvalue"><span>قيمة السهم</span><b>${money(g.share,g.currency)}</b></div><div class="keyvalue"><span>الأسهم المستهدفة</span><b>${g.shares}/${g.total}</b></div><div class="field"><label>عدد الأسهم التي ترغب بها</label><input type="number" id="joinShares" min="1" max="${g.maxPer}" value="1"></div>`,[['إرسال طلب الانضمام','submit-join','primary'],['إغلاق','close','outline']]);$('#modal-root').dataset.group=code;}
 else if(f.id==='paymentForm'){const d=Object.fromEntries(new FormData(f));const p={id:'P-'+Date.now(),group:currentGroup().id,person:db.user.name,cycle:+d.cycle,amount:+d.shares*currentGroup().share,ref:d.ref,status:'PROOF_SUBMITTED',date:today(),proof:f.proof.files[0]?.name||'إشعار التحويل'};db.payments.unshift(p);log('إرسال إثبات سداد '+p.ref);save();go('installments');toast('تم إرسال الإثبات إلى مدير الجمعية');}
