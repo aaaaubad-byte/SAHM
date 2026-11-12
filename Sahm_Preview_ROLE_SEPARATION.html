@@ -722,6 +722,24 @@ html,body{height:100%;min-height:100%;overflow:hidden}
 /* Authentication screens intentionally omit the app navigation. */
 #bottomnav[hidden]{display:none!important}
 
+
+.home-screen{overflow-x:hidden!important;overflow-y:auto!important;justify-content:flex-start!important;gap:0!important}
+.home-create-card{order:0;margin:0 0 10px!important}
+.home-shortcuts{order:1;margin-bottom:12px!important}
+.latest-activity{order:2;flex:none!important;min-height:0!important;overflow:visible!important;padding:0 1px 8px!important}
+.latest-activity h2{display:flex;align-items:center;gap:7px;font-size:12px;font-weight:850;margin:0 2px 9px;color:var(--ink)}
+.activity-heading-icon{width:27px;height:27px;border-radius:9px;background:#edf2ff;color:#3158d6;display:grid;place-items:center}
+.activity-list{display:flex;flex-direction:column;gap:8px}
+.activity-card{width:100%;min-height:66px;display:flex;align-items:center;gap:11px;padding:10px 12px;text-align:right;direction:rtl;background:#fff;border:1px solid var(--line);border-radius:16px;box-shadow:0 4px 14px rgba(25,44,78,.045);color:var(--ink)}
+.activity-icon{width:39px;height:39px;flex:0 0 39px;border-radius:13px;display:grid;place-items:center}
+.activity-icon.invite{background:#edf2ff;color:#3158d6}.activity-icon.joined{background:#edf6f2;color:#3d8068}.activity-icon.payment{background:#f7efe2;color:#a67532}
+.activity-copy{min-width:0;flex:1;display:flex;flex-direction:column;gap:4px}
+.activity-copy strong{font-size:10.5px;line-height:1.5;font-weight:800;white-space:normal}
+.activity-copy small{font-size:9px;line-height:1.4;color:#8995a6;font-weight:500}
+.activity-copy small i{font-style:normal;color:#c0c8d2;padding:0 2px}
+.activity-arrow{color:#98a4b5;display:grid;place-items:center;transform:rotate(180deg)}
+@media(max-height:740px){.home-carousel{height:112px}.home-summary{margin-bottom:7px}.home-create-card{height:53px;min-height:53px;margin-bottom:8px!important}.home-shortcuts{gap:8px;margin-bottom:9px!important}.home-shortcut{aspect-ratio:1.7/1;gap:7px}.shortcut-icon{width:37px;height:37px}.activity-list{gap:6px}.activity-card{min-height:59px;padding:8px 10px}.activity-icon{width:35px;height:35px;flex-basis:35px}}
+
 </style></head>
 <body><noscript><main dir="rtl" style="font-family:Arial,sans-serif;padding:24px;color:#142f39"><h1>سهم</h1></main></noscript><div class="workspace"><div class="phone" id="app">
 <div class="statusbar" aria-hidden="true"></div>
@@ -768,6 +786,9 @@ function uiIcon(name,size=20){
   groups:'M16 21v-2a4 4 0 0 0-4-4H7a4 4 0 0 0-4 4v2m6-10a4 4 0 1 0 0-8 4 4 0 0 0 0 8zm7-7.5a4 4 0 0 1 0 7.7M20 15a4 4 0 0 1 2 3.5V21',
   users:'M16 21v-2a4 4 0 0 0-4-4H7a4 4 0 0 0-4 4v2m6-10a4 4 0 1 0 0-8 4 4 0 0 0 0 8zm7-7.5a4 4 0 0 1 0 7.7M20 15a4 4 0 0 1 2 3.5V21',
   'user-check':'M16 21v-2a4 4 0 0 0-4-4H7a4 4 0 0 0-4 4v2m6-10a4 4 0 1 0 0-8 4 4 0 0 0 0 8zm7-2 2 2 4-4',
+  'user-plus':'M16 21v-2a4 4 0 0 0-4-4H7a4 4 0 0 0-4 4v2m6-10a4 4 0 1 0 0-8 4 4 0 0 0 0 8zm7-1v6m-3-3h6',
+  activity:'M3 12h4l3-8 4 16 3-8h4',
+  receipt:'M5 3h14v18l-3-2-4 2-4-2-3 2V3zm4 5h6m-6 4h6m-6 4h4',
   layers:'m12 3 9 5-9 5-9-5 9-5zm-9 9 9 5 9-5m-18 5 9 5 9-5',
   'plus-circle':'M12 8v8m-4-4h8m5 0a9 9 0 1 1-18 0 9 9 0 0 1 18 0z',
   messages:'M21 11.5a8.5 8.5 0 0 1-8.5 8.5 9 9 0 0 1-4-.9L3 21l1.9-5.5a9 9 0 0 1-.9-4A8.5 8.5 0 0 1 12.5 3h.5a8.5 8.5 0 0 1 8 8v.5zM8 11h8m-8 4h5',
@@ -831,11 +852,17 @@ function home(){
  <section class="home-summary" aria-label="ملخص الجمعيات">
  <div class="home-carousel" id="homeCarousel" aria-live="polite">${slides.map((x,i)=>`<article class="summary-slide ${x.tone} ${i===0?'active':''}" data-slide="${i}" aria-hidden="${i!==0}"><span class="summary-icon">${uiIcon(x.icon,27)}</span><span class="summary-copy"><strong>${x.title}</strong><b>${x.value}</b></span><span class="summary-index">0${i+1} / 03</span></article>`).join('')}</div>
  <div class="home-dots" role="group" aria-label="التنقل بين الملخص">${slides.map((x,i)=>`<button type="button" class="${i===0?'active':''}" data-action="home-slide" data-index="${i}" aria-label="عرض ${x.title}" aria-pressed="${i===0}"></button>`).join('')}</div></section>
+ <button class="home-create-card" data-go="create-group"><span class="create-card-icon">${uiIcon('plus-circle',27)}</span><strong>جمعية جديدة</strong><span class="create-card-arrow">${uiIcon('arrow',18)}</span></button>
  <section class="home-shortcuts" aria-label="الجمعيات">
  <button class="home-shortcut managed" data-action="home-managed"><span class="shortcut-icon">${uiIcon('users',29)}</span><strong>جمعيات أديرها</strong><span class="shortcut-arrow">${uiIcon('arrow',16)}</span></button>
  <button class="home-shortcut joined" data-action="home-member"><span class="shortcut-icon">${uiIcon('user-check',29)}</span><strong>جمعيات أشارك فيها</strong><span class="shortcut-arrow">${uiIcon('arrow',16)}</span></button></section>
- <button class="home-create-card" data-go="create-group"><span class="create-card-icon">${uiIcon('plus-circle',27)}</span><strong>جمعية جديدة</strong><span class="create-card-arrow">${uiIcon('arrow',18)}</span></button>
- <section class="latest-activity"><h2>أحدث النشاط</h2><div class="latest-activity-space" aria-hidden="true"></div></section>`);
+ <section class="latest-activity" aria-label="أحدث النشاط">
+ <h2><span class="activity-heading-icon">${uiIcon('activity',17)}</span> أحدث النشاط</h2>
+ <div class="activity-list">
+  <button class="activity-card" data-go="group-detail" data-id="G-2402"><span class="activity-icon invite">${uiIcon('user-plus',20)}</span><span class="activity-copy"><strong>دعوة مشاركة بواسطة مروان علي</strong><small>جمعية زملاء العمل <i>·</i> قبل ١٥ دقيقة</small></span><span class="activity-arrow">${uiIcon('arrow',16)}</span></button>
+  <button class="activity-card" data-go="group-detail" data-id="G-2401"><span class="activity-icon joined">${uiIcon('user-check',20)}</span><span class="activity-copy"><strong>وافقت سارة أحمد على انضمامك للجمعية</strong><small>جمعية الأهل <i>·</i> قبل ساعة</small></span><span class="activity-arrow">${uiIcon('arrow',16)}</span></button>
+  <button class="activity-card" data-go="receipts"><span class="activity-icon payment">${uiIcon('receipt',20)}</span><span class="activity-copy"><strong>تم اعتماد مساهمة سارة أحمد</strong><small>جمعية الأهل، الدورة الثالثة <i>·</i> أمس</small></span><span class="activity-arrow">${uiIcon('arrow',16)}</span></button>
+ </div></section>`);;
  const c=$('#homeCarousel');if(c){let x=0;c.addEventListener('pointerdown',e=>{x=e.clientX;c.setPointerCapture?.(e.pointerId)});c.addEventListener('pointerup',e=>{let d=e.clientX-x;if(Math.abs(d)>35)setHomeSlide(homeSlideIndex+(d<0?1:-1))})}
  homeSlideTimer=setInterval(()=>setHomeSlide(homeSlideIndex+1),5000);
 }
