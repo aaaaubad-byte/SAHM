@@ -1,5 +1,5 @@
 /* Sahm PWA — network-first documents, versioned offline assets, user-approved activation. */
-const CACHE_NAME = 'sahm-pwa-v8';
+const CACHE_NAME = 'sahm-pwa-v9';
 const APP_SHELL = [
   '/',
   '/Sahm_Preview_ROLE_SEPARATION.html',
