@@ -2315,6 +2315,80 @@ body {
   .home-screen .home-action-card { min-height:82px; }
 }
 
+
+/* Home layout refinement: compact chrome, floating complete navigation, equal action cards. */
+#topbar.topbar {
+  height:58px !important;
+  min-height:58px !important;
+  flex:0 0 58px !important;
+}
+#topbar .brand-mark {
+  width:34px !important;
+  height:34px !important;
+}
+#bottomnav.bottomnav {
+  position:relative !important;
+  align-self:center !important;
+  width:calc(100% - 24px) !important;
+  height:64px !important;
+  min-height:64px !important;
+  flex:0 0 64px !important;
+  margin:0 12px calc(8px + env(safe-area-inset-bottom)) !important;
+  padding:5px 8px !important;
+  border:1px solid rgba(211,222,239,.95) !important;
+  border-radius:17px !important;
+  overflow:visible !important;
+  background:#fff !important;
+  box-shadow:0 5px 18px rgba(19,37,70,.13),0 1px 3px rgba(19,37,70,.06) !important;
+  z-index:20 !important;
+}
+#bottomnav .navitem {
+  min-width:0 !important;
+  min-height:50px !important;
+  height:50px !important;
+  flex:1 1 0 !important;
+  padding:2px 0 !important;
+}
+#bottomnav .navitem .ni {
+  line-height:22px !important;
+  font-size:20px !important;
+}
+#bottomnav .navitem > span:last-child {
+  font-size:9px !important;
+  line-height:1.25 !important;
+}
+.home-screen .home-shortcuts.home-action-cards {
+  align-items:stretch !important;
+}
+.home-screen .home-action-card {
+  aspect-ratio:1.48/1 !important;
+  height:auto !important;
+  min-height:0 !important;
+  max-height:none !important;
+  padding:12px 14px !important;
+}
+@media(max-width:600px) {
+  #topbar.topbar {
+    height:56px !important;
+    min-height:56px !important;
+    flex-basis:56px !important;
+    padding-inline:15px !important;
+  }
+  #bottomnav.bottomnav {
+    width:calc(100% - 20px) !important;
+    margin-inline:10px !important;
+    margin-bottom:calc(6px + env(safe-area-inset-bottom)) !important;
+    height:62px !important;
+    min-height:62px !important;
+    flex-basis:62px !important;
+    padding:4px 7px !important;
+  }
+  #bottomnav .navitem {
+    height:50px !important;
+    min-height:50px !important;
+  }
+}
+
 </style></head>
 <body><noscript><main dir="rtl" style="font-family:Arial,sans-serif;padding:24px;color:#142f39"><h1>سهم</h1></main></noscript><div class="workspace"><div class="phone" id="app">
 <div id="topbar" class="topbar" style="display:none"></div><main id="screen" class="auth-screen">
