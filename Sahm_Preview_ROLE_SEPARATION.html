@@ -2251,6 +2251,70 @@ body {
   .home-screen .home-action-btn strong { font-size: 10px; }
 }
 
+
+/* Match create/join actions to the existing white group shortcut cards. */
+.home-screen .home-shortcuts.home-action-cards {
+  display:grid !important;
+  grid-template-columns:repeat(2,minmax(0,1fr));
+  gap:10px;
+  margin:0 0 14px !important;
+  padding:0;
+}
+.home-screen .home-action-card {
+  position:relative;
+  min-width:0;
+  min-height:92px;
+  aspect-ratio:auto;
+  display:flex;
+  flex-direction:column;
+  align-items:flex-start;
+  justify-content:center;
+  gap:10px;
+  padding:12px 14px;
+  background:#fff !important;
+  color:var(--ink) !important;
+  border:1px solid rgba(39,62,99,.07) !important;
+  border-radius:var(--radius-card) !important;
+  box-shadow:0 4px 10px rgba(27,48,84,.07),0 10px 20px rgba(27,48,84,.06) !important;
+  text-align:right;
+  transition:transform .18s ease,box-shadow .18s ease !important;
+}
+.home-screen .home-action-card .shortcut-icon {
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  width:29px;
+  height:29px;
+  color:#3158a8;
+}
+.home-screen .home-action-card.join .shortcut-icon { color:#8a642e; }
+.home-screen .home-action-card .shortcut-icon svg {
+  width:27px;
+  height:27px;
+  stroke-width:2;
+}
+.home-screen .home-action-card strong {
+  color:var(--ink);
+  font-size:11px;
+  font-weight:800;
+  white-space:nowrap;
+}
+.home-screen .home-action-card .shortcut-arrow {
+  left:12px;
+  right:auto;
+  top:50%;
+  bottom:auto;
+  transform:translateY(-50%) rotate(180deg);
+  color:#8997aa;
+}
+.home-screen .home-action-card:active {
+  transform:translateY(1px);
+  box-shadow:0 2px 5px rgba(27,48,84,.08) !important;
+}
+@media(max-height:700px) {
+  .home-screen .home-action-card { min-height:82px; }
+}
+
 </style></head>
 <body><noscript><main dir="rtl" style="font-family:Arial,sans-serif;padding:24px;color:#142f39"><h1>سهم</h1></main></noscript><div class="workspace"><div class="phone" id="app">
 <div id="topbar" class="topbar" style="display:none"></div><main id="screen" class="auth-screen">
@@ -2365,9 +2429,9 @@ function home(){
  <section class="home-shortcuts" aria-label="الجمعيات">
  <button class="home-shortcut managed" data-action="home-managed"><span class="shortcut-icon">${uiIcon('users',29)}</span><strong>جمعيات أديرها</strong><span class="shortcut-arrow">${uiIcon('arrow',16)}</span></button>
  <button class="home-shortcut joined" data-action="home-member"><span class="shortcut-icon">${uiIcon('user-check',29)}</span><strong>جمعيات أشارك فيها</strong><span class="shortcut-arrow">${uiIcon('arrow',16)}</span></button></section>
- <section class="home-actions" aria-label="إجراءات الجمعيات">
- <button class="home-action-btn" data-go="create-group"><span class="home-action-icon create">${uiIcon('plus-circle',31)}</span><strong>جمعية جديدة</strong></button>
- <button class="home-action-btn" data-go="join-group"><span class="home-action-icon join">${uiIcon('link',31)}</span><strong>انضمام لجمعية</strong></button>
+ <section class="home-shortcuts home-action-cards" aria-label="إجراءات الجمعيات">
+ <button class="home-shortcut home-action-card create" data-go="create-group"><span class="shortcut-icon">${uiIcon('plus-circle',29)}</span><strong>جمعية جديدة</strong><span class="shortcut-arrow">${uiIcon('arrow',16)}</span></button>
+ <button class="home-shortcut home-action-card join" data-go="join-group"><span class="shortcut-icon">${uiIcon('link',29)}</span><strong>انضمام لجمعية</strong><span class="shortcut-arrow">${uiIcon('arrow',16)}</span></button>
  </section>
  <section class="latest-activity" aria-label="أحدث النشاط">
  <h2><span class="activity-heading-icon">${uiIcon('activity',17)}</span> أحدث النشاط</h2>
