@@ -3305,7 +3305,7 @@ function setHomeSlide(index){const ss=document.querySelectorAll('#homeCarousel .
  '<div class="field create-field"><label for="cg-quorum">نصاب الحضور المطلوب (%)</label><input id="cg-quorum" name="quorum" type="number" min="1" max="100" value="66" step="1" inputmode="numeric" required></div>',
  '<div class="create-note"><span>'+uiIcon('users',16)+'</span><p>يُحتسب النصاب من عدد الأعضاء الحاضرين فعلياً، وليس من عدد الأسهم. لن يُفترض وجود حضور عند عدم تسجيله.</p></div></section>',
  '<section class="create-section create-live-summary" id="create-summary"><div class="create-section-head"><span class="create-section-icon">'+uiIcon('calculator',20)+'</span><div><h2>ملخص الجمعية المتوقع</h2><p>يتحدث تلقائياً عند تعديل الإعدادات</p></div></div>',
- '<div class="create-summary-grid"><div><span>عدد الأسهم</span><b id="cs-total">—</b></div><div><span>دورية القرعة</span><b id="cs-draw">شهرية</b></div><div><span>عدد الدفعات حتى القرعة الأولى</span><b id="cs-count">—</b></div><div><span>مساهمة السهم في الدورة</span><b id="cs-share">—</b></div></div>',
+ '<div class="create-summary-grid"><div><span>عدد الأسهم</span><b id="cs-total">—</b></div><div><span>دورية القرعة</span><b id="cs-draw">شهرية</b></div><div><span>عدد الدفعات حتى القرعة الأولى</span><b id="cs-count">—</b></div><div><span>مساهمة السهم في الدورة</span><b id="cs-share">—</b></div><div><span>المدة المقدرة للجمعية</span><b id="cs-duration">—</b></div></div>',
  '<div class="create-summary-total"><span>إجمالي التحصيل المتوقع من جميع الأسهم في الدورة الأولى</span><strong id="cs-grand">—</strong></div>',
  '<div class="create-summary-foot" id="cs-dates">أدخل المبالغ والتواريخ لعرض الحسابات والمواعيد.</div></section>',
  '<div class="create-submit-area"><button class="btn primary full create-submit" type="submit">'+uiIcon('plus-circle',17)+' إنشاء الجمعية وفتح المشاركة</button><p>ستُحفظ الإعدادات في سجل الجمعية، ويمكن مراجعتها قبل بدء نشاطها.</p></div>',
@@ -3326,7 +3326,7 @@ function setHomeSlide(index){const ss=document.querySelectorAll('#homeCarousel .
   const amount=num('paymentAmount'),total=num('total'),draw=val('drawPeriod'),pay=val('paymentPeriod');
   const drawDate=val('firstDraw'),payDate=val('firstPayment'),mode=val('calendarMode');
   let interval=draw==='daily'?1:draw==='weekly'?7:draw==='fortnightly'?14:draw==='monthly'?null:num('drawInterval');
-  const paymentInterval=pay==='daily'?1:pay==='weekly'?7:pay==='fortnightly'?14:pay==='monthly'?null:pay==='once'?0:num('paymentInterval');
+  const paymentInterval=pay==='daily'?1:pay==='weekly'?7:pay==='fortnightly'?14:pay==='monthly'?(mode==='fixed'?30:null):pay==='once'?0:num('paymentInterval');
   const parse=d=>{if(!d)return null;const a=d.split('-').map(Number);return new Date(a[0],a[1]-1,a[2],12)};
   const fmt=d=>d?d.toLocaleDateString('ar',{day:'numeric',month:'short',year:'numeric'}):'—';
   const addMonth=d=>{const day=d.getDate(),next=new Date(d.getFullYear(),d.getMonth()+1,1,12);next.setDate(Math.min(day,new Date(next.getFullYear(),next.getMonth()+1,0,12).getDate()));return next};
@@ -3344,6 +3344,9 @@ function setHomeSlide(index){const ss=document.querySelectorAll('#homeCarousel .
   const perShare=count*amount,grand=perShare*total;
   const put=(id,value)=>{const el=document.getElementById(id);if(el)el.textContent=value};
   put('cs-total',total?total+' سهم':'—');put('cs-draw',drawLabels[draw]||'—');put('cs-count',start&&end?(count+' دفعة'):'—');
+  let lastDraw=end?new Date(end):null;
+  if(lastDraw&&total>1){for(let i=1;i<total;i++){if(draw==='monthly')lastDraw=addMonth(lastDraw);else lastDraw.setDate(lastDraw.getDate()+(interval||1));}}
+  put('cs-duration',lastDraw&&end?(total+' قرعة · حتى '+fmt(lastDraw)):'—');
   put('cs-share',perShare?money(perShare,val('currency')):'—');put('cs-grand',grand?money(grand,val('currency')):'—');
   const dateText=start&&end?(start>=end?'موعد أول دفعة يجب أن يسبق موعد القرعة الأولى.':'أول دفعة: '+fmt(start)+' · أول قرعة: '+fmt(end)+' · '+(dates.length?'معاينة الدفعات: '+dates.join('، '):'لا توجد دفعات قبل القرعة.')):'أدخل موعد أول دفعة وموعد أول قرعة لعرض الجدول.';
   put('cs-dates',dateText);
@@ -3551,7 +3554,7 @@ document.addEventListener('submit',e=>{e.preventDefault();const f=e.target;if(f.
  if(managerShares<0||managerShares>maxPer||managerShares>total){toast('عدد أسهمك يتجاوز الحد المسموح');return}
  const amount=Number(d.paymentAmount),drawDate=d.firstDraw,payDate=d.firstPayment;
  if(!Number.isFinite(amount)||amount<=0||!drawDate||!payDate||payDate>=drawDate||!d.start||payDate<d.start){toast('تأكد من مبلغ الدفعة وأن موعدها يقع بعد بداية الجمعية وقبل القرعة الأولى');return}
- const newId='G-'+Date.now().toString().slice(-8);
+ const newId='G-'+Date.now();
  const drawLabels={daily:'يومية',weekly:'أسبوعية',fortnightly:'كل أسبوعين',monthly:'شهرية',custom:'مخصصة'};
  const payLabels={daily:'يومية',weekly:'أسبوعية',fortnightly:'كل أسبوعين',monthly:'شهرية',once:'دفعة واحدة',custom:'مخصصة'};
  const g={id:newId,name:d.name.trim(),description:d.description||'',currency:d.currency,share:amount,installmentAmount:amount,contributionPerCycle:amount,start:d.start,first:payDate,firstPayment:payDate,firstDraw:drawDate,period:payLabels[d.paymentPeriod]||'مخصصة',paymentPeriod:d.paymentPeriod,paymentInterval:d.paymentPeriod==='custom'?Number(d.paymentInterval):null,calendarMode:d.calendarMode,drawPeriod:d.drawPeriod,drawInterval:d.drawPeriod==='custom'?Number(d.drawInterval):null,drawPeriodLabel:drawLabels[d.drawPeriod]||'مخصصة',maxPer:maxPer,total:total,quorum:Number(d.quorum),role:'manager',myShares:managerShares,status:'PENDING_MEMBERS',members:managerShares?1:0,shares:managerShares,paid:0,cycle:0,admin:db.user.name,contrib:amount,publicLink:'sahm.app/join/'+newId,draws:[],rulesVersion:1};
