@@ -2761,6 +2761,45 @@ body {
   }
 }
 
+
+/* Corrected home shortcut alignment: centered content and textual arrow in the fourth quarter. */
+.home-screen .home-shortcuts > .home-shortcut {
+  position:relative !important;
+  display:flex !important;
+  flex-direction:column !important;
+  align-items:center !important;
+  justify-content:center !important;
+  gap:7px !important;
+  padding:12px !important;
+  text-align:center !important;
+}
+.home-screen .home-shortcuts > .home-shortcut .shortcut-icon,
+.home-screen .home-shortcuts > .home-shortcut strong {
+  position:static !important;
+  margin:0 !important;
+  transform:none !important;
+}
+.home-screen .home-shortcuts > .home-shortcut .shortcut-arrow {
+  position:absolute !important;
+  left:12px !important;
+  right:auto !important;
+  top:87.5% !important;
+  bottom:auto !important;
+  transform:translateY(-50%) !important;
+  display:flex !important;
+  align-items:center !important;
+  justify-content:center !important;
+  width:18px !important;
+  height:18px !important;
+  color:#496b9d !important;
+  font-family:Arial,sans-serif !important;
+  font-size:19px !important;
+  font-weight:500 !important;
+  line-height:1 !important;
+}
+.home-screen .home-shortcuts > .home-shortcut .shortcut-arrow svg {
+  display:none !important;
+}
 </style></head>
 <body><noscript><main dir="rtl" style="font-family:Arial,sans-serif;padding:24px;color:#142f39"><h1>سهم</h1></main></noscript><div class="workspace"><div class="phone" id="app">
 <div id="topbar" class="topbar" style="display:none"></div><main id="screen" class="auth-screen">
@@ -2873,18 +2912,18 @@ function home(){
  <div class="home-carousel" id="homeCarousel" aria-live="polite">${slides.map((x,i)=>`<article class="summary-slide ${x.tone} ${i===0?'active':''}" data-slide="${i}" aria-hidden="${i!==0}"><span class="summary-icon">${uiIcon(x.icon,27)}</span><span class="summary-copy"><strong>${x.title}</strong><b>${x.value}</b></span><span class="summary-index">0${i+1} / 03</span></article>`).join('')}</div>
  <div class="home-dots" role="group" aria-label="التنقل بين الملخص">${slides.map((x,i)=>`<button type="button" class="${i===0?'active':''}" data-action="home-slide" data-index="${i}" aria-label="عرض ${x.title}" aria-pressed="${i===0}"></button>`).join('')}</div></section>
  <section class="home-shortcuts" aria-label="الجمعيات">
- <button class="home-shortcut managed" data-action="home-managed"><span class="shortcut-icon">${uiIcon('users',29)}</span><strong>جمعيات أديرها</strong><span class="shortcut-arrow">${uiIcon('arrow',16)}</span></button>
- <button class="home-shortcut joined" data-action="home-member"><span class="shortcut-icon">${uiIcon('user-check',29)}</span><strong>جمعيات أشارك فيها</strong><span class="shortcut-arrow">${uiIcon('arrow',16)}</span></button></section>
+ <button class="home-shortcut managed" data-action="home-managed"><span class="shortcut-icon">${uiIcon('users',29)}</span><strong>جمعيات أديرها</strong><span class="shortcut-arrow">&gt;</span></button>
+ <button class="home-shortcut joined" data-action="home-member"><span class="shortcut-icon">${uiIcon('user-check',29)}</span><strong>جمعيات أشارك فيها</strong><span class="shortcut-arrow">&gt;</span></button></section>
  <section class="home-shortcuts home-action-cards" aria-label="إجراءات الجمعيات">
- <button class="home-shortcut home-action-card create" data-go="create-group"><span class="shortcut-icon">${uiIcon('plus-circle',29)}</span><strong>جمعية جديدة</strong><span class="shortcut-arrow">${uiIcon('arrow',16)}</span></button>
- <button class="home-shortcut home-action-card join" data-go="join-group"><span class="shortcut-icon">${uiIcon('link',29)}</span><strong>انضمام لجمعية</strong><span class="shortcut-arrow">${uiIcon('arrow',16)}</span></button>
+ <button class="home-shortcut home-action-card create" data-go="create-group"><span class="shortcut-icon">${uiIcon('plus-circle',29)}</span><strong>جمعية جديدة</strong><span class="shortcut-arrow">&gt;</span></button>
+ <button class="home-shortcut home-action-card join" data-go="join-group"><span class="shortcut-icon">${uiIcon('link',29)}</span><strong>انضمام لجمعية</strong><span class="shortcut-arrow">&gt;</span></button>
  </section>
  <section class="latest-activity" aria-label="أحدث النشاط">
  <h2><span class="activity-heading-icon">${uiIcon('activity',17)}</span> أحدث النشاط</h2>
  <div class="activity-list">
-  <button class="activity-card" data-go="group-detail" data-id="G-2402"><span class="activity-icon invite">${uiIcon('user-plus',20)}</span><span class="activity-copy"><strong>دعوة مشاركة بواسطة مروان علي</strong><small>جمعية زملاء العمل <i>·</i> قبل ١٥ دقيقة</small></span><span class="activity-arrow">${uiIcon('arrow',16)}</span></button>
-  <button class="activity-card" data-go="group-detail" data-id="G-2401"><span class="activity-icon joined">${uiIcon('user-check',20)}</span><span class="activity-copy"><strong>وافقت سارة أحمد على انضمامك للجمعية</strong><small>جمعية الأهل <i>·</i> قبل ساعة</small></span><span class="activity-arrow">${uiIcon('arrow',16)}</span></button>
-  <button class="activity-card" data-go="receipts"><span class="activity-icon payment">${uiIcon('receipt',20)}</span><span class="activity-copy"><strong>تم اعتماد مساهمة سارة أحمد</strong><small>جمعية الأهل، الدورة الثالثة <i>·</i> أمس</small></span><span class="activity-arrow">${uiIcon('arrow',16)}</span></button>
+  <button class="activity-card" data-go="group-detail" data-id="G-2402"><span class="activity-icon invite">${uiIcon('user-plus',20)}</span><span class="activity-copy"><strong>دعوة مشاركة بواسطة مروان علي</strong><small>جمعية زملاء العمل <i>·</i> قبل ١٥ دقيقة</small></span><span class="activity-arrow">&gt;</span></button>
+  <button class="activity-card" data-go="group-detail" data-id="G-2401"><span class="activity-icon joined">${uiIcon('user-check',20)}</span><span class="activity-copy"><strong>وافقت سارة أحمد على انضمامك للجمعية</strong><small>جمعية الأهل <i>·</i> قبل ساعة</small></span><span class="activity-arrow">&gt;</span></button>
+  <button class="activity-card" data-go="receipts"><span class="activity-icon payment">${uiIcon('receipt',20)}</span><span class="activity-copy"><strong>تم اعتماد مساهمة سارة أحمد</strong><small>جمعية الأهل، الدورة الثالثة <i>·</i> أمس</small></span><span class="activity-arrow">&gt;</span></button>
  </div></section>`);
  const c=$('#homeCarousel');if(c){let x=0;c.addEventListener('pointerdown',e=>{x=e.clientX;c.setPointerCapture?.(e.pointerId)});c.addEventListener('pointerup',e=>{let d=e.clientX-x;if(Math.abs(d)>35)setHomeSlide(homeSlideIndex+(d<0?1:-1))})}
  homeSlideTimer=setInterval(()=>setHomeSlide(homeSlideIndex+1),5000);
