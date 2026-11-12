@@ -1,0 +1,15 @@
+{
+  "id": "/Sahm_Preview_ROLE_SEPARATION.html",
+  "name": "سهم | إدارة الجمعيات التساهمية",
+  "short_name": "سهم",
+  "description": "منصة سهم لإدارة الجمعيات التساهمية",
+  "lang": "ar",
+  "dir": "rtl",
+  "start_url": "/Sahm_Preview_ROLE_SEPARATION.html",
+  "scope": "/",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#f3f6f5",
+  "theme_color": "#142f39",
+  "icons": [{"src":"/icons/sahm.svg","sizes":"any","type":"image/svg+xml","purpose":"any maskable"}]
+}
