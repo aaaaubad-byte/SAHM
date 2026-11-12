@@ -2423,6 +2423,49 @@ body {
   background:transparent !important;
 }
 
+
+
+/* Home shortcut cards: align each icon with its title and point navigation arrows left in RTL. */
+.home-screen .home-shortcuts > .home-shortcut {
+  flex-direction:row !important;
+  align-items:center !important;
+  justify-content:flex-start !important;
+  gap:9px !important;
+  text-align:right !important;
+}
+.home-screen .home-shortcuts > .home-shortcut .shortcut-icon {
+  flex:0 0 29px;
+  width:29px;
+  height:29px;
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+}
+.home-screen .home-shortcuts > .home-shortcut .shortcut-icon svg {
+  display:block;
+}
+.home-screen .home-shortcuts > .home-shortcut strong {
+  display:block;
+  line-height:1.35;
+  white-space:nowrap;
+}
+.home-screen .home-shortcuts > .home-shortcut .shortcut-arrow {
+  left:12px !important;
+  right:auto !important;
+  top:50% !important;
+  bottom:auto !important;
+  transform:translateY(-50%) !important;
+  color:#496b9d !important;
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+}
+.home-screen .home-shortcuts > .home-shortcut .shortcut-arrow svg {
+  width:17px;
+  height:17px;
+  stroke-width:2.1;
+}
+
 </style></head>
 <body><noscript><main dir="rtl" style="font-family:Arial,sans-serif;padding:24px;color:#142f39"><h1>سهم</h1></main></noscript><div class="workspace"><div class="phone" id="app">
 <div id="topbar" class="topbar" style="display:none"></div><main id="screen" class="auth-screen">
