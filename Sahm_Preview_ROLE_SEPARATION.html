@@ -364,6 +364,16 @@ html,body{height:100%;min-height:100%;overflow:hidden}
 .latest-activity{flex:1 1 auto;min-height:28px;overflow:hidden;padding:0 2px}.latest-activity h2{font-size:12px;font-weight:800;margin:0;color:var(--ink)}.latest-activity-space{height:100%}
 @media(max-height:700px){.home-screen{padding-top:9px!important}.home-welcome{margin-bottom:6px;min-height:27px}.home-welcome h1{font-size:18px}.home-summary{margin-bottom:8px}.home-summary-heading{margin-bottom:5px}.home-carousel{height:108px}.summary-slide{padding:13px 15px}.summary-icon{width:47px;height:47px}.summary-copy b{font-size:27px}.home-dots{height:14px;margin-top:3px}.home-shortcuts{gap:8px;margin-bottom:8px}.home-shortcut{aspect-ratio:1.55/1;padding:10px 12px;gap:7px}.shortcut-icon{width:36px;height:36px}.home-create-card{height:52px;min-height:52px;margin-bottom:8px}.create-card-icon{width:34px;height:34px}}
 @media(max-width:360px){.home-screen{padding-left:12px!important;padding-right:12px!important}.home-carousel{height:104px}.home-shortcut strong{font-size:10px}}
+
+/* Visibility correction: keep account actions and primary navigation legible and mounted. */
+#topbar.topbar{display:flex!important;visibility:visible!important;opacity:1!important;background:#fff!important;color:#172338!important;flex:0 0 70px!important;}
+#topbar .topbar-icons{width:100%;height:100%;display:flex!important;align-items:center;justify-content:space-between;direction:rtl;}
+#topbar .topbar-icons .icon-btn{display:grid!important;visibility:visible!important;opacity:1!important;background:#edf2ff!important;color:#3158d6!important;border:1px solid #dfe6fb!important;}
+#topbar .topbar-icons .icon-btn svg{display:block!important;visibility:visible!important;stroke:currentColor!important;}
+#bottomnav.bottomnav:not([hidden]){display:flex!important;visibility:visible!important;opacity:1!important;background:#fff!important;z-index:50!important;flex:0 0 78px!important;min-height:78px!important;}
+#bottomnav .navitem{display:flex!important;visibility:visible!important;opacity:1!important;color:#68778d;}
+#bottomnav .navitem.active{color:#3158d6;background:#edf2ff;}
+@media(max-width:600px){#topbar.topbar{flex-basis:calc(70px + env(safe-area-inset-top))!important;height:calc(70px + env(safe-area-inset-top))!important;min-height:calc(70px + env(safe-area-inset-top))!important;}#bottomnav.bottomnav:not([hidden]){flex-basis:calc(78px + env(safe-area-inset-bottom))!important;height:calc(78px + env(safe-area-inset-bottom))!important;min-height:calc(78px + env(safe-area-inset-bottom))!important;}}
 </style></head>
 <body><noscript><main dir="rtl" style="font-family:Arial,sans-serif;padding:24px;color:#142f39"><h1>سهم</h1></main></noscript><div class="workspace"><div class="phone" id="app">
 <div class="statusbar" aria-hidden="true"></div>
@@ -454,8 +464,8 @@ function header(title,sub=''){
  // Screen titles and back navigation now live exclusively in the fixed app bar.
  return ''
 }
-function renderTopbar(){const el=$('#topbar');el.style.display='flex';el.setAttribute('aria-label','الشريط العلوي');el.innerHTML=`<div class="topbar-icons"><button class="icon-btn" data-go="profile" aria-label="الحساب">${uiIcon('user',22)}</button><button class="icon-btn" data-go="notifications" aria-label="الإشعارات">${uiIcon('bell',22)}${db.unread?'<i class="dot"></i>':''}</button></div>`}
-function nav(active){const items=[['groups','groups','الجمعيات'],['home','home','الرئيسية'],['wall','messages','الدردشات']];const bar=$('#bottomnav');bar.hidden=false;bar.removeAttribute('hidden');bar.setAttribute('aria-hidden','false');bar.style.display='flex';bar.style.visibility='visible';$('#bottomnav').innerHTML=items.map(([s,i,t])=>`<button class="navitem ${active===s?'active':''}" data-go="${s}" aria-label="${t}" ${active===s?'aria-current="page"':''}><span class="ni">${uiIcon(i,23)}</span><span>${t}</span></button>`).join('')}
+function renderTopbar(){const el=$('#topbar');el.hidden=false;el.removeAttribute('hidden');el.style.setProperty('display','flex','important');el.style.visibility='visible';el.setAttribute('aria-label','الشريط العلوي');el.innerHTML=`<div class="topbar-icons"><button class="icon-btn" data-go="profile" aria-label="الحساب">${uiIcon('user',22)}</button><button class="icon-btn" data-go="notifications" aria-label="الإشعارات">${uiIcon('bell',22)}${db.unread?'<i class="dot"></i>':''}</button></div>`}
+function nav(active){const items=[['groups','groups','الجمعيات'],['home','home','الرئيسية'],['wall','messages','الدردشات']];const bar=$('#bottomnav');bar.hidden=false;bar.removeAttribute('hidden');bar.setAttribute('aria-hidden','false');bar.style.setProperty('display','flex','important');bar.style.visibility='visible';bar.style.opacity='1';bar.innerHTML=items.map(([s,i,t])=>`<button class="navitem ${active===s?'active':''}" data-go="${s}" aria-label="${t}" ${active===s?'aria-current="page"':''}><span class="ni">${uiIcon(i,23)}</span><span>${t}</span></button>`).join('')}
 function shell(title,active,html){renderTopbar();nav(active);const screen=$('#screen');screen.className='screen'+(active==='home'?' home-screen':'');screen.innerHTML=html;if(active!=='home'&&homeSlideTimer){clearInterval(homeSlideTimer);homeSlideTimer=null}}function auth(html){$('#topbar').style.display='none';$('#bottomnav').style.display='none';$('#screen').className='auth-screen';$('#screen').innerHTML=html}
 function groupCard(g){
  const manager=g.role==='manager',total=Number(g.total)||0,shares=Number(g.shares)||0,percent=total?Math.min(100,Math.round(shares/total*100)):0;
@@ -470,8 +480,7 @@ function home(){
  const slides=[{title:'جمعيات تديرها',value:managed.length,icon:'users',tone:'blue'},{title:'جمعيات أشارك فيها',value:joined.length,icon:'user-check',tone:'gold'},{title:'عدد الجمعيات',value:db.groups.length,icon:'layers',tone:'dark'}];
  if(homeSlideTimer){clearInterval(homeSlideTimer);homeSlideTimer=null}homeSlideIndex=0;
  shell('الرئيسية','home',`
- <section class="home-welcome"><h1>مرحباً، ${escapeHtml(db.user.name.split(' ')[0])}</h1></section>
- <section class="home-summary" aria-label="ملخص حسابك"><div class="home-summary-heading">ملخص حسابك</div>
+ <section class="home-summary" aria-label="ملخص الجمعيات">
  <div class="home-carousel" id="homeCarousel" aria-live="polite">${slides.map((x,i)=>`<article class="summary-slide ${x.tone} ${i===0?'active':''}" data-slide="${i}" aria-hidden="${i!==0}"><span class="summary-icon">${uiIcon(x.icon,27)}</span><span class="summary-copy"><strong>${x.title}</strong><b>${x.value}</b></span><span class="summary-index">0${i+1} / 03</span></article>`).join('')}</div>
  <div class="home-dots" role="group" aria-label="التنقل بين الملخص">${slides.map((x,i)=>`<button type="button" class="${i===0?'active':''}" data-action="home-slide" data-index="${i}" aria-label="عرض ${x.title}" aria-pressed="${i===0}"></button>`).join('')}</div></section>
  <section class="home-shortcuts" aria-label="الجمعيات">
