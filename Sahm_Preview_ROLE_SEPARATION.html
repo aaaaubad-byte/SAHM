@@ -815,7 +815,7 @@ button {
 }
 .toast {
   bottom: 88px;
-  border-radius: var(--radius-control);
+  border-radius: 14px;
   padding: 12px 16px;
   font-size: 11px;
   max-width: calc(100% - 36px);
@@ -1219,7 +1219,7 @@ textarea {
 }
 .member-summary>div {
   padding: 10px;
-  border-radius: var(--radius-control);
+  border-radius: 14px;
   gap: 4px;
 }
 .toolbar {
@@ -1776,10 +1776,6 @@ textarea {
   .summary-copy b {
     font-size: 30px !important;
   }
-  .home-shortcut .shortcut-icon {
-    width: 42px !important;
-    height: 42px !important;
-  }
   .home-create-card {
     height: 54px !important;
     min-height: 54px !important;
@@ -2190,200 +2186,36 @@ body {
 }
 
 
-/* Sahm visual system v2: direct line icons and restrained, consistent corners. */
-:root {
-  --radius-card: 12px;
-  --radius-control: 10px;
-  --radius-small: 8px;
-  --radius: var(--radius-card);
-}
 
-/* Icon glyphs sit directly on the surface; remove decorative icon containers. */
-.summary-icon,
-.shortcut-icon,
-.home-shortcut.managed .shortcut-icon,
-.home-shortcut.joined .shortcut-icon,
-.activity-heading-icon,
-.activity-icon,
-.create-card-icon,
-.icon-btn,
-#topbar .topbar-icons .icon-btn {
-  width: auto !important;
-  height: auto !important;
-  min-width: 0 !important;
-  min-height: 0 !important;
-  flex: 0 0 auto;
-  padding: 0 !important;
-  border: 0 !important;
-  border-radius: var(--radius-card);
-  background: transparent !important;
-  box-shadow: none !important;
-  filter: none !important;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-}
-
-/* Keep practical touch targets on icon buttons without drawing a bubble. */
-.icon-btn,
-#topbar .topbar-icons .icon-btn {
-  width: 40px !important;
-  height: 40px !important;
-  min-width: 40px !important;
-  min-height: 40px !important;
-  color: inherit;
-}
-
-.summary-icon svg,
-.shortcut-icon svg,
-.activity-heading-icon svg,
-.activity-icon svg,
-.create-card-icon svg,
-.icon-btn svg,
-#topbar .topbar-icons .icon-btn svg {
-  display: block;
-  width: 27px;
-  height: 27px;
-  fill: none !important;
-  stroke: currentColor !important;
-  stroke-width: 1.95 !important;
-  stroke-linecap: round;
-  stroke-linejoin: round;
-  filter: none !important;
-}
-.activity-heading-icon svg { width: 22px; height: 22px; }
-.activity-icon svg { width: 24px; height: 24px; }
-.icon-btn svg,
-#topbar .topbar-icons .icon-btn svg { width: 21px; height: 21px; }
-
-/* Unified corner scale: cards 12px, controls 10px, compact labels 8px. */
-.card,
-.auth-card,
-.group-card,
-.manager-card,
-.member-card,
-.manager-panel,
-.member-panel,
-.vote-panel,
-.activity-card,
-.home-create-card,
-.modal-card,
-.panel-card,
-.receipt-card,
-.settings-card {
-  border-radius: var(--radius-card);
-}
-button,
-.btn,
-.field input,
-.field select,
-.field textarea,
-.searchbox,
-input,
-select,
-textarea,
-.form-control {
-  border-radius: var(--radius-control);
-}
-.pill,
-.badge,
-.status-badge,
-.tag,
-.chip {
-  border-radius: var(--radius-small);
-}
-
-/* Keep the floating navigation shape subtle and preserve its existing layout. */
-#bottomnav {
-  border-radius: var(--radius-control);
-}
-#bottomnav .navitem,
-#bottomnav .navitem.active {
-  border-radius: 0;
-  background: transparent !important;
-  box-shadow: none !important;
-}
-#bottomnav .navitem .ni svg {
-  stroke-width: 1.95;
-}
-#bottomnav .navitem.active .ni svg {
-  stroke-width: 2.2;
-}
-
-
-/* Unified icon treatment: line artwork sits directly on the surface. */
-.icon-btn {
-  width: 38px;
-  height: 38px;
-  min-width: 38px;
-  padding: 0;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  background: transparent;
-  border: 0;
-  border-radius: 0;
-  box-shadow: none;
-  color: var(--primary);
-}
-.icon-btn svg {
-  width: 23px;
-  height: 23px;
-  stroke: currentColor;
-  stroke-width: 2;
-  fill: none;
-  stroke-linecap: round;
-  stroke-linejoin: round;
-}
-.summary-icon,
-.shortcut-icon,
-.create-card-icon,
-.activity-heading-icon,
-.activity-icon,
-.receipt-mark {
-  width: auto;
-  height: auto;
-  min-width: 0;
-  flex: 0 0 auto;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  padding: 0;
-  border: 0;
-  border-radius: 0;
-  background: transparent;
-  box-shadow: none;
-  line-height: 1;
-}
-.summary-icon { color: #fff; }
-.summary-icon svg { width: 28px; height: 28px; stroke-width: 2; }
-.shortcut-icon svg { width: 29px; height: 29px; stroke-width: 2; }
-.home-shortcut.managed .shortcut-icon { color: #244da9; }
-.home-shortcut.joined .shortcut-icon { color: #87591e; }
-.create-card-icon { color: #a85f37; }
-.create-card-icon svg { width: 27px; height: 27px; stroke-width: 2; }
-.activity-heading-icon { color: var(--primary); }
-.activity-heading-icon svg { width: 20px; height: 20px; stroke-width: 2; }
-.activity-icon { color: var(--primary); }
-.activity-icon.invite { color: #3158d6; }
-.activity-icon.joined { color: #3d8068; }
-.activity-icon.payment { color: #a67532; }
-.activity-icon svg { width: 22px; height: 22px; stroke-width: 2; }
-.receipt-mark { color: var(--primary); font-size: 22px; margin: auto; }
-.manager-action span,
-.member-action span {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  color: var(--primary);
-  line-height: 1;
-}
-.manager-action span svg,
-.member-action span svg {
-  width: 23px;
-  height: 23px;
-  stroke-width: 2;
-}
+/* Sahm design refinement: line icons without decorative containers. */
+.icon-btn { width:40px;height:40px;min-width:40px;min-height:40px;padding:0;display:inline-flex;align-items:center;justify-content:center;background:transparent;border:0;border-radius:0;box-shadow:none;color:var(--primary); }
+.icon-btn svg { width:23px;height:23px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round; }
+.summary-icon,.shortcut-icon,.create-card-icon,.activity-heading-icon,.activity-icon,.receipt-mark { width:auto;height:auto;min-width:0;min-height:0;flex:0 0 auto;display:inline-flex;align-items:center;justify-content:center;padding:0;border:0;border-radius:0;background:transparent;box-shadow:none;line-height:1; }
+.summary-icon { color:#fff; }
+.summary-icon svg { width:28px;height:28px;stroke-width:2; }
+.shortcut-icon svg { width:29px;height:29px;stroke-width:2; }
+.home-shortcut.managed .shortcut-icon { color:#244da9; }
+.home-shortcut.joined .shortcut-icon { color:#87591e; }
+.create-card-icon { color:#a85f37; }
+.create-card-icon svg { width:27px;height:27px;stroke-width:2; }
+.activity-heading-icon { color:var(--primary); }
+.activity-heading-icon svg { width:20px;height:20px;stroke-width:2; }
+.activity-icon { color:var(--primary); }
+.activity-icon.invite { color:#3158d6; }
+.activity-icon.joined { color:#3d8068; }
+.activity-icon.payment { color:#a67532; }
+.activity-icon svg { width:22px;height:22px;stroke-width:2; }
+.receipt-mark { color:var(--primary);font-size:22px;margin:auto; }
+.manager-action span,.member-action span { display:inline-flex;align-items:center;justify-content:center;color:var(--primary);line-height:1; }
+.manager-action span svg,.member-action span svg { width:23px;height:23px;stroke-width:2; }
+/* One corner scale for all primary surfaces and controls. */
+.card,.group-card,.manager-panel,.member-panel,.activity-card,.home-shortcut,.home-create-card,.summary-slide,.home-carousel,.receipt,.auth-card,.dialog,.payment-progress { border-radius:var(--radius-card); }
+.stat,.manager-action,.member-action,.btn,.field input,.field select,.field textarea,.searchbox,.segmented,.avatar,.brand-mark { border-radius:var(--radius-control); }
+.pill,.role-chip,.progress { border-radius:var(--radius-small); }
+#bottomnav.bottomnav:not([hidden]) { border-radius:var(--radius-card); }
+#bottomnav .navitem,#bottomnav .navitem.active { border-radius:0;background:transparent;box-shadow:none; }
+#bottomnav .navitem .ni svg { stroke-width:1.95; }
+#bottomnav .navitem.active .ni svg { stroke-width:2.2; }
 </style></head>
 <body><noscript><main dir="rtl" style="font-family:Arial,sans-serif;padding:24px;color:#142f39"><h1>سهم</h1></main></noscript><div class="workspace"><div class="phone" id="app">
 <div class="statusbar" aria-hidden="true"></div>
