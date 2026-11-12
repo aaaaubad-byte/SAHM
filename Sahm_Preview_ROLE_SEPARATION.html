@@ -2389,6 +2389,40 @@ body {
   }
 }
 
+
+/* Restore the bottom navigation as a normal, full-width app footer. */
+#bottomnav.bottomnav {
+  position:relative !important;
+  inset:auto !important;
+  align-self:stretch !important;
+  display:flex !important;
+  width:100% !important;
+  height:auto !important;
+  min-height:78px !important;
+  flex:0 0 auto !important;
+  margin:0 !important;
+  padding:8px 8px calc(8px + env(safe-area-inset-bottom)) !important;
+  gap:4px !important;
+  border:0 !important;
+  border-top:1px solid var(--line) !important;
+  border-radius:0 !important;
+  background:#fff !important;
+  box-shadow:0 -8px 22px rgba(24,41,75,.035) !important;
+  overflow:visible !important;
+  z-index:10 !important;
+}
+#bottomnav .navitem {
+  height:auto !important;
+  min-height:54px !important;
+  flex:1 1 0 !important;
+  padding:0 !important;
+  border-radius:0 !important;
+  background:transparent !important;
+}
+#bottomnav .navitem.active {
+  background:transparent !important;
+}
+
 </style></head>
 <body><noscript><main dir="rtl" style="font-family:Arial,sans-serif;padding:24px;color:#142f39"><h1>سهم</h1></main></noscript><div class="workspace"><div class="phone" id="app">
 <div id="topbar" class="topbar" style="display:none"></div><main id="screen" class="auth-screen">
