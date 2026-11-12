@@ -767,6 +767,129 @@ html,body{height:100%;min-height:100%;overflow:hidden}
 }
 .home-create-card strong{color:#68452f!important}
 .create-card-arrow{color:#a36d4d!important}
+
+/*
+ * Bottom navigation structural fix.
+ * The previous stylesheet contained several competing absolute/relative/flex
+ * declarations and counted the device safe-area twice. Keep one flex layout:
+ * header + independently scrolling content + non-shrinking navigation.
+ */
+html,body{
+  width:100%;
+  height:100%;
+  min-height:100%;
+  margin:0;
+  overflow:hidden!important;
+}
+.workspace{
+  width:100%;
+  height:100vh;
+  min-height:0!important;
+  padding:0;
+  overflow:hidden!important;
+}
+@supports(height:100dvh){
+  .workspace{height:100dvh}
+}
+#app.phone{
+  position:relative!important;
+  display:flex!important;
+  flex-direction:column!important;
+  width:min(100%,480px);
+  height:100%;
+  min-height:0!important;
+  max-height:none!important;
+  margin:0 auto;
+  overflow:hidden!important;
+  box-sizing:border-box!important;
+}
+#topbar.topbar{
+  position:relative!important;
+  flex:0 0 calc(70px + env(safe-area-inset-top,0px))!important;
+  height:calc(70px + env(safe-area-inset-top,0px))!important;
+  min-height:calc(70px + env(safe-area-inset-top,0px))!important;
+  max-height:calc(70px + env(safe-area-inset-top,0px))!important;
+  padding-top:env(safe-area-inset-top,0px)!important;
+  box-sizing:border-box!important;
+  z-index:20!important;
+}
+#screen.screen{
+  position:relative!important;
+  display:block!important;
+  flex:1 1 0px!important;
+  width:100%!important;
+  height:0!important;
+  min-height:0!important;
+  max-height:none!important;
+  margin:0!important;
+  overflow-x:hidden!important;
+  overflow-y:auto!important;
+  overscroll-behavior:contain;
+  -webkit-overflow-scrolling:touch;
+  padding-bottom:22px!important;
+  box-sizing:border-box!important;
+}
+#bottomnav.bottomnav:not([hidden]){
+  position:relative!important;
+  inset:auto!important;
+  display:flex!important;
+  flex:0 0 calc(68px + env(safe-area-inset-bottom,0px))!important;
+  width:100%!important;
+  height:calc(68px + env(safe-area-inset-bottom,0px))!important;
+  min-height:calc(68px + env(safe-area-inset-bottom,0px))!important;
+  max-height:calc(68px + env(safe-area-inset-bottom,0px))!important;
+  flex-shrink:0!important;
+  margin:0!important;
+  padding:5px 8px env(safe-area-inset-bottom,0px)!important;
+  box-sizing:border-box!important;
+  align-items:center!important;
+  justify-content:space-around!important;
+  gap:4px!important;
+  overflow:visible!important;
+  visibility:visible!important;
+  opacity:1!important;
+  z-index:40!important;
+  border:0!important;
+  border-top:1px solid #e2e8f1!important;
+  border-radius:0!important;
+  background:#fff!important;
+  box-shadow:0 -4px 14px rgba(24,41,75,.055)!important;
+}
+#bottomnav .navitem{
+  display:flex!important;
+  flex:1 1 0!important;
+  width:0!important;
+  min-width:0!important;
+  min-height:52px!important;
+  height:100%!important;
+  align-items:center!important;
+  justify-content:center!important;
+  overflow:visible!important;
+}
+#bottomnav[hidden]{display:none!important}
+@media(max-width:600px){
+  .workspace{
+    position:fixed!important;
+    inset:0!important;
+    width:100%!important;
+    height:100vh!important;
+    min-height:0!important;
+    padding:0!important;
+  }
+  @supports(height:100dvh){
+    .workspace{height:100dvh!important}
+  }
+  #app.phone{
+    width:100%!important;
+    height:100%!important;
+    min-height:0!important;
+    max-height:none!important;
+    border:0!important;
+    border-radius:0!important;
+    margin:0!important;
+  }
+}
+
 </style></head>
 <body><noscript><main dir="rtl" style="font-family:Arial,sans-serif;padding:24px;color:#142f39"><h1>سهم</h1></main></noscript><div class="workspace"><div class="phone" id="app">
 <div class="statusbar" aria-hidden="true"></div>
