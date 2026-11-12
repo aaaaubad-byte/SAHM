@@ -2466,6 +2466,51 @@ body {
   stroke-width:2.1;
 }
 
+
+/* Home shortcut cards: centered icon/title with a simple lower marker. */
+.home-screen .home-shortcuts > .home-shortcut {
+  flex-direction:column !important;
+  align-items:center !important;
+  justify-content:center !important;
+  gap:7px !important;
+  padding:12px 12px 27px !important;
+  text-align:center !important;
+}
+.home-screen .home-shortcuts > .home-shortcut .shortcut-icon {
+  width:30px !important;
+  height:30px !important;
+  flex:0 0 30px !important;
+  display:inline-flex !important;
+  align-items:center !important;
+  justify-content:center !important;
+  margin:0 !important;
+}
+.home-screen .home-shortcuts > .home-shortcut strong {
+  display:block !important;
+  width:100% !important;
+  text-align:center !important;
+  line-height:1.4 !important;
+}
+.home-screen .home-shortcuts > .home-shortcut .shortcut-arrow {
+  position:absolute !important;
+  left:50% !important;
+  right:auto !important;
+  top:auto !important;
+  bottom:8px !important;
+  transform:translateX(-50%) !important;
+  display:block !important;
+  color:#496b9d !important;
+  font-size:18px !important;
+  line-height:1 !important;
+  font-weight:700 !important;
+}
+.home-screen .home-shortcuts > .home-shortcut .shortcut-arrow svg {
+  display:none !important;
+}
+.home-screen .home-shortcuts > .home-shortcut .shortcut-arrow::before {
+  content:">";
+  display:block;
+}
 </style></head>
 <body><noscript><main dir="rtl" style="font-family:Arial,sans-serif;padding:24px;color:#142f39"><h1>سهم</h1></main></noscript><div class="workspace"><div class="phone" id="app">
 <div id="topbar" class="topbar" style="display:none"></div><main id="screen" class="auth-screen">
