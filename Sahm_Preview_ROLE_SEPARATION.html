@@ -2662,6 +2662,105 @@ body {
   }
 }
 
+
+
+/* Home cards: place a real left-pointing chevron in a consistent side rail. */
+.home-screen .home-shortcuts > .home-shortcut {
+  position:relative !important;
+}
+.home-screen .home-shortcuts > .home-shortcut .shortcut-arrow {
+  position:absolute !important;
+  left:10px !important;
+  right:auto !important;
+  top:50% !important;
+  bottom:auto !important;
+  width:26px !important;
+  height:26px !important;
+  display:inline-flex !important;
+  align-items:center !important;
+  justify-content:center !important;
+  transform:translateY(-50%) !important;
+  border-radius:50% !important;
+  background:#f0f4fb !important;
+  color:#496b9d !important;
+  font-size:0 !important;
+  line-height:1 !important;
+  box-shadow:none !important;
+}
+.home-screen .home-shortcuts > .home-shortcut .shortcut-arrow::before {
+  content:none !important;
+  display:none !important;
+}
+.home-screen .home-shortcuts > .home-shortcut .shortcut-arrow svg {
+  display:block !important;
+  width:15px !important;
+  height:15px !important;
+  stroke:currentColor !important;
+  stroke-width:2.1 !important;
+  transform:none !important;
+}
+.home-screen .home-shortcuts > .home-shortcut {
+  padding-left:42px !important;
+}
+.home-screen .home-shortcuts > .home-shortcut .shortcut-icon {
+  flex-shrink:0 !important;
+}
+
+/* Give the activity feed a real bounded scroll viewport; keep its heading fixed. */
+#screen.home-screen {
+  min-height:0 !important;
+  overflow:hidden !important;
+}
+.home-screen .latest-activity {
+  display:flex !important;
+  flex:1 1 0 !important;
+  flex-direction:column !important;
+  justify-content:flex-start !important;
+  min-height:0 !important;
+  max-height:100% !important;
+  overflow:hidden !important;
+}
+.home-screen .latest-activity h2 {
+  flex:0 0 auto !important;
+  margin-bottom:9px !important;
+}
+.home-screen .latest-activity .activity-list {
+  display:flex !important;
+  flex:0 1 190px !important;
+  height:190px !important;
+  min-height:110px !important;
+  max-height:28vh !important;
+  flex-direction:column !important;
+  gap:8px !important;
+  overflow-x:hidden !important;
+  overflow-y:auto !important;
+  overscroll-behavior-y:contain !important;
+  -webkit-overflow-scrolling:touch !important;
+  touch-action:pan-y !important;
+  scrollbar-width:thin !important;
+  scrollbar-color:#aebbd0 transparent !important;
+  padding:1px 3px 8px !important;
+}
+.home-screen .latest-activity .activity-card {
+  flex:0 0 auto !important;
+  min-height:66px !important;
+}
+.home-screen .latest-activity .activity-list::-webkit-scrollbar {
+  width:4px !important;
+}
+.home-screen .latest-activity .activity-list::-webkit-scrollbar-thumb {
+  background:#aebbd0 !important;
+  border-radius:8px !important;
+}
+@media(max-height:700px) {
+  .home-screen .latest-activity .activity-list {
+    height:150px !important;
+    max-height:25vh !important;
+    min-height:100px !important;
+    flex-basis:150px !important;
+  }
+}
+
 </style></head>
 <body><noscript><main dir="rtl" style="font-family:Arial,sans-serif;padding:24px;color:#142f39"><h1>سهم</h1></main></noscript><div class="workspace"><div class="phone" id="app">
 <div id="topbar" class="topbar" style="display:none"></div><main id="screen" class="auth-screen">
