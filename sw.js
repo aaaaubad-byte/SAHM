@@ -1,5 +1,5 @@
-/* Sahm PWA — network-first documents, versioned offline assets, user-approved activation. */
-const CACHE_NAME = 'sahm-pwa-v17';
+/* Sahm PWA — automatically activate new builds; always prefer fresh app documents. */
+const CACHE_NAME = 'sahm-pwa-v18';
 const APP_SHELL = [
   '/',
   '/Sahm_Preview_ROLE_SEPARATION.html',
@@ -11,14 +11,12 @@ self.addEventListener('install', event => {
   event.waitUntil(
     caches.open(CACHE_NAME)
       .then(cache => cache.addAll(APP_SHELL))
-      .then(() => undefined)
+      .then(() => self.skipWaiting())
   );
 });
 
 self.addEventListener('message', event => {
-  if (event.data && event.data.type === 'SKIP_WAITING') {
-    self.skipWaiting();
-  }
+  if (event.data && event.data.type === 'SKIP_WAITING') self.skipWaiting();
 });
 
 self.addEventListener('activate', event => {
@@ -35,7 +33,6 @@ self.addEventListener('activate', event => {
 self.addEventListener('fetch', event => {
   const request = event.request;
   if (request.method !== 'GET') return;
-
   const url = new URL(request.url);
   if (url.origin !== self.location.origin) return;
 
@@ -43,11 +40,11 @@ self.addEventListener('fetch', event => {
     event.respondWith((async () => {
       const cache = await caches.open(CACHE_NAME);
       try {
-        const fresh = await fetch(request, { cache: 'no-store' });
+        const fresh = await fetch(request, { cache: 'no-store', redirect: 'follow' });
         if (fresh && fresh.ok) await cache.put(request, fresh.clone());
         return fresh;
       } catch (error) {
-        return (await cache.match(request)) ||
+        return (await cache.match(request, { ignoreSearch: true })) ||
           (await cache.match('/Sahm_Preview_ROLE_SEPARATION.html')) ||
           (await cache.match('/'));
       }
@@ -59,7 +56,6 @@ self.addEventListener('fetch', event => {
     const cache = await caches.open(CACHE_NAME);
     const cached = await cache.match(request);
     if (cached) return cached;
-
     const response = await fetch(request);
     if (response && response.ok) await cache.put(request, response.clone());
     return response;
