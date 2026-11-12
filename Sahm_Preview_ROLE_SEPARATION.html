@@ -415,6 +415,31 @@ html,body{height:100%;min-height:100%;overflow:hidden}
   margin:0 13px calc(10px + env(safe-area-inset-bottom))!important;
  }
 }
+
+/* Anchor the floating navigation to the app frame, not the flex flow. */
+#app.phone{position:relative!important;overflow:hidden!important;}
+#bottomnav.bottomnav:not([hidden]){
+ position:absolute!important;
+ left:13px!important;right:13px!important;
+ bottom:calc(10px + env(safe-area-inset-bottom))!important;
+ width:auto!important;
+ height:70px!important;min-height:70px!important;max-height:70px!important;
+ flex:none!important;flex-basis:70px!important;
+ margin:0!important;
+ padding:6px 8px!important;
+ box-sizing:border-box!important;
+ z-index:60!important;
+ display:flex!important;align-items:center!important;justify-content:space-around!important;
+ border-radius:23px!important;
+ overflow:visible!important;
+}
+#screen.screen{padding-bottom:calc(94px + env(safe-area-inset-bottom))!important;}
+@media(max-width:600px){
+ #bottomnav.bottomnav:not([hidden]){
+  left:13px!important;right:13px!important;bottom:calc(10px + env(safe-area-inset-bottom))!important;
+  height:70px!important;min-height:70px!important;max-height:70px!important;
+ }
+}
 </style></head>
 <body><noscript><main dir="rtl" style="font-family:Arial,sans-serif;padding:24px;color:#142f39"><h1>سهم</h1></main></noscript><div class="workspace"><div class="phone" id="app">
 <div class="statusbar" aria-hidden="true"></div>
