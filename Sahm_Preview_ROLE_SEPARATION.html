@@ -261,12 +261,14 @@ button:focus-visible,a:focus-visible,input:focus-visible,select:focus-visible,te
  .member-summary b{font-size:16px}
 }
 
+.sahm-update-banner{position:absolute;z-index:60;bottom:82px;left:12px;right:12px;display:flex;align-items:center;justify-content:space-between;gap:10px;padding:10px 12px;border-radius:15px;background:#173941;color:#fff;box-shadow:0 8px 26px #102e3650;font-size:11px}.sahm-update-banner[hidden]{display:none}.sahm-update-banner button{flex:none;border-radius:10px;padding:9px 13px;background:#e7b85e;color:#173941;font-weight:800;font-size:11px}
 /* Arabic typography: refined, readable, and consistent across every control. */
 html,body,button,input,select,textarea{font-family:'IBM Plex Sans Arabic',system-ui,-apple-system,'Segoe UI',Tahoma,Arial,sans-serif}
 .page-title,.hero-total,.hero-num,.brand,.btn,.navitem{font-family:'IBM Plex Sans Arabic',system-ui,sans-serif}
 </style></head>
 <body><noscript><main dir="rtl" style="font-family:Arial,sans-serif;padding:24px;color:#142f39"><h1>سهم</h1></main></noscript><div class="workspace"><div class="phone" id="app">
 <div class="statusbar" aria-hidden="true"></div>
+<div id="sahm-update-banner" class="sahm-update-banner" hidden role="status" aria-live="polite"><span>يتوفر إصدار جديد من سهم</span><button id="sahm-apply-update" type="button">يوجد تحديث</button></div>
 <div id="topbar" class="topbar" style="display:none"></div><main id="screen" class="auth-screen">
 <div class="auth-brand"><div class="brand-mark">س</div><h1>سهم</h1></div>
 
@@ -550,9 +552,22 @@ history.replaceState({sahm:true,depth:0},'',location.href);
 try{render()}catch(err){document.querySelector('#screen').className='auth-screen';document.querySelector('#screen').innerHTML='<div style="background:white;color:#142f39;border-radius:18px;padding:20px;margin-top:35px"><h2>تعذر تشغيل المعاينة</h2><p>حدث خطأ أثناء تشغيل الواجهة. أعد فتح الملف في متصفح Chrome.</p><small>'+String(err&&err.message||err)+'</small></div>';console.error(err)}
 </script>
 <script>
-/* Sahm PWA: check for releases and refresh open app windows automatically. */
+/* Sahm PWA: announce updates in the open app and apply only on user action. */
 if ('serviceWorker' in navigator) {
   let sahmReloadingForUpdate = false;
+  let sahmRegistration = null;
+  const updateBanner = () => document.getElementById('sahm-update-banner');
+  const showUpdateAvailable = () => {
+    const banner = updateBanner();
+    if (banner && navigator.serviceWorker.controller) banner.hidden = false;
+  };
+  const watchWorker = worker => {
+    if (!worker) return;
+    if (worker.state === 'installed' && navigator.serviceWorker.controller) showUpdateAvailable();
+    worker.addEventListener('statechange', () => {
+      if (worker.state === 'installed' && navigator.serviceWorker.controller) showUpdateAvailable();
+    });
+  };
   navigator.serviceWorker.addEventListener('controllerchange', () => {
     if (sahmReloadingForUpdate) return;
     sahmReloadingForUpdate = true;
@@ -560,13 +575,41 @@ if ('serviceWorker' in navigator) {
   });
   window.addEventListener('load', async () => {
     try {
-      const registration = await navigator.serviceWorker.register('/sw.js', {
+      sahmRegistration = await navigator.serviceWorker.register('/sw.js', {
         scope: '/',
         updateViaCache: 'none'
       });
-      await registration.update();
+      if (sahmRegistration.waiting && navigator.serviceWorker.controller) showUpdateAvailable();
+      watchWorker(sahmRegistration.installing);
+      sahmRegistration.addEventListener('updatefound', () => watchWorker(sahmRegistration.installing));
+      await sahmRegistration.update();
+      if (sahmRegistration.waiting && navigator.serviceWorker.controller) showUpdateAvailable();
+      window.setInterval(async () => {
+        if (document.visibilityState === 'visible' && sahmRegistration) {
+          try { await sahmRegistration.update(); } catch (error) { console.warn('تعذر فحص تحديث سهم:', error); }
+        }
+      }, 60000);
     } catch (error) {
       console.warn('تعذر التحقق من تحديث سهم:', error);
+    }
+  });
+  window.addEventListener('focus', () => {
+    if (sahmRegistration) sahmRegistration.update().catch(() => {});
+  });
+  document.addEventListener('visibilitychange', () => {
+    if (document.visibilityState === 'visible' && sahmRegistration) sahmRegistration.update().catch(() => {});
+  });
+  document.addEventListener('click', event => {
+    if (event.target.closest('#sahm-apply-update')) {
+      const waiting = sahmRegistration && sahmRegistration.waiting;
+      if (!waiting) {
+        if (sahmRegistration) sahmRegistration.update().catch(() => {});
+        return;
+      }
+      const button = document.getElementById('sahm-apply-update');
+      button.disabled = true;
+      button.textContent = 'جارٍ التحديث…';
+      waiting.postMessage({ type: 'SKIP_WAITING' });
     }
   });
 }
