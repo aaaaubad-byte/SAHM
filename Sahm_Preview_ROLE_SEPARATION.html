@@ -3074,20 +3074,33 @@ function restorePreviousScreen(){
 function back(){
  if(stack.length){
   if(history.state&&history.state.sahm){history.back();return}
-  restorePreviousScreen();return;
+  restorePreviousScreen();return
  }
- if(screenName!=='home'&&db.session){go('home');return}
- go('home');
+ if(db.session&&screenName!=='home'){go('home');return}
+ if(!db.session&&screenName!=='welcome'){go('welcome');return}
 }
-window.addEventListener('popstate',()=>{if(stack.length)restorePreviousScreen();});
 function toast(t){const el=$('#toast');el.textContent=t;el.classList.add('show');clearTimeout(toastTimer);toastTimer=setTimeout(()=>el.classList.remove('show'),2300)}
 function header(title,sub=''){
  // Screen titles and back navigation now live exclusively in the fixed app bar.
  return ''
 }
-function renderTopbar(title){const el=$('#topbar');el.hidden=false;el.removeAttribute('hidden');el.style.setProperty('display','flex','important');el.style.visibility='visible';el.setAttribute('aria-label','الشريط العلوي');const atHome=screenName==='home';el.innerHTML=`<div class="topbar-screenbar"><strong class="topbar-screen-title">${escapeHtml(String(title||'سهم'))}</strong><button class="icon-btn topbar-back" type="button" data-action="${atHome?'logout-confirm':'back'}" aria-label="${atHome?'تسجيل الخروج':'رجوع'}">${uiIcon(atHome?'exit-screen':'back-screen',22)}</button></div>`}
+function renderTopbar(title){
+ const el=$('#topbar');
+ if(screenName==='home'){el.hidden=true;el.style.display='none';el.innerHTML='';el.removeAttribute('aria-label');return;}
+ el.hidden=false;el.removeAttribute('hidden');el.style.setProperty('display','flex','important');el.style.visibility='visible';el.setAttribute('aria-label','الشريط العلوي');
+ el.innerHTML=`<div class="topbar-screenbar"><strong class="topbar-screen-title">${escapeHtml(String(title||'سهم'))}</strong><button class="icon-btn topbar-back" type="button" data-action="back" aria-label="رجوع">${uiIcon('back-screen',22)}</button></div>`;
+}
 function nav(active){const items=[['groups','groups','الجمعيات'],['home','home','الرئيسية'],['wall','messages','الدردشات']];const bar=$('#bottomnav');bar.hidden=false;bar.removeAttribute('hidden');bar.setAttribute('aria-hidden','false');bar.style.display='flex';bar.style.visibility='visible';bar.style.opacity='1';bar.innerHTML=items.map(([s,i,t])=>`<button class="navitem ${active===s?'active':''}" data-go="${s}" aria-label="${t}" ${active===s?'aria-current="page"':''}><span class="ni">${uiIcon(i,23)}</span><span>${t}</span></button>`).join('')}
-function shell(title,active,html){renderTopbar(title);nav(active);const screen=$('#screen');screen.className='screen'+(active==='home'?' home-screen':'')+(screenName==='create-group'?' create-group-screen':'');screen.innerHTML=html;if(active!=='home'&&homeSlideTimer){clearInterval(homeSlideTimer);homeSlideTimer=null}}function auth(html){$('#topbar').hidden=true;$('#topbar').style.display='none';$('#bottomnav').hidden=true;$('#bottomnav').setAttribute('aria-hidden','true');$('#bottomnav').style.display='none';$('#screen').className='auth-screen';$('#screen').innerHTML=html}
+function shell(title,active,html){renderTopbar(title);nav(active);const screen=$('#screen');screen.className='screen'+(active==='home'?' home-screen':'')+(screenName==='create-group'?' create-group-screen':'');screen.innerHTML=html;if(active!=='home'&&homeSlideTimer){clearInterval(homeSlideTimer);homeSlideTimer=null}}function auth(html){
+ const authTitles={welcome:'أهلاً بك في سهم',phone:'تسجيل الدخول',otp:'التحقق من رقم الهاتف','profile-setup':'إكمال الملف الشخصي','logged-out':'تم تسجيل الخروج'};
+ renderTopbar(authTitles[screenName]||'سهم');
+ const bar=$('#bottomnav');bar.hidden=true;bar.setAttribute('aria-hidden','true');bar.style.display='none';
+ const screen=$('#screen');screen.className='auth-screen';screen.innerHTML=html;
+ if(screenName==='welcome'){
+  const entryButton=screen.querySelector('#welcomeAuthButton');
+  if(entryButton)entryButton.addEventListener('click',event=>{event.preventDefault();go('phone')});
+ }
+}
 function groupCard(g){
  const manager=g.role==='manager',total=Number(g.total)||0,shares=Number(g.shares)||0,percent=total?Math.min(100,Math.round(shares/total*100)):0;
  return `<article class="card group-card ${manager?'manager-card':'member-card'}" data-action="open-group" data-id="${escapeHtml(g.id)}" tabindex="0" role="button" aria-label="فتح جمعية ${escapeHtml(g.name)}">
@@ -3289,7 +3302,7 @@ function audit(){shell('سجل العمليات','groups',`${header('سجل ال
 function profile(){shell('حسابي','profile',`${header('الملف الشخصي','حسابك الموحد في سهم')}<div class="card"><div class="row"><div class="avatar dark" style="width:51px;height:51px;border-radius:17px;font-size:18px">${db.user.name.slice(0,1)}</div><div><b style="font-size:13px">${db.user.name}</b><div class="eyebrow">${db.user.phone}</div><div class="eyebrow">${db.user.city}</div></div><span class="pill green">حساب موحد</span></div></div><div class="card"><div class="listrow"><div class="avatar">♙</div><div class="grow"><strong>بيانات الملف الشخصي</strong></div><button class="btn outline small" data-go="edit-profile">تعديل</button></div><div class="listrow"><div class="avatar">▤</div><div class="grow"><strong>جمعياتي</strong></div><button class="btn outline small" data-go="groups">عرض</button></div><div class="listrow"><div class="avatar">⚙</div><div class="grow"><strong>إعدادات الحساب</strong></div><button class="btn outline small" data-go="settings">فتح</button></div><div class="listrow"><div class="avatar">⌁</div><div class="grow"><strong>سجل العمليات</strong></div><button class="btn outline small" data-go="audit">عرض</button></div></div><button class="btn danger full" data-action="logout-confirm">تسجيل الخروج</button>`)}
 function editProfile(){shell('تعديل الملف','profile',`${header('تعديل بياناتك','الملف الشخصي')}<form id="profileForm"><div class="field"><label>الاسم</label><input name="name" value="${escapeHtml(db.user.name)}" required></div><div class="field"><label>رقم الهاتف (موثق)</label><input value="${db.user.phone}" disabled></div><div class="field"><label>المدينة</label><input name="city" value="${escapeHtml(db.user.city)}"></div><button class="btn primary full" type="submit">حفظ التعديلات</button></form>`)}
 function settings(){shell('الإعدادات','profile',`${header('الإعدادات','تفضيلات الحساب')}<div class="card"><div class="between"><div><b style="font-size:11px">التنبيهات</b></div><input type="checkbox" id="notifToggle" ${db.user.notifications?'checked':''} style="width:20px;height:20px;accent-color:var(--teal)"></div><div class="listrow"><div class="avatar">🔒</div><div class="grow"><strong>حماية الجلسة</strong></div><input type="checkbox" id="bioToggle" ${db.user.biometric?'checked':''} style="width:20px;height:20px;accent-color:var(--teal)"></div><div class="listrow"><div class="avatar">☎</div><div class="grow"><strong>رقم الهاتف</strong><small>${db.user.phone}</small></div><span class="pill green">موثق</span></div></div><button class="btn danger full" data-action="logout-confirm">إنهاء الجلسة وتسجيل الخروج</button>`)}
-function welcome(){auth(`<div class="auth-brand"><div class="brand-mark">س</div><h1>سهم</h1></div><div class="auth-card"><div style="text-align:center"><b style="font-size:15px">أهلاً بك في سهم</b></div><button class="btn primary full" style="margin-top:12px" data-go="phone">إنشاء حساب / تسجيل الدخول</button></div>`)}
+function welcome(){auth(`<div class="auth-brand"><div class="brand-mark">س</div><h1>سهم</h1></div><div class="auth-card"><div style="text-align:center"><b style="font-size:15px">أهلاً بك في سهم</b></div><button id="welcomeAuthButton" class="btn primary full" type="button" style="margin-top:12px">إنشاء حساب / تسجيل الدخول</button></div>`)}
 function phone(){auth(`<div class="auth-brand" style="margin:20px 0"><div class="brand-mark">س</div><h1 style="font-size:22px">تسجيل الدخول</h1><p>أدخل رقم هاتفك للمتابعة</p></div><div class="auth-card"><div class="field"><label>رقم الهاتف</label><input id="phoneInput" type="tel" inputmode="tel" value="${db.user.phone}"></div><button class="btn primary full" data-action="send-otp">إرسال رمز التحقق</button><button class="btn outline full" style="margin-top:8px" data-go="welcome">رجوع</button></div>`)}
 function otp(){auth(`<div class="auth-brand" style="margin:20px 0"><div class="brand-mark">س</div><h1 style="font-size:22px">تحقق من رقمك</h1></div><div class="auth-card"><div class="field"><label>رمز التحقق</label><input id="otpInput" inputmode="numeric" maxlength="6" value="${db.otp}" placeholder="••••••" style="text-align:center;letter-spacing:9px;font-size:20px"></div><button class="btn primary full" data-action="verify-otp">تحقق ومتابعة</button><button class="btn outline full" style="margin-top:8px" data-action="resend-otp">إعادة إرسال الرمز</button><button class="link-btn" style="width:100%;margin-top:8px" data-go="phone">تغيير رقم الهاتف</button></div>`)}
 function profileSetup(){auth(`<div class="auth-brand" style="margin:18px 0"><div class="brand-mark">س</div><h1 style="font-size:22px">أكمل ملفك الشخصي</h1></div><div class="auth-card"><form id="setupForm"><div class="field"><label>الاسم الكامل</label><input name="name" required value="${escapeHtml(db.user.name)}"></div><div class="field"><label>المدينة</label><input name="city" required value="${escapeHtml(db.user.city)}"></div><button class="btn primary full" type="submit">حفظ وفتح حسابي</button></form></div>`)}
