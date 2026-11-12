@@ -3157,6 +3157,36 @@ body {
 .created-invite-footer .btn{min-height:46px}.created-invite-footer .btn:disabled{background:#9aa9c8!important;color:#fff!important;opacity:.62}
 @media(max-width:380px){.create-intro{padding:11px}.create-section{padding:12px!important}.create-rules-grid{gap:6px}.create-rules-grid>div{padding:8px}.create-step-actions .btn{font-size:11px}}
 
+
+/* First step only: compact, legible, balanced form layout */
+#create-step-1{gap:12px;padding-top:2px}
+#create-step-1 .create-section{padding:16px!important;border:1px solid #d9e2ef!important;border-radius:15px!important;box-shadow:0 3px 12px rgba(28,45,76,.055)!important;background:#fff!important}
+#create-step-1 .create-section-head{display:flex;align-items:center;gap:9px;margin:0 0 14px!important;padding:0 0 11px;border-bottom:1px solid #edf1f7}
+#create-step-1 .create-section-head h2{margin:0!important;font-size:14px!important;line-height:1.45;font-weight:800;color:#1d2d47!important}
+#create-step-1 .create-section-icon{width:32px;height:32px;display:grid;place-items:center;flex:none;border-radius:10px;background:#edf2ff;color:#3158d6!important}
+#create-step-1 .create-section-icon svg{width:18px;height:18px}
+#create-step-1 .create-field{min-width:0;margin:0!important;display:flex;flex-direction:column;gap:7px}
+#create-step-1 .create-field label{min-height:19px;display:flex!important;align-items:center;flex-wrap:wrap;gap:5px;font-size:11px!important;line-height:1.55!important;font-weight:750;color:#354760!important}
+#create-step-1 .create-field input,#create-step-1 .create-field select,#create-step-1 .create-field textarea{display:block;box-sizing:border-box;width:100%;min-width:0;min-height:45px;padding:10px 11px!important;border:1px solid #d5deeb!important;border-radius:10px!important;background:#fbfcff!important;color:#1b2b43!important;font-family:inherit;font-size:12px!important;line-height:1.5!important;font-weight:550;box-shadow:inset 0 1px 2px rgba(20,40,70,.025)!important}
+#create-step-1 .create-field textarea{min-height:76px;resize:vertical}
+#create-step-1 .create-field input:focus,#create-step-1 .create-field select:focus,#create-step-1 .create-field textarea:focus{outline:none;border-color:#6b88dc!important;box-shadow:0 0 0 3px rgba(49,88,214,.11)!important;background:#fff!important}
+#create-step-1 .create-fields-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));align-items:start;column-gap:11px;row-gap:14px;margin:0!important}
+#create-step-1 .create-section>.create-field{margin-bottom:14px!important}
+#create-step-1 .create-section>.create-field:last-child{margin-bottom:0!important}
+#create-step-1 .create-fields-grid+.create-field{margin-top:14px!important}
+#create-step-1 .create-optional{font-size:9px!important;font-weight:600;color:#7b8799;background:#f1f4f8;padding:2px 6px;border-radius:5px}
+#create-step-1 .create-manager-choice{display:flex;flex-direction:column;align-items:stretch;gap:11px;margin-top:14px;padding:12px!important;border:1px solid #dfe6f1!important;border-radius:11px!important;background:#f8faff!important}
+#create-step-1 .create-manager-choice>div:first-child{display:flex;flex-direction:column;gap:4px}
+#create-step-1 .create-manager-choice strong{font-size:12px!important;line-height:1.5;color:#253852!important}
+#create-step-1 .create-manager-choice small{font-size:10px!important;line-height:1.6;color:#687a93!important}
+#create-step-1 .create-manager-options{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}
+#create-step-1 .create-manager-options label{display:flex;align-items:center;justify-content:center;gap:6px;min-height:40px;padding:7px 8px!important;border:1px solid #d8e1ef!important;border-radius:9px!important;background:#fff;font-size:10.5px!important;line-height:1.4;white-space:normal;text-align:center}
+#create-step-1 .create-manager-options input{margin:0;accent-color:#3158d6;flex:none}
+#create-step-1 #manager-shares-field{margin-top:12px!important}
+#create-step-1 .create-step-actions{margin-top:2px}
+@media(max-width:370px){#create-step-1 .create-section{padding:13px!important}#create-step-1 .create-fields-grid{column-gap:8px;row-gap:12px}#create-step-1 .create-field label{font-size:10.5px!important}#create-step-1 .create-field input,#create-step-1 .create-field select{padding:9px 8px!important;font-size:11px!important}#create-step-1 .create-manager-options label{font-size:9.5px!important;padding:6px 4px!important}}
+@media(min-width:430px){#create-step-1 .create-section{padding:18px!important}#create-step-1 .create-fields-grid{column-gap:14px;row-gap:16px}}
+
 </style></head>
 <body><noscript><main dir="rtl" style="font-family:Arial,sans-serif;padding:24px;color:#142f39"><h1>سهم</h1></main></noscript><div class="workspace"><div class="phone" id="app">
 <div id="topbar" class="topbar" style="display:none"></div><main id="screen" class="auth-screen">
@@ -3358,7 +3388,7 @@ function createGroup(){
  createWizardStep=1;
  const html=[
  '<div class="create-group-page">',
- '<div class="create-intro"><span class="create-intro-icon">'+uiIcon('layers',24)+'</span><div class="create-intro-copy"><span class="create-kicker">جمعية جديدة</span><h1>إنشاء جمعية</h1><p id="create-stage-title">بيانات الجمعية</p></div></div>',
+ '',
  '<form id="createForm" class="create-form" novalidate>',
  '<div class="create-step" id="create-step-1">',
  '<section class="create-section"><div class="create-section-head"><span class="create-section-icon">'+uiIcon('landmark',20)+'</span><h2>بيانات الجمعية</h2></div>',
