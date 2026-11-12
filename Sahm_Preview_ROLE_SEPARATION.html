@@ -7,6 +7,9 @@
 <meta name="apple-mobile-web-app-title" content="سهم">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <link rel="manifest" href="/manifest.webmanifest">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Arabic:wght@400;500;600;700&display=swap" rel="stylesheet">
 <link rel="icon" href="/icons/sahm.svg" type="image/svg+xml">
 <link rel="apple-touch-icon" href="/icons/sahm.svg">
 <title>سهم | إدارة الجمعيات التساهمية</title>
@@ -258,6 +261,9 @@ button:focus-visible,a:focus-visible,input:focus-visible,select:focus-visible,te
  .member-summary b{font-size:16px}
 }
 
+/* Arabic typography: refined, readable, and consistent across every control. */
+html,body,button,input,select,textarea{font-family:'IBM Plex Sans Arabic',system-ui,-apple-system,'Segoe UI',Tahoma,Arial,sans-serif}
+.page-title,.hero-total,.hero-num,.brand,.btn,.navitem{font-family:'IBM Plex Sans Arabic',system-ui,sans-serif}
 </style></head>
 <body><noscript><main dir="rtl" style="font-family:Arial,sans-serif;padding:24px;color:#142f39"><h1>سهم</h1></main></noscript><div class="workspace"><div class="phone" id="app">
 <div class="statusbar" aria-hidden="true"></div>
@@ -320,8 +326,23 @@ if(managerOnly.includes(s)&&!isManager()){
 toast('هذه الوظيفة متاحة لمدير هذه الجمعية فقط');return
 }
 if(s==='create-group'&&currentGroup()?.role==='member')db.currentGroup=db.groups.find(g=>g.role==='manager')?.id||db.currentGroup;
-stack.push({screenName,params});screenName=s;params=p;render()
-}function back(){if(stack.length){const x=stack.pop();screenName=x.screenName;params=x.params;render()}else go('home')}
+stack.push({screenName,params});
+ history.pushState({sahm:true,depth:stack.length},'',location.href);
+ screenName=s;params=p;render()
+}
+function restorePreviousScreen(){
+ if(!stack.length)return;
+ const previous=stack.pop();screenName=previous.screenName;params=previous.params;render();
+}
+function back(){
+ if(stack.length){
+  if(history.state&&history.state.sahm){history.back();return}
+  restorePreviousScreen();return;
+ }
+ if(screenName!=='home'&&db.session){go('home');return}
+ go('home');
+}
+window.addEventListener('popstate',()=>{if(stack.length)restorePreviousScreen();});
 function toast(t){const el=$('#toast');el.textContent=t;el.classList.add('show');clearTimeout(toastTimer);toastTimer=setTimeout(()=>el.classList.remove('show'),2300)}
 function header(title,sub=''){
  return `<div class="screen-head"><div><h1 class="page-title">${escapeHtml(title)}</h1>${sub?`<p class="page-sub">${escapeHtml(sub)}</p>`:''}</div><button class="back-btn" data-action="back" aria-label="العودة إلى الشاشة السابقة">${uiIcon('back',17)}<span>رجوع</span></button></div>`
@@ -525,6 +546,7 @@ document.addEventListener('input',e=>{if(e.target.id==='chatInput')$('#charCount
 document.addEventListener('click',e=>{const f=e.target.closest('[data-action="installment-filter"]');if(f){document.querySelectorAll('[data-action="installment-filter"]').forEach(x=>x.classList.toggle('active',x===f));const filter=f.dataset.filter;document.querySelectorAll('#installmentRows .listrow').forEach(r=>{const tx=r.textContent;const show=filter==='all'||(filter==='pending'?/غير مسدد|متأخر|قيد المراجعة/.test(tx):tx.includes(statusText(filter)));r.style.display=show?'':'none'})}});
 // Simulated OTP and authentication actions.
 document.addEventListener('click',e=>{const a=e.target.closest('[data-action]')?.dataset.action;if(a==='send-otp'){const p=$('#phoneInput').value.trim();if(p.length<8){toast('أدخل رقم هاتف صحيحاً');return}db.user.phone=p;save();toast('تم إرسال رمز التحقق');go('otp')}if(a==='verify-otp'){if($('#otpInput').value.trim()!==db.otp){toast('رمز التحقق غير صحيح. حاول مجدداً');return}db.verified=true;save();go('profile-setup')}if(a==='resend-otp')toast('تمت إعادة إرسال الرمز التجريبي 246810')});
+history.replaceState({sahm:true,depth:0},'',location.href);
 try{render()}catch(err){document.querySelector('#screen').className='auth-screen';document.querySelector('#screen').innerHTML='<div style="background:white;color:#142f39;border-radius:18px;padding:20px;margin-top:35px"><h2>تعذر تشغيل المعاينة</h2><p>حدث خطأ أثناء تشغيل الواجهة. أعد فتح الملف في متصفح Chrome.</p><small>'+String(err&&err.message||err)+'</small></div>';console.error(err)}
 </script>
 <script>
