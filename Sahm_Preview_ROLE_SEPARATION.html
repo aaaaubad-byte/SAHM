@@ -77,7 +77,7 @@ button{touch-action:manipulation}
 .dot{width:8px;height:8px;background:#e25d67;border:2px solid #fff;top:7px;left:7px}
 .screen{background:var(--bg);padding:22px 18px calc(28px + env(safe-area-inset-bottom));scrollbar-color:#cad3e1 transparent}
 .screen::-webkit-scrollbar-thumb{background:#cad3e1}
-.bottomnav{height:78px;background:#fff;border-top:1px solid var(--line);padding:8px 8px calc(8px + env(safe-area-inset-bottom));gap:4px;box-shadow:0 -8px 22px rgba(24,41,75,.035)}
+.bottomnav{height:78px;min-height:78px;flex:0 0 auto;position:relative;z-index:10;visibility:visible;background:#fff;border-top:1px solid var(--line);padding:8px 8px calc(8px + env(safe-area-inset-bottom));gap:4px;box-shadow:0 -8px 22px rgba(24,41,75,.035)}
 .navitem{flex:1;min-width:0;min-height:54px;gap:4px;border-radius:15px;color:#8792a4;font-size:10px;font-weight:650;transition:background .18s,color .18s}
 .navitem .ni{height:24px;line-height:24px;display:grid;place-items:center}
 .navitem .ni svg{width:21px;height:21px;stroke:currentColor;stroke-width:1.8;fill:none;stroke-linecap:round;stroke-linejoin:round}
@@ -197,7 +197,7 @@ button:focus-visible,a:focus-visible,input:focus-visible,select:focus-visible,te
  .phone{max-width:none;width:100%;height:100dvh;min-height:100dvh;border:0;border-radius:0;box-shadow:none}
  .topbar{height:66px;padding-inline:17px}
  .screen{padding:19px 16px calc(28px + env(safe-area-inset-bottom))}
- .bottomnav{height:calc(76px + env(safe-area-inset-bottom));padding-bottom:calc(8px + env(safe-area-inset-bottom))}
+ .bottomnav{height:calc(76px + env(safe-area-inset-bottom));min-height:76px;flex:0 0 auto;position:relative;z-index:10;padding-bottom:calc(8px + env(safe-area-inset-bottom))}
  .auth-screen{padding-top:calc(20px + env(safe-area-inset-top))}
 }
 @media(min-width:900px){
@@ -355,7 +355,7 @@ function renderTopbar(title='سهم'){
 }
 function nav(active){
  const items=[['home','home','الرئيسية'],['groups','groups','جمعياتي'],['wall','wall','الحائط'],['notifications','bell','التنبيهات'],['profile','user','حسابي']];
- $('#bottomnav').style.display='flex';
+ const bar=$('#bottomnav');bar.hidden=false;bar.removeAttribute('hidden');bar.setAttribute('aria-hidden','false');bar.style.display='flex';bar.style.visibility='visible';
  $('#bottomnav').innerHTML=items.map(([s,i,t])=>`<button class="navitem ${active===s?'active':''}" data-go="${s}" aria-label="${t}" ${active===s?'aria-current="page"':''}><span class="ni">${uiIcon(i,21)}</span><span>${t}</span></button>`).join('')
 }
 function shell(title,active,html){renderTopbar(title);nav(active);$('#screen').className='screen';$('#screen').innerHTML=html}
