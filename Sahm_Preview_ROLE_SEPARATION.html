@@ -1,7 +1,7 @@
 <!doctype html>
 <html lang="ar" dir="rtl">
 <head>
-<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no"><meta name="theme-color" content="#3158d6">
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover"><meta name="theme-color" content="#3158d6">
 <meta name="application-name" content="سهم">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="سهم">
@@ -2043,6 +2043,7 @@ body {
     position: fixed;
     inset: 0;
     width: 100%;
+    height: 100vh;
     height: 100dvh;
     min-height: 0;
     padding: 0;
@@ -2050,14 +2051,63 @@ body {
     overflow: hidden;
   }
   .phone {
-  width: 100%;
-  height: 100%;
-  min-height: 0;
-  max-height: none;
-  margin: 0;
-  border: 0;
-}
+    width: 100%;
+    height: 100%;
+    min-height: 0;
+    max-height: 100%;
+    margin: 0;
+    border: 0;
+    border-radius: 0;
+  }
   #topbar.topbar {
+    flex: 0 0 calc(70px + env(safe-area-inset-top,0px));
+    height: calc(70px + env(safe-area-inset-top,0px));
+    min-height: calc(70px + env(safe-area-inset-top,0px));
+    padding-top: env(safe-area-inset-top,0px);
+  }
+  #screen.screen {
+    flex: 1 1 0%;
+    min-height: 0;
+    height: 0;
+    padding-bottom: 16px;
+    overflow-y: auto;
+    overscroll-behavior-y: contain;
+  }
+  #bottomnav.bottomnav:not([hidden]) {
+    position: relative;
+    inset: auto;
+    z-index: 60;
+    display: flex;
+    flex: 0 0 calc(70px + env(safe-area-inset-bottom,0px));
+    width: 100%;
+    height: calc(70px + env(safe-area-inset-bottom,0px));
+    min-height: calc(70px + env(safe-area-inset-bottom,0px));
+    max-height: calc(70px + env(safe-area-inset-bottom,0px));
+    margin: 0;
+    padding: 0 14px env(safe-area-inset-bottom,0px);
+    align-items: stretch;
+    justify-content: space-around;
+    gap: 4px;
+    box-sizing: border-box;
+    overflow: visible;
+    visibility: visible;
+    opacity: 1;
+    border: 0;
+    border-top: 1px solid var(--line);
+    border-radius: 0;
+    background: #fff;
+    box-shadow: none;
+  }
+  #bottomnav .navitem,
+  #bottomnav .navitem.active {
+    flex: 1 1 0;
+    width: auto;
+    height: 70px;
+    min-height: 70px;
+    max-height: 70px;
+    align-self: flex-start;
+  }
+}  #topbar.topbar {
     flex-basis: calc(70px + env(safe-area-inset-top,0px));
     height: calc(70px + env(safe-area-inset-top,0px));
     min-height: calc(70px + env(safe-area-inset-top,0px));
@@ -2112,7 +2162,7 @@ body {
 .card,.group-card,.manager-panel,.member-panel,.activity-card,.home-shortcut,.home-create-card,.summary-slide,.home-carousel,.receipt,.auth-card,.dialog,.payment-progress { border-radius:var(--radius-card); }
 .stat,.manager-action,.member-action,.btn,.field input,.field select,.field textarea,.searchbox,.segmented,.avatar,.brand-mark { border-radius:var(--radius-control); }
 .pill,.role-chip,.progress { border-radius:var(--radius-small); }
-#bottomnav.bottomnav:not([hidden]) { border-radius:var(--radius-card); }
+#bottomnav.bottomnav:not([hidden]) { border-radius:0; }
 #bottomnav .navitem,#bottomnav .navitem.active { border-radius:0;background:transparent;box-shadow:none; }
 #bottomnav .navitem .ni svg { stroke-width:1.95; }
 #bottomnav .navitem.active .ni svg { stroke-width:2.2; }
