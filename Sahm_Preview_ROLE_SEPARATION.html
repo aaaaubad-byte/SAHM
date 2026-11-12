@@ -440,6 +440,53 @@ html,body{height:100%;min-height:100%;overflow:hidden}
   height:70px!important;min-height:70px!important;max-height:70px!important;
  }
 }
+
+/* Home screen: clearer hierarchy, richer depth and restrained interaction states. */
+.home-screen{background:linear-gradient(180deg,#f4f7fd 0%,#f8faff 42%,#f3f6fc 100%)!important}
+.home-carousel{filter:drop-shadow(0 9px 18px rgba(24,45,88,.13))}
+.summary-slide{
+ border:1px solid rgba(255,255,255,.24)!important;
+ box-shadow:inset 0 1px 0 rgba(255,255,255,.2),inset 0 -1px 0 rgba(12,27,57,.12),0 8px 20px rgba(22,43,82,.18)!important;
+ transition:transform .22s ease,filter .22s ease,box-shadow .22s ease!important;
+}
+.summary-slide.blue{background:linear-gradient(125deg,#17365f 0%,#244b9a 56%,#3568dc 100%)!important}
+.summary-slide.gold{background:linear-gradient(125deg,#63451f 0%,#94672d 55%,#c18d43 100%)!important}
+.summary-slide.dark{background:linear-gradient(125deg,#1b2b40 0%,#30465f 58%,#49627e 100%)!important}
+.summary-icon{background:rgba(255,255,255,.18)!important;border-color:rgba(255,255,255,.34)!important;box-shadow:inset 0 1px 0 rgba(255,255,255,.18),0 3px 9px rgba(9,22,48,.12)}
+.summary-copy strong{color:#fff!important;text-shadow:0 1px 2px rgba(0,0,0,.18)}
+.summary-copy b{color:#fff!important;text-shadow:0 2px 8px rgba(0,0,0,.2)}
+.home-dots button{background:#aebbd0!important;box-shadow:0 1px 2px rgba(25,44,78,.12)}
+.home-dots button.active{background:#3158d6!important;box-shadow:0 0 0 3px rgba(49,88,214,.13)}
+.home-shortcut{
+ background:linear-gradient(145deg,#fff 0%,#f9fbff 100%)!important;
+ border:1px solid #d9e2f1!important;
+ box-shadow:0 2px 5px rgba(27,48,84,.045),0 8px 18px rgba(27,48,84,.075),inset 0 1px 0 #fff!important;
+ transition:transform .18s ease,border-color .18s ease,box-shadow .18s ease,background .18s ease!important;
+}
+.home-shortcut.managed{border-top:3px solid #5278df!important}
+.home-shortcut.joined{border-top:3px solid #c18d43!important}
+.home-shortcut.managed .shortcut-icon{background:linear-gradient(145deg,#eaf0ff,#dce6ff)!important;box-shadow:inset 0 1px 2px rgba(49,88,214,.1)}
+.home-shortcut.joined .shortcut-icon{background:linear-gradient(145deg,#fbf3e7,#f1e3cc)!important;box-shadow:inset 0 1px 2px rgba(166,117,50,.12)}
+.home-shortcut strong{color:#1c2b43!important;text-shadow:0 1px 0 #fff}
+.shortcut-arrow{color:#60728e!important}
+.home-create-card{
+ background:linear-gradient(110deg,#e8efff 0%,#f5f7ff 68%,#fff 100%)!important;
+ border:1px solid #cbd8f1!important;
+ border-right:4px solid #3158d6!important;
+ box-shadow:0 3px 7px rgba(34,62,115,.055),0 8px 18px rgba(34,62,115,.075),inset 0 1px 0 #fff!important;
+ transition:transform .18s ease,border-color .18s ease,box-shadow .18s ease!important;
+}
+.create-card-icon{background:linear-gradient(145deg,#dce7ff,#cbd9ff)!important;box-shadow:inset 0 1px 2px rgba(49,88,214,.14),0 2px 5px rgba(49,88,214,.1)}
+.home-create-card strong{color:#203b73!important}
+.create-card-arrow{color:#3158a9!important}
+.home-shortcut:active,.home-create-card:active{transform:translateY(1px) scale(.99);box-shadow:0 2px 5px rgba(27,48,84,.08)!important}
+.home-shortcut:focus-visible,.home-create-card:focus-visible,.home-dots button:focus-visible{outline:3px solid rgba(49,88,214,.32)!important;outline-offset:3px}
+@media(hover:hover){
+ .home-shortcut:hover,.home-create-card:hover{transform:translateY(-2px);box-shadow:0 5px 10px rgba(27,48,84,.07),0 13px 24px rgba(27,48,84,.11)!important}
+}
+@media(prefers-reduced-motion:reduce){
+ .summary-slide,.home-shortcut,.home-create-card{transition:none!important}
+}
 </style></head>
 <body><noscript><main dir="rtl" style="font-family:Arial,sans-serif;padding:24px;color:#142f39"><h1>سهم</h1></main></noscript><div class="workspace"><div class="phone" id="app">
 <div class="statusbar" aria-hidden="true"></div>
