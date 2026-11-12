@@ -1,5 +1,5 @@
-/* Sahm PWA — network-first documents, versioned offline assets, automatic activation. */
-const CACHE_NAME = 'sahm-pwa-v3';
+/* Sahm PWA — network-first documents, versioned offline assets, user-approved activation. */
+const CACHE_NAME = 'sahm-pwa-v4';
 const APP_SHELL = [
   '/',
   '/Sahm_Preview_ROLE_SEPARATION.html',
@@ -11,8 +11,14 @@ self.addEventListener('install', event => {
   event.waitUntil(
     caches.open(CACHE_NAME)
       .then(cache => cache.addAll(APP_SHELL))
-      .then(() => self.skipWaiting())
+      .then(() => undefined)
   );
+});
+
+self.addEventListener('message', event => {
+  if (event.data && event.data.type === 'SKIP_WAITING') {
+    self.skipWaiting();
+  }
 });
 
 self.addEventListener('activate', event => {
