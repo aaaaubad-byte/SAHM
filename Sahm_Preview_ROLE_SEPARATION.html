@@ -2865,6 +2865,129 @@ body {
  .create-field label { font-size:10px; }
  .create-field input,.create-field select { padding:8px !important; font-size:11px !important; }
 }
+
+/* Unified screen header: current screen title and one back control on every app screen. */
+#topbar.topbar {
+  height:58px !important;
+  min-height:58px !important;
+  flex:0 0 58px !important;
+  padding:0 18px !important;
+  background:#fff !important;
+  border-bottom:1px solid #e2e8f1 !important;
+  box-shadow:0 2px 10px rgba(23,35,56,.045) !important;
+}
+#topbar .topbar-screenbar {
+  width:100%;
+  height:100%;
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  direction:rtl;
+  gap:12px;
+}
+#topbar .topbar-screen-title {
+  min-width:0;
+  color:#172338;
+  font-size:16px;
+  line-height:1.4;
+  font-weight:800;
+  overflow:hidden;
+  text-overflow:ellipsis;
+  white-space:nowrap;
+}
+#topbar .topbar-back {
+  width:38px !important;
+  height:38px !important;
+  min-width:38px !important;
+  min-height:38px !important;
+  flex:none;
+  color:#3158d6 !important;
+}
+#topbar .topbar-back svg {
+  width:23px !important;
+  height:23px !important;
+  stroke-width:2 !important;
+}
+/* Create-group form: compact sections, clear typography, and unframed line icons. */
+#screen.create-group-screen {
+  padding:14px 14px 24px !important;
+  background:#f4f6fa !important;
+}
+.create-form { gap:10px !important; }
+.create-section {
+  padding:13px !important;
+  border:1px solid #e2e8f1 !important;
+  border-radius:12px !important;
+  background:#fff !important;
+  box-shadow:0 2px 8px rgba(23,35,56,.035) !important;
+}
+.create-section-head {
+  display:flex !important;
+  align-items:center !important;
+  gap:9px !important;
+  margin:0 0 10px !important;
+}
+.create-section-head h2 {
+  margin:0 !important;
+  color:#172338 !important;
+  font-size:13px !important;
+  line-height:1.5 !important;
+  font-weight:800 !important;
+}
+.create-section-icon {
+  width:auto !important;
+  height:auto !important;
+  min-width:0 !important;
+  min-height:0 !important;
+  padding:0 !important;
+  border:0 !important;
+  border-radius:0 !important;
+  background:transparent !important;
+  box-shadow:none !important;
+  color:#3158d6 !important;
+}
+.create-section-icon svg {
+  width:20px;
+  height:20px;
+  stroke:currentColor;
+  stroke-width:1.9;
+}
+.create-field label {
+  color:#34445d !important;
+  font-size:11px !important;
+  font-weight:750 !important;
+}
+.create-field input,.create-field select {
+  min-height:43px !important;
+  border:1px solid #dce3ed !important;
+  border-radius:9px !important;
+  background:#fbfcfe !important;
+  color:#172338 !important;
+  font-size:12px !important;
+  box-shadow:none !important;
+}
+.create-field input:focus,.create-field select:focus {
+  border-color:#6f8be4 !important;
+  background:#fff !important;
+  box-shadow:0 0 0 3px rgba(49,88,214,.11) !important;
+}
+.create-submit-area { padding:2px 0 8px !important; }
+.create-submit {
+  min-height:46px !important;
+  border-radius:10px !important;
+  background:#3158d6 !important;
+  box-shadow:0 4px 11px rgba(49,88,214,.16) !important;
+  font-size:13px !important;
+}
+@media(max-width:600px) {
+  #topbar.topbar {
+    height:56px !important;
+    min-height:56px !important;
+    flex-basis:56px !important;
+    padding-inline:15px !important;
+  }
+}
+
 </style></head>
 <body><noscript><main dir="rtl" style="font-family:Arial,sans-serif;padding:24px;color:#142f39"><h1>سهم</h1></main></noscript><div class="workspace"><div class="phone" id="app">
 <div id="topbar" class="topbar" style="display:none"></div><main id="screen" class="auth-screen">
@@ -2920,6 +3043,7 @@ function uiIcon(name,size=20){
   bell:'M18 8a6 6 0 0 0-12 0c0 7-3 7-3 9h18c0-2-3-2-3-9m-8 12a2 2 0 0 0 4 0',
   user:'M20 21a8 8 0 0 0-16 0m8-10a5 5 0 1 0 0-10 5 5 0 0 0 0 10z',
   back:'m15 18-6-6 6-6',
+  'back-screen':'M9 18l6-6-6-6',
   arrow:'M19 12H5m6 6-6-6 6-6',
   plus:'M12 5v14m-7-7h14',
   search:'m20 20-4.5-4.5M18 10a8 8 0 1 1-16 0 8 8 0 0 1 16 0z'
@@ -2957,9 +3081,9 @@ function header(title,sub=''){
  // Screen titles and back navigation now live exclusively in the fixed app bar.
  return ''
 }
-function renderTopbar(){const el=$('#topbar');el.hidden=false;el.removeAttribute('hidden');el.style.setProperty('display','flex','important');el.style.visibility='visible';el.setAttribute('aria-label','الشريط العلوي');el.innerHTML=`<div class="topbar-icons"><button class="icon-btn" data-go="profile" aria-label="الحساب">${uiIcon('user',22)}</button><button class="icon-btn" data-go="notifications" aria-label="الإشعارات">${uiIcon('bell',22)}${db.unread?'<i class="dot"></i>':''}</button></div>`}
+function renderTopbar(title){const el=$('#topbar');el.hidden=false;el.removeAttribute('hidden');el.style.setProperty('display','flex','important');el.style.visibility='visible';el.setAttribute('aria-label','الشريط العلوي');el.innerHTML=`<div class="topbar-screenbar"><strong class="topbar-screen-title">${escapeHtml(String(title||'سهم'))}</strong><button class="icon-btn topbar-back" type="button" data-action="back" aria-label="رجوع">${uiIcon('back-screen',22)}</button></div>`}
 function nav(active){const items=[['groups','groups','الجمعيات'],['home','home','الرئيسية'],['wall','messages','الدردشات']];const bar=$('#bottomnav');bar.hidden=false;bar.removeAttribute('hidden');bar.setAttribute('aria-hidden','false');bar.style.display='flex';bar.style.visibility='visible';bar.style.opacity='1';bar.innerHTML=items.map(([s,i,t])=>`<button class="navitem ${active===s?'active':''}" data-go="${s}" aria-label="${t}" ${active===s?'aria-current="page"':''}><span class="ni">${uiIcon(i,23)}</span><span>${t}</span></button>`).join('')}
-function shell(title,active,html){renderTopbar();nav(active);const screen=$('#screen');screen.className='screen'+(active==='home'?' home-screen':'')+(screenName==='create-group'?' create-group-screen':'');screen.innerHTML=html;if(active!=='home'&&homeSlideTimer){clearInterval(homeSlideTimer);homeSlideTimer=null}}function auth(html){$('#topbar').hidden=true;$('#topbar').style.display='none';$('#bottomnav').hidden=true;$('#bottomnav').setAttribute('aria-hidden','true');$('#bottomnav').style.display='none';$('#screen').className='auth-screen';$('#screen').innerHTML=html}
+function shell(title,active,html){renderTopbar(title);nav(active);const screen=$('#screen');screen.className='screen'+(active==='home'?' home-screen':'')+(screenName==='create-group'?' create-group-screen':'');screen.innerHTML=html;if(active!=='home'&&homeSlideTimer){clearInterval(homeSlideTimer);homeSlideTimer=null}}function auth(html){$('#topbar').hidden=true;$('#topbar').style.display='none';$('#bottomnav').hidden=true;$('#bottomnav').setAttribute('aria-hidden','true');$('#bottomnav').style.display='none';$('#screen').className='auth-screen';$('#screen').innerHTML=html}
 function groupCard(g){
  const manager=g.role==='manager',total=Number(g.total)||0,shares=Number(g.shares)||0,percent=total?Math.min(100,Math.round(shares/total*100)):0;
  return `<article class="card group-card ${manager?'manager-card':'member-card'}" data-action="open-group" data-id="${escapeHtml(g.id)}" tabindex="0" role="button" aria-label="فتح جمعية ${escapeHtml(g.name)}">
@@ -2995,31 +3119,30 @@ function home(){
 }
 function setHomeSlide(index){const ss=document.querySelectorAll('#homeCarousel .summary-slide'),dd=document.querySelectorAll('.home-dots button');if(!ss.length)return;homeSlideIndex=((index%ss.length)+ss.length)%ss.length;ss.forEach((x,i)=>{x.classList.toggle('active',i===homeSlideIndex);x.setAttribute('aria-hidden',i!==homeSlideIndex?'true':'false')});dd.forEach((x,i)=>{x.classList.toggle('active',i===homeSlideIndex);x.setAttribute('aria-pressed',i===homeSlideIndex?'true':'false')})}function groups(){const own=db.groups.filter(g=>groupTab==='all'||g.role===groupTab);const empty=groupTab==='manager'?'لا توجد جمعيات تديرها':groupTab==='member'?'لا توجد جمعيات تشارك فيها':'لا توجد جمعيات حتى الآن';shell('الجمعيات','groups',`<div class="toolbar"><input class="searchbox" id="groupSearch" placeholder="ابحث باسم الجمعية أو رمزها..."><button class="btn primary small" data-go="create-group">${uiIcon('plus',15)} إنشاء</button></div><div id="groupList">${own.length?own.map(groupCard).join(''):`<div class="card empty"><div class="big">${uiIcon('groups',27)}</div><b>${empty}</b><button class="btn primary" data-go="create-group">إنشاء جمعية</button></div>`}</div><button class="btn outline full" data-go="join-group">الانضمام إلى جمعية برمز أو رابط</button>`)}function createGroup(){
  shell('جمعية جديدة',null,`<div class="create-group-page">
-  <div class="create-intro"><div class="create-intro-icon">${uiIcon('users',25)}</div><div class="create-intro-copy"><span class="create-kicker">ابدأ جمعيتك</span><h1>جمعية جديدة</h1><p>أدخل تفاصيل الجمعية وحدد آلية المساهمة والسداد</p></div></div>
   <form id="createForm" class="create-form">
    <section class="create-section">
-    <div class="create-section-head"><span class="create-section-icon">${uiIcon('landmark',18)}</span><div><h2>بيانات الجمعية</h2><p>المعلومات الأساسية التي سيراها المشاركون</p></div></div>
-    <div class="field create-field"><label>اسم الجمعية</label><input name="name" placeholder="مثال: جمعية الأهل" autocomplete="off" required></div>
+    <div class="create-section-head"><span class="create-section-icon">${uiIcon('landmark',19)}</span><h2>بيانات الجمعية</h2></div>
+    <div class="field create-field"><label>اسم الجمعية</label><input name="name" placeholder="" autocomplete="off" required></div>
     <div class="field create-field"><label>عملة الجمعية</label><select name="currency"><option value="YER_SAN">ريال يمني - صنعاء</option><option value="YER_ADE">ريال يمني - عدن</option><option value="USD">دولار أمريكي</option><option value="SAR">ريال سعودي</option></select></div>
    </section>
    <section class="create-section">
-    <div class="create-section-head"><span class="create-section-icon">${uiIcon('wallet',18)}</span><div><h2>المساهمة والأسهم</h2><p>حدد قيمة السهم وعدد الأسهم في الجمعية</p></div></div>
+    <div class="create-section-head"><span class="create-section-icon">${uiIcon('wallet',19)}</span><h2>المساهمة والأسهم</h2></div>
     <div class="create-fields-grid">
-     <div class="field create-field"><label>قيمة مساهمة السهم</label><input type="number" name="share" min="1" inputmode="numeric" placeholder="مثال: 10000" required></div>
-     <div class="field create-field"><label>إجمالي الأسهم المستهدفة</label><input type="number" name="total" min="2" max="500" inputmode="numeric" placeholder="مثال: 20" required></div>
+     <div class="field create-field"><label>قيمة مساهمة السهم</label><input type="number" name="share" min="1" inputmode="numeric" placeholder="" required></div>
+     <div class="field create-field"><label>إجمالي الأسهم المستهدفة</label><input type="number" name="total" min="2" max="500" inputmode="numeric" placeholder="" required></div>
      <div class="field create-field"><label>الحد الأقصى لأسهم الفرد</label><input type="number" name="maxPer" min="1" inputmode="numeric" value="3" required></div>
      <div class="field create-field"><label>نصاب الحضور الافتراضي (%)</label><input type="number" name="quorum" min="1" max="100" inputmode="numeric" value="66" required></div>
     </div>
    </section>
    <section class="create-section">
-    <div class="create-section-head"><span class="create-section-icon">${uiIcon('calendar-days',18)}</span><div><h2>مواعيد الجمعية</h2><p>تنظيم بداية الجمعية ومواعيد الأقساط</p></div></div>
+    <div class="create-section-head"><span class="create-section-icon">${uiIcon('calendar-days',19)}</span><h2>مواعيد الجمعية</h2></div>
     <div class="field create-field"><label>دورية السداد</label><select name="period"><option>أسبوعية</option><option>شهرية</option></select></div>
     <div class="create-fields-grid">
      <div class="field create-field"><label>تاريخ البداية</label><input type="date" name="start" value="${today()}" required></div>
      <div class="field create-field"><label>موعد أول قسط</label><input type="date" name="first" required></div>
     </div>
    </section>
-   <div class="create-submit-area"><button class="btn primary full create-submit" type="submit"><span>${uiIcon('plus-circle',18)}</span> إنشاء الجمعية</button><p>ستتمكن بعد الإنشاء من دعوة المشاركين ومتابعة الجمعية</p></div>
+   <div class="create-submit-area"><button class="btn primary full create-submit" type="submit">إنشاء الجمعية</button></div>
   </form>
  </div>`);
 }
