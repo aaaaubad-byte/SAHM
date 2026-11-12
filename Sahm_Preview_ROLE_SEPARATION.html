@@ -2885,7 +2885,7 @@ body {
   height:100%;
   display:flex;
   align-items:center;
-  justify-content:flex-start;
+  justify-content:space-between;
   direction:rtl;
   gap:8px;
 }
@@ -2989,6 +2989,50 @@ body {
     min-height:56px !important;
     flex-basis:56px !important;
     padding-inline:15px !important;
+  }
+}
+
+
+/* Final layout authority: keep the footer navigation fully inside the app shell. */
+#bottomnav.bottomnav:not([hidden]) {
+  position:relative !important;
+  inset:auto !important;
+  display:flex !important;
+  flex:0 0 64px !important;
+  align-self:stretch !important;
+  width:100% !important;
+  height:64px !important;
+  min-height:64px !important;
+  max-height:64px !important;
+  margin:0 !important;
+  box-sizing:border-box !important;
+  overflow:visible !important;
+  visibility:visible !important;
+  opacity:1 !important;
+  z-index:60 !important;
+}
+#bottomnav .navitem,
+#bottomnav .navitem.active {
+  height:100% !important;
+  min-height:0 !important;
+  max-height:none !important;
+  align-self:stretch !important;
+  flex:1 1 0 !important;
+}
+@media(max-width:600px) {
+  #bottomnav.bottomnav:not([hidden]) {
+    flex:0 0 calc(64px + env(safe-area-inset-bottom,0px)) !important;
+    height:calc(64px + env(safe-area-inset-bottom,0px)) !important;
+    min-height:calc(64px + env(safe-area-inset-bottom,0px)) !important;
+    max-height:calc(64px + env(safe-area-inset-bottom,0px)) !important;
+    padding:3px 10px env(safe-area-inset-bottom,0px) !important;
+    margin:0 !important;
+  }
+  #bottomnav .navitem,
+  #bottomnav .navitem.active {
+    height:100% !important;
+    min-height:0 !important;
+    max-height:none !important;
   }
 }
 
@@ -3100,7 +3144,7 @@ function renderTopbar(title){
   el.innerHTML=`<div class="topbar-screenbar home-topbar"><div class="home-topbar-actions"><button class="icon-btn" type="button" data-go="profile" aria-label="الحساب">${uiIcon('user',23)}</button><button class="icon-btn" type="button" data-go="notifications" aria-label="الإشعارات">${uiIcon('bell',23)}${db.unread>0?'<span class="home-notification-dot" aria-hidden="true"></span>':''}</button></div></div>`;
   return;
  }
- el.innerHTML=`<div class="topbar-screenbar"><strong class="topbar-screen-title">${escapeHtml(String(title||'سهم'))}</strong><button class="icon-btn topbar-back" type="button" data-action="back" aria-label="رجوع">${uiIcon('back',22)}</button></div>`;
+ el.innerHTML=`<div class="topbar-screenbar"><strong class="topbar-screen-title">${escapeHtml(String(title||'سهم'))}</strong><button class="icon-btn topbar-back" type="button" data-action="back" aria-label="رجوع">${uiIcon('back-screen',22)}</button></div>`;
 }
 function nav(active){const items=[['groups','groups','الجمعيات'],['home','home','الرئيسية'],['wall','messages','الدردشات']];const bar=$('#bottomnav');bar.hidden=false;bar.removeAttribute('hidden');bar.setAttribute('aria-hidden','false');bar.style.display='flex';bar.style.visibility='visible';bar.style.opacity='1';bar.innerHTML=items.map(([s,i,t])=>`<button class="navitem ${active===s?'active':''}" data-go="${s}" aria-label="${t}" ${active===s?'aria-current="page"':''}><span class="ni">${uiIcon(i,23)}</span><span>${t}</span></button>`).join('')}
 function shell(title,active,html){renderTopbar(title);nav(active);const screen=$('#screen');screen.className='screen'+(active==='home'?' home-screen':'')+(screenName==='create-group'?' create-group-screen':'');screen.innerHTML=html;if(active!=='home'&&homeSlideTimer){clearInterval(homeSlideTimer);homeSlideTimer=null}}function auth(html){
