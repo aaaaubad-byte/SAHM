@@ -2107,33 +2107,7 @@ body {
     max-height: 70px;
     align-self: flex-start;
   }
-}  #topbar.topbar {
-    flex-basis: calc(70px + env(safe-area-inset-top,0px));
-    height: calc(70px + env(safe-area-inset-top,0px));
-    min-height: calc(70px + env(safe-area-inset-top,0px));
-    padding-top: env(safe-area-inset-top,0px);
-  }
-  #screen.screen {
-    padding-bottom: calc(92px + env(safe-area-inset-bottom,0px));
-  }
-  #bottomnav.bottomnav:not([hidden]) {
-    position: absolute;
-    left: 13px;
-    right: 13px;
-    bottom: calc(9px + env(safe-area-inset-bottom,0px));
-    width: auto;
-    height: 66px;
-    min-height: 66px;
-    max-height: 66px;
-    flex: none;
-    margin: 0;
-    padding: 5px 8px;
-    border: 1px solid #e5eaf1;
-    border-radius: var(--radius-card);
-    background: #fff;
-    box-shadow: 0 7px 24px rgba(28,48,83,.13);
-  }
-}
+/* Removed obsolete absolute-positioned footer override; footer is a flex child. */
 
 
 
@@ -2993,13 +2967,37 @@ body {
 }
 
 
-/* Final layout authority: keep the footer navigation fully inside the app shell. */
+/* Single authoritative app-shell layout: header, scrollable content, persistent footer. */
+#app.phone {
+  display:flex !important;
+  flex-direction:column !important;
+  min-height:0 !important;
+  overflow:hidden !important;
+}
+#topbar.topbar {
+  position:relative !important;
+  flex:0 0 56px !important;
+  height:56px !important;
+  min-height:56px !important;
+  order:0 !important;
+}
+#screen.screen {
+  position:relative !important;
+  flex:1 1 0% !important;
+  height:0 !important;
+  min-height:0 !important;
+  max-height:none !important;
+  overflow-x:hidden !important;
+  overflow-y:auto !important;
+  order:1 !important;
+}
 #bottomnav.bottomnav:not([hidden]) {
   position:relative !important;
   inset:auto !important;
   display:flex !important;
   flex:0 0 64px !important;
   align-self:stretch !important;
+  order:2 !important;
   width:100% !important;
   height:64px !important;
   min-height:64px !important;
@@ -3020,19 +3018,24 @@ body {
   flex:1 1 0 !important;
 }
 @media(max-width:600px) {
+  #topbar.topbar {
+    flex-basis:calc(56px + env(safe-area-inset-top,0px)) !important;
+    height:calc(56px + env(safe-area-inset-top,0px)) !important;
+    min-height:calc(56px + env(safe-area-inset-top,0px)) !important;
+    padding-top:env(safe-area-inset-top,0px) !important;
+  }
+  #screen.screen {
+    flex:1 1 0% !important;
+    min-height:0 !important;
+    height:0 !important;
+    padding-bottom:16px !important;
+  }
   #bottomnav.bottomnav:not([hidden]) {
     flex:0 0 calc(64px + env(safe-area-inset-bottom,0px)) !important;
     height:calc(64px + env(safe-area-inset-bottom,0px)) !important;
     min-height:calc(64px + env(safe-area-inset-bottom,0px)) !important;
     max-height:calc(64px + env(safe-area-inset-bottom,0px)) !important;
     padding:3px 10px env(safe-area-inset-bottom,0px) !important;
-    margin:0 !important;
-  }
-  #bottomnav .navitem,
-  #bottomnav .navitem.active {
-    height:100% !important;
-    min-height:0 !important;
-    max-height:none !important;
   }
 }
 
