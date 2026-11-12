@@ -3087,7 +3087,10 @@ function header(title,sub=''){
 }
 function renderTopbar(title){
  const el=$('#topbar');
- if(screenName==='home'){el.hidden=true;el.style.display='none';el.innerHTML='';el.removeAttribute('aria-label');return;}
+ const authScreens=['welcome','phone','otp','profile-setup','logged-out'];
+ if(screenName==='home'||authScreens.includes(screenName)){
+  el.hidden=true;el.style.display='none';el.innerHTML='';el.removeAttribute('aria-label');return;
+ }
  el.hidden=false;el.removeAttribute('hidden');el.style.setProperty('display','flex','important');el.style.visibility='visible';el.setAttribute('aria-label','الشريط العلوي');
  el.innerHTML=`<div class="topbar-screenbar"><strong class="topbar-screen-title">${escapeHtml(String(title||'سهم'))}</strong><button class="icon-btn topbar-back" type="button" data-action="back" aria-label="رجوع">${uiIcon('back-screen',22)}</button></div>`;
 }
