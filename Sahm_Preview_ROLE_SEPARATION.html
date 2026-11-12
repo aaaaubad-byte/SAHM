@@ -740,6 +740,33 @@ html,body{height:100%;min-height:100%;overflow:hidden}
 .activity-arrow{color:#98a4b5;display:grid;place-items:center;transform:rotate(180deg)}
 @media(max-height:740px){.home-carousel{height:112px}.home-summary{margin-bottom:7px}.home-create-card{height:53px;min-height:53px;margin-bottom:8px!important}.home-shortcuts{gap:8px;margin-bottom:9px!important}.home-shortcut{aspect-ratio:1.7/1;gap:7px}.shortcut-icon{width:37px;height:37px}.activity-list{gap:6px}.activity-card{min-height:59px;padding:8px 10px}.activity-icon{width:35px;height:35px;flex-basis:35px}}
 
+
+/* Final home-card correction: remove the shortcut top stripes and give create-group its own light accent. */
+.home-shortcut,
+.home-shortcut.managed,
+.home-shortcut.joined{
+  border-top:1px solid #d4deed!important;
+}
+.home-shortcut::before,
+.home-shortcut.managed::before,
+.home-shortcut.joined::before{
+  content:none!important;
+  display:none!important;
+}
+.home-create-card{
+  background:linear-gradient(110deg,#fff0e6 0%,#fff7f1 68%,#fffdfa 100%)!important;
+  border:1px solid #f0d8c7!important;
+  border-right:4px solid #df9b70!important;
+  color:#60432f!important;
+  box-shadow:0 3px 7px rgba(131,78,43,.045),0 8px 18px rgba(131,78,43,.065),inset 0 1px 0 #fff!important;
+}
+.create-card-icon{
+  background:linear-gradient(145deg,#ffe4d2,#f8d2b9)!important;
+  color:#a85f37!important;
+  box-shadow:inset 0 1px 2px rgba(168,95,55,.12),0 2px 5px rgba(168,95,55,.08)!important;
+}
+.home-create-card strong{color:#68452f!important}
+.create-card-arrow{color:#a36d4d!important}
 </style></head>
 <body><noscript><main dir="rtl" style="font-family:Arial,sans-serif;padding:24px;color:#142f39"><h1>سهم</h1></main></noscript><div class="workspace"><div class="phone" id="app">
 <div class="statusbar" aria-hidden="true"></div>
