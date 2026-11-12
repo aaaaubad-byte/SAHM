@@ -2381,6 +2381,138 @@ body {
     box-shadow: 0 7px 24px rgba(28,48,83,.13);
   }
 }
+
+
+/* Sahm visual system v2: direct line icons and restrained, consistent corners. */
+:root {
+  --radius-card: 12px;
+  --radius-control: 10px;
+  --radius-small: 8px;
+  --radius: var(--radius-card);
+}
+
+/* Icon glyphs sit directly on the surface; remove decorative icon containers. */
+.summary-icon,
+.shortcut-icon,
+.home-shortcut.managed .shortcut-icon,
+.home-shortcut.joined .shortcut-icon,
+.activity-heading-icon,
+.activity-icon,
+.create-card-icon,
+.icon-btn,
+#topbar .topbar-icons .icon-btn {
+  width: auto !important;
+  height: auto !important;
+  min-width: 0 !important;
+  min-height: 0 !important;
+  flex: 0 0 auto;
+  padding: 0 !important;
+  border: 0 !important;
+  border-radius: 0 !important;
+  background: transparent !important;
+  box-shadow: none !important;
+  filter: none !important;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* Keep practical touch targets on icon buttons without drawing a bubble. */
+.icon-btn,
+#topbar .topbar-icons .icon-btn {
+  width: 40px !important;
+  height: 40px !important;
+  min-width: 40px !important;
+  min-height: 40px !important;
+  color: inherit;
+}
+
+.summary-icon { color: #fff !important; }
+.home-shortcut.managed .shortcut-icon { color: #3158d6 !important; }
+.home-shortcut.joined .shortcut-icon { color: #a67532 !important; }
+.activity-icon.invite { color: #3158d6 !important; }
+.activity-icon.joined { color: #43836d !important; }
+.activity-icon.payment { color: #a67532 !important; }
+.activity-heading-icon { color: var(--primary) !important; }
+.create-card-icon { color: #a85f37 !important; }
+
+.summary-icon svg,
+.shortcut-icon svg,
+.activity-heading-icon svg,
+.activity-icon svg,
+.create-card-icon svg,
+.icon-btn svg,
+#topbar .topbar-icons .icon-btn svg {
+  display: block;
+  width: 27px;
+  height: 27px;
+  fill: none !important;
+  stroke: currentColor !important;
+  stroke-width: 1.95 !important;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  filter: none !important;
+}
+.activity-heading-icon svg { width: 22px; height: 22px; }
+.activity-icon svg { width: 24px; height: 24px; }
+.create-card-icon svg { width: 29px; height: 29px; }
+.icon-btn svg,
+#topbar .topbar-icons .icon-btn svg { width: 21px; height: 21px; }
+
+/* Unified corner scale: cards 12px, controls 10px, compact labels 8px. */
+.card,
+.auth-card,
+.group-card,
+.manager-card,
+.member-card,
+.manager-panel,
+.member-panel,
+.vote-panel,
+.activity-card,
+.home-create-card,
+.modal-card,
+.panel-card,
+.receipt-card,
+.settings-card {
+  border-radius: var(--radius-card) !important;
+}
+button,
+.btn,
+.field input,
+.field select,
+.field textarea,
+.searchbox,
+input,
+select,
+textarea,
+.form-control {
+  border-radius: var(--radius-control) !important;
+}
+.pill,
+.badge,
+.status-badge,
+.tag,
+.chip {
+  border-radius: var(--radius-small) !important;
+}
+
+/* Keep the floating navigation shape subtle and preserve its existing layout. */
+#bottomnav {
+  border-radius: 12px 12px 0 0;
+}
+#bottomnav .navitem,
+#bottomnav .navitem.active {
+  border-radius: 0 !important;
+  background: transparent !important;
+  box-shadow: none !important;
+}
+#bottomnav .navitem .ni svg {
+  stroke-width: 1.95;
+}
+#bottomnav .navitem.active .ni svg {
+  stroke-width: 2.2;
+}
+
 </style></head>
 <body><noscript><main dir="rtl" style="font-family:Arial,sans-serif;padding:24px;color:#142f39"><h1>سهم</h1></main></noscript><div class="workspace"><div class="phone" id="app">
 <div class="statusbar" aria-hidden="true"></div>

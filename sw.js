@@ -1,5 +1,5 @@
 /* Sahm PWA — automatically activate new builds; always prefer fresh app documents. */
-const CACHE_NAME = 'sahm-pwa-v19';
+const CACHE_NAME = 'sahm-pwa-v20';
 const APP_SHELL = [
   '/',
   '/Sahm_Preview_ROLE_SEPARATION.html',
