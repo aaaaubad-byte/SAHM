@@ -2959,7 +2959,7 @@ function header(title,sub=''){
 }
 function renderTopbar(){const el=$('#topbar');el.hidden=false;el.removeAttribute('hidden');el.style.setProperty('display','flex','important');el.style.visibility='visible';el.setAttribute('aria-label','الشريط العلوي');el.innerHTML=`<div class="topbar-icons"><button class="icon-btn" data-go="profile" aria-label="الحساب">${uiIcon('user',22)}</button><button class="icon-btn" data-go="notifications" aria-label="الإشعارات">${uiIcon('bell',22)}${db.unread?'<i class="dot"></i>':''}</button></div>`}
 function nav(active){const items=[['groups','groups','الجمعيات'],['home','home','الرئيسية'],['wall','messages','الدردشات']];const bar=$('#bottomnav');bar.hidden=false;bar.removeAttribute('hidden');bar.setAttribute('aria-hidden','false');bar.style.display='flex';bar.style.visibility='visible';bar.style.opacity='1';bar.innerHTML=items.map(([s,i,t])=>`<button class="navitem ${active===s?'active':''}" data-go="${s}" aria-label="${t}" ${active===s?'aria-current="page"':''}><span class="ni">${uiIcon(i,23)}</span><span>${t}</span></button>`).join('')}
-function shell(title,active,html){renderTopbar();nav(active);const screen=$('#screen');screen.className='screen'+(active==='home'?' home-screen':'');screen.innerHTML=html;if(active!=='home'&&homeSlideTimer){clearInterval(homeSlideTimer);homeSlideTimer=null}}function auth(html){$('#topbar').hidden=true;$('#topbar').style.display='none';$('#bottomnav').hidden=true;$('#bottomnav').setAttribute('aria-hidden','true');$('#bottomnav').style.display='none';$('#screen').className='auth-screen';$('#screen').innerHTML=html}
+function shell(title,active,html){renderTopbar();nav(active);const screen=$('#screen');screen.className='screen'+(active==='home'?' home-screen':'')+(screenName==='create-group'?' create-group-screen':'');screen.innerHTML=html;if(active!=='home'&&homeSlideTimer){clearInterval(homeSlideTimer);homeSlideTimer=null}}function auth(html){$('#topbar').hidden=true;$('#topbar').style.display='none';$('#bottomnav').hidden=true;$('#bottomnav').setAttribute('aria-hidden','true');$('#bottomnav').style.display='none';$('#screen').className='auth-screen';$('#screen').innerHTML=html}
 function groupCard(g){
  const manager=g.role==='manager',total=Number(g.total)||0,shares=Number(g.shares)||0,percent=total?Math.min(100,Math.round(shares/total*100)):0;
  return `<article class="card group-card ${manager?'manager-card':'member-card'}" data-action="open-group" data-id="${escapeHtml(g.id)}" tabindex="0" role="button" aria-label="فتح جمعية ${escapeHtml(g.name)}">
@@ -3022,8 +3022,8 @@ function setHomeSlide(index){const ss=document.querySelectorAll('#homeCarousel .
    <div class="create-submit-area"><button class="btn primary full create-submit" type="submit"><span>${uiIcon('plus-circle',18)}</span> إنشاء الجمعية</button><p>ستتمكن بعد الإنشاء من دعوة المشاركين ومتابعة الجمعية</p></div>
   </form>
  </div>`);
- $('#screen').classList.add('create-group-screen');
 }
+
 function groupDetail(){
 const g=currentGroup(),manager=isManager(),myShares=g.myShares||1;
 const personalPayments=db.payments.filter(p=>p.group===g.id&&p.person===db.user.name);
