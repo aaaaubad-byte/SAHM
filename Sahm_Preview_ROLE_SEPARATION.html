@@ -598,6 +598,43 @@ html,body{height:100%;min-height:100%;overflow:hidden}
 @media(prefers-reduced-motion:reduce){
  .home-shortcut,.home-create-card{transition:none!important}
 }
+
+/* Home shortcut accent — tapered path from the right edge into the bottom edge. */
+.home-shortcut{
+ isolation:isolate!important;
+ overflow:hidden!important;
+}
+.home-shortcut.managed,
+.home-shortcut.joined{
+ border-top:1px solid #d9e2f1!important;
+}
+.home-shortcut::before{
+ content:none!important;
+ display:none!important;
+}
+.home-shortcut .shortcut-accent{
+ position:absolute;
+ inset:0;
+ z-index:0;
+ display:block;
+ width:100%;
+ height:100%;
+ pointer-events:none;
+}
+.home-shortcut .shortcut-accent svg{
+ display:block;
+ width:100%;
+ height:100%;
+ overflow:visible;
+}
+.home-shortcut .shortcut-icon,
+.home-shortcut strong{
+ position:relative;
+ z-index:1;
+}
+.home-shortcut .shortcut-arrow{
+ z-index:1;
+}
 </style></head>
 <body><noscript><main dir="rtl" style="font-family:Arial,sans-serif;padding:24px;color:#142f39"><h1>سهم</h1></main></noscript><div class="workspace"><div class="phone" id="app">
 <div class="statusbar" aria-hidden="true"></div>
@@ -708,8 +745,8 @@ function home(){
  <div class="home-carousel" id="homeCarousel" aria-live="polite">${slides.map((x,i)=>`<article class="summary-slide ${x.tone} ${i===0?'active':''}" data-slide="${i}" aria-hidden="${i!==0}"><span class="summary-icon">${uiIcon(x.icon,27)}</span><span class="summary-copy"><strong>${x.title}</strong><b>${x.value}</b></span><span class="summary-index">0${i+1} / 03</span></article>`).join('')}</div>
  <div class="home-dots" role="group" aria-label="التنقل بين الملخص">${slides.map((x,i)=>`<button type="button" class="${i===0?'active':''}" data-action="home-slide" data-index="${i}" aria-label="عرض ${x.title}" aria-pressed="${i===0}"></button>`).join('')}</div></section>
  <section class="home-shortcuts" aria-label="الجمعيات">
- <button class="home-shortcut managed" data-action="home-managed"><span class="shortcut-icon">${uiIcon('users',29)}</span><strong>جمعيات أديرها</strong><span class="shortcut-arrow">${uiIcon('arrow',16)}</span></button>
- <button class="home-shortcut joined" data-action="home-member"><span class="shortcut-icon">${uiIcon('user-check',29)}</span><strong>جمعيات أشارك فيها</strong><span class="shortcut-arrow">${uiIcon('arrow',16)}</span></button></section>
+ <button class="home-shortcut managed" data-action="home-managed"><span class="shortcut-accent" aria-hidden="true"><svg viewBox="0 0 100 100" preserveAspectRatio="none" focusable="false"><defs><linearGradient id="managedShortcutAccent" x1="100%" y1="0%" x2="0%" y2="100%"><stop offset="0%" stop-color="#3158d6" stop-opacity=".34"/><stop offset="38%" stop-color="#5278df" stop-opacity=".86"/><stop offset="68%" stop-color="#7895ed" stop-opacity=".96"/><stop offset="100%" stop-color="#3158d6" stop-opacity=".28"/></linearGradient></defs><path d="M96.6 -1 C96.6 22 97.1 45 95.3 65 C94.2 76.5 89.3 82.9 78 85.4 C57 90 31 94.3 7 96.3 C31 95 56 91.6 78.5 88.7 C92.2 86.8 98.8 78.8 99.1 64.5 C99.8 43 98.2 20 97.9 -1 Z" fill="url(#managedShortcutAccent)"/></svg></span><span class="shortcut-icon">${uiIcon('users',29)}</span><strong>جمعيات أديرها</strong><span class="shortcut-arrow">${uiIcon('arrow',16)}</span></button>
+ <button class="home-shortcut joined" data-action="home-member"><span class="shortcut-accent" aria-hidden="true"><svg viewBox="0 0 100 100" preserveAspectRatio="none" focusable="false"><defs><linearGradient id="joinedShortcutAccent" x1="100%" y1="0%" x2="0%" y2="100%"><stop offset="0%" stop-color="#a67532" stop-opacity=".32"/><stop offset="38%" stop-color="#c18d43" stop-opacity=".86"/><stop offset="68%" stop-color="#e2bd7d" stop-opacity=".96"/><stop offset="100%" stop-color="#a67532" stop-opacity=".28"/></linearGradient></defs><path d="M96.6 -1 C96.6 22 97.1 45 95.3 65 C94.2 76.5 89.3 82.9 78 85.4 C57 90 31 94.3 7 96.3 C31 95 56 91.6 78.5 88.7 C92.2 86.8 98.8 78.8 99.1 64.5 C99.8 43 98.2 20 97.9 -1 Z" fill="url(#joinedShortcutAccent)"/></svg></span><span class="shortcut-icon">${uiIcon('user-check',29)}</span><strong>جمعيات أشارك فيها</strong><span class="shortcut-arrow">${uiIcon('arrow',16)}</span></button></section>
  <button class="home-create-card" data-go="create-group"><span class="create-card-icon">${uiIcon('plus-circle',27)}</span><strong>جمعية جديدة</strong><span class="create-card-arrow">${uiIcon('arrow',18)}</span></button>
  <section class="latest-activity"><h2>أحدث النشاط</h2><div class="latest-activity-space" aria-hidden="true"></div></section>`);
  const c=$('#homeCarousel');if(c){let x=0;c.addEventListener('pointerdown',e=>{x=e.clientX;c.setPointerCapture?.(e.pointerId)});c.addEventListener('pointerup',e=>{let d=e.clientX-x;if(Math.abs(d)>35)setHomeSlide(homeSlideIndex+(d<0?1:-1))})}
