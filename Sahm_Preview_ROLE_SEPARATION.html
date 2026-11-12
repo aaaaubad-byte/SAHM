@@ -2549,6 +2549,119 @@ body {
   top:auto !important;
   transform:none !important;
 }
+
+
+/* Navigation polish: compact footer and one consistent, unframed line-icon system. */
+#topbar .topbar-icons {
+  justify-content:flex-start !important;
+  gap:12px !important;
+  direction:rtl !important;
+}
+#topbar .icon-btn,
+#topbar .icon-btn:active,
+#topbar .icon-btn:hover {
+  width:38px !important;
+  height:38px !important;
+  min-width:38px !important;
+  min-height:38px !important;
+  padding:0 !important;
+  display:inline-flex !important;
+  align-items:center !important;
+  justify-content:center !important;
+  color:#3158d6 !important;
+  background:transparent !important;
+  border:0 !important;
+  border-radius:0 !important;
+  box-shadow:none !important;
+  filter:none !important;
+  transform:none !important;
+  -webkit-tap-highlight-color:transparent;
+}
+#topbar .icon-btn::before,
+#topbar .icon-btn::after {
+  content:none !important;
+  display:none !important;
+}
+#topbar .icon-btn svg,
+#bottomnav .navitem .ni svg {
+  display:block !important;
+  width:22px !important;
+  height:22px !important;
+  fill:none !important;
+  stroke:currentColor !important;
+  stroke-width:1.9 !important;
+  stroke-linecap:round !important;
+  stroke-linejoin:round !important;
+  filter:none !important;
+  transition:color .16s ease !important;
+}
+#topbar .icon-btn svg { width:22px !important;height:22px !important; }
+#bottomnav .navitem,
+#bottomnav .navitem.active {
+  gap:3px !important;
+  justify-content:center !important;
+  color:#8793a6 !important;
+  font-weight:600 !important;
+  background:transparent !important;
+  box-shadow:none !important;
+  transform:none !important;
+}
+#bottomnav .navitem .ni {
+  width:25px !important;
+  height:25px !important;
+  display:grid !important;
+  place-items:center !important;
+  line-height:1 !important;
+  font-size:0 !important;
+  background:transparent !important;
+  box-shadow:none !important;
+}
+#bottomnav .navitem.active {
+  color:#3158d6 !important;
+  font-weight:800 !important;
+}
+#bottomnav .navitem > span:last-child {
+  font-size:9px !important;
+  line-height:1.25 !important;
+  white-space:nowrap !important;
+}
+#bottomnav .navitem.active .ni svg {
+  stroke-width:1.9 !important;
+}
+#bottomnav.bottomnav:not([hidden]) {
+  height:62px !important;
+  min-height:62px !important;
+  max-height:62px !important;
+  flex:0 0 62px !important;
+  padding:3px 12px !important;
+  gap:6px !important;
+  border-radius:0 !important;
+  background:#fff !important;
+  box-shadow:0 -4px 12px rgba(24,41,75,.035) !important;
+}
+#bottomnav .navitem,
+#bottomnav .navitem.active {
+  height:54px !important;
+  min-height:54px !important;
+  max-height:54px !important;
+  padding:2px 0 !important;
+}
+@media(max-width:600px) {
+  #bottomnav.bottomnav:not([hidden]) {
+    height:calc(60px + env(safe-area-inset-bottom,0px)) !important;
+    min-height:calc(60px + env(safe-area-inset-bottom,0px)) !important;
+    max-height:calc(60px + env(safe-area-inset-bottom,0px)) !important;
+    flex-basis:calc(60px + env(safe-area-inset-bottom,0px)) !important;
+    padding:2px 12px env(safe-area-inset-bottom,0px) !important;
+  }
+  #bottomnav .navitem,
+  #bottomnav .navitem.active {
+    height:54px !important;
+    min-height:54px !important;
+    max-height:54px !important;
+  }
+}
+
 </style></head>
 <body><noscript><main dir="rtl" style="font-family:Arial,sans-serif;padding:24px;color:#142f39"><h1>سهم</h1></main></noscript><div class="workspace"><div class="phone" id="app">
 <div id="topbar" class="topbar" style="display:none"></div><main id="screen" class="auth-screen">
