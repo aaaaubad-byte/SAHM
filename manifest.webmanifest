@@ -9,7 +9,7 @@
   "scope": "/",
   "display": "standalone",
   "orientation": "portrait",
-  "background_color": "#f3f6f5",
-  "theme_color": "#142f39",
+  "background_color": "#f4f6fa",
+  "theme_color": "#3158d6",
   "icons": [{"src":"/icons/sahm.svg","sizes":"any","type":"image/svg+xml","purpose":"any maskable"}]
 }
