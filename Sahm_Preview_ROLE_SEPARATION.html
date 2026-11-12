@@ -2169,6 +2169,88 @@ body {
 
 @media(max-width:600px){.phone{border-radius:0;}}
 
+
+/* Home quick actions: integrated, embossed glass controls beneath the group cards. */
+.home-screen .home-shortcuts {
+  order: 0 !important;
+  margin: 0 0 12px !important;
+}
+.home-screen .home-actions {
+  order: 1 !important;
+  flex: none;
+  display: grid;
+  grid-template-columns: repeat(2,minmax(0,1fr));
+  align-items: center;
+  gap: 10px;
+  margin: 0 0 17px;
+  padding: 3px 5px 5px;
+}
+.home-screen .home-action-btn {
+  min-width: 0;
+  min-height: 78px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 7px;
+  padding: 7px 5px;
+  background: transparent !important;
+  border: 0 !important;
+  border-radius: 0 !important;
+  color: #405777;
+  box-shadow: none !important;
+  text-align: center;
+  -webkit-tap-highlight-color: transparent;
+  transition: transform .16s ease,filter .16s ease;
+}
+.home-screen .home-action-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 39px;
+  height: 39px;
+  color: #5573a6;
+  filter: drop-shadow(0 1px 0 rgba(255,255,255,.98)) drop-shadow(0 -1px 1px rgba(70,91,128,.19));
+}
+.home-screen .home-action-icon svg {
+  width: 31px;
+  height: 31px;
+  stroke-width: 1.8;
+}
+.home-screen .home-action-icon.create { color: #5575ad; }
+.home-screen .home-action-icon.join { color: #7185a4; }
+.home-screen .home-action-btn strong {
+  color: #536784;
+  font-size: 11px;
+  font-weight: 800;
+  line-height: 1.4;
+  text-shadow: 0 1px 0 rgba(255,255,255,.95),0 -1px 1px rgba(70,91,128,.16);
+}
+.home-screen .home-action-btn:active {
+  transform: translateY(1px) scale(.98);
+  filter: brightness(.96);
+}
+.home-screen .home-action-btn:focus-visible {
+  outline: 2px solid rgba(49,88,214,.38);
+  outline-offset: 2px;
+}
+.home-screen .home-create-card { display: none !important; }
+.home-screen .latest-activity { order: 2 !important; }
+@media(max-height:700px) {
+  .home-screen .home-actions {
+    margin-bottom: 10px;
+    gap: 6px;
+  }
+  .home-screen .home-action-btn {
+    min-height: 68px;
+    gap: 4px;
+  }
+}
+@media(max-width:360px) {
+  .home-screen .home-actions { padding-inline: 0; }
+  .home-screen .home-action-btn strong { font-size: 10px; }
+}
+
 </style></head>
 <body><noscript><main dir="rtl" style="font-family:Arial,sans-serif;padding:24px;color:#142f39"><h1>سهم</h1></main></noscript><div class="workspace"><div class="phone" id="app">
 <div id="topbar" class="topbar" style="display:none"></div><main id="screen" class="auth-screen">
@@ -2218,6 +2300,7 @@ function uiIcon(name,size=20){
   receipt:'M5 3h14v18l-3-2-4 2-4-2-3 2V3zm4 5h6m-6 4h6m-6 4h4',
   layers:'m12 3 9 5-9 5-9-5 9-5zm-9 9 9 5 9-5m-18 5 9 5 9-5',
   'plus-circle':'M12 8v8m-4-4h8m5 0a9 9 0 1 1-18 0 9 9 0 0 1 18 0z',
+  link:'M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71m2.25 5.82a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71',
   messages:'M21 11.5a8.5 8.5 0 0 1-8.5 8.5 9 9 0 0 1-4-.9L3 21l1.9-5.5a9 9 0 0 1-.9-4A8.5 8.5 0 0 1 12.5 3h.5a8.5 8.5 0 0 1 8 8v.5zM8 11h8m-8 4h5',
   wall:'M4 5h16v11H9l-5 4V5zm4 4h8m-8 4h5',
   bell:'M18 8a6 6 0 0 0-12 0c0 7-3 7-3 9h18c0-2-3-2-3-9m-8 12a2 2 0 0 0 4 0',
@@ -2279,10 +2362,13 @@ function home(){
  <section class="home-summary" aria-label="ملخص الجمعيات">
  <div class="home-carousel" id="homeCarousel" aria-live="polite">${slides.map((x,i)=>`<article class="summary-slide ${x.tone} ${i===0?'active':''}" data-slide="${i}" aria-hidden="${i!==0}"><span class="summary-icon">${uiIcon(x.icon,27)}</span><span class="summary-copy"><strong>${x.title}</strong><b>${x.value}</b></span><span class="summary-index">0${i+1} / 03</span></article>`).join('')}</div>
  <div class="home-dots" role="group" aria-label="التنقل بين الملخص">${slides.map((x,i)=>`<button type="button" class="${i===0?'active':''}" data-action="home-slide" data-index="${i}" aria-label="عرض ${x.title}" aria-pressed="${i===0}"></button>`).join('')}</div></section>
- <button class="home-create-card" data-go="create-group"><span class="create-card-icon">${uiIcon('plus-circle',27)}</span><strong>جمعية جديدة</strong><span class="create-card-arrow">${uiIcon('arrow',18)}</span></button>
  <section class="home-shortcuts" aria-label="الجمعيات">
  <button class="home-shortcut managed" data-action="home-managed"><span class="shortcut-icon">${uiIcon('users',29)}</span><strong>جمعيات أديرها</strong><span class="shortcut-arrow">${uiIcon('arrow',16)}</span></button>
  <button class="home-shortcut joined" data-action="home-member"><span class="shortcut-icon">${uiIcon('user-check',29)}</span><strong>جمعيات أشارك فيها</strong><span class="shortcut-arrow">${uiIcon('arrow',16)}</span></button></section>
+ <section class="home-actions" aria-label="إجراءات الجمعيات">
+ <button class="home-action-btn" data-go="create-group"><span class="home-action-icon create">${uiIcon('plus-circle',31)}</span><strong>جمعية جديدة</strong></button>
+ <button class="home-action-btn" data-go="join-group"><span class="home-action-icon join">${uiIcon('link',31)}</span><strong>انضمام لجمعية</strong></button>
+ </section>
  <section class="latest-activity" aria-label="أحدث النشاط">
  <h2><span class="activity-heading-icon">${uiIcon('activity',17)}</span> أحدث النشاط</h2>
  <div class="activity-list">
