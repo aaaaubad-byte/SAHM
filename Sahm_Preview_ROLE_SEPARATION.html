@@ -2511,6 +2511,44 @@ body {
   content:">";
   display:block;
 }
+
+/* Keep the activity heading fixed while its own list scrolls independently. */
+.home-screen .latest-activity {
+  display:flex !important;
+  flex:1 1 0 !important;
+  flex-direction:column !important;
+  min-height:0 !important;
+  overflow:hidden !important;
+}
+.home-screen .latest-activity h2 {
+  flex:0 0 auto !important;
+}
+.home-screen .latest-activity .activity-list {
+  flex:1 1 auto !important;
+  min-height:0 !important;
+  overflow-x:hidden !important;
+  overflow-y:auto !important;
+  overscroll-behavior:contain;
+  -webkit-overflow-scrolling:touch;
+  scrollbar-width:thin;
+  scrollbar-color:#c4cfdf transparent;
+  padding:1px 2px 8px;
+}
+.home-screen .latest-activity .activity-list::-webkit-scrollbar {
+  width:3px;
+}
+.home-screen .latest-activity .activity-list::-webkit-scrollbar-thumb {
+  background:#c4cfdf;
+  border-radius:8px;
+}
+/* Place the > marker close to the lower-left corner with equal insets. */
+.home-screen .home-shortcuts > .home-shortcut .shortcut-arrow {
+  left:8px !important;
+  right:auto !important;
+  bottom:8px !important;
+  top:auto !important;
+  transform:none !important;
+}
 </style></head>
 <body><noscript><main dir="rtl" style="font-family:Arial,sans-serif;padding:24px;color:#142f39"><h1>سهم</h1></main></noscript><div class="workspace"><div class="phone" id="app">
 <div id="topbar" class="topbar" style="display:none"></div><main id="screen" class="auth-screen">
