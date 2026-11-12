@@ -662,6 +662,43 @@ html,body{height:100%;min-height:100%;overflow:hidden}
 /* Keep shortcut accent flush with the card's right and bottom edges. */
 .home-shortcut .shortcut-accent{inset:0!important}
 .home-shortcut .shortcut-accent svg{overflow:hidden!important}
+
+/* Requested refinement: keep the create-group card color, remove only its gold side stripe. */
+.home-create-card::before{
+ content:none!important;
+ display:none!important;
+}
+
+/* Bottom navigation returns to a full-width, fixed-in-layout bar (not floating). */
+#app.phone{overflow:hidden!important}
+#bottomnav.bottomnav:not([hidden]){
+ position:relative!important;
+ inset:auto!important;
+ left:auto!important;right:auto!important;bottom:auto!important;
+ width:100%!important;
+ flex:0 0 calc(78px + env(safe-area-inset-bottom))!important;
+ flex-basis:calc(78px + env(safe-area-inset-bottom))!important;
+ height:calc(78px + env(safe-area-inset-bottom))!important;
+ min-height:calc(78px + env(safe-area-inset-bottom))!important;
+ max-height:calc(78px + env(safe-area-inset-bottom))!important;
+ margin:0!important;
+ padding:8px 8px calc(8px + env(safe-area-inset-bottom))!important;
+ border:0!important;
+ border-top:1px solid #e2e8f1!important;
+ border-radius:0!important;
+ background:#fff!important;
+ box-shadow:0 -3px 12px rgba(24,41,75,.045)!important;
+ overflow:hidden!important;
+}
+#screen.screen{padding-bottom:calc(22px + env(safe-area-inset-bottom))!important}
+@media(max-width:600px){
+ #bottomnav.bottomnav:not([hidden]){
+  flex-basis:calc(78px + env(safe-area-inset-bottom))!important;
+  height:calc(78px + env(safe-area-inset-bottom))!important;
+  min-height:calc(78px + env(safe-area-inset-bottom))!important;
+  max-height:calc(78px + env(safe-area-inset-bottom))!important;
+ }
+}
 </style></head>
 <body><noscript><main dir="rtl" style="font-family:Arial,sans-serif;padding:24px;color:#142f39"><h1>سهم</h1></main></noscript><div class="workspace"><div class="phone" id="app">
 <div class="statusbar" aria-hidden="true"></div>
