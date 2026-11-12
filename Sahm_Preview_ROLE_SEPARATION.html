@@ -3079,6 +3079,7 @@ function back(){
  if(db.session&&screenName!=='home'){go('home');return}
  if(!db.session&&screenName!=='welcome'){go('welcome');return}
 }
+window.addEventListener('popstate',()=>{if(stack.length)restorePreviousScreen();});
 function toast(t){const el=$('#toast');el.textContent=t;el.classList.add('show');clearTimeout(toastTimer);toastTimer=setTimeout(()=>el.classList.remove('show'),2300)}
 function header(title,sub=''){
  // Screen titles and back navigation now live exclusively in the fixed app bar.
