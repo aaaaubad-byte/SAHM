@@ -862,7 +862,7 @@ function home(){
   <button class="activity-card" data-go="group-detail" data-id="G-2402"><span class="activity-icon invite">${uiIcon('user-plus',20)}</span><span class="activity-copy"><strong>دعوة مشاركة بواسطة مروان علي</strong><small>جمعية زملاء العمل <i>·</i> قبل ١٥ دقيقة</small></span><span class="activity-arrow">${uiIcon('arrow',16)}</span></button>
   <button class="activity-card" data-go="group-detail" data-id="G-2401"><span class="activity-icon joined">${uiIcon('user-check',20)}</span><span class="activity-copy"><strong>وافقت سارة أحمد على انضمامك للجمعية</strong><small>جمعية الأهل <i>·</i> قبل ساعة</small></span><span class="activity-arrow">${uiIcon('arrow',16)}</span></button>
   <button class="activity-card" data-go="receipts"><span class="activity-icon payment">${uiIcon('receipt',20)}</span><span class="activity-copy"><strong>تم اعتماد مساهمة سارة أحمد</strong><small>جمعية الأهل، الدورة الثالثة <i>·</i> أمس</small></span><span class="activity-arrow">${uiIcon('arrow',16)}</span></button>
- </div></section>`);;
+ </div></section>`);
  const c=$('#homeCarousel');if(c){let x=0;c.addEventListener('pointerdown',e=>{x=e.clientX;c.setPointerCapture?.(e.pointerId)});c.addEventListener('pointerup',e=>{let d=e.clientX-x;if(Math.abs(d)>35)setHomeSlide(homeSlideIndex+(d<0?1:-1))})}
  homeSlideTimer=setInterval(()=>setHomeSlide(homeSlideIndex+1),5000);
 }
