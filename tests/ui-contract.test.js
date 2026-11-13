@@ -9,6 +9,7 @@ const html = fs.readFileSync(path.join(ROOT, 'Sahm_Preview_ROLE_SEPARATION.html'
 const app = fs.readFileSync(path.join(ROOT, 'sahm-app.js'), 'utf8');
 const data = fs.readFileSync(path.join(ROOT, 'sahm-data.js'), 'utf8');
 const core = fs.readFileSync(path.join(ROOT, 'sahm-core.js'), 'utf8');
+const sw = fs.readFileSync(path.join(ROOT, 'sw.js'), 'utf8');
 
 function stringsFromArray(source, pattern) {
   const match = source.match(pattern);
@@ -75,4 +76,10 @@ test('obsolete parallel view-model collections and no-op route helpers are absen
   assert.doesNotMatch(html, /function\s+log\s*\(/);
   assert.doesNotMatch(html, /function\s+wall\s*\(\)\s*\{\s*chat\s*\(\)\s*\}/);
   assert.doesNotMatch(html, /\bstack\s*=\s*\[\]/);
+});
+
+test('navigation runtime is loaded in order and precached by the service worker', () => {
+  assert.ok(html.indexOf('<script src="/sahm-app.js"></script>') < html.indexOf('<script src="/sahm-navigation.js"></script>'));
+  assert.match(sw, /const CACHE_NAME = 'sahm-pwa-v23'/);
+  assert.match(sw, /APP_SHELL[\s\S]*?'\/sahm-navigation\.js'/);
 });
