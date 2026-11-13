@@ -130,8 +130,12 @@
 
   async function resetPassword(email) {
     var c = getClient();
+    var redirect = new URL(root.location.href);
+    redirect.hash = '';
+    redirect.searchParams.delete('code');
+    redirect.searchParams.set('auth_action', 'reset-password');
     var result = await c.auth.resetPasswordForEmail(String(email || '').trim().toLowerCase(), {
-      redirectTo: root.location.origin + root.location.pathname + root.location.search + '#reset-password'
+      redirectTo: redirect.toString()
     });
     if (result.error) throw result.error;
     return true;
