@@ -3332,7 +3332,7 @@ function load(){
    notifications:prefs.notifications!==false,biometric:!!prefs.biometric
   }),
   session:!!prefs.session,verified:!!prefs.verified,groups,participants,messages,wall,notifications,
-  unread:notifResult&&notifResult.ok?notifResult.unread:SahmApp.unreadNotifications(),
+  unread:notifResult&&notifResult.ok?notifResult.unread:SahmApp.unreadNotifications(),otp:'246810',
   receipts,invites,audit
  };
 }
@@ -3625,6 +3625,16 @@ function showModal(title,body,buttons=[['إغلاق','close','outline']]){$('#mo
 document.addEventListener('keydown',e=>{const card=e.target.closest?.('.group-card[role="button"]');if(card&&(e.key==='Enter'||e.key===' ')){e.preventDefault();card.click()}});
 function handleAppAction(action,el){
  const g=currentGroup();
+ if(action==='send-otp'){
+  const phone=normalizeInvitePhone($('#phoneInput')?.value||'');
+  if(phone.replace(/\D/g,'').length<8){toast('أدخل رقم هاتف صحيحاً');return}
+  db.user.phone=phone;db.otp='246810';save();toast('رمز المعاينة التجريبي: 246810');go('otp');return;
+ }
+ if(action==='verify-otp'){
+  if(String($('#otpInput')?.value||'').trim()!==String(db.otp||'246810')){toast('رمز التحقق غير صحيح. حاول مجدداً');return}
+  db.verified=true;save();go('profile-setup');return;
+ }
+ if(action==='resend-otp'){toast('رمز المعاينة التجريبي: 246810');return}
  if(action==='back'){back();return}if(action==='overlay-close'||action==='close'){closeModal();return}
  if(action==='create-next'){if(validateCreateStep(createWizardStep))setCreateWizardStep(createWizardStep+1);return}
  if(action==='create-prev'){setCreateWizardStep(createWizardStep-1);return}
