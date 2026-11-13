@@ -3344,6 +3344,14 @@ function save(){
  else if(result&&result.ok===false)toast('تعذر حفظ التفضيلات');
 }
 function refreshData(){const previous=currentGroupId;db=load();currentGroupId=db.groups.some(g=>g.id===previous)?previous:((db.groups[0]||{}).id||null);return db}
+function startRemoteRealtime(){
+ return SahmSupabaseData.startRealtime(()=>{
+  if(screenName==='chat')chat();
+  else if(screenName==='notifications')notifications();
+  else if(screenName==='home')home();
+ });
+}
+
 function currentGroup(){return db.groups.find(g=>g.id===currentGroupId)||db.groups[0]||null}
 function isManager(g=currentGroup()){return !!g&&g.role==='manager'}
 function statusText(s){return({PENDING_MEMBERS:'استقبال الأعضاء',READY_FOR_DRAW:'بانتظار موعد القرعة',ACTIVE_REVOLVING:'نشطة',COMPLETED:'مكتملة',due:'مستحق',paid:'مدفوع',late:'متأخر',upcoming:'لم يحن موعده بعد',pending:'معلقة',accepted:'مقبولة',cancelled:'ملغاة'})[s]||s}
@@ -3840,7 +3848,7 @@ document.addEventListener('submit',async e=>{
   try{
    const signed=await SahmSupabase.signIn(d.email,d.password);
    activeProfile=await SahmSupabase.profile(signed.user.id);
-   await SahmSupabaseData.init(activeProfile);SahmSupabaseData.install();db=load();currentGroupId=(db.groups[0]||{}).id||null;
+   await SahmSupabaseData.init(activeProfile);SahmSupabaseData.install();db=load();currentGroupId=(db.groups[0]||{}).id||null;startRemoteRealtime();
    db.session=true;db.verified=!!signed.user.email_confirmed_at;db.user=Object.assign(db.user,{id:signed.user.id,email:signed.user.email,name:activeProfile.fullName,phone:activeProfile.phone,city:activeProfile.city});
    if(!activeProfile.completed){resetNavigation('profile-setup',{});}
    else{resetNavigation(new URLSearchParams(location.search).get('invite')?'join-group':'home',{});toast('تم تسجيل الدخول بنجاح');}
