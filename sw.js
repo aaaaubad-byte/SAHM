@@ -3,6 +3,7 @@ const CACHE_NAME = 'sahm-pwa-v25';
 const APP_SHELL = [
   '/',
   '/Sahm_Preview_ROLE_SEPARATION.html',
+  '/terms.html',
   '/sahm-supabase.js',
   '/sahm-supabase-data.js',
   '/sahm-core.js',
