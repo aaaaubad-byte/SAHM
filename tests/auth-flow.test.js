@@ -24,6 +24,7 @@ test('login screen uses email and password with a create-account entry', () => {
   assert.match(screen, /id="loginPassword"[^>]*type="password"/);
   assert.match(screen, /تسجيل الدخول/);
   assert.match(screen, /data-go="register">إنشاء حساب/);
+  assert.match(screen, /class="link-btn"[^>]*data-go="register"/);
 });
 
 test('registration requires email, password confirmation and explicit terms acceptance', () => {
