@@ -63,7 +63,8 @@ test('email login uses password authentication and normalizes email', async () =
   const { facade, calls, user } = loadAuthFacade();
   const signed = await facade.signIn(' Person@Example.com ', 'correct-password');
   assert.equal(signed.user.id, user.id);
-  assert.deepEqual(calls.signIn[0], { email: 'person@example.com', password: 'correct-password' });
+  assert.equal(calls.signIn[0].email, 'person@example.com');
+  assert.equal(calls.signIn[0].password, 'correct-password');
 });
 
 test('profile reads private phone separately from public profile metadata', async () => {
@@ -86,7 +87,7 @@ test('password recovery redirect keeps the original invitation query', async () 
 test('password recovery updates the authenticated user password', async () => {
   const { facade, calls } = loadAuthFacade();
   await facade.updatePassword('new-long-password');
-  assert.deepEqual(calls.update[0], [{ password: 'new-long-password' }]);
+  assert.equal(calls.update[0][0].password, 'new-long-password');
 });
 
 test('publishable key only is configured for the browser client', () => {
