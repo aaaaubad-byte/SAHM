@@ -3241,10 +3241,13 @@ body {
 @media(max-width:360px){.phone-country-row select{flex-basis:46%;font-size:10px}}</style></head>
 <body><noscript><main dir="rtl" style="font-family:Arial,sans-serif;padding:24px;color:#142f39"><h1>سهم</h1></main></noscript><div class="workspace"><div class="phone" id="app">
 <div id="topbar" class="topbar" style="display:none"></div><main id="screen" class="auth-screen">
-<div class="auth-brand"><div class="brand-mark">س</div><h1>سهم</h1></div>
-
-<div class="auth-card"><div style="text-align:center"><b style="font-size:15px">أهلاً بك في سهم</b></div><button class="btn primary full" style="margin-top:12px" data-go="register">إنشاء حساب</button></div>
-
+<div class="auth-brand" style="margin:12px 0 20px"><div class="brand-mark">س</div><h1 style="font-size:24px">سهم</h1><p>إدارة الجمعيات التساهمية</p></div>
+<div class="auth-card"><form id="loginForm">
+<div class="field"><label for="loginEmail">البريد الإلكتروني</label><input id="loginEmail" name="email" type="email" autocomplete="username" required placeholder="name@example.com"></div>
+<div class="field"><label for="loginPassword">كلمة المرور</label><input id="loginPassword" name="password" type="password" autocomplete="current-password" required placeholder="أدخل كلمة المرور"></div>
+<button class="btn primary full" type="submit">تسجيل الدخول</button>
+<button class="link-btn" style="width:100%;margin-top:10px" type="button" data-action="forgot-password">نسيت كلمة المرور؟</button>
+</form><div class="auth-divider"><span>ليس لديك حساب؟</span></div><button class="btn outline full" type="button" data-go="register">إنشاء حساب</button></div>
 </main><nav id="bottomnav" class="bottomnav" style="display:none"></nav><div id="modal-root"></div><div id="toast" class="toast" role="status" aria-live="polite"></div>
 </div></div>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.119.0"></script>
