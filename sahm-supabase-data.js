@@ -9,8 +9,10 @@
     return root.SahmSupabase.client();
   }
   function fail(error) {
-    return { ok:false, code:error && (error.code || error.status) || 'REMOTE_ERROR',
+    var result={ ok:false, code:error && (error.code || error.status) || 'REMOTE_ERROR',
       message:root.SahmSupabase ? root.SahmSupabase.friendlyError(error) : (error && error.message || 'تعذر تنفيذ العملية على الخادم') };
+    if(app&&app.report)app.report('supabase',result);
+    return result;
   }
   async function rows(table, select) {
     var q = c().from(table).select(select || '*');
@@ -416,6 +418,14 @@
       return {ok:true,marked:list.length};
     }catch(e){return fail(e);}
   }
+  async function updateMyProfile(fullName,city){
+    try{
+      await invoke('update_my_profile',{p_full_name:String(fullName||'').trim(),p_city:String(city||'').trim()});
+      profile=await root.SahmSupabase.profile(user.id);
+      await refresh();
+      return {ok:true,profile:profile};
+    }catch(e){return fail(e);}
+  }
   async function savePrefs(){
     try{
       var res=await c().from('user_preferences').upsert({
@@ -453,9 +463,14 @@
     profile=profileValue || await root.SahmSupabase.profile(user.id);
     return loadSnapshot(profile);
   }
+  function clear(){
+    user=null;profile=null;store=null;raw={};
+    if(app&&app.clearStore)app.clearStore();
+  }
   root.SahmSupabaseData={
     init:init,refresh:refresh,store:function(){return store;},raw:function(){return raw;},
-    previewInvite:previewInvite,acceptInvite:acceptInvite,install:install,
+    previewInvite:previewInvite,acceptInvite:acceptInvite,updateMyProfile:updateMyProfile,
+    install:install,clear:clear,
     isRemote:function(){return !!store;},savePrefs:savePrefs
   };
 })(window);
