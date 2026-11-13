@@ -3548,10 +3548,10 @@ function createGroup(){
 }
 function createdGroup(){const g=currentGroup();if(!g){go('home');return}showCreatedGroup(g)}
 function showCreatedGroup(g){
- const detail=SahmApp.groupDetail(g.id),plan=detail&&detail.ok?detail.plan:null,link=g.publicLink||location.origin+'/?join='+encodeURIComponent(g.inviteCode||'');
+ const detail=SahmApp.groupDetail(g.id),plan=detail&&detail.ok?detail.plan:null;
  const html='<div class="create-group-page created-group-page"><section class="create-success-card"><span class="create-success-icon">'+uiIcon('check-circle',30)+'</span><div><h1>تم إنشاء الجمعية بنجاح</h1><strong>'+escapeHtml(g.name)+'</strong><small>'+escapeHtml(g.id)+'</small></div></section>'+
  '<section class="create-section"><div class="create-section-head"><span class="create-section-icon">'+uiIcon('clipboard-list',20)+'</span><h2>ملخص الجمعية</h2></div><div class="create-rules-grid"><div><span>الأسهم المستهدفة</span><b>'+g.total+'</b></div><div><span>الحد الأقصى للفرد</span><b>'+g.maxPer+'</b></div><div><span>حصة السهم في الدورة</span><b>'+money(g.share,g.currency)+'</b></div><div><span>عدد الأقساط</span><b>'+g.installments+'</b></div><div><span>تاريخ البداية</span><b>'+dateLabel(g.start)+'</b></div><div><span>موعد أول قرعة</span><b>'+dateLabel(g.first)+'</b></div><div><span>المدة الإجمالية</span><b>'+((plan&&plan.durationDays)||'—')+' يومًا</b></div></div></section>'+
- '<section class="create-section"><div class="create-section-head"><span class="create-section-icon">'+uiIcon('link',20)+'</span><h2>رابط دعوة الأعضاء</h2></div><div class="field"><input id="createdGroupLink" value="'+escapeHtml(link)+'" readonly></div><button class="btn primary full" data-action="copy-created-link">نسخ رابط الدعوة</button><button class="btn outline full" data-action="whatsapp-created-link">مشاركة الرابط عبر واتساب</button></section><button class="btn outline full" data-go="invites">إدارة الدعوات</button><button class="btn primary full" data-go="group-detail">فتح الجمعية</button></div>';
+ '<section class="create-section"><div class="create-section-head"><span class="create-section-icon">'+uiIcon('user-plus',20)+'</span><h2>دعوة الأعضاء</h2></div><p>روابط الدعوة فريدة لكل عضو، وترتبط برقم الهاتف الذي تحدده عند إنشاء الدعوة.</p><button class="btn primary full" data-go="invite">إنشاء أول دعوة</button><button class="btn outline full" data-go="invites">إدارة الدعوات</button></section><button class="btn primary full" data-go="group-detail">فتح الجمعية</button></div>';
  shell('تم الإنشاء','groups',html);
 }
 function groupDetail(){
@@ -3591,7 +3591,7 @@ function members(){
 }
 function invite(){
  const g=currentGroup();if(!g||!isManager()){toast('إرسال الدعوات متاح لمدير الجمعية فقط');go('group-detail');return}if(g.locked){toast('أُغلقت العضويات بعد تثبيت أول قرعة');go('group-detail');return}
- shell('دعوة عضو','groups',header('دعوة عضو',g.name)+'<div class="card"><form id="inviteForm"><div class="field"><label>اسم المدعو</label><input name="name" maxlength="60" required></div><div class="field"><label>رقم الهاتف</label><input name="phone" type="tel" inputmode="tel" required></div><div class="field"><label>عدد الأسهم</label><input name="shares" type="number" min="1" max="'+g.maxPer+'" step="1" value="1" required></div><button class="btn primary full" type="submit">إرسال الدعوة</button></form></div><div class="card"><b>رابط الجمعية</b><p>'+escapeHtml(g.publicLink)+'</p><button class="btn outline full" data-action="copy-group-link">نسخ الرابط</button></div>');
+ shell('دعوة عضو','groups',header('دعوة عضو',g.name)+'<div class="card"><form id="inviteForm"><div class="field"><label>اسم المدعو</label><input name="name" maxlength="60" required></div><div class="field"><label>رقم الهاتف مع مفتاح الدولة</label><input name="phone" type="tel" inputmode="tel" placeholder="+9677XXXXXXXX" required></div><div class="field"><label>عدد الأسهم</label><input name="shares" type="number" min="1" max="'+g.maxPer+'" step="1" value="1" required></div><button class="btn primary full" type="submit">إنشاء دعوة ورابط خاص</button></form></div><div class="card"><small>ينشئ النظام رابطًا فريدًا لكل دعوة، ويرتبط قبولها بحساب المستخدم بعد تأكيد البريد وإكمال بياناته.</small></div>');
 }
 function invites(){
  const g=currentGroup();if(!g||!isManager()){toast('إدارة الدعوات متاحة لمدير الجمعية فقط');go('group-detail');return}
@@ -3735,7 +3735,7 @@ function render(){
 }
 function showModal(title,body,buttons=[['إغلاق','close','outline']]){if(navigation)navigation.openModal();$('#modal-root').innerHTML=`<div class="overlay" data-action="overlay-close"><div class="dialog" onclick="event.stopPropagation()"><h3>${title}</h3><div class="dialog-body">${body}</div><div class="dialog-actions">${buttons.map(([label,act,style='primary'])=>`<button class="btn ${style}" data-action="${act}">${label}</button>`).join('')}</div></div></div>`}function closeModal(){if(navigation)navigation.dismissModal();$('#modal-root').innerHTML=''}
 document.addEventListener('keydown',e=>{const card=e.target.closest?.('.group-card[role="button"]');if(card&&(e.key==='Enter'||e.key===' ')){e.preventDefault();card.click()}});
-async async function handleAppAction(action,el){
+async function handleAppAction(action,el){
  const g=currentGroup();
  if(action==='choose-avatar'){
   selectedAvatarKey=AVATAR_OPTIONS.some(x=>x[0]===el.dataset.avatar)?el.dataset.avatar:'avatar-01';
@@ -3835,7 +3835,7 @@ document.addEventListener('submit',async e=>{
    await SahmSupabaseData.init(activeProfile);SahmSupabaseData.install();db=load();currentGroupId=(db.groups[0]||{}).id||null;
    db.session=true;db.verified=!!signed.user.email_confirmed_at;db.user=Object.assign(db.user,{id:signed.user.id,email:signed.user.email,name:activeProfile.fullName,phone:activeProfile.phone,city:activeProfile.city});
    if(!activeProfile.completed){resetNavigation('profile-setup',{});}
-   else{resetNavigation(new URLSearchParams(location.search).get('join')?'join-group':'home',{});toast('تم تسجيل الدخول بنجاح');}
+   else{resetNavigation(new URLSearchParams(location.search).get('invite')?'join-group':'home',{});toast('تم تسجيل الدخول بنجاح');}
   }catch(err){toast(SahmSupabase.friendlyError(err));}
   finally{authBusy=false;setBusy(false);}
   return;
@@ -3867,13 +3867,13 @@ document.addEventListener('submit',async e=>{
   if(parts.length<3){toast('أدخل الاسم الثلاثي على الأقل');return}
   const digits=String(d.phone||'').replace(/[٠-٩]/g,ch=>'٠١٢٣٤٥٦٧٨٩'.indexOf(ch)).replace(/\D/g,'').replace(/^0+/,'');
   if(digits.length<7||digits.length>14){toast('أدخل رقم هاتف صحيحاً');return}
-  const phoneE164=String(d.country||'+967')+digits;
+  const dial=String(d.country||'+967'),dialDigits=dial.replace(/\D/g,'');const national=digits.startsWith(dialDigits)?digits.slice(dialDigits.length):digits;const phoneE164=dial+national;
   authBusy=true;setBusy(true,'جارٍ حفظ بياناتك...');
   try{
    await SahmSupabase.completeProfile(d.fullName,phoneE164,selectedAvatarKey);
    activeProfile=await SahmSupabase.profile();
    db.session=true;db.verified=true;db.user=Object.assign(db.user,{id:activeProfile.id,name:activeProfile.fullName,phone:activeProfile.phone,city:activeProfile.city,avatarKey:activeProfile.avatarKey});
-   resetNavigation(new URLSearchParams(location.search).get('join')?'join-group':'home',{});
+   resetNavigation(new URLSearchParams(location.search).get('invite')?'join-group':'home',{});
    toast('اكتمل ملفك الشخصي');
   }catch(err){toast(SahmSupabase.friendlyError(err));}
   finally{authBusy=false;setBusy(false);}
