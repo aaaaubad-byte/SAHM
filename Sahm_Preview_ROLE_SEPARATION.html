@@ -3258,7 +3258,7 @@ const $=s=>document.querySelector(s);
 const money=(n,c='YER')=>{const cur=SahmCore.CURRENCIES[c]||SahmCore.CURRENCIES.YER;const minor=Math.round(Number(n||0)*cur.minor);return SahmCore.fmtMoney(minor,c in SahmCore.CURRENCIES?c:'YER')};
 const today=()=>SahmApp.todayIn();
 const AUTH_SCREEN_NAMES=['welcome','register','profile-setup','logged-out'];
-let db=load(),screenName='welcome',params={},groupTab='all',groupDetailTab='overview',toastTimer,homeSlideTimer=null,homeSlideIndex=0,selectedInstallmentCycle=1,selectedInstallmentStatus='all',pendingJoinCode=null;
+let db={session:false,verified:false,user:{id:null,name:'',phone:'',city:'',email:'',avatarKey:'avatar-01',notifications:true,biometric:false},groups:[],unread:0},screenName='welcome',params={},groupTab='all',groupDetailTab='overview',toastTimer,homeSlideTimer=null,homeSlideIndex=0,selectedInstallmentCycle=1,selectedInstallmentStatus='all',pendingJoinCode=null;
 let selectedAvatarKey='avatar-01',authBusy=false,activeProfile=null;
 let currentGroupId=(db.groups[0]||{}).id||null,createdGroupId=null,createWizardStep=1,createFormSnapshot={},reminderRequest=null,navigation=null;
 SahmApp.onResult((name,result)=>{if(result&&result.ok===false)toast(result.message||'تعذر تنفيذ العملية');else if(result&&result.persisted===false)toast(result.warning||'تعذر حفظ التغييرات في تخزين المعاينة');});
@@ -3801,7 +3801,7 @@ async function handleAppAction(action,el){
   const r=await SahmApp.correctReceipt(root.dataset.receiptId,{action:'void',reason});if(r&&r.ok){const id=root.dataset.receiptId;closeModal();refreshData();params={id};receiptDetail();toast('تم توثيق التصحيح')}return;
  }
  if(action==='logout-confirm'){showModal('تسجيل الخروج','هل تريد إنهاء الجلسة الحالية؟ ستبقى بيانات المعاينة المحفوظة كما هي.',[['نعم، تسجيل الخروج','logout-now','danger'],['إلغاء','close','outline']]);return}
- if(action==='logout-now'){SahmSupabase.signOut().then(()=>{db.session=false;db.verified=false;save();closeModal();resetNavigation('welcome',{});}).catch(e=>toast(SahmSupabase.friendlyError(e)));return}
+ if(action==='logout-now'){SahmSupabase.signOut().then(()=>{SahmSupabaseData.clear();db={session:false,verified:false,user:{id:null,name:'',phone:'',city:'',email:'',avatarKey:'avatar-01',notifications:true,biometric:false},groups:[],unread:0};currentGroupId=null;closeModal();resetNavigation('welcome',{});}).catch(e=>toast(SahmSupabase.friendlyError(e)));return}
 }
 document.addEventListener('click',async e=>{
  const el=e.target.closest('[data-go],[data-action]');if(!el)return;const route=el.dataset.go,action=el.dataset.action;
@@ -3918,7 +3918,7 @@ async function bootSahm(){
    screenName=activeProfile.completed?(new URLSearchParams(location.search).get('invite')?'join-group':'home'):'profile-setup';
   }else{db.session=false;screenName='welcome'}
   SahmSupabase.onAuthStateChange((event,sess)=>{
-   if(event==='SIGNED_OUT'){db.session=false;screenName='welcome';resetNavigation('welcome',{});}
+   if(event==='SIGNED_OUT'){SahmSupabaseData.clear();db={session:false,verified:false,user:{id:null,name:'',phone:'',city:'',email:'',avatarKey:'avatar-01',notifications:true,biometric:false},groups:[],unread:0};currentGroupId=null;screenName='welcome';resetNavigation('welcome',{});}
   });
  }catch(err){
   db.session=false;screenName='welcome';
