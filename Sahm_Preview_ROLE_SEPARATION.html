@@ -3235,36 +3235,14 @@ body {
 </div></div>
 <script src="/sahm-core.js"></script>
 <script src="/sahm-data.js"></script>
+<script src="/sahm-app.js"></script>
 <script>
-const $=s=>document.querySelector(s);const money=(n,c='YER_SAN')=>new Intl.NumberFormat('ar-YE').format(n)+' '+({YER:'ر.ي',YER_SAN:'ر.ي (صنعاء)',YER_ADE:'ر.ي (عدن)',USD:'دولار',SAR:'ريال سعودي'}[c]||c);const today=()=>new Date().toISOString().slice(0,10);
-const seed={user:{name:'أحمد محمد',phone:'+967 777 123 456',city:'تعز',avatar:'أم',notifications:true,biometric:false},groups:[{id:'G-2401',name:'جمعية الأهل',currency:'YER_SAN',share:50000,total:12,maxPer:3,start:'2026-11-20',first:'2026-11-27',period:'أسبوعية',quorum:66,role:'manager',myShares:2,status:'ACTIVE_REVOLVING',members:9,shares:12,paid:7,cycle:3,admin:'أحمد محمد',contrib:50000,publicLink:'sahm.app/join/G-2401',draws:[{cycle:1,winner:'خالد عبدالله',shareNo:1,ticketNo:5,date:'2026-10-30'},{cycle:2,winner:'سارة أحمد',shareNo:1,ticketNo:3,date:'2026-11-06'}]},{id:'G-2402',name:'زملاء العمل',currency:'USD',share:100,total:8,maxPer:2,start:'2026-12-01',first:'2026-12-08',period:'أسبوعية',quorum:66,role:'member',myShares:1,status:'PENDING_MEMBERS',members:6,shares:6,paid:0,cycle:0,admin:'مروان علي',contrib:100,publicLink:'sahm.app/join/G-2402',draws:[]},{id:'G-2403',name:'جمعية الجيران',currency:'SAR',share:300,total:10,maxPer:2,start:'2026-11-01',first:'2026-11-01',period:'شهرية',quorum:66,role:'manager',myShares:1,status:'READY_FOR_DRAW',members:8,shares:10,paid:10,cycle:1,admin:'أحمد محمد',contrib:300,publicLink:'sahm.app/join/G-2403',draws:[] }],payments:[{id:'P-001',group:'G-2401',person:'مروان علي',cycle:3,amount:50000,ref:'TRX-982113',status:'UNDER_REVIEW',date:'2026-11-10',proof:'إشعار_التحويل.jpg'},{id:'P-002',group:'G-2401',person:'سارة أحمد',cycle:3,amount:50000,ref:'TRX-982098',status:'VERIFIED_PAID',date:'2026-11-09',proof:'إشعار_بنكي.png'}],receipts:[{id:'SH-2026-0008',group:'G-2401',person:'سارة أحمد',amount:50000,cycle:3,ref:'TRX-982098',date:'2026-11-09'}],invites:[{id:'I-01',group:'G-2401',name:'علي حسن',phone:'777000111',shares:1,status:'PENDING'}],wall:[{group:'G-2401',type:'system',text:'بدأت الدورة الثالثة من جمعية الأهل',date:'2026-11-08',reactions:3},{group:'G-2401',type:'system',text:'تم اعتماد إيصال سداد سارة أحمد للدورة الثالثة',date:'2026-11-09',reactions:2},{group:'G-2401',type:'system',text:'تم إعلان نتيجة قرعة الدورة الثانية: سارة أحمد',date:'2026-11-06',reactions:5}],messages:[{group:'G-2401',name:'خالد عبدالله',text:'بالتوفيق للجميع في هذه الدورة',time:'10:42'},{group:'G-2401',name:'أحمد محمد',mine:true,text:'يرجى إرسال إثبات السداد قبل الموعد',time:'11:05'}],notifications:[{title:'موعد القسط القادم',text:'قسط جمعية الأهل يستحق في 14 نوفمبر',date:'منذ ساعتين',read:false},{title:'تم اعتماد السداد',text:'تم اعتماد مساهمة سارة أحمد',date:'أمس',read:false},{title:'موعد القرعة',text:'قرعة جمعية الجيران في 20 نوفمبر',date:'منذ يومين',read:true}],audit:[{action:'اعتماد إيصال سداد',actor:'أحمد محمد',date:'2026-11-09 11:22'},{action:'إرسال إثبات تحويل',actor:'سارة أحمد',date:'2026-11-09 10:14'},{action:'تحديث بيانات الجمعية',actor:'أحمد محمد',date:'2026-11-08 18:45'},{action:'بدء الدورة الثالثة',actor:'النظام',date:'2026-11-08 08:00'}],participants:[
- {group:'G-2401',name:'أحمد محمد',shares:2,role:'manager',present:true},
- {group:'G-2401',name:'سارة أحمد',shares:2,role:'member',present:true},
- {group:'G-2401',name:'خالد عبدالله',shares:1,role:'member',present:true},
- {group:'G-2401',name:'مروان علي',shares:2,role:'member',present:true},
- {group:'G-2401',name:'ريم صالح',shares:1,role:'member',present:true},
- {group:'G-2401',name:'نبيل سالم',shares:1,role:'member',present:true},
- {group:'G-2401',name:'هدى ياسين',shares:1,role:'member',present:false},
- {group:'G-2401',name:'سمير قاسم',shares:1,role:'member',present:false},
- {group:'G-2401',name:'فهد ياسين',shares:1,role:'member',present:false},
- {group:'G-2402',name:'أحمد محمد',shares:1,role:'member',present:true},
- {group:'G-2402',name:'مروان علي',shares:1,role:'member',present:true},
- {group:'G-2402',name:'خالد عبدالله',shares:1,role:'member',present:true},
- {group:'G-2402',name:'سارة أحمد',shares:1,role:'member',present:true},
- {group:'G-2402',name:'هدى ياسين',shares:1,role:'member',present:false},
- {group:'G-2402',name:'نبيل سالم',shares:1,role:'member',present:false},
- {group:'G-2403',name:'أحمد محمد',shares:1,role:'manager',present:true},
- {group:'G-2403',name:'سارة أحمد',shares:2,role:'member',present:true},
- {group:'G-2403',name:'خالد عبدالله',shares:1,role:'member',present:true},
- {group:'G-2403',name:'مروان علي',shares:1,role:'member',present:true},
- {group:'G-2403',name:'ريم صالح',shares:1,role:'member',present:true},
- {group:'G-2403',name:'نبيل سالم',shares:1,role:'member',present:true},
- {group:'G-2403',name:'هدى ياسين',shares:2,role:'member',present:true},
- {group:'G-2403',name:'سمير قاسم',shares:1,role:'member',present:true}
-],currentGroup:'G-2401',tab:'managed',session:false,otp:'246810',verified:false,unread:2};
-let SD=null;
-const LEGACY_STATUS={pending:'PENDING_MEMBERS',open:'ACTIVE_REVOLVING',running:'ACTIVE_REVOLVING',completed:'COMPLETED'};
-let db=load(),screenName=db.session?(new URLSearchParams(location.search).get('join')?'join-group':'home'):'welcome',stack=[],params={},groupTab='all',groupDetailTab='overview',selectedPayment=null,toastTimer,homeSlideTimer=null,homeSlideIndex=0;
+const $=s=>document.querySelector(s);
+const money=(n,c='YER')=>{const cur=SahmCore.CURRENCIES[c]||SahmCore.CURRENCIES.YER;const minor=Math.round(Number(n||0)*cur.minor);return SahmCore.fmtMoney(minor,c in SahmCore.CURRENCIES?c:'YER')};
+const today=()=>SahmApp.todayIn();
+const LEGACY_STATUS={pending:'PENDING_MEMBERS',open:'READY_FOR_DRAW',running:'ACTIVE_REVOLVING',completed:'COMPLETED'};
+let db=load(),screenName=db.session?(new URLSearchParams(location.search).get('join')?'join-group':'home'):'welcome',stack=[],params={},groupTab='all',groupDetailTab='overview',toastTimer,homeSlideTimer=null,homeSlideIndex=0,selectedInstallmentCycle=1,selectedInstallmentStatus='all',pendingJoinCode=null,pendingJoinShares=1;
+SahmApp.onResult((name,result)=>{if(result&&result.ok===false)toast(result.message||'تعذر تنفيذ العملية');else if(result&&result.persisted===false)toast(result.warning||'تعذر حفظ التغييرات في تخزين المعاينة');});
 
 function uiIcon(name,size=20){
  const paths={
@@ -3307,36 +3285,64 @@ function uiIcon(name,size=20){
  return '<svg viewBox="0 0 24 24" width="'+size+'" height="'+size+'" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="'+(paths[name]||paths.groups)+'"/></svg>';
 }
 
-function syncFromStore(d){
- if(!SD)return d;
- const K=SahmCore,D=SahmData,t=K.todayIn(D.TZ),gname=id=>(SD.groups.find(g=>g.id===id)||{}).name||'';
- const derived=SD.groups.map(g=>{
-  const s=D.groupSummary(SD,g,t),minor=K.CURRENCIES[g.currency].minor,mgr=SD.members.find(m=>m.groupId===g.id&&m.isManager);
-  return {id:g.id,name:g.name,currency:g.currency,share:g.shareAmount/minor,installmentAmount:g.shareAmount/minor,total:g.targetShares,maxPer:g.maxPerMember,
-   start:g.startDate,first:K.firstDrawDate(g),period:K.cycleLabel(g)+' · '+g.installments+(g.installments===1?' قسط':' أقساط'),quorum:g.quorum,
-   role:s.role.manager?'manager':'member',myShares:s.role.shares,status:LEGACY_STATUS[s.phase]||'PENDING_MEMBERS',members:s.members,shares:s.totalShares,
-   paid:s.collected||0,cycle:s.cycle,admin:g.managerName,contrib:g.shareAmount/minor,publicLink:'sahm.app/join/'+g.inviteCode,inviteCode:g.inviteCode,rules:g.rules,
-   draws:SD.draws.filter(x=>x.groupId===g.id).sort((a,b)=>a.round-b.round).map(x=>{const sh=SD.shares.find(y=>y.id===x.winnerShareId),m=SD.members.find(y=>y.id===sh.memberId);return {cycle:x.round,winner:m.name,shareNo:sh.no,date:x.date}})};
- });
- d.localGroups=d.localGroups||[];
- d.groups=d.localGroups.concat(derived);
- if(!d.groups.some(g=>g.id===d.currentGroup))d.currentGroup=(d.groups[0]||{}).id;
- d.messages=SD.messages.filter(m=>m.kind==='member').map(m=>({group:m.groupId,name:m.senderName,mine:m.userId==='me',text:m.text,time:D.chatTime(m.at,t),at:m.at}));
- d.wall=SD.messages.filter(m=>m.kind==='system').slice().reverse().map(m=>({group:m.groupId,type:'system',text:m.text,date:D.chatTime(m.at,t),reactions:0}));
- const NT={received:'استلام قسط',reminder:'تذكير بقسط',drawResult:'نتيجة قرعة'};
- d.notifications=SD.notifications.map(n=>({title:NT[n.type]||'إشعار',text:n.text,date:D.chatTime(n.at,t),read:n.read}));
- d.unread=D.totalUnreadNotifications(SD);
- d.participants=SD.members.map(m=>({group:m.groupId,name:m.name,shares:K.memberShares(SD,m.id).length,role:m.isManager?'manager':'member',present:m.present}));
- d.payments=[];d.invites=[];
- d.receipts=SD.receipts.filter(r=>{const m=SD.members.find(x=>x.id===r.memberId);return m&&m.userId==='me'}).map(r=>({id:r.id,group:r.groupId,person:d.user.name,amount:r.amount/K.CURRENCIES[r.currency].minor,cycle:r.cycle,ref:r.id,date:r.recordedAt.slice(0,10)}));
- return d;
-}
 function load(){
- const base=JSON.parse(JSON.stringify(seed));
- try{SD=SahmData.load();const p=SD.prefs;base.user=Object.assign({},base.user,p.user,{notifications:p.notifications!==false,biometric:!!p.biometric});base.session=!!p.session;base.verified=!!p.verified;base.localGroups=p.localGroups||[]}catch(e){SD=null}
- return syncFromStore(base);
+ const prefs=SahmApp.prefs(),mine=SahmApp.myGroups(),rawGroups=[...(mine.managed||[]),...(mine.joined||[])];
+ const minorFor=currency=>(SahmCore.CURRENCIES[currency]||SahmCore.CURRENCIES.YER).minor;
+ const groups=[],participants=[],messages=[],wall=[],notifications=[],receipts=[],invites=[],audit=[];
+ rawGroups.forEach(g=>{
+  const detail=SahmApp.groupDetail(g.id);if(!detail||!detail.ok)return;
+  const memberResult=SahmApp.memberList(g.id),memberRows=memberResult&&memberResult.ok?memberResult.members:[];
+  const drawResult=SahmApp.drawHistory(g.id),drawRows=drawResult&&drawResult.ok?drawResult.draws:[];
+  const chatResult=SahmApp.chatView(g.id),chatRows=chatResult&&chatResult.ok?chatResult.messages:[];
+  const receiptResult=SahmApp.receiptList(g.id,{includeVoided:true}),receiptRows=receiptResult&&receiptResult.ok?receiptResult.receipts:[];
+  const inviteResult=detail.role.manager?SahmApp.inviteList(g.id):null,inviteRows=inviteResult&&inviteResult.ok?inviteResult.invites:[];
+  const eventResult=SahmApp.eventLog(g.id,{limit:100}),eventRows=eventResult&&eventResult.ok?eventResult.events:[];
+  const minor=minorFor(g.currency),actualShares=memberRows.reduce((n,m)=>n+(Number(m.shares)||0),0);
+  const perShare=SahmCore.splitAmount(g.shareAmount,g.installments).map(v=>v/minor);
+  const phaseStatus={pending:'PENDING_MEMBERS',open:'READY_FOR_DRAW',running:'ACTIVE_REVOLVING',completed:'COMPLETED'};
+  const role=detail.role.manager?'manager':'member';
+  groups.push({
+   id:g.id,name:g.name,currency:g.currency,share:g.shareAmount/minor,installmentAmount:perShare[0]||0,total:g.targetShares,maxPer:g.maxPerMember,
+   start:g.startDate,first:detail.plan&&detail.plan.firstDraw||SahmCore.firstDrawDate(g),
+   period:SahmCore.cycleLabel(g)+' · '+g.installments+' '+(g.installments===1?'قسط':'أقساط'),
+   cycleType:g.cycleType,cycleDays:g.cycleDays,installments:g.installments,shareAmountMinor:g.shareAmount,
+   quorum:g.quorum,role:role,myShares:detail.role.shares,status:phaseStatus[detail.phase]||'PENDING_MEMBERS',
+   members:memberRows.length,shares:actualShares,paid:detail.counts?detail.counts.paid:0,cycle:detail.cycle||1,
+   admin:g.managerName,contrib:g.shareAmount/minor,publicLink:location.origin+'/?join='+encodeURIComponent(g.inviteCode),
+   inviteCode:g.inviteCode,rules:g.rules,draws:drawRows,locked:detail.locked,detail:detail,counts:detail.counts||null
+  });
+  memberRows.forEach(m=>participants.push({group:g.id,memberId:m.memberId,name:m.name,shares:m.shares,role:m.isManager?'manager':'member',present:!!m.present,isMe:!!m.isMe}));
+  chatRows.forEach(m=>{
+   const row={group:g.id,id:m.id,kind:m.kind,name:m.senderName,mine:!!m.mine,text:m.text,time:m.timeLabel||SahmApp.chatTime(m.at),at:m.at};
+   if(m.kind==='system')wall.push({group:g.id,type:'system',text:m.text,date:row.time,reactions:0});
+   else messages.push(row);
+  });
+  receiptRows.forEach(r=>receipts.push({
+   id:r.id,group:g.id,person:r.memberName,memberId:r.memberId,amount:r.amount/minor,currency:g.currency,cycle:r.cycle,no:r.no,
+   ref:r.id,date:String(r.recordedAt||'').slice(0,10),recordedAt:r.recordedAt,self:!!r.self,voided:!!r.voided,reason:r.note||'',canCorrect:!!r.canCorrect
+  }));
+  inviteRows.forEach(i=>invites.push({id:i.id,group:g.id,name:i.name,phone:i.phone,shares:i.shares,status:String(i.status||'pending').toUpperCase(),createdAt:i.createdAt}));
+  eventRows.forEach(e=>audit.push({id:e.id,group:g.id,action:e.text,actor:e.actor||'سهم',date:e.at,vis:e.vis}));
+ });
+ const notifResult=SahmApp.notificationList(),notifRows=notifResult&&notifResult.ok?notifResult.notifications:[];
+ notifRows.forEach(n=>notifications.push({id:n.id,group:n.groupId,title:n.type,text:n.text,date:n.at,read:n.read,muted:n.muted}));
+ return {
+  user:Object.assign({name:'',phone:'',city:'',notifications:true,biometric:false},prefs.user||{},{
+   notifications:prefs.notifications!==false,biometric:!!prefs.biometric
+  }),
+  session:!!prefs.session,verified:!!prefs.verified,groups,participants,messages,wall,notifications,
+  unread:notifResult&&notifResult.ok?notifResult.unread:SahmApp.unreadNotifications(),
+  receipts,invites,payments:[],audit,localGroups:[]
+ };
 }
-function save(){try{if(!SD)return;const p=SD.prefs;p.session=db.session;p.verified=db.verified;p.user=Object.assign(p.user||{},{name:db.user.name,phone:db.user.phone,city:db.user.city});p.notifications=db.user.notifications!==false;p.biometric=!!db.user.biometric;p.localGroups=db.localGroups||[];SahmData.save(SD)}catch(e){/* تبقى الحالة في الذاكرة عند منع التخزين المحلي */}}function log(action,actor=db.user.name){db.audit.unshift({action,actor,date:new Date().toLocaleString('ar-YE')});save()}
+function save(){
+ const prefs=SahmApp.prefs();prefs.session=!!db.session;prefs.verified=!!db.verified;
+ prefs.user=Object.assign(prefs.user||{},{name:db.user.name,phone:db.user.phone,city:db.user.city});
+ prefs.notifications=db.user.notifications!==false;prefs.biometric=!!db.user.biometric;
+ const result=SahmApp.savePrefs();if(result&&result.ok===false)toast('تعذر حفظ التفضيلات محليًا');
+}
+function refreshData(){db=load();return db;}
+function log(){/* العمليات الرسمية تسجل أحداثها داخل SahmData؛ لا يوجد سجل واجهة موازٍ. */}
 function currentGroup(){return db.groups.find(g=>g.id===db.currentGroup)||db.groups[0]}function isManager(g=currentGroup()){return g.role==='manager'}function statusText(s){return({DRAFT:'مسودة',PENDING_MEMBERS:'استقبال الأعضاء',READY_FOR_DRAW:'جاهزة للقرعة',ACTIVE_REVOLVING:'نشطة',PAUSED_DEFAULT:'متوقفة مؤقتاً',COMPLETED:'مكتملة',UNPAID:'غير مسدد',PROOF_SUBMITTED:'تم إرسال الإثبات',UNDER_REVIEW:'قيد المراجعة',VERIFIED_PAID:'تم الاعتماد',REJECTED:'مرفوض',OVERDUE:'متأخر',PENDING:'بانتظار القبول',ACCEPTED:'مقبول',REJECTED_INV:'مرفوض'})[s]||s}function pill(s){let c=['ACTIVE_REVOLVING','VERIFIED_PAID','ACCEPTED'].includes(s)?'green':['READY_FOR_DRAW','UNDER_REVIEW','PENDING','PROOF_SUBMITTED'].includes(s)?'gold':['PAUSED_DEFAULT','OVERDUE','REJECTED'].includes(s)?'red':['PENDING_MEMBERS'].includes(s)?'blue':'';return `<span class="pill ${c}">${statusText(s)}</span>`}
 function go(s,p={}){
 const managerOnly=['members','invite','invites','review','draw-room','audit'];
@@ -3420,10 +3426,9 @@ function home(){
  homeSlideTimer=setInterval(()=>setHomeSlide(homeSlideIndex+1),5000);
 }
 function homeActivity(){
- if(!SD)return '';
- const t=SahmCore.todayIn(SahmData.TZ),list=SahmData.recentActivity(SD,3);
+ const list=SahmApp.recentActivity(3);
  if(!list.length)return '<div class="empty"><b>لا يوجد نشاط حديث</b></div>';
- return list.map(a=>`<button class="activity-card" data-go="group-detail" data-id="${escapeHtml(a.groupId)}"><span class="activity-icon joined">${uiIcon(a.icon,20)}</span><span class="activity-copy"><strong>${escapeHtml(a.title)}</strong><small>${escapeHtml(a.groupName)} <i>·</i> ${escapeHtml(SahmData.chatTime(a.at,t))}</small></span><span class="activity-arrow">&gt;</span></button>`).join('')
+ return list.map(a=>`<button class="activity-card" data-go="group-detail" data-id="${escapeHtml(a.groupId)}"><span class="activity-icon joined">${uiIcon(a.icon,20)}</span><span class="activity-copy"><strong>${escapeHtml(a.title)}</strong><small>${escapeHtml(a.groupName)} <i>·</i> ${escapeHtml(SahmApp.chatTime(a.at))}</small></span><span class="activity-arrow">&gt;</span></button>`).join('')
 }
 function setHomeSlide(index){const ss=document.querySelectorAll('#homeCarousel .summary-slide'),dd=document.querySelectorAll('.home-dots button');if(!ss.length)return;homeSlideIndex=((index%ss.length)+ss.length)%ss.length;ss.forEach((x,i)=>{x.classList.toggle('active',i===homeSlideIndex);x.setAttribute('aria-hidden',i!==homeSlideIndex?'true':'false')});dd.forEach((x,i)=>{x.classList.toggle('active',i===homeSlideIndex);x.setAttribute('aria-pressed',i===homeSlideIndex?'true':'false')})}function groups(){const own=db.groups.filter(g=>groupTab==='all'||g.role===groupTab);const empty=groupTab==='manager'?'لا توجد جمعيات تديرها':groupTab==='member'?'لا توجد جمعيات تشارك فيها':'لا توجد جمعيات حتى الآن';shell('الجمعيات','groups',`<div class="toolbar"><input class="searchbox" id="groupSearch" placeholder="ابحث باسم الجمعية أو رمزها..."><button class="btn primary small" data-go="create-group">${uiIcon('plus',15)} إنشاء</button></div><div id="groupList">${own.length?own.map(groupCard).join(''):`<div class="card empty"><div class="big">${uiIcon('groups',27)}</div><b>${empty}</b><button class="btn primary" data-go="create-group">إنشاء جمعية</button></div>`}</div><button class="btn outline full" data-go="join-group">الانضمام إلى جمعية برمز أو رابط</button>`)}
 let createWizardStep=1,inviteCandidates=[],createdGroupId=null;
