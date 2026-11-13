@@ -81,7 +81,7 @@ test('password recovery redirect keeps the original invitation query', async () 
   const { facade, calls } = loadAuthFacade();
   await facade.resetPassword('Person@Example.com');
   assert.equal(calls.reset[0][0], 'person@example.com');
-  assert.equal(calls.reset[0][1].redirectTo, 'https://sahm.example/app.html?invite=secret-invite#reset-password');
+  assert.equal(calls.reset[0][1].redirectTo, 'https://sahm.example/app.html?invite=secret-invite&auth_action=reset-password');
 });
 
 test('password recovery updates the authenticated user password', async () => {
