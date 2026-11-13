@@ -3,6 +3,7 @@ const test = require('node:test');
 const assert = require('node:assert/strict');
 const fs = require('node:fs');
 const path = require('node:path');
+const vm = require('node:vm');
 
 const ROOT = path.join(__dirname, '..');
 const html = fs.readFileSync(path.join(ROOT, 'Sahm_Preview_ROLE_SEPARATION.html'), 'utf8');
@@ -10,6 +11,8 @@ const app = fs.readFileSync(path.join(ROOT, 'sahm-app.js'), 'utf8');
 const data = fs.readFileSync(path.join(ROOT, 'sahm-data.js'), 'utf8');
 const core = fs.readFileSync(path.join(ROOT, 'sahm-core.js'), 'utf8');
 const sw = fs.readFileSync(path.join(ROOT, 'sw.js'), 'utf8');
+const auth = fs.readFileSync(path.join(ROOT, 'sahm-supabase.js'), 'utf8');
+const remote = fs.readFileSync(path.join(ROOT, 'sahm-supabase-data.js'), 'utf8');
 
 function stringsFromArray(source, pattern) {
   const match = source.match(pattern);
@@ -78,6 +81,23 @@ test('obsolete parallel view-model collections and no-op route helpers are absen
   assert.doesNotMatch(html, /\bstack\s*=\s*\[\]/);
 });
 
+
+
+test('all page scripts and Supabase modules are syntactically valid JavaScript', () => {
+  new vm.Script(auth, { filename: 'sahm-supabase.js' });
+  new vm.Script(remote, { filename: 'sahm-supabase-data.js' });
+  new vm.Script(app, { filename: 'sahm-app.js' });
+  new vm.Script(data, { filename: 'sahm-data.js' });
+  new vm.Script(core, { filename: 'sahm-core.js' });
+  let count=0;
+  for (const match of html.matchAll(/<script\\b([^>]*)>([\\s\\S]*?)<\\/script>/gi)) {
+    const attrs=match[1]||'';
+    const source=(match[2]||'').trim();
+    if(!source || /type\\s*=\\s*["']application\\/ld\\+json["']/i.test(attrs))continue;
+    new vm.Script(source,{filename:'inline-script-'+(++count)+'.js'});
+  }
+  assert.ok(count>=2,'inline application and PWA scripts are parsed');
+});
 
 test('email auth and staged profile onboarding replace the demo OTP flow', () => {
   const auth = fs.readFileSync(path.join(ROOT, 'sahm-supabase.js'), 'utf8');
