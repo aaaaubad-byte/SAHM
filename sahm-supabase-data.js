@@ -15,10 +15,22 @@
     return result;
   }
   async function rows(table, select) {
-    var q = c().from(table).select(select || '*');
-    var r = await q;
-    if (r.error) throw r.error;
-    return r.data || [];
+    var pageSize=500,offset=0,all=[];
+    var orderColumn=({
+      association_notification_settings:'association_id',
+      user_preferences:'user_id'
+    })[table] || 'id';
+    while(true){
+      var q=c().from(table).select(select || '*')
+        .order(orderColumn,{ascending:true})
+        .range(offset,offset+pageSize-1);
+      var r=await q;
+      if(r.error)throw r.error;
+      var page=r.data||[];
+      all=all.concat(page);
+      if(page.length<pageSize)return all;
+      offset+=pageSize;
+    }
   }
   function profileName(id, profiles) {
     return profiles[id] && profiles[id].full_name || (id === (user && user.id) && profile ? profile.fullName : 'مشارك');
