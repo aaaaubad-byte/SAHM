@@ -60,7 +60,7 @@
       'draws','draw_eligible_shares','cycle_attendance','chat_messages','chat_read_states',
       'association_events','association_notification_settings','association_user_preferences',
       'invitations','notifications','reminders','user_preferences'];
-    var result = await Promise.all(names.map(rows));
+    var result = await Promise.all(names.map(function(name){ return rows(name); }));
     raw = {};
     names.forEach(function(n,i){raw[n]=result[i];});
     var profileMap = {};
@@ -448,8 +448,10 @@
     app.savePrefs=savePrefs;
     return true;
   }
-  function init(profileValue){
-    return root.SahmSupabase.user().then(function(u){user=u;profile=profileValue||root.SahmSupabase.profile(u.id);return profile;}).then(function(p){return loadSnapshot(p);});
+  async function init(profileValue){
+    user=await root.SahmSupabase.user();
+    profile=profileValue || await root.SahmSupabase.profile(user.id);
+    return loadSnapshot(profile);
   }
   root.SahmSupabaseData={
     init:init,refresh:refresh,store:function(){return store;},raw:function(){return raw;},
