@@ -3230,6 +3230,13 @@ body {
 #bottomnav[hidden]{display:none!important}
 #bottomnav .navitem,#bottomnav .navitem.active{display:flex!important;flex:1 1 0!important;min-width:0!important;height:100%!important;min-height:0!important;max-height:none!important;align-self:stretch!important}
 @media(max-width:600px){#bottomnav.bottomnav:not([hidden]){flex-basis:calc(64px + env(safe-area-inset-bottom,0px))!important;height:calc(64px + env(safe-area-inset-bottom,0px))!important;min-height:calc(64px + env(safe-area-inset-bottom,0px))!important;max-height:calc(64px + env(safe-area-inset-bottom,0px))!important;padding:4px 10px env(safe-area-inset-bottom,0px)!important}}
+.auth-divider{display:flex;align-items:center;gap:10px;color:var(--muted);font-size:11px;margin:16px 0 10px}.auth-divider:before,.auth-divider:after{content:"";height:1px;background:var(--line);flex:1}
+.terms-check{display:flex;align-items:flex-start;gap:9px;margin:6px 0 14px;font-size:12px;line-height:1.8}.terms-check input{width:18px;height:18px;flex:0 0 18px;accent-color:var(--teal);margin-top:3px}.terms-check a{color:var(--teal);font-weight:700;text-decoration:underline}
+.field-hint{display:block;color:var(--muted);font-size:10px;margin-top:5px}
+.avatar-picker{display:grid;grid-template-columns:repeat(6,minmax(0,1fr));gap:8px;margin-top:8px}
+.avatar-option{height:43px;border:1px solid var(--line);background:var(--surface-2);color:var(--ink-2);border-radius:13px;display:flex;align-items:center;justify-content:center;cursor:pointer}
+.avatar-option.selected{border:2px solid var(--teal);background:var(--teal-soft);color:var(--teal)}
+@media(max-width:360px){.avatar-picker{grid-template-columns:repeat(4,minmax(0,1fr))}}
 </style></head>
 <body><noscript><main dir="rtl" style="font-family:Arial,sans-serif;padding:24px;color:#142f39"><h1>سهم</h1></main></noscript><div class="workspace"><div class="phone" id="app">
 <div id="topbar" class="topbar" style="display:none"></div><main id="screen" class="auth-screen">
@@ -3239,12 +3246,12 @@ body {
 
 </main><nav id="bottomnav" class="bottomnav" style="display:none"></nav><div id="modal-root"></div><div id="toast" class="toast" role="status" aria-live="polite"></div>
 </div></div>
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.119.0/dist/umd/supabase.js" defer></script>
-<script src="/sahm-supabase.js" defer></script>
-<script src="/sahm-core.js" defer></script>
-<script src="/sahm-data.js" defer></script>
-<script src="/sahm-app.js" defer></script>
-<script src="/sahm-navigation.js" defer></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.119.0/dist/umd/supabase.js"></script>
+<script src="/sahm-supabase.js"></script>
+<script src="/sahm-core.js"></script>
+<script src="/sahm-data.js"></script>
+<script src="/sahm-app.js"></script>
+<script src="/sahm-navigation.js"></script>
 <script>
 const $=s=>document.querySelector(s);
 const money=(n,c='YER')=>{const cur=SahmCore.CURRENCIES[c]||SahmCore.CURRENCIES.YER;const minor=Math.round(Number(n||0)*cur.minor);return SahmCore.fmtMoney(minor,c in SahmCore.CURRENCIES?c:'YER')};
@@ -3690,16 +3697,16 @@ const COUNTRIES=[
  ['YE','اليمن','+967'],['SA','السعودية','+966'],['AE','الإمارات','+971'],['OM','عُمان','+968'],['BH','البحرين','+973'],['KW','الكويت','+965'],['QA','قطر','+974'],['EG','مصر','+20'],['IQ','العراق','+964'],['JO','الأردن','+962'],['TR','تركيا','+90'],['US','الولايات المتحدة','+1'],['GB','المملكة المتحدة','+44'],['DE','ألمانيا','+49'],['FR','فرنسا','+33'],['CA','كندا','+1'],['MY','ماليزيا','+60'],['ID','إندونيسيا','+62'],['SD','السودان','+249'],['SO','الصومال','+252']
 ];
 const AVATAR_OPTIONS=[
- ['avatar-01','user'],['avatar-02','user-round'],['avatar-03','briefcase-business'],['avatar-04','graduation-cap'],
- ['avatar-05','crown'],['avatar-06','leaf'],['avatar-07','star'],['avatar-08','compass'],
- ['avatar-09','heart'],['avatar-10','shield-check'],['avatar-11','globe'],['avatar-12','sparkles']
+ ['avatar-01','user'],['avatar-02','user-check'],['avatar-03','user-plus'],['avatar-04','activity'],
+ ['avatar-05','receipt'],['avatar-06','layers'],['avatar-07','link'],['avatar-08','messages'],
+ ['avatar-09','wall'],['avatar-10','shield-check'],['avatar-11','bell'],['avatar-12','calculator']
 ];
 function avatarPicker(){
  return '<div class="avatar-picker" role="group" aria-label="اختر أيقونة الحساب">'+AVATAR_OPTIONS.map(([key,icon])=>'<button type="button" class="avatar-option '+(selectedAvatarKey===key?'selected':'')+'" data-action="choose-avatar" data-avatar="'+key+'" aria-pressed="'+(selectedAvatarKey===key)+'">'+uiIcon(icon,22)+'</button>').join('')+'</div>';
 }
 function profileSetup(){
  const chosen=activeProfile||{};
- selectedAvatarKey=chosen.avatarKey||selectedAvatarKey||'avatar-01';
+ if(!selectedAvatarKey)selectedAvatarKey=chosen.avatarKey||'avatar-01';
  auth(`<div class="auth-brand" style="margin:8px 0 18px"><div class="brand-mark">س</div><h1 style="font-size:22px">بياناتك الشخصية</h1><p>أكمل بيانات الحساب للمتابعة</p></div>
  <div class="auth-card"><form id="setupForm" novalidate>
   <div class="field"><label>أيقونة الحساب</label>${avatarPicker()}<small class="field-hint">اختر أيقونة جاهزة؛ لا يتم رفع أو تخزين صور شخصية.</small></div>
@@ -3839,7 +3846,7 @@ document.addEventListener('submit',async e=>{
    if(created.session){
     activeProfile=await SahmSupabase.profile(created.user.id);
     db.session=true;db.user=Object.assign(db.user,{id:created.user.id,email:created.user.email});
-    selectedAvatarKey='avatar-01';resetNavigation('profile-setup',{});
+    selectedAvatarKey=activeProfile.avatarKey||'avatar-01';resetNavigation('profile-setup',{});
    }else{
     toast('تم إنشاء الحساب. افتح رسالة التأكيد التي أرسلناها إلى بريدك الإلكتروني، ثم ارجع لتسجيل الدخول.');
     resetNavigation('welcome',{});
@@ -3894,6 +3901,7 @@ async function bootSahm(){
    activeProfile=await SahmSupabase.profile(session.user.id);
    db.session=true;db.verified=!!session.user.email_confirmed_at;
    db.user=Object.assign(db.user,{id:session.user.id,email:session.user.email,name:activeProfile.fullName,phone:activeProfile.phone,city:activeProfile.city,avatarKey:activeProfile.avatarKey});
+   selectedAvatarKey=activeProfile.avatarKey||'avatar-01';
    screenName=activeProfile.completed?(new URLSearchParams(location.search).get('join')?'join-group':'home'):'profile-setup';
   }else{db.session=false;screenName='welcome'}
   SahmSupabase.onAuthStateChange((event,sess)=>{
