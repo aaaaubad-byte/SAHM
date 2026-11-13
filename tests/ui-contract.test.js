@@ -78,6 +78,31 @@ test('obsolete parallel view-model collections and no-op route helpers are absen
   assert.doesNotMatch(html, /\bstack\s*=\s*\[\]/);
 });
 
+
+test('email auth and staged profile onboarding replace the demo OTP flow', () => {
+  const auth = fs.readFileSync(path.join(ROOT, 'sahm-supabase.js'), 'utf8');
+  const gateway = fs.readFileSync(path.join(ROOT, 'sahm-supabase-data.js'), 'utf8');
+  assert.match(html, /id="loginForm"/);
+  assert.match(html, /id="registerForm"/);
+  assert.match(html, /id="setupForm"/);
+  assert.match(html, /id="updatePasswordForm"/);
+  assert.match(html, /name="terms" required/);
+  assert.match(html, /href="\/terms\.html"/);
+  assert.match(html, /name="fullName"/);
+  assert.match(html, /name="phone"/);
+  assert.match(html, /value="\+967"/);
+  assert.match(html, /AVATAR_OPTIONS/);
+  assert.doesNotMatch(html, /246810|رمز المعاينة التجريبي/);
+  assert.match(auth, /signInWithPassword/);
+  assert.match(auth, /auth\.signUp/);
+  assert.match(auth, /resetPasswordForEmail/);
+  assert.match(auth, /updateUser/);
+  assert.match(gateway, /create_association/);
+  assert.match(gateway, /accept_invitation/);
+  assert.match(gateway, /postgres_changes/);
+  assert.doesNotMatch(auth, /var URL\s*=/);
+});
+
 test('navigation runtime is loaded in order and precached by the service worker', () => {
   const appScript = html.indexOf('<script src="/sahm-app.js"></script>');
   const navigationScript = html.indexOf('<script src="/sahm-navigation.js"></script>');
