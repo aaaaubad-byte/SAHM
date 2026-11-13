@@ -25,7 +25,7 @@
     'setNotifyType', 'setMute', 'markChatRead', 'markNotificationsRead', 'joinByCode'];
   /* queries that take (db, viewer, ...) */
   var VIEW_QUERIES = ['groupDetail', 'installmentRows', 'memberStatement', 'receiptList', 'receiptDetail', 'eventLog',
-    'memberList', 'drawHistory', 'notificationList', 'chatView'];
+    'memberList', 'inviteList', 'drawHistory', 'notificationList', 'chatView'];
   /* helpers that take (db, ...) with no viewer */
   var PLAIN = ['drawStatus', 'previewJoin', 'inviteSummary', 'getInviteInfo', 'lastReminder'];
 
@@ -47,7 +47,11 @@
 
   /* account preferences live in db.prefs (not a second source of associations) */
   api.prefs = function () { return init().prefs; };
-  api.savePrefs = function () { return D().save(init()); };
+  api.savePrefs = function () { return report('savePrefs', D().save(init())); };
+  api.nowAt = function (tz) { return D().nowAt(tz || D().TZ); };
+  api.todayIn = function (tz) { return C().todayIn(tz || D().TZ); };
+  api.chatTime = function (at, today) { return D().chatTime(at, today || C().todayIn(D().TZ)); };
+  api.timeZone = function () { return D().TZ; };
 
   root.SahmApp = api;
 })(typeof window !== 'undefined' ? window : globalThis);
