@@ -52,7 +52,8 @@
         params: copy(snapshot.params) || {},
         currentGroupId: snapshot.currentGroupId == null ? null : snapshot.currentGroupId,
         groupTab: snapshot.groupTab || 'all',
-        groupDetailTab: snapshot.groupDetailTab || 'overview'
+        groupDetailTab: snapshot.groupDetailTab || 'overview',
+        viewState: copy(snapshot.viewState) || {}
       };
     }
 
@@ -65,7 +66,8 @@
         JSON.stringify(a.params || {}) === JSON.stringify(b.params || {}) &&
         a.currentGroupId === b.currentGroupId &&
         a.groupTab === b.groupTab &&
-        a.groupDetailTab === b.groupDetailTab;
+        a.groupDetailTab === b.groupDetailTab &&
+        JSON.stringify(a.viewState || {}) === JSON.stringify(b.viewState || {});
     }
 
     function start(snapshot) {
