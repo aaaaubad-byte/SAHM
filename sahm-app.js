@@ -49,9 +49,11 @@
   api.prefs = function () { return init().prefs; };
   api.savePrefs = function () { return report('savePrefs', D().save(init())); };
   api.nowAt = function (tz) { return D().nowAt(tz || D().TZ); };
-  api.todayIn = function (tz) { return C().todayIn(tz || D().TZ); };
-  api.chatTime = function (at, today) { return D().chatTime(at, today || C().todayIn(D().TZ)); };
+  api.todayIn = function (tz) { return root.SahmCore.todayIn(tz || D().TZ); };
+  api.chatTime = function (at, today) { return D().chatTime(at, today || root.SahmCore.todayIn(D().TZ)); };
   api.timeZone = function () { return D().TZ; };
+  api.notifyTypes = function () { return D().NOTIFY_TYPES.slice(); };
+  api.maxMessage = function () { return D().MAX_MSG; };
 
   root.SahmApp = api;
 })(typeof window !== 'undefined' ? window : globalThis);
