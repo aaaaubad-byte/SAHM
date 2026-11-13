@@ -6,6 +6,7 @@ on:
       - feature/sahm-final-preview-product
       - fix/sahm-node-ci-test-command
       - main
+      - SAHM-SUPABASE
   pull_request:
     branches:
       - main
