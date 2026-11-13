@@ -59,6 +59,7 @@ BEGIN
  v_membership:=(v_accept->>'membership_id')::uuid;
  IF (v_accept->>'shares_added')::integer<>1 THEN RAISE EXCEPTION 'Invitation did not add the requested share'; END IF;
 
+ PERFORM set_config('request.jwt.claim.sub','aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa',true);
  v_added:=public.add_shares(v_membership,1);
  IF v_added<>1 THEN RAISE EXCEPTION 'add_shares failed'; END IF;
  v_removed:=public.remove_shares(v_membership,1);
@@ -69,7 +70,6 @@ BEGIN
    RAISE EXCEPTION 'remove_member did not deactivate membership';
  END IF;
 
- PERFORM set_config('request.jwt.claim.sub','aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa',true);
  PERFORM public.update_association(v_association,jsonb_build_object('name','جمعية اختبار معدلة'));
  v_second_invite:=public.create_invitation(v_association,'فاطمة علي محمد','+967777000003',1);
  IF NOT public.cancel_invitation((v_second_invite->>'id')::uuid) THEN
