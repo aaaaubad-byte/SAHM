@@ -249,3 +249,57 @@ test('storage write failure is reported instead of claiming persistence', () => 
   assert.equal(result.persisted, false);
   assert.ok(result.warning);
 });
+
+test('adding shares respects the per-member limit and records the new share', () => {
+  const w = fresh();
+  const { group } = createGroup(w, { targetShares: 2, maxPerMember: 2 });
+  const member = w.D.addMember(w.db, 'me', group.id, {
+    name: 'صاحب سهم', userId: 'share-owner', shares: 1, joinedAt: '2026-11-13'
+  }).member;
+  const added = w.D.addShares(w.db, 'me', member.id, 1);
+  assert.equal(added.ok, true);
+  assert.equal(added.totalShares, 2);
+  assert.equal(w.K.memberShares(w.db, member.id).length, 2);
+  assert.equal(w.D.addShares(w.db, 'me', member.id, 1).code, 'MAX_PER_MEMBER');
+});
+
+test('invitation acceptance binds the invited phone to the joining account', () => {
+  const w = fresh();
+  const { group } = createGroup(w, { targetShares: 2 });
+  const invitation = w.D.createInvite(w.db, 'me', group.id, {
+    name: 'مدعو', phone: '777123456', shares: 1
+  });
+  assert.equal(invitation.ok, true);
+  const joined = w.D.joinByCode(w.db, 'invitee-user', group.inviteCode, {
+    name: 'المدعو', phone: '777123456'
+  });
+  assert.equal(joined.ok, true);
+  assert.equal(joined.member.userId, 'invitee-user');
+  assert.equal(w.D.inviteSummary(w.db, group.id).assigned, 1);
+});
+
+test('manager controls group notification types while members control their own mute', () => {
+  const w = fresh();
+  const { group } = createGroup(w, { targetShares: 1 });
+  const member = w.D.addMember(w.db, 'me', group.id, {
+    name: 'مشارك', userId: 'mute-user', shares: 1, joinedAt: '2026-11-13'
+  }).member;
+  assert.equal(w.D.setNotifyType(w.db, 'me', group.id, 'received', false).ok, true);
+  assert.equal(group.notify.received, false);
+  assert.equal(w.D.setNotifyType(w.db, 'mute-user', group.id, 'received', true).code, 'FORBIDDEN');
+  assert.equal(w.D.setMute(w.db, 'mute-user', group.id, { group: true, reminders: true }).ok, true);
+  assert.equal(w.D.isMuted(w.db, group.id, 'reminder'), true);
+  assert.equal(w.D.isMuted(w.db, group.id, 'group'), true);
+  assert.equal(member.userId, 'mute-user');
+});
+
+test('v3 data is archived and migrated to the current schema', () => {
+  const w = fresh();
+  const old = w.D.buildSeed('2026-11-13');
+  old.version = 'sahm-data-2026-11-v3';
+  w.storage.put(w.D.KEYS.data, old);
+  const migrated = w.D.load();
+  assert.equal(migrated.version, w.D.VERSION);
+  assert.ok(migrated.shares.every(x => !!x.addedAt));
+  assert.ok(w.D.archiveList().some(x => x.key === w.D.KEYS.data && x.reason === 'migrated-from-sahm-data-2026-11-v3'));
+});
