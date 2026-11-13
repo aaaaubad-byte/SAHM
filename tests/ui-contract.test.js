@@ -110,7 +110,7 @@ test('email auth and staged profile onboarding replace the demo OTP flow', () =>
   assert.match(html, /href="\/terms\.html"/);
   assert.match(html, /name="fullName"/);
   assert.match(html, /name="phone"/);
-  assert.match(html, /\['YE','اليمن','\+967'\]/);
+  assert.ok(html.includes("['YE','اليمن','+967']"));
   assert.match(html, /AVATAR_OPTIONS/);
   assert.doesNotMatch(html, /246810|رمز المعاينة التجريبي/);
   assert.match(auth, /signInWithPassword/);
