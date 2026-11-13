@@ -4,11 +4,13 @@ const assert = require('node:assert/strict');
 const { fresh } = require('./helpers');
 
 function createGroup(w, overrides = {}) {
-  const result = w.D.createGroup(w.db, 'me', Object.assign({
+  const config = Object.assign({
     name: 'جمعية اختبار الدفعة الأولى', currency: 'YER', cycleType: 'monthly',
     shareAmount: '90000', installments: 3, startDate: '2026-11-13',
     targetShares: 3, maxPerMember: 2, quorum: 60, rules: ''
-  }, overrides));
+  }, overrides);
+  config.maxPerMember = Math.min(config.maxPerMember, config.targetShares);
+  const result = w.D.createGroup(w.db, 'me', config);
   assert.equal(result.ok, true, JSON.stringify(result));
   return { result, group: w.db.groups.find(g => g.id === result.groupId) };
 }
@@ -23,7 +25,7 @@ test('data store loads a versioned seed and required collections', () => {
 
 test('manager-only creation does not create a manager share', () => {
   const w = fresh();
-  const { group } = createGroup(w, { targetShares: 2, managerMode: 'manager' });
+  const { group } = createGroup(w, { targetShares: 2, managerMode: 'only' });
   assert.equal(w.K.groupShares(w.db, group.id).length, 0);
   assert.equal(w.D.groupDetail(w.db, 'me', group.id).role.manager, true);
   assert.equal(w.D.groupDetail(w.db, 'me', group.id).role.participant, false);
