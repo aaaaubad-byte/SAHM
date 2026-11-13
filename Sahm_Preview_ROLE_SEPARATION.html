@@ -3377,7 +3377,6 @@ function applyNavigationState(state,fromPop=false){
  let next=state;
  const isAuth=AUTH_SCREEN_NAMES.includes(next.screenName);
  const guestOnly=['welcome','register','logged-out'].includes(next.screenName);
- const authenticatedSetup=['profile-setup','reset-password'].includes(next.screenName);
  if(db.session&&guestOnly)next=navigation.reset(routeSnapshot('home',{}));
  else if(db.session&&next.screenName==='profile-setup'&&activeProfile&&activeProfile.completed)next=navigation.reset(routeSnapshot('home',{}));
  else if(!db.session&&!isAuth)next=navigation.reset(routeSnapshot('logged-out',{}));
@@ -3909,9 +3908,20 @@ document.addEventListener('submit',async e=>{
   if(authBusy)return;const d=Object.fromEntries(new FormData(form));
   const parts=String(d.fullName||'').trim().split(/\s+/).filter(Boolean);
   if(parts.length<3){toast('أدخل الاسم الثلاثي على الأقل');return}
-  const digits=String(d.phone||'').replace(/[٠-٩]/g,ch=>'٠١٢٣٤٥٦٧٨٩'.indexOf(ch)).replace(/\D/g,'').replace(/^0+/,'');
-  if(digits.length<7||digits.length>14){toast('أدخل رقم هاتف صحيحاً');return}
-  const dial=String(d.country||'+967'),dialDigits=dial.replace(/\D/g,'');const national=digits.startsWith(dialDigits)?digits.slice(dialDigits.length):digits;const phoneE164=dial+national;
+  const rawPhone=String(d.phone||'').trim().replace(/[٠-٩]/g,ch=>'٠١٢٣٤٥٦٧٨٩'.indexOf(ch)).replace(/[۰-۹]/g,ch=>'۰۱۲۳۴۵۶۷۸۹'.indexOf(ch));
+  const compactPhone=rawPhone.replace(/[\\s().-]/g,'');
+  let phoneE164='';
+  if(compactPhone.startsWith('+')||compactPhone.startsWith('00')){
+   let internationalDigits=compactPhone.replace(/\\D/g,'');
+   if(compactPhone.startsWith('00'))internationalDigits=internationalDigits.slice(2);
+   phoneE164='+'+internationalDigits;
+  }else{
+   let national=compactPhone.replace(/\\D/g,'').replace(/^0+/,'');
+   const dialDigits=String(d.country||'+967').replace(/\\D/g,'');
+   if(national.startsWith(dialDigits))national=national.slice(dialDigits.length);
+   phoneE164='+'+dialDigits+national;
+  }
+  if(!/^\\+[1-9][0-9]{7,14}$/.test(phoneE164)){toast('أدخل رقم هاتف صحيحاً مع اختيار الدولة المناسبة');return}
   authBusy=true;setBusy(true,'جارٍ حفظ بياناتك...');
   try{
    await SahmSupabase.completeProfile(d.fullName,phoneE164,selectedAvatarKey);
