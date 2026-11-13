@@ -777,6 +777,12 @@
     });
   }
   /* what the invitation screen may show before membership is accepted (no member data) */
+  function inviteList(db, viewer, gid) {
+    var v = guardView(db, viewer, gid); if (v.err) return v.err;
+    if (!v.role.manager) return fail('FORBIDDEN', 'قائمة الدعوات متاحة لمدير الجمعية فقط');
+    return { ok: true, groupId: gid, invites: db.invites.filter(function (i) { return i.groupId === gid; }).map(clone) };
+  }
+
   function getInviteInfo(db, code) {
     var g = db.groups.find(function (x) { return x.inviteCode === String(code || '').trim(); });
     if (!g) return fail('INVITE_CODE_INVALID', 'رابط الدعوة غير صحيح');
@@ -1196,6 +1202,6 @@
     sendMessage: sendMessage, markChatRead: markChatRead, setNotifyType: setNotifyType, setMute: setMute, isMuted: isMuted, markNotificationsRead: markNotificationsRead,
     /* queries */
     groupDetail: groupDetail, installmentRows: installmentRows, memberStatement: memberStatement, receiptList: receiptList, receiptDetail: receiptDetail,
-    eventLog: eventLog, memberList: memberList, drawHistory: drawHistory, notificationList: notificationList, chatView: chatView
+    eventLog: eventLog, memberList: memberList, inviteList: inviteList, drawHistory: drawHistory, notificationList: notificationList, chatView: chatView
   };
 })(typeof window !== 'undefined' ? window : globalThis);
