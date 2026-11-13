@@ -1057,7 +1057,7 @@
     return db.groups.filter(function (g) { var r = roleOf(db, g); return r.manager || r.participant; }).map(function (g) {
       var msgs = groupMessages(db, g.id), last = msgs[msgs.length - 1] || null;
       return { group: g, last: last, unread: unreadCount(db, g.id), muted: !!(db.prefs.mute[g.id] && db.prefs.mute[g.id].group) };
-    }).sort(function (a, b) { return (b.last ? b.last.at : '') < (a.last ? a.last.at : '') ? -1 : 1; });
+    }).sort(function (a, b) { var aAt = a.last ? a.last.at : '', bAt = b.last ? b.last.at : ''; return aAt === bAt ? 0 : (aAt < bAt ? 1 : -1); });
   }
   function totalUnreadNotifications(db) { return db.notifications.filter(function (n) { return !n.read && !n.muted; }).length; }
   function eventVisible(e, role) {
