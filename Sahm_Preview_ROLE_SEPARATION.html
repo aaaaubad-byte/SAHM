@@ -3870,7 +3870,7 @@ document.addEventListener('submit',async e=>{
    const created=await SahmSupabase.signUp(d.email,d.password,true);
    if(created.session){
     activeProfile=await SahmSupabase.profile(created.user.id);
-    await SahmSupabaseData.init(activeProfile);SahmSupabaseData.install();db=load();currentGroupId=(db.groups[0]||{}).id||null;
+    await SahmSupabaseData.init(activeProfile);SahmSupabaseData.install();db=load();currentGroupId=(db.groups[0]||{}).id||null;startRemoteRealtime();
     db.session=true;db.user=Object.assign(db.user,{id:created.user.id,email:created.user.email});
     selectedAvatarKey=activeProfile.avatarKey||'avatar-01';resetNavigation('profile-setup',{});
    }else{
@@ -3891,7 +3891,7 @@ document.addEventListener('submit',async e=>{
    history.replaceState(null,'',location.pathname+location.search);
    toast('تم تحديث كلمة المرور بنجاح');
    if(!activeProfile)activeProfile=await SahmSupabase.profile();
-   if(!SahmSupabaseData.isRemote()){await SahmSupabaseData.init(activeProfile);SahmSupabaseData.install();db=load();}
+   if(!SahmSupabaseData.isRemote()){await SahmSupabaseData.init(activeProfile);SahmSupabaseData.install();db=load();startRemoteRealtime();}
    resetNavigation(activeProfile.completed?'home':'profile-setup',{});
   }catch(err){toast(SahmSupabase.friendlyError(err));}
   finally{authBusy=false;setBusy(false);}
@@ -3951,7 +3951,7 @@ async function bootSahm(){
   const session=await SahmSupabase.session();
   if(session&&session.user){
    activeProfile=await SahmSupabase.profile(session.user.id);
-   await SahmSupabaseData.init(activeProfile);SahmSupabaseData.install();db=load();currentGroupId=(db.groups[0]||{}).id||null;
+   await SahmSupabaseData.init(activeProfile);SahmSupabaseData.install();db=load();currentGroupId=(db.groups[0]||{}).id||null;startRemoteRealtime();
    db.session=true;db.verified=!!session.user.email_confirmed_at;
    db.user=Object.assign(db.user,{id:session.user.id,email:session.user.email,name:activeProfile.fullName,phone:activeProfile.phone,city:activeProfile.city,avatarKey:activeProfile.avatarKey});
    selectedAvatarKey=activeProfile.avatarKey||'avatar-01';
