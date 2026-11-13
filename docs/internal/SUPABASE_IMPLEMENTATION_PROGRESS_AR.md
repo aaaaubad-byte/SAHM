@@ -58,7 +58,7 @@
 
 - التغيير الأولي للجداول والسياسات والدوال نُفذ مباشرة عبر SQL MCP على المشروع الحي بعد التحقق من خلو مخطط `public` من جداول تطبيق. **لم يسجل هذا التأسيس الأولي كترحيل Supabase حتى الآن**؛ يجب تحويله إلى baseline قابل لإعادة الإنشاء ومطابق تمامًا قبل اعتماد بيئة جديدة.
 - أول ترحيل مسجل رسميًا: `20261113195243_append_only_financial_and_audit_history`.
-- ملفه في المستودع: `supabase/migrations/20261113203000_append_only_financial_and_audit_history.sql`.
+- ملفه في المستودع: `supabase/migrations/20261113195243_append_only_financial_and_audit_history.sql`.
 - لا يجوز اعتبار سجل الترحيلات مكتملًا حتى إضافة baseline schema وتوحيد نسخة SQL المصدر مع المخطط الحي.
 
 ## 3. ما لم يكتمل بعد
