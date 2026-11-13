@@ -28,7 +28,7 @@ test('every registered screen has a real renderer and every static route resolve
   const screenEntries = [...registryMatch[1].matchAll(/(?:^|,)\s*'?([A-Za-z_$][\w$-]*)'?\s*:\s*([A-Za-z_$][\w$]*)/gm)];
   assert.ok(screenEntries.length >= 20, 'all application screens are registered');
 
-  const renderers = new Set([...html.matchAll(/^function\s+([A-Za-z_$][\w$]*)\s*\(/gm)].map(x => x[1]));
+  const renderers = new Set([...html.matchAll(/\bfunction\s+([A-Za-z_$][\w$]*)\s*\(/g)].map(x => x[1]));
   for (const [, route, renderer] of screenEntries) {
     assert.ok(renderers.has(renderer), route + ' has renderer ' + renderer);
   }
