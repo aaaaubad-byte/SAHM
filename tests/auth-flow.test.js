@@ -35,14 +35,14 @@ test('registration requires email, password confirmation and explicit terms acce
   assert.match(screen, /id="confirmPassword"[^>]*type="password"/);
   assert.match(screen, /type="checkbox" name="terms" required/);
   assert.match(screen, /href="\/terms.html"/);
-  assert.match(screen, /SahmSupabase\.signUp\(d\.email,d\.password,true\)/);
+  assert.match(html, /SahmSupabase\.signUp\(d\.email,d\.password,true\)/);
 });
 
 test('profile completion requires a three-part name and a phone with Yemen selected by default', () => {
   const start = html.indexOf('function profileSetup(){');
   const end = html.indexOf('function logout()', start);
   const screen = html.slice(start, end);
-  assert.match(screen, /AVATAR_OPTIONS/);
+  assert.match(screen, /avatarPicker\(\)/);
   assert.match(screen, /اختر أيقونة جاهزة/);
   assert.match(screen, /id="profileFullName" name="fullName" required/);
   assert.match(screen, /id="profileCountry" name="country"/);
