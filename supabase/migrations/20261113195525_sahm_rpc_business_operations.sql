@@ -1,3 +1,5 @@
+CREATE SCHEMA IF NOT EXISTS private;
+
 -- SAHM database RPC operations. Definer implementations live in private;
 -- exposed public RPCs are SECURITY INVOKER wrappers with authenticated-only grants.
 CREATE OR REPLACE FUNCTION private.accept_invitation(p_token text)
