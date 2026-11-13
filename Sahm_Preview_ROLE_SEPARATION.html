@@ -3258,7 +3258,7 @@ body {
 const $=s=>document.querySelector(s);
 const money=(n,c='YER')=>{const cur=SahmCore.CURRENCIES[c]||SahmCore.CURRENCIES.YER;const minor=Math.round(Number(n||0)*cur.minor);return SahmCore.fmtMoney(minor,c in SahmCore.CURRENCIES?c:'YER')};
 const today=()=>SahmApp.todayIn();
-const AUTH_SCREEN_NAMES=['welcome','register','profile-setup','logged-out'];
+const AUTH_SCREEN_NAMES=['welcome','register','profile-setup','reset-password','logged-out'];
 let db={session:false,verified:false,user:{id:null,name:'',phone:'',city:'',email:'',avatarKey:'avatar-01',notifications:true,biometric:false},groups:[],unread:0},screenName='welcome',params={},groupTab='all',groupDetailTab='overview',toastTimer,homeSlideTimer=null,homeSlideIndex=0,selectedInstallmentCycle=1,selectedInstallmentStatus='all',pendingJoinCode=null;
 let selectedAvatarKey='avatar-01',authBusy=false,activeProfile=null;
 let currentGroupId=(db.groups[0]||{}).id||null,createdGroupId=null,createWizardStep=1,createFormSnapshot={},reminderRequest=null,navigation=null;
@@ -3687,6 +3687,14 @@ function welcome(){
   <button class="link-btn" style="width:100%;margin-top:10px" type="button" data-action="forgot-password">نسيت كلمة المرور؟</button>
  </form><div class="auth-divider"><span>ليس لديك حساب؟</span></div><button class="btn outline full" type="button" data-go="register">إنشاء حساب</button></div>`)
 }
+function resetPasswordScreen(){
+ auth(`<div class="auth-brand" style="margin:8px 0 18px"><div class="brand-mark">س</div><h1 style="font-size:22px">تعيين كلمة مرور جديدة</h1><p>أدخل كلمة المرور الجديدة لحسابك</p></div>
+ <div class="auth-card"><form id="updatePasswordForm" novalidate>
+  <div class="field"><label for="newPassword">كلمة المرور الجديدة</label><input id="newPassword" name="password" type="password" autocomplete="new-password" minlength="8" required placeholder="8 أحرف على الأقل"></div>
+  <div class="field"><label for="newPasswordConfirm">تأكيد كلمة المرور</label><input id="newPasswordConfirm" name="confirmPassword" type="password" autocomplete="new-password" minlength="8" required placeholder="أعد كتابة كلمة المرور"></div>
+  <button class="btn primary full" type="submit">حفظ كلمة المرور</button>
+ </form></div>`)
+}
 function register(){
  auth(`<div class="auth-brand" style="margin:8px 0 18px"><div class="brand-mark">س</div><h1 style="font-size:22px">إنشاء حساب جديد</h1><p>ابدأ بإنشاء حسابك باستخدام بريدك الإلكتروني</p></div>
  <div class="auth-card"><form id="registerForm" novalidate>
@@ -3721,7 +3729,7 @@ function profileSetup(){
 }
 function logout(){auth(`<div class="auth-brand"><div class="brand-mark">✓</div><h1>تم تسجيل الخروج</h1></div><div class="auth-card"><button class="btn primary full" data-go="welcome">العودة لتسجيل الدخول</button></div>`)}
 const ALL_SCREEN_REGISTRY={
- welcome:welcome,register:register,'profile-setup':profileSetup,'logged-out':logout,
+ welcome:welcome,register:register,'profile-setup':profileSetup,'reset-password':resetPasswordScreen,'logged-out':logout,
  home:home,groups:groups,'create-group':createGroup,'created-group':createdGroup,'group-detail':groupDetail,
  members:members,invite:invite,invites:invites,'join-group':joinGroup,installments:installments,
  'draw-room':drawRoom,'draw-history':drawHistory,receipts:receipts,'receipt-detail':receiptDetail,
@@ -3822,7 +3830,7 @@ document.addEventListener('change',async e=>{
 });
 document.addEventListener('submit',async e=>{
  const form=e.target;
- if(!['loginForm','registerForm','setupForm','createForm','inviteForm','joinForm','chatForm','profileForm'].includes(form.id))return;
+ if(!['loginForm','registerForm','setupForm','updatePasswordForm','createForm','inviteForm','joinForm','chatForm','profileForm'].includes(form.id))return;
  e.preventDefault();
  const setBusy=(on,label)=>{const b=form.querySelector('button[type="submit"]');if(b){b.disabled=!!on;if(on){b.dataset.oldLabel=b.textContent;b.textContent=label||'جارٍ التنفيذ...'}else if(b.dataset.oldLabel){b.textContent=b.dataset.oldLabel;delete b.dataset.oldLabel}}};
  if(form.id==='loginForm'){
@@ -3857,6 +3865,22 @@ document.addEventListener('submit',async e=>{
     toast('تم إنشاء الحساب. افتح رسالة التأكيد التي أرسلناها إلى بريدك الإلكتروني، ثم ارجع لتسجيل الدخول.');
     resetNavigation('welcome',{});
    }
+  }catch(err){toast(SahmSupabase.friendlyError(err));}
+  finally{authBusy=false;setBusy(false);}
+  return;
+ }
+ if(form.id==='updatePasswordForm'){
+  if(authBusy)return;const d=Object.fromEntries(new FormData(form));
+  if(String(d.password||'').length<8){toast('كلمة المرور يجب ألا تقل عن 8 أحرف');return}
+  if(d.password!==d.confirmPassword){toast('كلمتا المرور غير متطابقتين');return}
+  authBusy=true;setBusy(true,'جارٍ حفظ كلمة المرور...');
+  try{
+   await SahmSupabase.updatePassword(d.password);
+   history.replaceState(null,'',location.pathname+location.search);
+   toast('تم تحديث كلمة المرور بنجاح');
+   if(!activeProfile)activeProfile=await SahmSupabase.profile();
+   if(!SahmSupabaseData.isRemote()){await SahmSupabaseData.init(activeProfile);SahmSupabaseData.install();db=load();}
+   resetNavigation(activeProfile.completed?'home':'profile-setup',{});
   }catch(err){toast(SahmSupabase.friendlyError(err));}
   finally{authBusy=false;setBusy(false);}
   return;
@@ -3919,9 +3943,10 @@ async function bootSahm(){
    db.session=true;db.verified=!!session.user.email_confirmed_at;
    db.user=Object.assign(db.user,{id:session.user.id,email:session.user.email,name:activeProfile.fullName,phone:activeProfile.phone,city:activeProfile.city,avatarKey:activeProfile.avatarKey});
    selectedAvatarKey=activeProfile.avatarKey||'avatar-01';
-   screenName=activeProfile.completed?(new URLSearchParams(location.search).get('invite')?'join-group':'home'):'profile-setup';
+   screenName=location.hash.includes('reset-password')?'reset-password':(activeProfile.completed?(new URLSearchParams(location.search).get('invite')?'join-group':'home'):'profile-setup');
   }else{db.session=false;screenName='welcome'}
   SahmSupabase.onAuthStateChange((event,sess)=>{
+   if(event==='PASSWORD_RECOVERY'){resetNavigation('reset-password',{});return;}
    if(event==='SIGNED_OUT'){SahmSupabaseData.clear();db={session:false,verified:false,user:{id:null,name:'',phone:'',city:'',email:'',avatarKey:'avatar-01',notifications:true,biometric:false},groups:[],unread:0};currentGroupId=null;screenName='welcome';resetNavigation('welcome',{});}
   });
  }catch(err){
