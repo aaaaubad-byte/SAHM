@@ -8,12 +8,12 @@ DECLARE
 BEGIN
   SELECT count(*) INTO v_tables
   FROM pg_tables WHERE schemaname='public';
-  IF v_tables<>22 THEN RAISE EXCEPTION 'Expected 22 public tables, got %',v_tables; END IF;
+  IF v_tables<>23 THEN RAISE EXCEPTION 'Expected 23 public tables, got %',v_tables; END IF;
 
   SELECT count(*) INTO v_rls
   FROM pg_class c JOIN pg_namespace n ON n.oid=c.relnamespace
   WHERE n.nspname='public' AND c.relkind='r' AND c.relrowsecurity;
-  IF v_rls<>22 THEN RAISE EXCEPTION 'RLS is not enabled on every public table: %/22',v_rls; END IF;
+  IF v_rls<>23 THEN RAISE EXCEPTION 'RLS is not enabled on every public table: %/23',v_rls; END IF;
 
   SELECT count(*) INTO v_anon_grants
   FROM information_schema.role_table_grants
