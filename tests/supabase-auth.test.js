@@ -34,7 +34,7 @@ function loadAuthFacade(overrides = {}) {
       };
     }
   };
-  const window = { location: { origin: 'https://sahm.example', pathname: '/app.html', search: '?invite=secret-invite' } };
+  const window = { location: { href: 'https://sahm.example/app.html?invite=secret-invite', origin: 'https://sahm.example', pathname: '/app.html', search: '?invite=secret-invite' } };
   window.supabase = { createClient: (url, key, options) => {
     calls.config = { url, key, options };
     return client;
