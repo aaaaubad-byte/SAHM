@@ -3862,6 +3862,7 @@ document.addEventListener('submit',async e=>{
   try{
    const signed=await SahmSupabase.signIn(d.email,d.password);
    activeProfile=await SahmSupabase.profile(signed.user.id);
+   selectedAvatarKey=activeProfile.avatarKey||'avatar-01';
    await SahmSupabaseData.init(activeProfile);SahmSupabaseData.install();db=load();currentGroupId=(db.groups[0]||{}).id||null;startRemoteRealtime();
    db.session=true;db.verified=!!signed.user.email_confirmed_at;db.user=Object.assign(db.user,{id:signed.user.id,email:signed.user.email,name:activeProfile.fullName,phone:activeProfile.phone,city:activeProfile.city});
    if(!activeProfile.completed){resetNavigation('profile-setup',{});}
