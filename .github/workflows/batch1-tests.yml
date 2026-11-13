@@ -4,6 +4,7 @@ on:
   push:
     branches:
       - feature/sahm-final-preview-product
+      - fix/sahm-node-ci-test-command
   pull_request:
     branches:
       - main
@@ -19,4 +20,4 @@ jobs:
         with:
           node-version: 22
       - name: Run batch 1 tests
-        run: node --test tests/
+        run: node --test tests/*.test.js
