@@ -8,7 +8,7 @@ const vm = require('node:vm');
 const html = fs.readFileSync(path.join(__dirname, '..', 'Sahm_Preview_ROLE_SEPARATION.html'), 'utf8');
 
 test('all inline browser scripts parse without syntax errors', () => {
-  const scripts = [...html.matchAll(/<script\\b(?![^>]*\\bsrc=)[^>]*>([\\s\\S]*?)<\\/script>/gi)]
+  const scripts = [...html.matchAll(/<script\b(?![^>]*\bsrc=)[^>]*>([\s\S]*?)<\/script>/gi)]
     .map(match => match[1]).filter(source => source.trim());
   assert.ok(scripts.length >= 1, 'expected inline application scripts');
   scripts.forEach((source, index) => {
@@ -34,7 +34,7 @@ test('registration requires email, password confirmation and explicit terms acce
   assert.match(screen, /id="registerPassword"[^>]*type="password"/);
   assert.match(screen, /id="confirmPassword"[^>]*type="password"/);
   assert.match(screen, /type="checkbox" name="terms" required/);
-  assert.match(screen, /href="\\/terms.html"/);
+  assert.match(screen, /href="\/terms.html"/);
   assert.match(screen, /SahmSupabase\.signUp\(d\.email,d\.password,true\)/);
 });
 
@@ -46,7 +46,7 @@ test('profile completion requires a three-part name and a phone with Yemen selec
   assert.match(screen, /اختر أيقونة جاهزة/);
   assert.match(screen, /id="profileFullName" name="fullName" required/);
   assert.match(screen, /id="profileCountry" name="country"/);
-  assert.match(screen, /c\\[0\\]==='YE'\?'selected'/);
+  assert.match(screen, /c\[0\]==='YE'\?'selected'/);
   assert.match(screen, /id="profilePhone" name="phone" type="tel" required/);
   assert.doesNotMatch(screen, /type="file"/);
   assert.match(html, /parts\.length<3/);
