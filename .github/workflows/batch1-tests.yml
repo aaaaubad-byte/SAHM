@@ -5,6 +5,7 @@ on:
     branches:
       - feature/sahm-final-preview-product
       - fix/sahm-node-ci-test-command
+      - main
   pull_request:
     branches:
       - main
