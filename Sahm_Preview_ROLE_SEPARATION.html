@@ -3333,7 +3333,7 @@ function load(){
   }),
   session:!!prefs.session,verified:!!prefs.verified,groups,participants,messages,wall,notifications,
   unread:notifResult&&notifResult.ok?notifResult.unread:SahmApp.unreadNotifications(),
-  receipts,invites,payments:[],audit,localGroups:[]
+  receipts,invites,audit
  };
 }
 function save(){
@@ -3554,14 +3554,28 @@ function joinGroup(){
  shell('الانضمام','groups',header('الانضمام إلى جمعية','استخدم رمز الدعوة المرسل إليك')+'<div class="card"><form id="joinForm"><div class="field"><label>رابط الدعوة أو الرمز</label><input name="code" value="'+escapeHtml(code)+'" required></div><button class="btn primary full" type="submit">عرض بيانات الجمعية</button></form><small>يتطلب الانضمام دعوة معلقة صادرة إلى رقم هاتف حسابك.</small></div>');
 }
 function installments(){
- const g=currentGroup();if(!g){go('groups');return}const d=SahmApp.groupDetail(g.id);if(!d||!d.ok){toast(d&&d.message||'تعذر تحميل الجمعية');return}
- const manager=!!d.role.manager,rounds=d.rounds||g.shares||0;if(!selectedInstallmentCycle||selectedInstallmentCycle>rounds)selectedInstallmentCycle=d.cycle||1;
+ const g=currentGroup();if(!g){go('groups');return}
+ const detail=SahmApp.groupDetail(g.id);if(!detail||!detail.ok){toast(detail&&detail.message||'تعذر تحميل الجمعية');return}
+ const manager=!!detail.role.manager,rounds=detail.rounds||g.shares||0;
+ if(!selectedInstallmentCycle||selectedInstallmentCycle>rounds)selectedInstallmentCycle=detail.cycle||1;
  const options=Array.from({length:Math.max(0,rounds)},(_,i)=>'<option value="'+(i+1)+'" '+(selectedInstallmentCycle===i+1?'selected':'')+'>الدورة '+(i+1)+'</option>').join('');
- const r=rounds?SahmApp.installmentRows(g.id,{cycle:selectedInstallmentCycle,status:selectedInstallmentStatus}):{ok:true,rows:[],counts:{paid:0,due:0,late:0,upcoming:0}};
- if(!r||!r.ok){shell('الأقساط','groups',header('أقساط الدورة',g.name)+'<div class="card empty"><b>'+escapeHtml(r&&r.message||'لا توجد أقساط لعرضها')+'</b></div>');return}
- const rows=r.rows||[],counts=r.counts||{paid:0,due:0,late:0,upcoming:0},filters=[['all','الكل'],['due','مستحق'],['paid','مدفوع'],['late','متأخر']];
- const rowsHtml=rows.map(x=>{const can=manager&&(x.status==='due'||x.status==='late'),actions=can?'<div class="dialog-actions"><button class="btn primary small" data-action="record-paid" data-member="'+x.memberId+'" data-cycle="'+x.cycle+'" data-no="'+x.no+'">تسجيل مدفوع</button><button class="btn outline small" data-action="send-reminder" data-member="'+x.memberId+'" data-cycle="'+x.cycle+'" data-no="'+x.no+'">تذكير</button></div>':'';return '<div class="listrow installment-row"><div class="grow"><strong>'+escapeHtml(x.memberName)+' · القسط '+x.no+' من '+x.of+'</strong><small>'+dateLabel(x.periodStart)+' — '+dateLabel(x.periodEnd)+'</small><small>'+x.shares+' أسهم · '+minorMoney(x.total,g.currency)+'</small></div>'+pill(x.status)+'<div class="installment-actions">'+actions+'</div></div>'}).join('');
- shell('الأقساط','groups',header('أقساط الدورة',g.name)+'<div class="member-summary three"><div><span>مدفوعة</span><b>'+counts.paid+'</b></div><div><span>مستحقة</span><b>'+counts.due+'</b></div><div><span>متأخرة</span><b>'+counts.late+'</b></div></div><div class="field"><label>الدورة</label><select id="installmentCycle">'+options+'</select></div><div class="segmented">'+filters.map(f=>'<button class="'+(selectedInstallmentStatus===f[0]?'active':'')+'" data-action="installment-filter" data-filter="'+f[0]+'">'+f[1]+'</button>').join('')+'</div><div class="card" id="installmentRows">'+(rowsHtml||'<div class="empty"><b>لا توجد أقساط مطابقة لهذا المرشح</b></div>')+'</div><button class="btn outline full" data-go="receipts">سجل الاستلام والتصحيحات</button>'+(manager?'<button class="btn outline full" data-go="audit">سجل أحداث الجمعية</button>':''));
+ const reminderOptions=Array.from({length:g.installments},(_,i)=>'<option value="'+(i+1)+'">القسط '+(i+1)+'</option>').join('');
+ const result=rounds?SahmApp.installmentRows(g.id,{cycle:selectedInstallmentCycle,status:selectedInstallmentStatus}):{ok:true,rows:[],counts:{paid:0,due:0,late:0,upcoming:0}};
+ if(!result||!result.ok){shell('الأقساط','groups',header('أقساط الدورة',g.name)+'<div class="card empty"><b>'+escapeHtml(result&&result.message||'لا توجد أقساط لعرضها')+'</b></div>');return}
+ const rows=result.rows||[],counts=result.counts||{paid:0,due:0,late:0,upcoming:0},filters=[['all','الكل'],['due','مستحق'],['paid','مدفوع'],['late','متأخر']];
+ const rowsHtml=rows.map(x=>{
+  const canRecord=manager&&(x.status==='due'||x.status==='late');
+  const actions=canRecord?'<div class="dialog-actions"><button class="btn primary small" data-action="record-paid" data-member="'+x.memberId+'" data-cycle="'+x.cycle+'" data-no="'+x.no+'">تسجيل مدفوع</button><button class="btn outline small" data-action="send-reminder" data-member="'+x.memberId+'" data-cycle="'+x.cycle+'" data-no="'+x.no+'">تذكير</button></div>':'';
+  return '<div class="listrow installment-row"><div class="grow"><strong>'+escapeHtml(x.memberName)+' · القسط '+x.no+' من '+x.of+'</strong><small>'+dateLabel(x.periodStart)+' — '+dateLabel(x.periodEnd)+'</small><small>'+x.shares+' أسهم · '+minorMoney(x.total,g.currency)+'</small></div>'+pill(x.status)+'<div class="installment-actions">'+actions+'</div></div>';
+ }).join('');
+ const reminderTools=manager?'<div class="card reminder-tools"><div class="field"><label>تذكير جميع المشاركين بالقسط</label><select id="reminderInstallment">'+reminderOptions+'</select></div><button class="btn outline full" data-action="send-reminder-all">إرسال التذكير للمستحقين والمتأخرين</button><small>لن يصل التذكير لمن سجل القسط مدفوعًا أو لم يحن موعده بعد.</small></div>':'';
+ shell('الأقساط','groups',header('أقساط الدورة',g.name)+
+ '<div class="member-summary three"><div><span>مدفوعة</span><b>'+counts.paid+'</b></div><div><span>مستحقة</span><b>'+counts.due+'</b></div><div><span>متأخرة</span><b>'+counts.late+'</b></div></div>'+
+ '<div class="field"><label>الدورة</label><select id="installmentCycle">'+options+'</select></div>'+reminderTools+
+ '<div class="segmented">'+filters.map(f=>'<button class="'+(selectedInstallmentStatus===f[0]?'active':'')+'" data-action="installment-filter" data-filter="'+f[0]+'">'+f[1]+'</button>').join('')+'</div>'+
+ '<div class="card" id="installmentRows">'+(rowsHtml||'<div class="empty"><b>لا توجد أقساط مطابقة لهذا المرشح</b></div>')+'</div>'+
+ '<button class="btn outline full" data-go="receipts">سجل الاستلام والتصحيحات</button>'+
+ (manager?'<button class="btn outline full" data-go="audit">سجل أحداث الجمعية</button>':''));
 }
 function drawRoom(){
  const g=currentGroup();if(!g||!isManager()){toast('إجراء القرعة متاح لمدير الجمعية فقط');go('group-detail');return}
@@ -3638,6 +3652,17 @@ function handleAppAction(action,el){
  if(action==='record-paid-confirm'){
   const root=$('#modal-root'),r=SahmApp.recordPaid({groupId:g.id,memberId:root.dataset.memberId,cycle:Number(root.dataset.cycle),no:Number(root.dataset.installmentNo)});
   if(r&&r.ok){const id=r.receipt&&r.receipt.id;closeModal();refreshData();installments();toast('تم تسجيل الاستلام'+(id?' · '+id:''))}return;
+ }
+ if(action==='installment-filter'){
+  selectedInstallmentStatus=el.dataset.filter||'all';installments();return;
+ }
+ if(action==='send-reminder-all'){
+  const no=Number($('#reminderInstallment')?.value||1);
+  reminderRequest={groupId:g.id,cycle:selectedInstallmentCycle,no:no};
+  const r=SahmApp.sendReminder(reminderRequest);
+  if(r&&r.ok){refreshData();toast('تم إرسال التذكير إلى '+r.recipients+' مشاركين')}
+  else if(r&&r.code==='REMINDER_REPEAT'){showModal('تأكيد تكرار التذكير',escapeHtml(r.message),[['إرسال مرة أخرى','send-reminder-confirm','primary'],['إلغاء','close','outline']])}
+  return;
  }
  if(action==='send-reminder'){
   reminderRequest={groupId:g.id,cycle:Number(el.dataset.cycle),no:Number(el.dataset.no),memberId:el.dataset.member||undefined};
