@@ -129,3 +129,32 @@ test('navigating to an identical route does not add another history entry', () =
   assert.equal(win.history.length, length);
   assert.equal(nav.current().depth, 0);
 });
+
+test('creation wizard stages are browser-history entries and retain the draft', () => {
+  const win = fakeWindow();
+  const nav = create({ window: win });
+  nav.start({ screenName: 'groups' });
+  nav.navigate({
+    screenName: 'create-group',
+    viewState: { createWizardStep: 1, createFormSnapshot: { name: 'جمعية الاختبار' } }
+  });
+  nav.navigate({
+    screenName: 'create-group',
+    viewState: { createWizardStep: 2, createFormSnapshot: { name: 'جمعية الاختبار', currency: 'YER' } }
+  });
+  nav.navigate({
+    screenName: 'create-group',
+    viewState: { createWizardStep: 3, createFormSnapshot: { name: 'جمعية الاختبار', currency: 'YER', targetShares: '10' } }
+  });
+
+  nav.back();
+  assert.equal(nav.current().viewState.createWizardStep, 2);
+  assert.equal(nav.current().viewState.createFormSnapshot.currency, 'YER');
+  nav.back();
+  assert.equal(nav.current().viewState.createWizardStep, 1);
+  nav.forward();
+  assert.equal(nav.current().viewState.createWizardStep, 2);
+  nav.forward();
+  assert.equal(nav.current().viewState.createWizardStep, 3);
+  assert.equal(nav.current().viewState.createFormSnapshot.targetShares, '10');
+});
