@@ -3376,7 +3376,10 @@ function applyNavigationState(state,fromPop=false){
  const modalWasOpen=!!($('#modal-root')&&$('#modal-root').innerHTML);
  let next=state;
  const isAuth=AUTH_SCREEN_NAMES.includes(next.screenName);
- if(db.session&&isAuth)next=navigation.reset(routeSnapshot('home',{}));
+ const guestOnly=['welcome','register','logged-out'].includes(next.screenName);
+ const authenticatedSetup=['profile-setup','reset-password'].includes(next.screenName);
+ if(db.session&&guestOnly)next=navigation.reset(routeSnapshot('home',{}));
+ else if(db.session&&next.screenName==='profile-setup'&&activeProfile&&activeProfile.completed)next=navigation.reset(routeSnapshot('home',{}));
  else if(!db.session&&!isAuth)next=navigation.reset(routeSnapshot('logged-out',{}));
  screenName=next.screenName;params=next.params||{};
  currentGroupId=db.groups.some(g=>g.id===next.currentGroupId)?next.currentGroupId:((db.groups[0]||{}).id||null);
@@ -3759,7 +3762,12 @@ async function handleAppAction(action,el){
  const g=currentGroup();
  if(action==='choose-avatar'){
   selectedAvatarKey=AVATAR_OPTIONS.some(x=>x[0]===el.dataset.avatar)?el.dataset.avatar:'avatar-01';
-  profileSetup();return;
+  document.querySelectorAll('.avatar-option').forEach(button=>{
+   const selected=button.dataset.avatar===selectedAvatarKey;
+   button.classList.toggle('selected',selected);
+   button.setAttribute('aria-pressed',String(selected));
+  });
+  return;
  }
  if(action==='forgot-password'){
   var email=$('#loginEmail')?.value||'';
