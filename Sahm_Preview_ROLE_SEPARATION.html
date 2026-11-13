@@ -3236,13 +3236,14 @@ body {
 <script src="/sahm-core.js"></script>
 <script src="/sahm-data.js"></script>
 <script src="/sahm-app.js"></script>
+<script src="/sahm-navigation.js"></script>
 <script>
 const $=s=>document.querySelector(s);
 const money=(n,c='YER')=>{const cur=SahmCore.CURRENCIES[c]||SahmCore.CURRENCIES.YER;const minor=Math.round(Number(n||0)*cur.minor);return SahmCore.fmtMoney(minor,c in SahmCore.CURRENCIES?c:'YER')};
 const today=()=>SahmApp.todayIn();
-const LEGACY_STATUS={pending:'PENDING_MEMBERS',open:'READY_FOR_DRAW',running:'ACTIVE_REVOLVING',completed:'COMPLETED'};
-let db=load(),screenName=db.session?(new URLSearchParams(location.search).get('join')?'join-group':'home'):'welcome',stack=[],params={},groupTab='all',groupDetailTab='overview',toastTimer,homeSlideTimer=null,homeSlideIndex=0,selectedInstallmentCycle=1,selectedInstallmentStatus='all',pendingJoinCode=null,pendingJoinShares=1;
-let currentGroupId=(db.groups[0]||{}).id||null,createdGroupId=null,createWizardStep=1,reminderRequest=null;
+const AUTH_SCREEN_NAMES=['welcome','phone','otp','profile-setup','logged-out'];
+let db=load(),screenName=db.session?(new URLSearchParams(location.search).get('join')?'join-group':'home'):'welcome',params={},groupTab='all',groupDetailTab='overview',toastTimer,homeSlideTimer=null,homeSlideIndex=0,selectedInstallmentCycle=1,selectedInstallmentStatus='all',pendingJoinCode=null;
+let currentGroupId=(db.groups[0]||{}).id||null,createdGroupId=null,createWizardStep=1,reminderRequest=null,navigation=null;
 SahmApp.onResult((name,result)=>{if(result&&result.ok===false)toast(result.message||'تعذر تنفيذ العملية');else if(result&&result.persisted===false)toast(result.warning||'تعذر حفظ التغييرات في تخزين المعاينة');});
 
 function uiIcon(name,size=20){
@@ -3288,52 +3289,32 @@ function uiIcon(name,size=20){
 
 function load(){
  const prefs=SahmApp.prefs(),mine=SahmApp.myGroups(),rawGroups=[...(mine.managed||[]),...(mine.joined||[])];
- const minorFor=currency=>(SahmCore.CURRENCIES[currency]||SahmCore.CURRENCIES.YER).minor;
- const groups=[],participants=[],messages=[],wall=[],notifications=[],receipts=[],invites=[],audit=[];
+ const groups=[];
  rawGroups.forEach(g=>{
   const detail=SahmApp.groupDetail(g.id);if(!detail||!detail.ok)return;
   const memberResult=SahmApp.memberList(g.id),memberRows=memberResult&&memberResult.ok?memberResult.members:[];
-  const drawResult=SahmApp.drawHistory(g.id),drawRows=drawResult&&drawResult.ok?drawResult.draws:[];
-  const chatResult=SahmApp.chatView(g.id),chatRows=chatResult&&chatResult.ok?chatResult.messages:[];
-  const receiptResult=SahmApp.receiptList(g.id,{includeVoided:true}),receiptRows=receiptResult&&receiptResult.ok?receiptResult.receipts:[];
-  const inviteResult=detail.role.manager?SahmApp.inviteList(g.id):null,inviteRows=inviteResult&&inviteResult.ok?inviteResult.invites:[];
-  const eventResult=SahmApp.eventLog(g.id,{limit:100}),eventRows=eventResult&&eventResult.ok?eventResult.events:[];
-  const minor=minorFor(g.currency),actualShares=memberRows.reduce((n,m)=>n+(Number(m.shares)||0),0);
+  const minor=(SahmCore.CURRENCIES[g.currency]||SahmCore.CURRENCIES.YER).minor;
+  const actualShares=memberRows.reduce((n,m)=>n+(Number(m.shares)||0),0);
   const perShare=SahmCore.splitAmount(g.shareAmount,g.installments).map(v=>v/minor);
   const phaseStatus={pending:'PENDING_MEMBERS',open:'READY_FOR_DRAW',running:'ACTIVE_REVOLVING',completed:'COMPLETED'};
-  const role=detail.role.manager?'manager':'member';
   groups.push({
    id:g.id,name:g.name,currency:g.currency,share:g.shareAmount/minor,installmentAmount:perShare[0]||0,total:g.targetShares,maxPer:g.maxPerMember,
    start:g.startDate,first:detail.plan&&detail.plan.firstDraw||SahmCore.firstDrawDate(g),
    period:SahmCore.cycleLabel(g)+' · '+g.installments+' '+(g.installments===1?'قسط':'أقساط'),
    cycleType:g.cycleType,cycleDays:g.cycleDays,installments:g.installments,shareAmountMinor:g.shareAmount,
-   quorum:g.quorum,role:role,myShares:detail.role.shares,status:phaseStatus[detail.phase]||'PENDING_MEMBERS',
+   quorum:g.quorum,role:detail.role.manager?'manager':'member',myShares:detail.role.shares,status:phaseStatus[detail.phase]||'PENDING_MEMBERS',
    members:memberRows.length,shares:actualShares,paid:detail.counts?detail.counts.paid:0,cycle:detail.cycle||1,
    admin:g.managerName,contrib:g.shareAmount/minor,publicLink:location.origin+'/?join='+encodeURIComponent(g.inviteCode),
-   inviteCode:g.inviteCode,rules:g.rules,draws:drawRows,locked:detail.locked,detail:detail,counts:detail.counts||null
+   inviteCode:g.inviteCode,rules:g.rules,locked:detail.locked,detail:detail,counts:detail.counts||null
   });
-  memberRows.forEach(m=>participants.push({group:g.id,memberId:m.memberId,name:m.name,shares:m.shares,role:m.isManager?'manager':'member',present:!!m.present,isMe:!!m.isMe}));
-  chatRows.forEach(m=>{
-   const row={group:g.id,id:m.id,kind:m.kind,name:m.senderName,mine:!!m.mine,text:m.text,time:m.timeLabel||SahmApp.chatTime(m.at),at:m.at};
-   if(m.kind==='system')wall.push({group:g.id,type:'system',text:m.text,date:row.time,reactions:0});
-   else messages.push(row);
-  });
-  receiptRows.forEach(r=>receipts.push({
-   id:r.id,group:g.id,person:r.memberName,memberId:r.memberId,amount:r.amount/minor,currency:g.currency,cycle:r.cycle,no:r.no,
-   ref:r.id,date:String(r.recordedAt||'').slice(0,10),recordedAt:r.recordedAt,self:!!r.self,voided:!!r.voided,reason:r.note||'',canCorrect:!!r.canCorrect
-  }));
-  inviteRows.forEach(i=>invites.push({id:i.id,group:g.id,name:i.name,phone:i.phone,shares:i.shares,status:String(i.status||'pending').toUpperCase(),createdAt:i.createdAt}));
-  eventRows.forEach(e=>audit.push({id:e.id,group:g.id,action:e.text,actor:e.actor||'سهم',date:e.at,vis:e.vis}));
  });
- const notifResult=SahmApp.notificationList(),notifRows=notifResult&&notifResult.ok?notifResult.notifications:[];
- notifRows.forEach(n=>notifications.push({id:n.id,group:n.groupId,title:n.type,text:n.text,date:n.at,read:n.read,muted:n.muted}));
+ const notifResult=SahmApp.notificationList();
  return {
   user:Object.assign({name:'',phone:'',city:'',notifications:true,biometric:false},prefs.user||{},{
    notifications:prefs.notifications!==false,biometric:!!prefs.biometric
   }),
-  session:!!prefs.session,verified:!!prefs.verified,groups,participants,messages,wall,notifications,
-  unread:notifResult&&notifResult.ok?notifResult.unread:SahmApp.unreadNotifications(),otp:'246810',
-  receipts,invites,audit
+  session:!!prefs.session,verified:!!prefs.verified,groups,
+  unread:notifResult&&notifResult.ok?notifResult.unread:SahmApp.unreadNotifications(),otp:'246810'
  };
 }
 function save(){
@@ -3350,20 +3331,59 @@ function statusText(s){return({PENDING_MEMBERS:'استقبال الأعضاء',R
 function pill(s){let c=['ACTIVE_REVOLVING','paid','accepted'].includes(s)?'green':['READY_FOR_DRAW','pending','due'].includes(s)?'gold':['late','cancelled'].includes(s)?'red':['PENDING_MEMBERS'].includes(s)?'blue':'';return '<span class="pill '+c+'">'+escapeHtml(statusText(s))+'</span>'}
 function minorMoney(value,currency){return SahmCore.fmtMoney(Number(value)||0,currency||'YER')}
 function dateLabel(value){return value?SahmCore.fmtDate(value):'—'}
-function go(s,p={}){const managerOnly=['members','invite','invites','draw-room','audit'];if(managerOnly.includes(s)&&!isManager()){toast('هذه الوظيفة متاحة لمدير هذه الجمعية فقط');return}stack.push({screenName,params});history.pushState({sahm:true,depth:stack.length},'',location.href);screenName=s;params=p;render()}
-function restorePreviousScreen(){
- if(!stack.length)return;
- const previous=stack.pop();screenName=previous.screenName;params=previous.params;render();
+function routeSnapshot(nextScreen=screenName,nextParams=params,context={}){
+ return Object.assign({
+  screenName:nextScreen,params:nextParams||{},currentGroupId:currentGroupId,
+  groupTab:groupTab,groupDetailTab:groupDetailTab,
+  viewState:{selectedInstallmentCycle:selectedInstallmentCycle,selectedInstallmentStatus:selectedInstallmentStatus,createWizardStep:createWizardStep}
+ },context||{});
 }
+function sameRouteSnapshot(a,b){
+ return !!a&&!!b&&a.screenName===b.screenName&&JSON.stringify(a.params||{})===JSON.stringify(b.params||{})&&
+  a.currentGroupId===b.currentGroupId&&a.groupTab===b.groupTab&&a.groupDetailTab===b.groupDetailTab&&
+  JSON.stringify(a.viewState||{})===JSON.stringify(b.viewState||{});
+}
+function applyNavigationState(state,fromPop=false){
+ if(!state)return;
+ const previous=routeSnapshot();
+ const modalWasOpen=!!($('#modal-root')&&$('#modal-root').innerHTML);
+ let next=state;
+ const isAuth=AUTH_SCREEN_NAMES.includes(next.screenName);
+ if(db.session&&isAuth)next=navigation.reset(routeSnapshot('home',{}));
+ else if(!db.session&&!isAuth)next=navigation.reset(routeSnapshot('logged-out',{}));
+ screenName=next.screenName;params=next.params||{};
+ currentGroupId=db.groups.some(g=>g.id===next.currentGroupId)?next.currentGroupId:((db.groups[0]||{}).id||null);
+ groupTab=next.groupTab||'all';groupDetailTab=next.groupDetailTab||'overview';
+ const view=next.viewState||{};
+ selectedInstallmentCycle=Number(view.selectedInstallmentCycle)||1;
+ selectedInstallmentStatus=view.selectedInstallmentStatus||'all';
+ createWizardStep=Math.max(1,Math.min(3,Number(view.createWizardStep)||1));
+ const same=sameRouteSnapshot(previous,next);
+ if(next.layer!=='modal'&&modalWasOpen)$('#modal-root').innerHTML='';
+ if(fromPop&&same)return;
+ render();
+}
+function go(s,p={},context={}){
+ if(!Object.prototype.hasOwnProperty.call(ALL_SCREEN_REGISTRY,s)){toast('تعذر فتح الشاشة المطلوبة');return false}
+ if(!db.session&&!AUTH_SCREEN_NAMES.includes(s)){toast('سجل الدخول أولاً للمتابعة');return false}
+ const managerOnly=['members','invite','invites','draw-room','audit'];
+ if(managerOnly.includes(s)&&!isManager(context.currentGroupId?db.groups.find(g=>g.id===context.currentGroupId)||null:currentGroup())){toast('هذه الوظيفة متاحة لمدير هذه الجمعية فقط');return false}
+ const next=navigation.navigate(routeSnapshot(s,p,context));
+ if(sameRouteSnapshot(routeSnapshot(),next))return true;
+ applyNavigationState(next);return true;
+}
+function resetNavigation(s,p={}){
+ if(!navigation)return;
+ const next=navigation.reset(routeSnapshot(s,p));
+ applyNavigationState(next);return next;
+}
+function syncNavigationContext(){if(navigation)navigation.replace(routeSnapshot())}
 function back(){
- if(stack.length){
-  if(history.state&&history.state.sahm){history.back();return}
-  restorePreviousScreen();return
- }
- if(db.session&&screenName!=='home'){go('home');return}
- if(!db.session&&screenName!=='welcome'){go('welcome');return}
+ if(screenName==='create-group'&&createWizardStep>1){setCreateWizardStep(createWizardStep-1);syncNavigationContext();return}
+ if(navigation&&navigation.back())return;
+ if(db.session&&screenName!=='home'){resetNavigation('home',{});return}
+ if(!db.session&&screenName!=='welcome'){resetNavigation('welcome',{});return}
 }
-window.addEventListener('popstate',()=>{if(stack.length)restorePreviousScreen();});
 function toast(t){const el=$('#toast');el.textContent=t;el.classList.add('show');clearTimeout(toastTimer);toastTimer=setTimeout(()=>el.classList.remove('show'),2300)}
 function header(title,sub=''){
  // Screen titles and back navigation now live exclusively in the fixed app bar.
@@ -3601,7 +3621,20 @@ function chat(){
  SahmApp.markChatRead(g.id);const rows=r.messages||[];
  shell('المحادثة','wall',header('محادثة الجمعية',g.name)+'<div class="card" id="chatMessages" style="min-height:250px">'+rows.map(x=>'<div class="chatbubble '+(x.kind==='member'&&x.mine?'mine':'')+'"><b>'+(x.kind==='system'?'سهم':escapeHtml(x.senderName||'مشارك'))+'</b><div>'+escapeHtml(x.text)+'</div><small class="eyebrow">'+escapeHtml(x.timeLabel||SahmApp.chatTime(x.at))+'</small></div>').join('')+'</div><form id="chatForm"><div class="field"><label>رسالتك</label><textarea name="text" maxlength="'+SahmApp.maxMessage()+'" id="chatInput" placeholder="اكتب رسالة..." required></textarea><div class="between"><span id="charCount">0 / '+SahmApp.maxMessage()+'</span></div></div><button class="btn primary full" type="submit">إرسال الرسالة</button></form>');
 }
-function wall(){chat()}
+function wall(){
+ const rows=SahmApp.chatList()||[];
+ const items=rows.map(item=>{
+  const group=item.group||{},last=item.last||null;
+  const preview=last?((last.kind==='system'?'سهم':(last.senderName||'مشارك'))+': '+String(last.text||'')):'لا توجد رسائل بعد';
+  const time=last?SahmApp.chatTime(last.at):'';
+  return '<button class="listrow chat-list-row" style="width:100%;padding:12px 0;text-align:right;background:transparent" data-go="chat" data-id="'+escapeHtml(group.id)+'">'+
+   '<span class="avatar">'+escapeHtml(String(group.name||'س').slice(0,1))+'</span>'+
+   '<span class="grow"><strong>'+escapeHtml(group.name||'جمعية')+'</strong><small>'+escapeHtml(preview)+'</small><small class="eyebrow">'+escapeHtml(time)+(item.muted?' · مكتومة':'')+'</small></span>'+
+   (item.unread?'<span class="pill blue">'+item.unread+'</span>':'')+
+  '</button>';
+ }).join('');
+ shell('الدردشات','wall',header('الدردشات','محادثات جمعياتك')+'<div class="card">'+(items||'<div class="empty"><b>لا توجد محادثات بعد</b><p>ستظهر محادثات الجمعيات التي تديرها أو تشارك فيها هنا.</p></div>')+'</div>');
+}
 function notifications(){
  const r=SahmApp.notificationList();if(!r||!r.ok){toast('تعذر تحميل الإشعارات');return}SahmApp.markNotificationsRead();
  const labels={received:'تسجيل استلام قسط',reminder:'تذكير بقسط',drawResult:'نتيجة القرعة',late:'تأخر قسط',drawSoon:'اقتراب موعد القرعة',drawDue:'موعد القرعة',joined:'انضمام عضو',completed:'اكتمال الأقساط'};
@@ -3620,8 +3653,19 @@ function phone(){auth(`<div class="auth-brand" style="margin:20px 0"><div class=
 function otp(){auth(`<div class="auth-brand" style="margin:20px 0"><div class="brand-mark">س</div><h1 style="font-size:22px">تحقق من رقمك</h1></div><div class="auth-card"><div class="field"><label>رمز التحقق</label><input id="otpInput" inputmode="numeric" maxlength="6" value="${db.otp}" placeholder="••••••" style="text-align:center;letter-spacing:9px;font-size:20px"></div><button class="btn primary full" data-action="verify-otp">تحقق ومتابعة</button><button class="btn outline full" style="margin-top:8px" data-action="resend-otp">إعادة إرسال الرمز</button><button class="link-btn" style="width:100%;margin-top:8px" data-go="phone">تغيير رقم الهاتف</button></div>`)}
 function profileSetup(){auth(`<div class="auth-brand" style="margin:18px 0"><div class="brand-mark">س</div><h1 style="font-size:22px">أكمل ملفك الشخصي</h1></div><div class="auth-card"><form id="setupForm"><div class="field"><label>الاسم الكامل</label><input name="name" required value="${escapeHtml(db.user.name)}"></div><div class="field"><label>المدينة</label><input name="city" required value="${escapeHtml(db.user.city)}"></div><button class="btn primary full" type="submit">حفظ وفتح حسابي</button></form></div>`)}
 function logout(){auth(`<div class="auth-brand"><div class="brand-mark">✓</div><h1>تم إنهاء الجلسة</h1></div><div class="auth-card"><button class="btn primary full" data-go="phone">تسجيل الدخول مجدداً</button></div>`)}
-function render(){if(['welcome','phone','otp','profile-setup','logged-out'].includes(screenName)){({welcome,phone,otp,'profile-setup':profileSetup,'logged-out':logout}[screenName])();return}const funcs={home,groups,'create-group':createGroup,'created-group':createdGroup,'group-detail':groupDetail,members,invite,invites,'join-group':joinGroup,installments,'draw-room':drawRoom,'draw-history':drawHistory,receipts,'receipt-detail':receiptDetail,chat,wall,notifications,audit,profile,'edit-profile':editProfile,settings};(funcs[screenName]||home)()}
-function showModal(title,body,buttons=[['إغلاق','close','outline']]){$('#modal-root').innerHTML=`<div class="overlay" data-action="overlay-close"><div class="dialog" onclick="event.stopPropagation()"><h3>${title}</h3><div class="dialog-body">${body}</div><div class="dialog-actions">${buttons.map(([label,act,style='primary'])=>`<button class="btn ${style}" data-action="${act}">${label}</button>`).join('')}</div></div></div>`}function closeModal(){$('#modal-root').innerHTML=''}
+const ALL_SCREEN_REGISTRY={
+ welcome:welcome,phone:phone,otp:otp,'profile-setup':profileSetup,'logged-out':logout,
+ home:home,groups:groups,'create-group':createGroup,'created-group':createdGroup,'group-detail':groupDetail,
+ members:members,invite:invite,invites:invites,'join-group':joinGroup,installments:installments,
+ 'draw-room':drawRoom,'draw-history':drawHistory,receipts:receipts,'receipt-detail':receiptDetail,
+ chat:chat,wall:wall,notifications:notifications,audit:audit,profile:profile,'edit-profile':editProfile,settings:settings
+};
+function render(){
+ const screen=ALL_SCREEN_REGISTRY[screenName];
+ if(typeof screen!=='function'){toast('الشاشة المطلوبة غير مسجلة في التطبيق');resetNavigation(db.session?'home':'welcome');return}
+ screen();
+}
+function showModal(title,body,buttons=[['إغلاق','close','outline']]){if(navigation)navigation.openModal();$('#modal-root').innerHTML=`<div class="overlay" data-action="overlay-close"><div class="dialog" onclick="event.stopPropagation()"><h3>${title}</h3><div class="dialog-body">${body}</div><div class="dialog-actions">${buttons.map(([label,act,style='primary'])=>`<button class="btn ${style}" data-action="${act}">${label}</button>`).join('')}</div></div></div>`}function closeModal(){if(navigation)navigation.dismissModal();$('#modal-root').innerHTML=''}
 document.addEventListener('keydown',e=>{const card=e.target.closest?.('.group-card[role="button"]');if(card&&(e.key==='Enter'||e.key===' ')){e.preventDefault();card.click()}});
 function handleAppAction(action,el){
  const g=currentGroup();
@@ -3638,9 +3682,9 @@ function handleAppAction(action,el){
  if(action==='back'){back();return}if(action==='overlay-close'||action==='close'){closeModal();return}
  if(action==='create-next'){if(validateCreateStep(createWizardStep))setCreateWizardStep(createWizardStep+1);return}
  if(action==='create-prev'){setCreateWizardStep(createWizardStep-1);return}
- if(action==='open-group'){currentGroupId=el.dataset.id;groupDetailTab='overview';go('group-detail');return}
- if(action==='home-managed'){groupTab='manager';go('groups');return}if(action==='home-member'){groupTab='member';go('groups');return}
- if(action==='home-slide'){setHomeSlide(Number(el.dataset.index)||0);return}if(action==='group-tab'){groupTab=el.dataset.tab;groups();return}if(action==='detail-tab'){groupDetailTab=el.dataset.tab;groupDetail();return}
+ if(action==='open-group'){go('group-detail',{}, {currentGroupId:el.dataset.id,groupDetailTab:'overview'});return}
+ if(action==='home-managed'){go('groups',{}, {groupTab:'manager'});return}if(action==='home-member'){go('groups',{}, {groupTab:'member'});return}
+ if(action==='home-slide'){setHomeSlide(Number(el.dataset.index)||0);return}if(action==='group-tab'){groupTab=el.dataset.tab;syncNavigationContext();groups();return}if(action==='detail-tab'){groupDetailTab=el.dataset.tab;syncNavigationContext();groupDetail();return}
  if(action==='copy-created-link'||action==='copy-group-link'){const value=(g&&g.publicLink)||$('#createdGroupLink')?.value||'';if(!value){toast('رابط الدعوة غير متاح');return}if(navigator.clipboard?.writeText)navigator.clipboard.writeText(value).then(()=>toast('تم نسخ الرابط')).catch(()=>toast(value));else toast(value);return}
  if(action==='whatsapp-created-link'){if(g)window.open('https://wa.me/?text='+encodeURIComponent('انضم إلى جمعية '+g.name+' عبر الرابط '+g.publicLink),'_blank');return}
  if(action==='cancel-invite'){const r=SahmApp.cancelInvite(el.dataset.id);if(r&&r.ok){refreshData();invites()}return}
@@ -3655,7 +3699,7 @@ function handleAppAction(action,el){
  }
  if(action==='attendance-toggle'){const r=SahmApp.setAttendance(el.dataset.id,el.dataset.present==='true');if(r&&r.ok){refreshData();members()}return}
  if(action==='record-paid'){
-  const member=(db.participants||[]).find(m=>m.memberId===el.dataset.member);
+  const list=SahmApp.memberList(g.id),member=(list&&list.ok?list.members:[]).find(m=>m.memberId===el.dataset.member);
   showModal('تأكيد تسجيل الاستلام','هل استلم المدير خارج التطبيق قيمة القسط رقم '+el.dataset.no+' من '+(member?escapeHtml(member.name):'المشارك')+'؟ يسجل هذا الإجراء إقرار الاستلام، ولا ينفذ أي تحويل مالي.',[['تسجيل مدفوع','record-paid-confirm','primary'],['إلغاء','close','outline']]);
   Object.assign($('#modal-root').dataset,{memberId:el.dataset.member,cycle:el.dataset.cycle,installmentNo:el.dataset.no});return;
  }
@@ -3664,7 +3708,7 @@ function handleAppAction(action,el){
   if(r&&r.ok){const id=r.receipt&&r.receipt.id;closeModal();refreshData();installments();toast('تم تسجيل الاستلام'+(id?' · '+id:''))}return;
  }
  if(action==='installment-filter'){
-  selectedInstallmentStatus=el.dataset.filter||'all';installments();return;
+  selectedInstallmentStatus=el.dataset.filter||'all';syncNavigationContext();installments();return;
  }
  if(action==='send-reminder-all'){
   const no=Number($('#reminderInstallment')?.value||1);
@@ -3689,15 +3733,22 @@ function handleAppAction(action,el){
   const r=SahmApp.correctReceipt(root.dataset.receiptId,{action:'void',reason});if(r&&r.ok){const id=root.dataset.receiptId;closeModal();refreshData();params={id};receiptDetail();toast('تم توثيق التصحيح')}return;
  }
  if(action==='logout-confirm'){showModal('تسجيل الخروج','هل تريد إنهاء الجلسة الحالية؟ ستبقى بيانات المعاينة المحفوظة كما هي.',[['نعم، تسجيل الخروج','logout-now','danger'],['إلغاء','close','outline']]);return}
- if(action==='logout-now'){db.session=false;save();stack=[];closeModal();screenName='logged-out';render();return}
+ if(action==='logout-now'){db.session=false;save();closeModal();resetNavigation('logged-out',{});return}
 }
 document.addEventListener('click',e=>{
  const el=e.target.closest('[data-go],[data-action]');if(!el)return;const route=el.dataset.go,action=el.dataset.action;
- if(route){if(route==='group-detail')currentGroupId=el.dataset.id||currentGroupId;if(route==='groups')groupTab='all';go(route);return}handleAppAction(action,el);
+ if(route){
+  const context={};
+  if(route==='group-detail'&&el.dataset.id)Object.assign(context,{currentGroupId:el.dataset.id,groupDetailTab:'overview'});
+  if(route==='chat'&&el.dataset.id)context.currentGroupId=el.dataset.id;
+  if(route==='groups')context.groupTab='all';
+  go(route,{},context);return;
+ }
+ handleAppAction(action,el);
 });
 document.addEventListener('change',e=>{
  const el=e.target;if(el.id==='notifToggle'){db.user.notifications=el.checked;save();return}if(el.id==='bioToggle'){db.user.biometric=el.checked;save();return}
- if(el.id==='installmentCycle'){selectedInstallmentCycle=Number(el.value)||1;installments();return}
+ if(el.id==='installmentCycle'){selectedInstallmentCycle=Number(el.value)||1;syncNavigationContext();installments();return}
  if(el.dataset.action==='mute-toggle'){const g=currentGroup();if(!g)return;const prefs=SahmApp.prefs(),old=prefs.mute&&prefs.mute[g.id]||{},patch={};patch[el.dataset.kind]=el.checked;const r=SahmApp.setMute(g.id,Object.assign({},old,patch));if(r&&r.ok){refreshData();groupDetail()}return}
  if(el.dataset.action==='notify-toggle'){const g=currentGroup();if(!g||!isManager())return;const r=SahmApp.setNotifyType(g.id,el.dataset.type,el.checked);if(r&&r.ok){refreshData();groupDetail()}return}
 });
@@ -3706,7 +3757,7 @@ document.addEventListener('submit',e=>{
  if(form.id==='createForm'){
   if(createWizardStep<3){if(validateCreateStep(createWizardStep))setCreateWizardStep(createWizardStep+1);return}
   if(!validateCreateStep(1)||!validateCreateStep(2)||!validateCreateStep(3))return;
-  const r=SahmApp.createGroup(createDraft(form));if(r&&r.ok){refreshData();currentGroupId=r.groupId;createdGroupId=r.groupId;screenName='created-group';params={};stack=[];render();toast('تم إنشاء الجمعية وحفظ إعداداتها')}return;
+  const r=SahmApp.createGroup(createDraft(form));if(r&&r.ok){refreshData();currentGroupId=r.groupId;createdGroupId=r.groupId;resetNavigation('created-group',{});toast('تم إنشاء الجمعية وحفظ إعداداتها')}return;
  }
  if(form.id==='inviteForm'){
   const g=currentGroup();if(!g||!isManager())return;const d=Object.fromEntries(new FormData(form)),r=SahmApp.createInvite(g.id,{name:d.name,phone:d.phone,shares:Number(d.shares)});if(r&&r.ok){refreshData();invites();toast('تم تسجيل الدعوة')}return;
@@ -3721,9 +3772,10 @@ document.addEventListener('submit',e=>{
   const g=currentGroup(),r=SahmApp.sendMessage(g.id,txt);if(r&&r.ok){refreshData();chat();toast('تم إرسال الرسالة')}return;
  }
  if(form.id==='profileForm'){const d=Object.fromEntries(new FormData(form));db.user.name=d.name;db.user.city=d.city;save();refreshData();profile();toast('تم حفظ بيانات الملف الشخصي');return}
- if(form.id==='setupForm'){const d=Object.fromEntries(new FormData(form));db.user.name=d.name;db.user.city=d.city;db.session=true;db.verified=true;save();refreshData();stack=[];screenName=new URLSearchParams(location.search).get('join')?'join-group':'home';render();return}
+ if(form.id==='setupForm'){const d=Object.fromEntries(new FormData(form));db.user.name=d.name;db.user.city=d.city;db.session=true;db.verified=true;save();refreshData();resetNavigation(new URLSearchParams(location.search).get('join')?'join-group':'home',{});return}
 });
-history.replaceState({sahm:true,depth:0},'',location.href);
+navigation=SahmNavigation.create({window:window,onChange:(state)=>applyNavigationState(state,true)});
+navigation.start(routeSnapshot());
 try{render()}catch(err){document.querySelector('#screen').className='auth-screen';document.querySelector('#screen').innerHTML='<div style="background:white;color:#142f39;border-radius:18px;padding:20px;margin-top:35px"><h2>تعذر تشغيل المعاينة</h2><p>حدث خطأ أثناء تشغيل الواجهة. أعد فتح الملف في متصفح Chrome.</p><small>'+String(err&&err.message||err)+'</small></div>';console.error(err)}
 </script>
 <script>
