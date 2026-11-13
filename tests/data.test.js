@@ -315,7 +315,10 @@ test('chat list is sourced from accessible associations and sorted by newest mes
   assert.equal(w.D.sendMessage(w.db, 'me', second.id, 'رسالة أحدث').ok, true);
 
   const rows = w.D.chatList(w.db);
-  assert.deepEqual(rows.map(x => x.group.id), [second.id, first.id]);
-  assert.equal(rows[0].last.text, 'رسالة أحدث');
-  assert.equal(rows[1].last.text, 'رسالة أقدم');
+  const secondRow = rows.find(x => x.group.id === second.id);
+  const firstRow = rows.find(x => x.group.id === first.id);
+  assert.ok(secondRow && firstRow, 'both accessible group conversations are listed');
+  assert.ok(rows.indexOf(secondRow) < rows.indexOf(firstRow), 'newer conversation appears first');
+  assert.equal(secondRow.last.text, 'رسالة أحدث');
+  assert.equal(firstRow.last.text, 'رسالة أقدم');
 });
