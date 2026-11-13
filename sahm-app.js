@@ -30,6 +30,15 @@
   var PLAIN = ['drawStatus', 'previewJoin', 'inviteSummary', 'getInviteInfo', 'lastReminder'];
 
   var api = { init: init, store: store, viewer: viewer, onResult: onResult };
+  /* Replace the in-memory snapshot with a verified server snapshot. Local storage is not authoritative in remote mode. */
+  api.useRemoteStore = function (remoteStore) {
+    if (!remoteStore || !Array.isArray(remoteStore.groups) || !remoteStore.prefs || !remoteStore.prefs.user || !remoteStore.prefs.user.id) {
+      throw new Error('Invalid SAHM remote store snapshot');
+    }
+    db = remoteStore;
+    return db;
+  };
+  api.clearStore = function () { db = null; };
   ACTOR_OPS.forEach(function (n) { api[n] = function () { var a = [init(), viewer()].concat([].slice.call(arguments)); return report(n, D()[n].apply(null, a)); }; });
   VIEW_QUERIES.forEach(function (n) { api[n] = function () { var a = [init(), viewer()].concat([].slice.call(arguments)); return D()[n].apply(null, a); }; });
   PLAIN.forEach(function (n) { api[n] = function () { var a = [init()].concat([].slice.call(arguments)); return D()[n].apply(null, a); }; });
