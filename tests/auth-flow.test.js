@@ -47,7 +47,7 @@ test('profile completion requires a three-part name and a phone with Yemen selec
   assert.match(screen, /id="profileFullName" name="fullName" required/);
   assert.match(screen, /id="profileCountry" name="country"/);
   assert.match(screen, /c\[0\]==='YE'\?'selected'/);
-  assert.match(screen, /id="profilePhone" name="phone" type="tel" required/);
+  assert.match(screen, /id="profilePhone" name="phone" type="tel"[^>]*required/);
   assert.doesNotMatch(screen, /type="file"/);
   assert.match(html, /parts\.length<3/);
   assert.match(html, /SahmSupabase\.completeProfile\(d\.fullName,phoneE164,selectedAvatarKey\)/);
