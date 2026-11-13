@@ -3888,11 +3888,11 @@ document.addEventListener('submit',async e=>{
   authBusy=true;setBusy(true,'جارٍ حفظ كلمة المرور...');
   try{
    await SahmSupabase.updatePassword(d.password);
-   history.replaceState(null,'',location.pathname+location.search);
+   const cleanUrl=new URL(location.href);cleanUrl.searchParams.delete('auth_action');cleanUrl.searchParams.delete('code');cleanUrl.hash='';history.replaceState(null,'',cleanUrl.pathname+cleanUrl.search);
    toast('تم تحديث كلمة المرور بنجاح');
    if(!activeProfile)activeProfile=await SahmSupabase.profile();
    if(!SahmSupabaseData.isRemote()){await SahmSupabaseData.init(activeProfile);SahmSupabaseData.install();db=load();startRemoteRealtime();}
-   resetNavigation(activeProfile.completed?'home':'profile-setup',{});
+   resetNavigation(activeProfile.completed?(new URLSearchParams(location.search).get('invite')?'join-group':'home'):'profile-setup',{});
   }catch(err){toast(SahmSupabase.friendlyError(err));}
   finally{authBusy=false;setBusy(false);}
   return;
@@ -3955,7 +3955,7 @@ async function bootSahm(){
    db.session=true;db.verified=!!session.user.email_confirmed_at;
    db.user=Object.assign(db.user,{id:session.user.id,email:session.user.email,name:activeProfile.fullName,phone:activeProfile.phone,city:activeProfile.city,avatarKey:activeProfile.avatarKey});
    selectedAvatarKey=activeProfile.avatarKey||'avatar-01';
-   screenName=location.hash.includes('reset-password')?'reset-password':(activeProfile.completed?(new URLSearchParams(location.search).get('invite')?'join-group':'home'):'profile-setup');
+   screenName=(location.hash.includes('reset-password')||new URLSearchParams(location.search).get('auth_action')==='reset-password')?'reset-password':(activeProfile.completed?(new URLSearchParams(location.search).get('invite')?'join-group':'home'):'profile-setup');
   }else{db.session=false;screenName='welcome'}
   SahmSupabase.onAuthStateChange((event,sess)=>{
    if(event==='PASSWORD_RECOVERY'){resetNavigation('reset-password',{});return;}
