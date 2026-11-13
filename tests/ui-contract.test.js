@@ -79,7 +79,10 @@ test('obsolete parallel view-model collections and no-op route helpers are absen
 });
 
 test('navigation runtime is loaded in order and precached by the service worker', () => {
-  assert.ok(html.indexOf('<script src="/sahm-app.js"></script>') < html.indexOf('<script src="/sahm-navigation.js"></script>'));
+  const appScript = html.indexOf('<script src="/sahm-app.js"></script>');
+  const navigationScript = html.indexOf('<script src="/sahm-navigation.js"></script>');
+  const nextInlineScript = html.indexOf('<script>', navigationScript + '<script src="/sahm-navigation.js"></script>'.length);
+  assert.ok(appScript >= 0 && appScript < navigationScript && navigationScript < nextInlineScript);
   assert.match(sw, /const CACHE_NAME = 'sahm-pwa-v23'/);
   assert.match(sw, /APP_SHELL[\s\S]*?'\/sahm-navigation\.js'/);
 });
