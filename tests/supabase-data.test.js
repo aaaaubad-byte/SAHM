@@ -12,7 +12,7 @@ const EXPECTED_TABLES = [
   'invitations','notifications','reminders','user_preferences'
 ];
 
-function loadRemoteGateway() {
+function loadRemoteGateway(options = {}) {
   const calls = { tables: [], rpc: [], realtime: [], removed: 0 };
   const storeRef = { value: null };
   const profile = {
@@ -25,9 +25,13 @@ function loadRemoteGateway() {
       calls.tables.push(table);
       return {
         select() {
+          let start=0,end=499;
           const query = {
+            order(column,opts) { calls.orders=(calls.orders||[]).concat([{table,column,opts}]); return query; },
+            range(from,to) { start=from;end=to;calls.ranges=(calls.ranges||[]).concat([{table,from,to}]);return query; },
             then(resolve,reject) {
-              return Promise.resolve({ data:[], error:null }).then(resolve,reject);
+              const rows=(options.tableData&&options.tableData[table])||[];
+              return Promise.resolve({ data:rows.slice(start,end+1), error:null }).then(resolve,reject);
             }
           };
           return query;
@@ -77,6 +81,9 @@ test('remote gateway loads the full RLS-scoped table snapshot into SahmApp', asy
   const db=await gateway.init(profile);
   assert.deepEqual([...new Set(calls.tables)].sort(),[...EXPECTED_TABLES].sort());
   assert.equal(calls.tables.length,EXPECTED_TABLES.length);
+  assert.equal(calls.ranges.length,EXPECTED_TABLES.length);
+  assert.equal(calls.orders.length,EXPECTED_TABLES.length);
+  assert.ok(calls.orders.every(x=>x.opts.ascending===true));
   assert.equal(db.prefs.user.id,'user-1');
   assert.equal(db.prefs.user.email,'person@example.com');
   assert.equal(db.prefs.user.name,'أحمد محمد علي');
@@ -100,6 +107,26 @@ test('remote mutation layer writes through database RPC, not SahmData local oper
   assert.ok(call);
   assert.equal(call.args.p_payload.name,'جمعية الاختبار');
   assert.equal(call.args.p_payload.shareAmountMinor,100);
+});
+
+
+test('remote gateway paginates association records beyond a single page',async()=>{
+  const association=(n)=>({
+    id:'g-'+n,manager_user_id:'user-1',name:'جمعية '+n,currency:'YER',
+    start_date:'2026-12-01',invite_opens_on:null,invite_closes_on:null,
+    time_zone:'Asia/Aden',cycle_type:'weekly',cycle_days:7,
+    share_amount_minor:100,installments_count:1,target_shares:10,
+    max_shares_per_member:2,manager_participates:false,quorum_percent:66,
+    rules:'',locked_at:null,locked_share_count:null,status:'active',created_at:'2026-11-14T00:00:00Z'
+  });
+  const groups=Array.from({length:501},(_,i)=>association(i+1));
+  const {gateway,calls}=loadRemoteGateway({tableData:{associations:groups}});
+  const db=await gateway.init();
+  assert.equal(db.groups.length,501);
+  const pages=calls.ranges.filter(x=>x.table==='associations');
+  assert.equal(pages.length,2);
+  assert.deepEqual(pages.map(x=>[x.from,x.to]),[[0,499],[500,999]]);
+  assert.equal(calls.orders.find(x=>x.table==='associations').column,'id');
 });
 
 test('remote gateway subscribes only to chat and notifications and clears channel state', async()=>{
