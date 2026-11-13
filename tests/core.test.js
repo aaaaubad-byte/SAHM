@@ -137,3 +137,11 @@ test('group validation rejects removed payment and manual first-draw fields', ()
   assert.ok(errors.some(x => x.field === 'paymentMethod'));
   assert.ok(errors.some(x => x.field === 'firstDrawDate'));
 });
+
+test('installment status changes only after the inclusive end date', () => {
+  const range = { start: '2026-11-01', end: '2026-11-10' };
+  assert.equal(K.instStatus(range, false, '2026-10-31'), 'upcoming');
+  assert.equal(K.instStatus(range, false, '2026-11-10'), 'due');
+  assert.equal(K.instStatus(range, false, '2026-11-11'), 'late');
+  assert.equal(K.instStatus(range, true, '2026-11-11'), 'paid');
+});
