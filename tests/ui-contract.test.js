@@ -90,10 +90,10 @@ test('all page scripts and Supabase modules are syntactically valid JavaScript',
   new vm.Script(data, { filename: 'sahm-data.js' });
   new vm.Script(core, { filename: 'sahm-core.js' });
   let count=0;
-  for (const match of html.matchAll(/<script\\b([^>]*)>([\\s\\S]*?)<\\/script>/gi)) {
+  for (const match of html.matchAll(/<script\b([^>]*)>([\s\S]*?)<\/script>/gi)) {
     const attrs=match[1]||'';
     const source=(match[2]||'').trim();
-    if(!source || /type\\s*=\\s*["']application\\/ld\\+json["']/i.test(attrs))continue;
+    if(!source || /type\s*=\s*["']application\/ld\+json["']/i.test(attrs))continue;
     new vm.Script(source,{filename:'inline-script-'+(++count)+'.js'});
   }
   assert.ok(count>=2,'inline application and PWA scripts are parsed');
