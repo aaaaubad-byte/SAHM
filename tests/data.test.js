@@ -303,3 +303,19 @@ test('v3 data is archived and migrated to the current schema', () => {
   assert.ok(migrated.shares.every(x => !!x.addedAt));
   assert.ok(w.D.archiveList().some(x => x.key === w.D.KEYS.data && x.reason === 'migrated-from-sahm-data-2026-11-v3'));
 });
+
+test('chat list is sourced from accessible associations and sorted by newest message', () => {
+  const w = fresh();
+  const first = createGroup(w, { targetShares: 1 }).group;
+  const second = createGroup(w, { targetShares: 1 }).group;
+
+  w.clock.now = '2026-11-13T10:00';
+  assert.equal(w.D.sendMessage(w.db, 'me', first.id, 'رسالة أقدم').ok, true);
+  w.clock.now = '2026-11-13T11:00';
+  assert.equal(w.D.sendMessage(w.db, 'me', second.id, 'رسالة أحدث').ok, true);
+
+  const rows = w.D.chatList(w.db);
+  assert.deepEqual(rows.map(x => x.group.id), [second.id, first.id]);
+  assert.equal(rows[0].last.text, 'رسالة أحدث');
+  assert.equal(rows[1].last.text, 'رسالة أقدم');
+});
