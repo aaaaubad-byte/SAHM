@@ -26,14 +26,43 @@
 ### 2.1 الحسابات
 
 **profiles**
-- `id uuid PK FK auth.users(id) ON DELETE CASCADE`
-- `full_name text NOT NULL`
-- `phone_e164 text NOT NULL UNIQUE` — قيد تحقق `^\\+[1-9][0-9]{7,14}$`.
-- `city text NULL`
-- `phone_verified_at timestamptz NULL` — لا يُملأ في مرحلة التسجيل الحالية.
-- `created_at, updated_at timestamptz NOT NULL`.
+- `id uuid PK FK auth.users(id) ON DELETE CASCADE`, `full_name text NOT NULL`, `created_at, updated_at timestamptz NOT NULL`.
+- يحتوي الاسم المعروض فقط؛ يسمح بقراءته للمدير وأعضاء الجمعية نفسها دون كشف البريد أو الهاتف.
 
-البريد لا يكرر هنا؛ مصدره `auth.users.email`. ينشأ الملف في trigger واحد داخل معاملة إنشاء Auth. تستقبل بيانات الاسم والهاتف والمدينة من بيانات التسجيل الوصفية لأغراض الملف فقط، ولا تستخدم أي metadata لتحديد صلاحيات.
+**profile_private**
+- `user_id uuid PK FK profiles(id) ON DELETE RESTRICT`.
+- `phone_e164 text NOT NULL UNIQUE` — قيد تحقق `^\\+[1-9][0-9]{7,14}# التصميم العلائقي لقاعدة بيانات سهم — Supabase
+
+**الإصدار:** 1.0 — 13 نوفمبر 2026  
+**الحالة:** تصميم قبل التنفيذ؛ لم تُطبق الجداول أو السياسات بعد.  
+**المستودع/الفرع:** `aaaaubad-byte/SAHM` / `SAHM-SUPABASE`  
+**المرجع الملزم:** `SAHM_Association_Creation_and_Installments_Reference_AR_v2.md`  
+**المشروع المستهدف:** `SAHM` — `nusjnnrtpxbpphphmdsc`
+
+## 1. مبادئ التصميم
+
+1. قاعدة PostgreSQL هي مصدر الحقيقة الوحيد للجمعيات والعضويات والأسهم والأقساط والاستلام والقرعة والمحادثات والإشعارات.
+2. `auth.users.id` هو الهوية الداخلية UUID. البريد الإلكتروني وكلمة المرور هما وسيلة الدخول. الهاتف معرف فريد في `profiles` بصيغة E.164، وليس وسيلة مصادقة أو إثبات ملكية.
+3. لا تنقل بيانات المعاينة أو قيم `me` أو seed إلى قاعدة البيانات.
+4. كل جمعية نطاق أمني مستقل. تربط القيود المركبة السجلات التابعة بالجمعية نفسها لمنع ربط سجل بكيان من جمعية أخرى.
+5. المبالغ أعداد صحيحة بوحدات العملة الصغرى: YER = ريال، SAR = هللة، USD = سنت. لا تستخدم `float` أو `double precision`.
+6. تحفظ اللحظات الزمنية في `timestamptz`، والتواريخ التشغيلية في `date`، والمنطقة الزمنية IANA في الجمعية.
+7. لا تخزن حالة القسط المستقبلية بوصفها حالة مالية؛ تعرض «لم يحن موعده بعد» من مقارنة التاريخ. الحالة «مدفوع» مصدرها سجل استلام نشط، و«مستحق/متأخر» تحسب من فترة القسط والمنطقة الزمنية.
+8. السجلات المالية ونتائج القرعة والتصحيحات والأحداث لا تحذف ماديًا. الإلغاء/التصحيح حدث جديد يحفظ الأصل.
+9. لا توجد صلاحية إدارية عامة أو دور يختاره المستخدم؛ المدير هو `associations.manager_user_id` لكل جمعية.
+10. لا حاجة إلى Storage حاليًا؛ V2 ألغى المرفقات وإثباتات التحويل. لا تُنشأ حاوية ما لم تظهر حاجة موثقة جديدة.
+
+## 2. المخطط والجداول
+
+كل المفاتيح الأساسية UUID مع `gen_random_uuid()`، عدا `profiles.id` الذي يساوي `auth.users.id`. جميع الجداول التالية في `public` ومفعّل عليها RLS. أسماء الأعمدة المقترحة إنجليزية ثابتة لتسهيل SQL وواجهات Supabase؛ تسميات الواجهة عربية.
+
+### 2.1 الحسابات
+
+.
+- `city text NULL`, `phone_verified_at timestamptz NULL` — لا يُملأ في مرحلة التسجيل الحالية.
+- RLS للمالك فقط؛ لا يرى أعضاء الجمعية رقم هاتف بعضهم أو المدينة الخاصة.
+
+البريد لا يكرر هنا؛ مصدره `auth.users.email`. ينشأ `profiles` و`profile_private` في trigger واحد داخل معاملة إنشاء Auth. تستقبل بيانات الاسم والهاتف والمدينة من بيانات التسجيل الوصفية لأغراض الملف فقط، ولا تستخدم أي metadata لتحديد صلاحيات.
 
 ### 2.2 الجمعية والعضوية والأسهم والدعوات
 
@@ -164,8 +193,8 @@
 
 ## 3. العلاقات الأساسية
 
-- `auth.users 1—1 profiles`.
-- `profiles 1—N associations` عبر مدير الجمعية، و`profiles N—N associations` عبر `association_memberships`.
+- `auth.users 1—1 profiles 1—1 profile_private`.
+- `profiles 1—1 profile_private`; `profiles 1—N associations` عبر مدير الجمعية، و`profiles N—N associations` عبر `association_memberships`.
 - `association 1—N memberships`; `membership 1—N shares`.
 - `association 1—N invitations`.
 - `association 1—N cycles 1—N installment_periods`.
@@ -188,7 +217,7 @@
 
 | الكيان | المدير داخل جمعيته | المشارك داخل جمعيته | غير العضو / مستخدم آخر |
 |---|---|---|---|
-| الملف الشخصي | ملفه فقط | ملفه فقط | ملفه فقط |
+| الاسم المعروض | اسمه وأسماء أعضاء جمعيته | اسمه وأسماء أعضاء جمعيته | اسمه فقط |\n| الهاتف والمدينة الخاصة | بياناته فقط | بياناته فقط | بياناته فقط |
 | الجمعية وإعداداتها | قراءة وتعديل عبر RPC | قراءة | لا وصول |
 | العضويات والأسهم | قراءة وإدارة عبر RPC | قراءة بيانات العضوية والأسهم المسموح بها | لا وصول |
 | الدعوات | إدارة وقراءة | لا يقرأ قائمة الدعوات | لا وصول |
@@ -237,7 +266,7 @@
 
 - التسجيل: `auth.signUp({ email, password, options: { data: { full_name, phone, city } } })`.
 - قبل إنشاء الملف، تطبع الواجهة الأرقام العربية والهندية وتزيل فواصل العرض، ثم تشترط رقمًا دوليًا يبدأ بـ +؛ لا تخمّن رمز الدولة عند غيابه.
-- trigger بعد INSERT على `auth.users` يستدعي `private.handle_new_user()` وينشئ `profiles` ضمن المعاملة نفسها. فشل تحقق الهاتف أو تعارض UNIQUE يفشل إنشاء Auth كله، فلا يبقى حساب بلا ملف.
+- trigger بعد INSERT على `auth.users` يستدعي `private.handle_new_user()` وينشئ `profiles` و`profile_private` و`user_preferences` ضمن المعاملة نفسها. فشل تحقق الهاتف أو تعارض UNIQUE يفشل إنشاء Auth كله، فلا يبقى حساب بلا ملف.
 - لا توجد SMS أو phone OTP أو phone sign-in في هذه المرحلة. الهاتف غير موثق، ولا يمنح صلاحية أو إثبات ملكية.
 - الدخول: `signInWithPassword({ email, password })`. استعادة كلمة المرور: `resetPasswordForEmail(email, { redirectTo })`.
 - لا يتوقف التطبيق على شاشة تحقق بريد عند تعطيل Confirm Email من لوحة Supabase؛ يتعامل مع session إن أعادها Auth، ويعرض حالة انتظار فقط إذا كانت إعدادات المالك تتطلبها.
