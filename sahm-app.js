@@ -29,7 +29,7 @@
   /* helpers that take (db, ...) with no viewer */
   var PLAIN = ['drawStatus', 'previewJoin', 'inviteSummary', 'getInviteInfo', 'lastReminder'];
 
-  var api = { init: init, store: store, viewer: viewer, onResult: onResult };
+  var api = { init: init, store: store, viewer: viewer, onResult: onResult, report: report };
   /* Replace the in-memory snapshot with a verified server snapshot. Local storage is not authoritative in remote mode. */
   api.useRemoteStore = function (remoteStore) {
     if (!remoteStore || !Array.isArray(remoteStore.groups) || !remoteStore.prefs || !remoteStore.prefs.user || !remoteStore.prefs.user.id) {
