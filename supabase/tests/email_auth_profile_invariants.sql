@@ -43,6 +43,19 @@ BEGIN
     RAISE EXCEPTION 'public complete_my_profile wrapper must remain SECURITY INVOKER';
   END IF;
 
+  SELECT pg_get_functiondef('private.complete_my_profile(text,text,text)'::regprocedure) INTO v_fn;
+  IF position('legal_acceptances' in v_fn)=0 OR position('2026-11-14' in v_fn)=0 THEN
+    RAISE EXCEPTION 'Completing the profile must require the accepted current terms version';
+  END IF;
+  IF position('array_length(v_parts,1)' in v_fn)=0 THEN
+    RAISE EXCEPTION 'Profile completion must require a triple-part full name';
+  END IF;
+
+  SELECT pg_get_functiondef('private.update_my_profile(text,text)'::regprocedure) INTO v_fn;
+  IF position('array_length(v_parts,1)' in v_fn)=0 THEN
+    RAISE EXCEPTION 'Profile updates must preserve triple-part full name validation';
+  END IF;
+
   SELECT pg_get_functiondef('private.accept_invitation(text)'::regprocedure) INTO v_fn;
   IF position('profile_completed' in v_fn)=0 OR position('invitee_phone_e164' in v_fn)=0 THEN
     RAISE EXCEPTION 'Invitation acceptance is missing profile completion or invited-phone verification';
