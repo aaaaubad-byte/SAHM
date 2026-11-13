@@ -3243,7 +3243,7 @@ const money=(n,c='YER')=>{const cur=SahmCore.CURRENCIES[c]||SahmCore.CURRENCIES.
 const today=()=>SahmApp.todayIn();
 const AUTH_SCREEN_NAMES=['welcome','phone','otp','profile-setup','logged-out'];
 let db=load(),screenName=db.session?(new URLSearchParams(location.search).get('join')?'join-group':'home'):'welcome',params={},groupTab='all',groupDetailTab='overview',toastTimer,homeSlideTimer=null,homeSlideIndex=0,selectedInstallmentCycle=1,selectedInstallmentStatus='all',pendingJoinCode=null;
-let currentGroupId=(db.groups[0]||{}).id||null,createdGroupId=null,createWizardStep=1,reminderRequest=null,navigation=null;
+let currentGroupId=(db.groups[0]||{}).id||null,createdGroupId=null,createWizardStep=1,createFormSnapshot={},reminderRequest=null,navigation=null;
 SahmApp.onResult((name,result)=>{if(result&&result.ok===false)toast(result.message||'تعذر تنفيذ العملية');else if(result&&result.persisted===false)toast(result.warning||'تعذر حفظ التغييرات في تخزين المعاينة');});
 
 function uiIcon(name,size=20){
@@ -3324,7 +3324,6 @@ function save(){
  const result=SahmApp.savePrefs();if(result&&result.ok===false)toast('تعذر حفظ التفضيلات محليًا');
 }
 function refreshData(){const previous=currentGroupId;db=load();currentGroupId=db.groups.some(g=>g.id===previous)?previous:((db.groups[0]||{}).id||null);return db}
-function log(){/* تسجل العمليات أحداثها عبر SahmData ولا يوجد سجل واجهة موازٍ. */}
 function currentGroup(){return db.groups.find(g=>g.id===currentGroupId)||db.groups[0]||null}
 function isManager(g=currentGroup()){return !!g&&g.role==='manager'}
 function statusText(s){return({PENDING_MEMBERS:'استقبال الأعضاء',READY_FOR_DRAW:'بانتظار موعد القرعة',ACTIVE_REVOLVING:'نشطة',COMPLETED:'مكتملة',due:'مستحق',paid:'مدفوع',late:'متأخر',upcoming:'لم يحن موعده بعد',pending:'معلقة',accepted:'مقبولة',cancelled:'ملغاة'})[s]||s}
@@ -3335,7 +3334,7 @@ function routeSnapshot(nextScreen=screenName,nextParams=params,context={}){
  return Object.assign({
   screenName:nextScreen,params:nextParams||{},currentGroupId:currentGroupId,
   groupTab:groupTab,groupDetailTab:groupDetailTab,
-  viewState:{selectedInstallmentCycle:selectedInstallmentCycle,selectedInstallmentStatus:selectedInstallmentStatus,createWizardStep:createWizardStep}
+  viewState:{selectedInstallmentCycle:selectedInstallmentCycle,selectedInstallmentStatus:selectedInstallmentStatus,createWizardStep:createWizardStep,createFormSnapshot:$('#createForm')?Object.fromEntries(new FormData($('#createForm'))):createFormSnapshot}
  },context||{});
 }
 function sameRouteSnapshot(a,b){
@@ -3358,14 +3357,22 @@ function applyNavigationState(state,fromPop=false){
  selectedInstallmentCycle=Number(view.selectedInstallmentCycle)||1;
  selectedInstallmentStatus=view.selectedInstallmentStatus||'all';
  createWizardStep=Math.max(1,Math.min(3,Number(view.createWizardStep)||1));
+ createFormSnapshot=Object.assign({},view.createFormSnapshot||{});
+ const sameScreen=previous.screenName===next.screenName&&JSON.stringify(previous.params||{})===JSON.stringify(next.params||{})&&previous.currentGroupId===next.currentGroupId&&previous.groupTab===next.groupTab&&previous.groupDetailTab===next.groupDetailTab;
  const same=sameRouteSnapshot(previous,next);
  if(next.layer!=='modal'&&modalWasOpen)$('#modal-root').innerHTML='';
+ if(fromPop&&sameScreen&&next.screenName==='create-group'){
+  setCreateWizardStep(createWizardStep,false);
+  syncNavigationContext();
+  return;
+ }
  if(fromPop&&same)return;
  render();
 }
 function go(s,p={},context={}){
  if(!Object.prototype.hasOwnProperty.call(ALL_SCREEN_REGISTRY,s)){toast('تعذر فتح الشاشة المطلوبة');return false}
  if(!db.session&&!AUTH_SCREEN_NAMES.includes(s)){toast('سجل الدخول أولاً للمتابعة');return false}
+ if(s==='create-group'&&screenName!=='create-group'){createWizardStep=1;createFormSnapshot={}}
  const managerOnly=['members','invite','invites','draw-room','audit'];
  if(managerOnly.includes(s)&&!isManager(context.currentGroupId?db.groups.find(g=>g.id===context.currentGroupId)||null:currentGroup())){toast('هذه الوظيفة متاحة لمدير هذه الجمعية فقط');return false}
  const next=navigation.navigate(routeSnapshot(s,p,context));
@@ -3379,7 +3386,6 @@ function resetNavigation(s,p={}){
 }
 function syncNavigationContext(){if(navigation)navigation.replace(routeSnapshot())}
 function back(){
- if(screenName==='create-group'&&createWizardStep>1){setCreateWizardStep(createWizardStep-1);syncNavigationContext();return}
  if(navigation&&navigation.back())return;
  if(db.session&&screenName!=='home'){resetNavigation('home',{});return}
  if(!db.session&&screenName!=='welcome'){resetNavigation('welcome',{});return}
@@ -3448,8 +3454,10 @@ function homeActivity(){
  return list.map(a=>`<button class="activity-card" data-go="group-detail" data-id="${escapeHtml(a.groupId)}"><span class="activity-icon joined">${uiIcon(a.icon,20)}</span><span class="activity-copy"><strong>${escapeHtml(a.title)}</strong><small>${escapeHtml(a.groupName)} <i>·</i> ${escapeHtml(SahmApp.chatTime(a.at))}</small></span><span class="activity-arrow">&gt;</span></button>`).join('')
 }
 function setHomeSlide(index){const ss=document.querySelectorAll('#homeCarousel .summary-slide'),dd=document.querySelectorAll('.home-dots button');if(!ss.length)return;homeSlideIndex=((index%ss.length)+ss.length)%ss.length;ss.forEach((x,i)=>{x.classList.toggle('active',i===homeSlideIndex);x.setAttribute('aria-hidden',i!==homeSlideIndex?'true':'false')});dd.forEach((x,i)=>{x.classList.toggle('active',i===homeSlideIndex);x.setAttribute('aria-pressed',i===homeSlideIndex?'true':'false')})}function groups(){const own=db.groups.filter(g=>groupTab==='all'||g.role===groupTab);const empty=groupTab==='manager'?'لا توجد جمعيات تديرها':groupTab==='member'?'لا توجد جمعيات تشارك فيها':'لا توجد جمعيات حتى الآن';shell('الجمعيات','groups',`<div class="toolbar"><input class="searchbox" id="groupSearch" placeholder="ابحث باسم الجمعية أو رمزها..."><button class="btn primary small" data-go="create-group">${uiIcon('plus',15)} إنشاء</button></div><div id="groupList">${own.length?own.map(groupCard).join(''):`<div class="card empty"><div class="big">${uiIcon('groups',27)}</div><b>${empty}</b><button class="btn primary" data-go="create-group">إنشاء جمعية</button></div>`}</div><button class="btn outline full" data-go="join-group">الانضمام إلى جمعية برمز أو رابط</button>`)}
-function setCreateWizardStep(step){
- createWizardStep=Math.max(1,Math.min(3,step));const form=document.getElementById('createForm');
+function setCreateWizardStep(step,updateHistory=true){
+ const previous=createWizardStep;createWizardStep=Math.max(1,Math.min(3,step));const form=document.getElementById('createForm');
+ if(form)createFormSnapshot=Object.fromEntries(new FormData(form));
+ if(updateHistory&&navigation&&screenName==='create-group'&&previous!==createWizardStep)navigation.navigate(routeSnapshot());
  if(form){form.classList.remove('create-step-active-1','create-step-active-2','create-step-active-3');form.classList.add('create-step-active-'+createWizardStep)}
  document.querySelectorAll('.create-step').forEach((node,i)=>node.hidden=i+1!==createWizardStep);
  const names=['بيانات الجمعية','البداية والجدولة','القواعد والمراجعة'];const title=document.getElementById('create-stage-title');if(title)title.textContent=names[createWizardStep-1];
@@ -3492,7 +3500,7 @@ function createPreview(f){
  put('cs-total',d.targetShares?d.targetShares+' سهم':'—');put('cs-share',minor?minorMoney(minor,currency):'—');put('cs-rounds',d.targetShares?d.targetShares+' جولة':'—');put('cs-duration',plan&&plan.durationDays?plan.durationDays+' يومًا · حتى '+dateLabel(plan.lastDay):'—');put('cs-quorum',(d.quorum||66)+'% من الأشخاص');
 }
 function createGroup(){
- createWizardStep=1;const html=[
+ const html=[
  '<div class="create-group-page"><form id="createForm" class="create-form" novalidate>',
  '<div class="create-step" id="create-step-1"><section class="create-section create-unified-section"><div class="create-section-head"><span class="create-section-icon">'+uiIcon('landmark',20)+'</span><h2>بيانات الجمعية</h2></div>',
  '<div class="field create-field"><label>اسم الجمعية</label><input name="name" maxlength="60" required></div>',
@@ -3514,8 +3522,9 @@ function createGroup(){
  '<section class="create-section create-live-summary"><div class="create-section-head"><span class="create-section-icon">'+uiIcon('calculator',20)+'</span><h2>مراجعة الجمعية</h2></div><div class="create-summary-grid"><div><span>الأسهم المستهدفة</span><b id="cs-total">—</b></div><div><span>الجولات</span><b id="cs-rounds">—</b></div><div><span>حصة السهم في الدورة</span><b id="cs-share">—</b></div><div><span>المدة الإجمالية</span><b id="cs-duration">—</b></div><div><span>النصاب</span><b id="cs-quorum">66% من الأشخاص</b></div></div></section></section></div>',
  '<div class="create-step-actions"><button class="btn outline" id="create-prev" type="button" data-action="create-prev" hidden>السابق</button><button class="btn primary" id="create-next" type="button" data-action="create-next">التالي</button><button class="btn primary create-submit" id="create-final-submit" type="submit" hidden>إنشاء الجمعية</button></div></form></div>'
  ].join('');shell('جمعية جديدة',null,html);const f=$('#createForm');
- const update=()=>{const cycle=f.elements.cycleType.value,mode=f.elements.installmentsMode.value,manager=f.querySelector('input[name="managerMode"]:checked')?.value;$('#cycle-days-field').hidden=cycle!=='custom';f.elements.cycleDays.required=cycle==='custom';$('#custom-installments-field').hidden=mode!=='custom';f.elements.customInstallments.required=mode==='custom';$('#manager-shares-field').hidden=manager!=='both';f.elements.managerShares.required=manager==='both';const days=cycle==='weekly'?7:cycle==='monthly'?30:Number(f.elements.cycleDays.value||0);f.elements.customInstallments.max=String(days||3650);f.elements.managerShares.max=String(Number(f.elements.maxPerMember.value||1000));createPreview(f)};
- f.addEventListener('input',update);f.addEventListener('change',update);setCreateWizardStep(1);update();
+ Object.entries(createFormSnapshot||{}).forEach(([name,value])=>{const control=f.elements.namedItem(name);if(!control)return;if(typeof RadioNodeList!=='undefined'&&control instanceof RadioNodeList)Array.from(control).forEach(item=>{item.checked=String(item.value)===String(value)});else control.value=value});
+ const update=()=>{const cycle=f.elements.cycleType.value,mode=f.elements.installmentsMode.value,manager=f.querySelector('input[name="managerMode"]:checked')?.value;$('#cycle-days-field').hidden=cycle!=='custom';f.elements.cycleDays.required=cycle==='custom';$('#custom-installments-field').hidden=mode!=='custom';f.elements.customInstallments.required=mode==='custom';$('#manager-shares-field').hidden=manager!=='both';f.elements.managerShares.required=manager==='both';const days=cycle==='weekly'?7:cycle==='monthly'?30:Number(f.elements.cycleDays.value||0);f.elements.customInstallments.max=String(days||3650);f.elements.managerShares.max=String(Number(f.elements.maxPerMember.value||1000));createPreview(f);createFormSnapshot=Object.fromEntries(new FormData(f));if(navigation&&screenName==='create-group')syncNavigationContext()};
+ f.addEventListener('input',update);f.addEventListener('change',update);setCreateWizardStep(createWizardStep,false);update();
 }
 function createdGroup(){const g=currentGroup();if(!g){go('home');return}showCreatedGroup(g)}
 function showCreatedGroup(g){
@@ -3681,7 +3690,7 @@ function handleAppAction(action,el){
  if(action==='resend-otp'){toast('رمز المعاينة التجريبي: 246810');return}
  if(action==='back'){back();return}if(action==='overlay-close'||action==='close'){closeModal();return}
  if(action==='create-next'){if(validateCreateStep(createWizardStep))setCreateWizardStep(createWizardStep+1);return}
- if(action==='create-prev'){setCreateWizardStep(createWizardStep-1);return}
+ if(action==='create-prev'){back();return}
  if(action==='open-group'){go('group-detail',{}, {currentGroupId:el.dataset.id,groupDetailTab:'overview'});return}
  if(action==='home-managed'){go('groups',{}, {groupTab:'manager'});return}if(action==='home-member'){go('groups',{}, {groupTab:'member'});return}
  if(action==='home-slide'){setHomeSlide(Number(el.dataset.index)||0);return}if(action==='group-tab'){groupTab=el.dataset.tab;syncNavigationContext();groups();return}if(action==='detail-tab'){groupDetailTab=el.dataset.tab;syncNavigationContext();groupDetail();return}
