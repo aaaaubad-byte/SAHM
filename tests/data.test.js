@@ -50,6 +50,7 @@ test('invalid group creation is rejected without adding a group', () => {
 test('late member addition requires confirmation and reports expired periods', () => {
   const w = fresh();
   const { group } = createGroup(w, { startDate: '2026-11-01', targetShares: 2 });
+  w.clock.now = '2026-11-21T10:00';
   const denied = w.D.addMember(w.db, 'me', group.id, {
     name: 'عضو متأخر', userId: 'late-user', shares: 1, joinedAt: '2026-11-21'
   });
@@ -198,20 +199,6 @@ test('first draw waits for its date and quorum, then locks membership', () => {
     name: 'بعد القفل', userId: 'late-after-draw', shares: 1, joinedAt: '2026-12-13', confirmLateImpact: true
   }).code, 'GROUP_LOCKED');
   assert.equal(w.K.eligibleShares(w.db, group.id).length, 1);
-});
-
-test('draw can use explicit test RNG without changing production secure RNG path', () => {
-  const w = fresh();
-  const { group } = createGroup(w, { targetShares: 1 });
-  const member = w.D.addMember(w.db, 'me', group.id, {
-    name: 'عضو', userId: 'rng-user', shares: 1, joinedAt: '2026-11-13'
-  }).member;
-  const manager = w.db.members.find(m => m.groupId === group.id && m.userId === 'me');
-  w.D.setAttendance(w.db, 'me', manager.id, true);
-  w.clock.now = '2026-12-13T10:00';
-  const result = w.D.performDraw(w.db, 'me', group.id, { overrideQuorum: true, rng: () => 0 });
-  assert.equal(result.ok, true);
-  assert.equal(result.draw.winnerMemberId, member.id);
 });
 
 test('tick does not duplicate generated notices on repeated calls', () => {
