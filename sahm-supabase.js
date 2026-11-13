@@ -137,6 +137,13 @@
     return true;
   }
 
+  async function updatePassword(password) {
+    var c = getClient();
+    var result = await c.auth.updateUser({ password: password });
+    if (result.error) throw result.error;
+    return result.data.user;
+  }
+
   function onAuthStateChange(callback) {
     var c = getClient();
     if (authListener) authListener.unsubscribe();
@@ -162,6 +169,7 @@
     profile: profile,
     completeProfile: completeProfile,
     resetPassword: resetPassword,
+    updatePassword: updatePassword,
     onAuthStateChange: onAuthStateChange,
     friendlyError: friendly
   };
