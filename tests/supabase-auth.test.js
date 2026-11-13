@@ -90,8 +90,9 @@ test('password recovery updates the authenticated user password', async () => {
   assert.equal(calls.update[0][0].password, 'new-long-password');
 });
 
-test('publishable key only is configured for the browser client', () => {
-  const { calls } = loadAuthFacade();
+test('publishable key only is configured for the browser client', async () => {
+  const { facade, calls } = loadAuthFacade();
+  await facade.session();
   assert.equal(calls.config.url, 'https://nusjnnrtpxbpphphmdsc.supabase.co');
   assert.match(calls.config.key, /^sb_publishable_/);
   assert.doesNotMatch(calls.config.key, /service_role/i);
