@@ -3331,7 +3331,7 @@ function load(){
    notifications:prefs.notifications!==false,biometric:!!prefs.biometric
   }),
   session:!!prefs.session,verified:!!prefs.verified,groups,
-  unread:notifResult&&notifResult.ok?notifResult.unread:SahmApp.unreadNotifications(),otp:'246810'
+  unread:notifResult&&notifResult.ok?notifResult.unread:SahmApp.unreadNotifications()
  };
 }
 function save(){
@@ -3788,7 +3788,7 @@ async function handleAppAction(action,el){
  }
  if(action==='send-reminder'){
   reminderRequest={groupId:g.id,cycle:Number(el.dataset.cycle),no:Number(el.dataset.no),memberId:el.dataset.member||undefined};
-  const r=SahmApp.sendReminder(reminderRequest);if(r&&r.ok){refreshData();toast('تم إرسال التذكير')}else if(r&&r.code==='REMINDER_REPEAT'){showModal('تأكيد تكرار التذكير',escapeHtml(r.message),[['إرسال مرة أخرى','send-reminder-confirm','primary'],['إلغاء','close','outline']])}return;
+  const r=await SahmApp.sendReminder(reminderRequest);if(r&&r.ok){refreshData();toast('تم إرسال التذكير')}else if(r&&r.code==='REMINDER_REPEAT'){showModal('تأكيد تكرار التذكير',escapeHtml(r.message),[['إرسال مرة أخرى','send-reminder-confirm','primary'],['إلغاء','close','outline']])}return;
  }
  if(action==='send-reminder-confirm'&&reminderRequest){const r=await SahmApp.sendReminder(Object.assign({},reminderRequest,{confirmRepeat:true}));if(r&&r.ok){closeModal();refreshData();installments();toast('تم إرسال التذكير')}return}
  if(action==='run-draw'){
@@ -3915,7 +3915,7 @@ async function bootSahm(){
    db.session=true;db.verified=!!session.user.email_confirmed_at;
    db.user=Object.assign(db.user,{id:session.user.id,email:session.user.email,name:activeProfile.fullName,phone:activeProfile.phone,city:activeProfile.city,avatarKey:activeProfile.avatarKey});
    selectedAvatarKey=activeProfile.avatarKey||'avatar-01';
-   screenName=activeProfile.completed?(new URLSearchParams(location.search).get('join')?'join-group':'home'):'profile-setup';
+   screenName=activeProfile.completed?(new URLSearchParams(location.search).get('invite')?'join-group':'home'):'profile-setup';
   }else{db.session=false;screenName='welcome'}
   SahmSupabase.onAuthStateChange((event,sess)=>{
    if(event==='SIGNED_OUT'){db.session=false;screenName='welcome';resetNavigation('welcome',{});}
