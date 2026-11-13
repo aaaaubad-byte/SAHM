@@ -1,3 +1,5 @@
+CREATE SCHEMA IF NOT EXISTS private;
+
 -- Atomic draw with explicit expected round to make retries/concurrent requests idempotent.
 -- Implementation is kept in the non-exposed private schema; public.perform_draw is an invoker wrapper.
 CREATE OR REPLACE FUNCTION private.perform_draw(p_association_id uuid, p_expected_round_no integer)
