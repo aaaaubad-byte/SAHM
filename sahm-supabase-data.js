@@ -1,7 +1,7 @@
 /* SAHM remote data gateway. All business state is read from Supabase and every mutation is confirmed by a database RPC. */
 (function (root) {
   'use strict';
-  var app = null, client = null, user = null, profile = null, store = null, raw = {};
+  var app = null, client = null, user = null, profile = null, store = null, raw = {}, realtimeChannel = null, realtimeCallback = null;
   var NOTIFY = ['received','completed','late','drawSoon','drawDue','drawResult','joined','motivate'];
 
   function c() {
@@ -418,6 +418,62 @@
       return {ok:true,marked:list.length};
     }catch(e){return fail(e);}
   }
+  function handleRealtime(payload){
+    if(!store||!payload||!payload.new)return;
+    var row=payload.new, table=payload.table;
+    if(table==='chat_messages' && payload.eventType==='INSERT'){
+      if(store.messages.some(function(m){return m.id===row.id;}))return;
+      raw.chat_messages.push(row);
+      store.messages.push({
+        id:row.id,groupId:row.association_id,kind:row.kind,
+        senderName:row.kind==='system'?'سهم':profileName(row.sender_user_id,raw.profiles.reduce(function(a,p){a[p.id]=p;return a;},{})),
+        senderId:row.sender_user_id||'sahm-system',userId:row.sender_user_id||null,
+        type:row.system_type||null,text:row.body,at:row.created_at
+      });
+    }
+    if(table==='notifications' && payload.eventType==='INSERT'){
+      if(store.notifications.some(function(n){return n.id===row.id;}))return;
+      raw.notifications.push(row);
+      var pref=raw.association_user_preferences.find(function(p){return p.association_id===row.association_id&&p.user_id===user.id;});
+      store.notifications.push({
+        id:row.id,groupId:row.association_id,userId:row.user_id,type:row.type,
+        at:row.created_at,read:!!row.read_at,
+        muted:!!(pref&&(pref.mute_group||(row.type==='reminder'&&pref.mute_reminders))),
+        text:row.body,title:row.title,relatedEntityId:row.related_entity_id
+      });
+    }
+    if(table==='notifications' && payload.eventType==='UPDATE'){
+      var existing=store.notifications.find(function(n){return n.id===row.id;});
+      if(existing)existing.read=!!row.read_at;
+      var rawRow=raw.notifications.find(function(n){return n.id===row.id;});
+      if(rawRow)rawRow.read_at=row.read_at;
+    }
+    if(typeof realtimeCallback==='function')realtimeCallback(payload);
+  }
+
+  function startRealtime(callback){
+    if(!user)return false;
+    realtimeCallback=callback||null;
+    if(realtimeChannel){
+      try{c().removeChannel(realtimeChannel);}catch(_){}
+      realtimeChannel=null;
+    }
+    realtimeChannel=c().channel('sahm-user-'+user.id)
+      .on('postgres_changes',{event:'INSERT',schema:'public',table:'chat_messages'},handleRealtime)
+      .on('postgres_changes',{event:'INSERT',schema:'public',table:'notifications',filter:'user_id=eq.'+user.id},handleRealtime)
+      .on('postgres_changes',{event:'UPDATE',schema:'public',table:'notifications',filter:'user_id=eq.'+user.id},handleRealtime)
+      .subscribe();
+    return true;
+  }
+
+  function stopRealtime(){
+    if(realtimeChannel){
+      try{c().removeChannel(realtimeChannel);}catch(_){}
+      realtimeChannel=null;
+    }
+    realtimeCallback=null;
+  }
+
   async function updateMyProfile(fullName,city){
     try{
       await invoke('update_my_profile',{p_full_name:String(fullName||'').trim(),p_city:String(city||'').trim()});
@@ -464,13 +520,13 @@
     return loadSnapshot(profile);
   }
   function clear(){
-    user=null;profile=null;store=null;raw={};
+    stopRealtime();user=null;profile=null;store=null;raw={};
     if(app&&app.clearStore)app.clearStore();
   }
   root.SahmSupabaseData={
     init:init,refresh:refresh,store:function(){return store;},raw:function(){return raw;},
     previewInvite:previewInvite,acceptInvite:acceptInvite,updateMyProfile:updateMyProfile,
-    install:install,clear:clear,
+    startRealtime:startRealtime,stopRealtime:stopRealtime,install:install,clear:clear,
     isRemote:function(){return !!store;},savePrefs:savePrefs
   };
 })(window);
