@@ -47,7 +47,7 @@
       email: String(email || '').trim().toLowerCase(),
       password: password,
       options: {
-        emailRedirectTo: root.location.origin + root.location.pathname,
+        emailRedirectTo: root.location.origin + root.location.pathname + root.location.search,
         data: { terms_accepted: true, terms_version: TERMS_VERSION }
       }
     });
@@ -131,7 +131,7 @@
   async function resetPassword(email) {
     var c = getClient();
     var result = await c.auth.resetPasswordForEmail(String(email || '').trim().toLowerCase(), {
-      redirectTo: root.location.origin + root.location.pathname + '#reset-password'
+      redirectTo: root.location.origin + root.location.pathname + root.location.search + '#reset-password'
     });
     if (result.error) throw result.error;
     return true;
