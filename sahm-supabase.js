@@ -3,7 +3,7 @@
  */
 (function (root) {
   'use strict';
-  var URL = 'https://nusjnnrtpxbpphphmdsc.supabase.co';
+  var SUPABASE_URL = 'https://nusjnnrtpxbpphphmdsc.supabase.co';
   var PUBLISHABLE_KEY = 'sb_publishable_RE6_iJo4rqaD4-FqOCMh5A_ZB05bU10';
   var TERMS_VERSION = '2026-11-14';
   var client = null;
@@ -15,7 +15,7 @@
     if (!root.supabase || typeof root.supabase.createClient !== 'function') {
       throw new Error('تعذر تحميل مكتبة الاتصال الآمن. تحقق من اتصال الإنترنت ثم أعد المحاولة.');
     }
-    client = root.supabase.createClient(URL, PUBLISHABLE_KEY, {
+    client = root.supabase.createClient(SUPABASE_URL, PUBLISHABLE_KEY, {
       auth: {
         autoRefreshToken: true,
         persistSession: true,
@@ -162,7 +162,7 @@
   }
 
   root.SahmSupabase = {
-    url: URL,
+    url: SUPABASE_URL,
     termsVersion: TERMS_VERSION,
     client: getClient,
     signUp: signUp,
