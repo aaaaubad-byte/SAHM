@@ -3702,7 +3702,7 @@ function joinGroup(){
   '<button class="btn primary full" type="submit">متابعة</button></form><small>اختيار الأسهم وإرسال الطلب لا ينشئان عضوية إلا بعد موافقة مدير الجمعية.</small></div>');
 }
 function showJoinRequestForm(info,source,token){
- pendingJoinContext={source:source,token:token,info:info};
+ pendingJoinContext={source:source,token:token,info:info,invitationId:info.invitationId||info.id||null};
  const currency=info.currency||'YER',share=Number(info.shareAmountMinor)||0;
  const details='<div class="card"><h3>'+escapeHtml(info.name||'الجمعية')+'</h3><div class="keyvalue"><span>المدير</span><b>'+escapeHtml(info.managerName||'—')+'</b></div>'+
   '<div class="keyvalue"><span>بداية الجمعية</span><b>'+dateLabel(info.startDate)+'</b></div><div class="keyvalue"><span>أول قرعة</span><b>'+dateLabel(info.firstDrawOn)+'</b></div>'+
