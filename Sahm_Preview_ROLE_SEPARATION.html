@@ -4391,6 +4391,7 @@ async function handleAppAction(action,el){
  if(action==='switch-account'){
   if(authBusy)return;authBusy=true;
   try{
+   SahmSupabaseData.stopRealtime();
    const switched=await SahmSupabase.switchAccount(el.dataset.userId);
    SahmSupabaseData.clear();activeProfile=await SahmSupabase.profile(switched.user.id);
    await SahmSupabaseData.init(activeProfile);SahmSupabaseData.install();db=load();currentGroupId=(db.groups[0]||{}).id||null;
@@ -4431,15 +4432,18 @@ document.addEventListener('submit',async e=>{
   if(authBusy)return;const d=Object.fromEntries(new FormData(form));
   if(!d.email||!d.password){toast('أدخل البريد الإلكتروني وكلمة المرور');return}
   authBusy=true;setBusy(true,'جارٍ تسجيل الدخول...');
+  const hadRemoteSession=SahmSupabaseData.isRemote();
+  if(hadRemoteSession)SahmSupabaseData.stopRealtime();
   try{
    const signed=await SahmSupabase.signIn(d.email,d.password);
+   SahmSupabaseData.clear();
    activeProfile=await SahmSupabase.profile(signed.user.id);
    selectedAvatarKey=activeProfile.avatarKey||'avatar-01';
    await SahmSupabaseData.init(activeProfile);SahmSupabaseData.install();db=load();currentGroupId=(db.groups[0]||{}).id||null;startRemoteRealtime();
    db.session=true;db.verified=!!signed.user.email_confirmed_at;db.user=Object.assign(db.user,{id:signed.user.id,email:signed.user.email,name:activeProfile.fullName,phone:activeProfile.phone,city:activeProfile.city});
    if(!activeProfile.completed){resetNavigation('profile-setup',{});}
    else{resetNavigation((new URLSearchParams(location.search).get('invite')||new URLSearchParams(location.search).get('join'))?'join-group':'home',{});toast('تم تسجيل الدخول بنجاح');}
-  }catch(err){toast(SahmSupabase.friendlyError(err));}
+  }catch(err){if(hadRemoteSession)startRemoteRealtime();toast(SahmSupabase.friendlyError(err));}
   finally{authBusy=false;setBusy(false);}
   return;
  }
