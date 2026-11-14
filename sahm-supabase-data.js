@@ -369,6 +369,28 @@
         summary:root.SahmApp.inviteSummary(groupId)};
     }catch(e){return fail(e);}
   }
+  async function createInvitationsBulk(groupId,invitees){
+    try{
+      if(!Array.isArray(invitees)||invitees.length<1||invitees.length>50)throw new Error('اختر من جهة اتصال واحدة إلى 50 جهة');
+      var contacts=invitees.map(function(item){
+        return {name:String(item&&item.name||'').trim(),phone:phoneE164(item&&item.phone||'')};
+      });
+      var data=await invoke('create_invitations_bulk',{p_association_id:groupId,p_invitees:contacts});
+      await refresh();
+      var results=(data.results||[]).map(function(item){
+        if(item.status!=='sent')return item;
+        return Object.assign({},item,{
+          url:root.location.origin+root.location.pathname+'?invite='+encodeURIComponent(item.token||'')
+        });
+      });
+      return {
+        ok:true,total:Number(data.total)||contacts.length,
+        sentCount:Number(data.sentCount)||0,failedCount:Number(data.failedCount)||0,
+        results:results
+      };
+    }catch(e){return fail(e);}
+  }
+
   async function cancelInvite(inviteId){
     try{await invoke('cancel_invitation',{p_invitation_id:inviteId});await refresh();return {ok:true};}catch(e){return fail(e);}
   }
@@ -608,6 +630,7 @@
     app.createGroup=createGroup;
     app.updateGroup=updateGroup;
     app.createInvite=createInvite;
+    app.createInvitationsBulk=createInvitationsBulk;
     app.cancelInvite=cancelInvite;
     app.respondToInvite=respondToInvite;
     app.submitJoinRequest=submitJoinRequest;
@@ -643,6 +666,7 @@
   root.SahmSupabaseData={
     init:init,refresh:refresh,store:function(){return store;},raw:function(){return raw;},
     previewInvite:previewInvite,acceptInvite:acceptInvite,respondToInvite:respondToInvite,
+    createInvitationsBulk:createInvitationsBulk,
     submitJoinRequest:submitJoinRequest,cancelJoinRequest:cancelJoinRequest,approveJoinRequest:approveJoinRequest,
     rejectJoinRequest:rejectJoinRequest,managePublicLink:managePublicLink,previewPublicJoinLink:previewPublicJoinLink,
     listMyInvitations:listMyInvitations,getMyInvitationDetails:getMyInvitationDetails,
