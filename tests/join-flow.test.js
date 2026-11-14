@@ -205,3 +205,10 @@ test('applicant approval and rejection notifications open the related request st
   assert.match(state.markup, /رفض طلب انضمامك/);
   assert.match(state.markup, /تذكير بقسط/);
 });
+
+
+test('cancel, approve and reject actions guard repeated UI clicks during server decisions', () => {
+  assert.equal((html.match(/if\(joinDecisionBusy\)return;/g) || []).length, 3);
+  assert.equal((html.match(/joinDecisionBusy=true;el\.disabled=true;/g) || []).length, 3);
+  assert.equal((html.match(/finally\{joinDecisionBusy=false;if\(el\.isConnected\)el\.disabled=false;\}/g) || []).length, 3);
+});
