@@ -1,10 +1,12 @@
 # التصميم العلائقي لقاعدة بيانات سهم — Supabase
 
-**الإصدار:** 1.0 — 13 نوفمبر 2026  
-**الحالة:** تصميم قبل التنفيذ؛ لم تُطبق الجداول أو السياسات بعد.  
+**الإصدار:** 1.1 — 14 نوفمبر 2026  
+**الحالة:** التصميم الأساس مرفق بملحق الحالة المنفذة؛ قاعدة Supabase المرتبطة تحتوي مخططًا مطبقًا مع RLS وعمليات RPC وتدفق الدعوة وطلب الانضمام والرابط العام.  
 **المستودع/الفرع:** `aaaaubad-byte/SAHM` / `SAHM-SUPABASE`  
-**المرجع الملزم:** `SAHM_Association_Creation_and_Installments_Reference_AR_v2.md`  
+**المرجع الملزم:** `docs/SAHM-UNIFIED-ASSOCIATION-FLOW-SPEC.md`  
 **المشروع المستهدف:** `SAHM` — `nusjnnrtpxbpphphmdsc`
+
+> وصف الجداول التالية هو التصميم البنيوي الأساس. أُضيفت إليه بعد التنفيذ كيانات الدعوة/الطلب والرابط العام الموضحة في القسم 2.4. لا تستخدم أوصاف التنفيذ التاريخية في نهاية الوثيقة لتحديد الحالة الراهنة؛ راجع `SUPABASE_IMPLEMENTATION_PROGRESS_AR.md`.
 
 ## 1. مبادئ التصميم
 
@@ -73,7 +75,7 @@
 - `time_zone text NOT NULL` — اسم IANA.
 - `cycle_type text CHECK IN ('weekly','monthly','custom')`, `cycle_days int NOT NULL`؛ قيد يفرض 7 للأسبوعي و30 للشهري و1..3650 للمخصص.
 - `share_amount_minor bigint CHECK > 0`, `installments_count int CHECK BETWEEN 1 AND cycle_days`.
-- `target_shares int CHECK > 0`, `max_shares_per_member int CHECK BETWEEN 1 AND target_shares`.
+- `target_shares int NULL`, `max_shares_per_member int NULL` — حقول توافق تاريخية فقط؛ تبقى قيم الجمعيات القديمة محفوظة، ويُنشئ مسار الجمعية الجديد هذين الحقلين بقيمة `NULL`. لا يفرضهما تدفق طلبات الانضمام الجديد.
 - `manager_participates boolean NOT NULL DEFAULT false`, `quorum_percent int CHECK BETWEEN 1 AND 100`, `rules text NOT NULL DEFAULT ''`.
 - `locked_at timestamptz NULL`, `locked_share_count int NULL` — يثبتان ذريًا عند أول قرعة.
 - `status text CHECK IN ('active','closed') DEFAULT 'active'`, `created_at, updated_at timestamptz`.
@@ -92,11 +94,11 @@
 
 **invitations**
 - `id uuid PK`, `association_id uuid FK associations`, `created_by uuid FK profiles`.
-- `invitee_name text NOT NULL`, `invitee_phone_e164 text NULL`, `shares_requested int CHECK > 0`.
+- `invitee_name text NOT NULL`, `invitee_phone_e164 text NULL`, `shares_requested int NULL CHECK (shares_requested IS NULL OR shares_requested > 0)`.
 - `token_hash text NOT NULL UNIQUE` — يحفظ hash لرمز عشوائي قوي، لا الرمز الخام.
-- `status text CHECK IN ('pending','accepted','cancelled','expired')`, `invited_user_id uuid NULL FK profiles`.
-- `created_at, expires_at, accepted_at, cancelled_at timestamptz`.
-- رقم الهاتف في الدعوة معلومة مساعدة فقط؛ لا يثبت ملكية الرقم ولا يمنح العضوية. قبول الدعوة يتطلب جلسة Auth صالحة ورمز دعوة سريًا، ثم ينفذ الخادم التحقق من الصلاحية وحد الأسهم.
+- `status text CHECK IN ('pending','accepted','cancelled','expired')`, `response_status text` لحالة الرد، `invited_user_id uuid NULL FK profiles`.
+- `created_at, expires_at, accepted_at, cancelled_at, responded_at timestamptz`.
+- الدعوة الجديدة لا تتضمن عدد الأسهم؛ تظل `shares_requested` القديمة محفوظة للدعوات التاريخية فقط. رقم الهاتف معلومة توجيه/مطابقة لا تكشف وجود حساب عام ولا تثبت ملكية الهاتف. مسار الدعوة الحديثة يفتح طلبًا؛ ولا تنشأ العضوية إلا بعد قرار المدير.
 
 ### 2.3 دورات القرعة وخطط الأقساط والالتزامات
 
@@ -191,12 +193,43 @@
 - `before_data jsonb NULL`, `after_data jsonb NULL`, `occurred_at timestamptz NOT NULL DEFAULT now()`.
 - Append-only. يخزن أقل قدر لازم للتدقيق، ولا يعرض البيانات الإدارية/المالية الخاصة للمشاركين غير المعنيين.
 
+### 2.4 تدفق الدعوة وطلب الانضمام والرابط العام — الحالة المنفذة
+
+**join_requests**
+- `id uuid PK`, `association_id uuid NOT NULL FK associations`, `applicant_user_id uuid NOT NULL FK profiles`.
+- `applicant_name text` — لقطة الاسم وقت التقديم لعرض قائمة المدير.
+- `invitation_id uuid NULL FK invitations`, `public_link_id uuid NULL`, `source_type text CHECK IN ('invitation','public_link')`.
+- `requested_shares integer NOT NULL CHECK > 0`, `estimated_amount_minor bigint NOT NULL CHECK > 0`.
+- `status text CHECK IN ('pending','approved','rejected','cancelled')`.
+- `submitted_at, decided_at timestamptz`, `decided_by_user_id uuid NULL`, `rejection_reason text NULL`, `membership_id uuid NULL FK association_memberships`.
+- يمنع الفهرس الفريد الجزئي `join_requests_one_pending_per_user_idx` أكثر من طلب معلق للشخص نفسه والجمعية نفسها. كما يمنع الفهرس الفريد `join_requests_one_membership_idx` ربط عضوية واحدة بأكثر من طلب معتمد.
+
+**private.association_public_links**
+- كيان مستقل عن الدعوات الشخصية، مخزن في مخطط `private` غير المكشوف عبر Data API.
+- يحفظ `token_hash` فقط، مع حالة الرابط (`active/paused/revoked`)، وبيانات الصلاحية والإيقاف والتجديد والإبطال ومنشئ الرابط.
+- لا يعاد الرمز الخام إلا عند الإنشاء أو التجديد للمدير المخول، ويستخدمه الزائر في معاينة عامة آمنة ثم يقدم طلبًا بعد المصادقة.
+
+**العقود التشغيلية المنفذة**
+- `create_invitation(uuid,text,text)`: ينشئ دعوة بلا أسهم. سُحبت صلاحية استدعاء نسخة RPC القديمة ذات أربعة معاملات التي كانت تسمح للمدير بتحديد الأسهم.
+- `create_invitations_bulk(uuid,jsonb)`: يعالج 1–50 جهة اتصال، ويعيد نتيجة مستقلة لكل شخص. لا يكشف ما إذا كان الرقم لديه حساب في سهم خارج نطاق الجمعية، ولا يرسل SMS/WhatsApp تلقائيًا.
+- `respond_to_invitation`, `get_my_invitation_details`, `get_my_invitation_inbox`: معاينة آمنة وتسجيل رغبة المدعو أو رفضه أو تأجيله.
+- `submit_join_request` و`submit_join_request_by_invitation`: ينشئان طلبًا مستقلًا ولا يحجزان أسهمًا أو ينشئان عضوية أو التزامًا نهائيًا.
+- `approve_join_request`: عملية ذرية تنشئ العضوية والأسهم والالتزامات وتحدث الطلب وتسجل الحدث. `reject_join_request` و`cancel_join_request` لا ينشئان عضوية.
+- `manage_association_public_link` و`preview_public_join_link`: إدارة الرابط العام ومعاينته؛ الرابط العام ينتج طلب انضمام لا عضوية مباشرة.
+- فُرض فحص نافذة الانضمام على تقديم الطلب والموافقة وقبول الدعوات القديمة وفق المنطقة الزمنية للجمعية. الدعوات القديمة تُعالج عبر `accept_legacy_invitation_by_id(uuid)` مع الحفاظ على بياناتها التاريخية.
+
+**قاعدة الأسهم**
+- لا يوجد حد عام لعدد أسهم الجمعية الجديدة، ولا حد أقصى لأسهم العضو يحدده المدير في التدفق الجديد.
+- تبقى أعمدة `target_shares` و`max_shares_per_member` وقيمها القديمة للتوافق، ولا تطبق على طلبات الانضمام الجديدة.
+- لا تُحذف أو يعاد تفسير قيم `shares_requested` القديمة؛ تظل مفصولة عن `requested_shares` في طلب الانضمام.
+
 ## 3. العلاقات الأساسية
 
 - `auth.users 1—1 profiles 1—1 profile_private`.
 - `profiles 1—1 profile_private`; `profiles 1—N associations` عبر مدير الجمعية، و`profiles N—N associations` عبر `association_memberships`.
 - `association 1—N memberships`; `membership 1—N shares`.
-- `association 1—N invitations`.
+- `association 1—N invitations` و`association 1—N join_requests`.
+- `invitation 1—N join_requests` عند التقديم عبر دعوة، والرابط العام له معرف مستقل داخل `private.association_public_links`.
 - `association 1—N cycles 1—N installment_periods`.
 - `membership N—N installment_periods` عبر `installment_obligations`، مع التزام واحد لكل عضوية وفترة.
 - `obligation 1—N historical receipts` مع استلام نشط واحد كحد أقصى، و`receipt 1—N receipt_corrections`.
@@ -305,7 +338,7 @@
 - اختبار Realtime لمحادثة عضوين ومنع غير العضو من الاستماع أو القراءة.
 - تشغيل Security Advisors بعد كل دفعة DDL/RPC، ومعالجة جميع التحذيرات ذات الصلة.
 
-**حالة التنفيذ:** وثيقة تصميم فقط. لم يتم إنشاء أي جدول أو RPC أو سياسة أو مستخدم تجريبي في مشروع Supabase عند اعتماد هذه الوثيقة.
+**حالة التنفيذ التاريخية:** كانت هذه وثيقة تصميم قبل التطبيق. المخطط والعمليات موضحة الآن في الملحق 2.4 وفي `SUPABASE_IMPLEMENTATION_PROGRESS_AR.md`; لا تستخدم هذه العبارة التاريخية على أنها الحالة الراهنة.
 
 
 ## 12. حالة التنفيذ على المشروع الحي — 13 نوفمبر 2026
