@@ -3725,8 +3725,8 @@ async function loadAssociationPublicLinkStatus(associationId){
 function members(){
  const g=currentGroup();if(!g){go('groups');return}if(!isManager()){toast('قائمة الأعضاء التفصيلية متاحة لمدير الجمعية');go('group-detail');return}
  const r=SahmApp.memberList(g.id);if(!r||!r.ok){toast(r&&r.message||'تعذر تحميل الأعضاء');return}
- const list=r.members||[],q=r.quorum||{present:0,people:list.length,required:0,pct:0},shares=list.reduce((n,m)=>n+m.shares,0);
- shell('الأعضاء','groups',header('الأعضاء والحضور',g.name)+'<div class="member-summary"><div><span>المشاركون</span><b>'+list.length+'</b></div><div><span>الأسهم المسجلة</span><b>'+shares+' / '+g.total+'</b></div></div><div class="card"><div class="between"><b>نصاب الحضور</b><strong>'+q.present+' من '+q.people+'</strong></div><div class="progress"><i style="width:'+q.pct+'%"></i></div><small>المطلوب '+q.required+' أشخاص</small></div><div class="toolbar"><input class="searchbox" placeholder="ابحث عن اسم مشارك..." id="memberSearch"><button class="btn primary small" data-go="invite">دعوة عضو</button></div><div class="card" id="membersList">'+(list.map(m=>'<div class="listrow"><div class="avatar '+(m.isManager?'dark':'')+'">'+escapeHtml(m.name.slice(0,1))+'</div><div class="grow"><strong>'+escapeHtml(m.name)+'</strong><small>'+(m.isManager?'مدير الجمعية':'مشارك')+' · '+m.shares+' أسهم</small></div><span class="pill '+(m.present?'green':'')+'">'+(m.present?'حاضر':'غير حاضر')+'</span><button class="btn outline small" data-action="attendance-toggle" data-id="'+m.memberId+'" data-present="'+(!m.present)+'">'+(m.present?'إلغاء الحضور':'تسجيل الحضور')+'</button></div>').join('')||'<div class="empty"><b>لا يوجد أعضاء بعد</b></div>')+'</div><button class="btn outline full" data-go="invites">إدارة الدعوات</button>');
+ const list=r.members||[],q=r.quorum||{present:0,people:list.length,required:0,pct:0},shares=list.reduce((n,m)=>n+m.shares,0),shareSummary=g.total==null?shares+' سهم':shares+' / '+g.total;
+ shell('الأعضاء','groups',header('الأعضاء والحضور',g.name)+'<div class="member-summary"><div><span>المشاركون</span><b>'+list.length+'</b></div><div><span>الأسهم المسجلة</span><b>'+shareSummary+'</b></div></div><div class="card"><div class="between"><b>نصاب الحضور</b><strong>'+q.present+' من '+q.people+'</strong></div><div class="progress"><i style="width:'+q.pct+'%"></i></div><small>المطلوب '+q.required+' أشخاص</small></div><div class="toolbar"><input class="searchbox" placeholder="ابحث عن اسم مشارك..." id="memberSearch"><button class="btn primary small" data-go="invite">دعوة عضو</button></div><div class="card" id="membersList">'+(list.map(m=>'<div class="listrow"><div class="avatar '+(m.isManager?'dark':'')+'">'+escapeHtml(m.name.slice(0,1))+'</div><div class="grow"><strong>'+escapeHtml(m.name)+'</strong><small>'+(m.isManager?'مدير الجمعية':'مشارك')+' · '+m.shares+' أسهم</small></div><span class="pill '+(m.present?'green':'')+'">'+(m.present?'حاضر':'غير حاضر')+'</span><button class="btn outline small" data-action="attendance-toggle" data-id="'+m.memberId+'" data-present="'+(!m.present)+'">'+(m.present?'إلغاء الحضور':'تسجيل الحضور')+'</button></div>').join('')||'<div class="empty"><b>لا يوجد أعضاء بعد</b></div>')+'</div><button class="btn outline full" data-go="invites">إدارة الدعوات</button>');
 }
 let pendingInvitees=[];
 function invitePhoneKey(value){
@@ -3871,59 +3871,15 @@ function joinInstallmentPreview(info,requestedShares){
  const mode=info.installmentMode==='amount'?'amount':'count',fixed=Number(info.installmentAmountMinor)||0;
  if(!Number.isInteger(count)||count<1||!Number.isInteger(days)||days<1||!Number.isFinite(share)||share<1||!Number.isInteger(shares)||shares<1)return '<small class="field-hint">أدخل عدد الأسهم لعرض تفاصيل الأقساط.</small>';
  if(mode==='amount'&&(!Number.isFinite(fixed)||fixed<1||fixed>share))return '<small class="field-hint">تعذر احتساب قيمة الأقساط؛ أعد فتح الرابط أو تواصل مع مدير الجمعية.</small>';
- const ranges=[],equalParts=SahmCore.splitAmount(share,count),baseDays=Math.floor(days/count),extraDays=days%count;
- let offset=0,remaining=share;
- for(let i=1;i<=count;i++){const span=baseDays+(i<=extraDays?1:0);ranges.push({no:i,from:offset+1,to:offset+span});offset+=span;}
- const rows=ranges.map(p=>{
-  const perShare=mode==='amount'?Math.min(fixed,remaining):equalParts[p.no-1];
-  remaining-=perShare;
+ const ranges=SahmCore.periods(days,count),amounts=SahmCore.installmentAmounts({shareAmount:share,installments:count,installmentMode:mode,installmentAmountMinor:fixed});
+  const rows=ranges.map(p=>{
+  const perShare=amounts[p.no-1];
   const from=SahmCore.addDays(info.startDate,p.from-1),to=SahmCore.addDays(info.startDate,p.to-1);
   return '<div class="listrow"><div class="grow"><strong>القسط '+p.no+'</strong><small>'+dateLabel(from)+(from!==to?' — '+dateLabel(to):'')+'</small></div><b>'+minorMoney(perShare*shares,currency)+'</b></div>';
  }).join('');
  const total=share*shares,first=ranges.length?((mode==='amount'?Math.min(fixed,share):equalParts[0])*shares):0;
  return '<div class="card join-payment-plan"><div class="keyvalue"><span>إجمالي الالتزام في الدورة</span><b>'+minorMoney(total,currency)+'</b></div><div class="keyvalue"><span>طريقة السداد</span><b>'+(mode==='amount'?'حسب قيمة القسط':'حسب عدد الأقساط')+'</b></div><div class="keyvalue"><span>عدد الأقساط</span><b>'+count+'</b></div><div class="keyvalue"><span>قيمة القسط الأول</span><b>'+minorMoney(first,currency)+'</b></div><div class="field-hint">توزيع الأقساط ومواعيدها</div>'+rows+'</div>';
 }
-function inviteDetail(){
- const id=params.id;
- if(!id){toast('معرّف الدعوة غير موجود');go('home');return}
- shell('تفاصيل الدعوة','groups',header('دعوة للانضمام إلى جمعية')+'<div class="card"><div class="empty"><b>جارٍ تحميل تفاصيل الدعوة...</b></div></div>');
- SahmSupabaseData.getMyInvitationDetails(id).then(result=>{
-  if(!result||!result.ok){toast(result&&result.message||'تعذر تحميل الدعوة');go('home');return}
-  const info=result.invitation||{};
-  pendingJoinContext={source:'invitation_id',token:null,info:info,invitationId:id};
-  const body='<div class="card"><h3>'+escapeHtml(info.name||'الجمعية')+'</h3>'+
-   '<div class="keyvalue"><span>المدير</span><b>'+escapeHtml(info.managerName||'—')+'</b></div>'+
-   '<div class="keyvalue"><span>بداية الجمعية</span><b>'+dateLabel(info.startDate)+'</b></div>'+
-   '<div class="keyvalue"><span>أول قرعة</span><b>'+dateLabel(info.firstDrawOn)+'</b></div>'+
-   '<div class="keyvalue"><span>مدة الدورة</span><b>'+Number(info.cycleDays||0)+' يومًا</b></div>'+
-   '<div class="keyvalue"><span>حصة السهم</span><b>'+minorMoney(info.shareAmountMinor,info.currency)+'</b></div>'+
-   '<div class="keyvalue"><span>طريقة السداد</span><b>'+(info.installmentMode==='amount'?'قيمة القسط':'عدد الأقساط')+'</b></div>'+
-   '<div class="keyvalue"><span>عدد الأقساط</span><b>'+Number(info.installments||1)+'</b></div>'+
-   (info.isLegacyInvitation?'<div class="keyvalue"><span>أسهم الدعوة القديمة</span><b>'+Number(info.sharesRequested||0)+'</b></div>':'')+
-   '</div>';
-  if(info.isLegacyInvitation){
-   shell('دعوة قديمة','groups',header('تفاصيل دعوة قديمة')+body+
-    '<p>هذه دعوة من النظام السابق، وقد حُدد عدد الأسهم فيها مسبقًا. قبولها يحافظ على العضوية التاريخية.</p>'+
-    '<button class="btn primary full" data-action="accept-legacy-invitation-inbox" data-id="'+escapeHtml(id)+'">قبول الدعوة والانضمام</button>');
-   return;
-  }
-  if(info.responseStatus==='interested'){
-   if(info.isJoinOpen){showJoinRequestForm(info,'invitation_id',null,id);return}
-   shell('دعوة للانضمام','groups',header('استكمال الانضمام')+body+
-    '<div class="card"><b>أُغلق استقبال الأعضاء في هذه الجمعية.</b><p>لا يمكن إرسال طلب انضمام بعد موعد الإغلاق.</p></div>');
-   return;
-  }
-  const state=info.responseStatus==='deferred'?'سبق أن أجلت الرد ويمكنك المتابعة':'بانتظار ردك على الدعوة';
-  const primary=info.isJoinOpen
-   ?'<button class="btn primary" data-action="invitation-interested" data-id="'+escapeHtml(id)+'">نعم، أرغب بالانضمام</button>'
-   :'<button class="btn primary" disabled>أُغلق استقبال الأعضاء</button>';
-  shell('دعوة للانضمام','groups',header('دعوة للانضمام إلى جمعية')+body+
-   '<p>'+state+'. اختيار «نعم» ينقلك إلى نموذج الأسهم ويرسل طلبًا للمدير؛ لا تُنشأ العضوية تلقائيًا.</p>'+
-   '<div class="grid2">'+primary+'<button class="btn outline" data-action="invitation-declined" data-id="'+escapeHtml(id)+'">أرفض الدعوة</button></div>'+
-   '<button class="btn soft full" data-action="invitation-deferred" data-id="'+escapeHtml(id)+'">ليس الآن</button>');
- }).catch(error=>{toast(SahmSupabase.friendlyError(error));go('home')});
-}
-
 function showJoinRequestForm(info,source,token,invitationId){
  pendingJoinContext={source:source,token:token,info:info,invitationId:invitationId||info.invitationId||info.id||null};
  const currency=info.currency||'YER',share=Number(info.shareAmountMinor)||0;
