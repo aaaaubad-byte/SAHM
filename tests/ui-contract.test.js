@@ -217,15 +217,16 @@ test('every rendered button, route, form, and modal action is connected to a han
 });
 
 test('copy and share buttons have clipboard fallbacks for browsers without Clipboard API', () => {
-  assert.match(html, /async function copyText\\(/);
-  assert.match(html, /document\\.execCommand\\('copy'\\)/);
-  assert.match(html, /await copyText\\(value,'تم نسخ رابط الانضمام'\\)/);
-  assert.match(html, /await copyText\\(value,'المشاركة غير مدعومة؛ تم نسخ الرابط'\\)/);
+  assert.match(html, /async function copyText\(/);
+  assert.match(html, /document\.execCommand\('copy'\)/);
+  assert.match(html, /await copyText\(value,'تم نسخ رابط الانضمام'\)/);
+  assert.match(html, /await copyText\(value,'المشاركة غير مدعومة؛ تم نسخ الرابط'\)/);
 });
 
 test('account switch failures attempt to restore the previously active account', () => {
-  assert.match(html, /previousUserSnapshot=Object\\.assign\\(\\{\\},db\\.user\\|\\|\\{\\}\\)/);
-  assert.match(html, /await SahmSupabase\\.switchAccount\\(previousUserId\\)/);
-  assert.match(html, /await SahmSupabaseData\\.init\\(activeProfile\\)/);
-  assert.match(html, /startRemoteRealtime\\(\\)/);
+  assert.match(html, /previousUserSnapshot=Object\.assign\(\{\},db\.user\|\|\{\}\)/);
+  assert.match(html, /await SahmSupabase\.switchAccount\(previousUserId\)/);
+  assert.match(html, /await SahmSupabaseData\.init\(activeProfile\)/);
+  assert.match(html, /startRemoteRealtime\(\)/);
 });
+
