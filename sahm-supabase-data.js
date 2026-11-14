@@ -10,8 +10,13 @@
     return root.SahmSupabase.client();
   }
   function fail(error) {
-    var result={ ok:false, code:error && (error.code || error.status) || 'REMOTE_ERROR',
-      message:root.SahmSupabase ? root.SahmSupabase.friendlyError(error) : (error && error.message || 'تعذر تنفيذ العملية على الخادم') };
+    var rawCode=error && (error.code || error.status) || 'REMOTE_ERROR';
+    var code=rawCode==='RPT01'?'REMINDER_REPEAT':rawCode;
+    var message=code==='REMINDER_REPEAT'
+      ? (error && error.message || 'أُرسل تذكير بهذا القسط خلال الساعات الست الماضية. هل تريد إرسال تذكير آخر؟')
+      : (root.SahmSupabase ? root.SahmSupabase.friendlyError(error) : (error && error.message || 'تعذر تنفيذ العملية على الخادم'));
+    var result={ok:false,code:code,message:message};
+    if(code==='REMINDER_REPEAT')result.needsConfirm=true;
     if(app&&app.report)app.report('supabase',result);
     return result;
   }
@@ -489,7 +494,8 @@
       if(!cyc)throw new Error('الدورة المطلوبة غير موجودة');
       var member=p.memberId||null;
       var count=await invoke('send_installment_reminders',{
-        p_cycle_id:cyc.id,p_installment_no:Number(p.no),p_membership_id:member
+        p_cycle_id:cyc.id,p_installment_no:Number(p.no),p_membership_id:member,
+        p_confirm_repeat:!!(p&&p.confirmRepeat)
       });
       await refresh();return {ok:true,recipients:count};
     }catch(e){return fail(e);}
