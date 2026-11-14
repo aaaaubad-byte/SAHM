@@ -2,6 +2,7 @@
 (function (root) {
   'use strict';
   var app = null, client = null, user = null, profile = null, store = null, raw = {}, realtimeChannel = null, realtimeCallback = null;
+  var realtimeRefreshTimer = null, pendingRealtimePayloads = [];
   var NOTIFY = ['received','completed','late','drawSoon','drawDue','drawResult','joined','motivate'];
 
   function c() {
@@ -544,12 +545,35 @@
       return {ok:true,marked:list.length};
     }catch(e){return fail(e);}
   }
+  function clearRealtimeRefreshQueue(){
+    if(realtimeRefreshTimer!==null){
+      clearTimeout(realtimeRefreshTimer);
+      realtimeRefreshTimer=null;
+    }
+    pendingRealtimePayloads=[];
+  }
+  function flushRealtimeRefresh(){
+    realtimeRefreshTimer=null;
+    if(!store||!pendingRealtimePayloads.length){
+      pendingRealtimePayloads=[];
+      return;
+    }
+    var events=pendingRealtimePayloads.splice(0);
+    refresh().then(function(){
+      events.forEach(function(event){
+        if(typeof realtimeCallback==='function')realtimeCallback(event);
+      });
+    }).catch(function(error){
+      if(app&&app.report)app.report('supabase',fail(error));
+    });
+  }
   function handleRealtime(payload){
     if(!store||!payload||!payload.new)return;
     var row=payload.new, table=payload.table;
     if(table==='join_requests'||table==='invitations'){
-      refresh().then(function(){if(typeof realtimeCallback==='function')realtimeCallback(payload);})
-        .catch(function(error){if(app&&app.report)app.report('supabase',fail(error));});
+      pendingRealtimePayloads.push(payload);
+      if(realtimeRefreshTimer!==null)clearTimeout(realtimeRefreshTimer);
+      realtimeRefreshTimer=setTimeout(flushRealtimeRefresh,100);
       return;
     }
     if(table==='chat_messages' && payload.eventType==='INSERT'){
@@ -584,6 +608,7 @@
 
   function startRealtime(callback){
     if(!user)return false;
+    clearRealtimeRefreshQueue();
     realtimeCallback=callback||null;
     if(realtimeChannel){
       try{c().removeChannel(realtimeChannel);}catch(_){}
@@ -600,6 +625,7 @@
   }
 
   function stopRealtime(){
+    clearRealtimeRefreshQueue();
     if(realtimeChannel){
       try{c().removeChannel(realtimeChannel);}catch(_){}
       realtimeChannel=null;
