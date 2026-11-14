@@ -3277,7 +3277,7 @@ const $=s=>document.querySelector(s);
 const money=(n,c='YER')=>{const cur=SahmCore.CURRENCIES[c]||SahmCore.CURRENCIES.YER;const minor=Math.round(Number(n||0)*cur.minor);return SahmCore.fmtMoney(minor,c in SahmCore.CURRENCIES?c:'YER')};
 const today=()=>SahmApp.todayIn();
 const AUTH_SCREEN_NAMES=['welcome','register','profile-setup','reset-password','logged-out'];
-let db={session:false,verified:false,user:{id:null,name:'',phone:'',city:'',email:'',avatarKey:'avatar-01',notifications:true,biometric:false},groups:[],unread:0},screenName='welcome',params={},groupTab='all',groupDetailTab='overview',toastTimer,homeSlideTimer=null,homeSlideIndex=0,selectedInstallmentCycle=1,selectedInstallmentStatus='all',pendingJoinCode=null,pendingJoinContext=null,lastSubmittedRequestId=null,joinRequestFilter='pending',joinRequestBusy=false,joinDecisionBusy=false,createdGroupLink=null,createdLinkWarning=null;
+let db={session:false,verified:false,user:{id:null,name:'',phone:'',city:'',email:'',avatarKey:'avatar-01',notifications:true,biometric:false},groups:[],unread:0},screenName='welcome',params={},groupTab='all',groupDetailTab='overview',toastTimer,homeSlideTimer=null,homeSlideIndex=0,selectedInstallmentCycle=1,selectedInstallmentStatus='all',pendingJoinCode=null,pendingJoinContext=null,lastSubmittedRequestId=null,joinRequestFilter='pending',createGroupBusy=false,joinRequestBusy=false,joinDecisionBusy=false,createdGroupLink=null,createdLinkWarning=null;
 let selectedAvatarKey='avatar-01',authBusy=false,activeProfile=null;
 let currentGroupId=(db.groups[0]||{}).id||null,createdGroupId=null,createWizardStep=1,createFormSnapshot={},reminderRequest=null,navigation=null;
 SahmApp.onResult((name,result)=>{if(result&&result.ok===false)toast(result.message||'تعذر تنفيذ العملية');else if(result&&result.persisted===false)toast(result.warning||'تعذر حفظ التغييرات في تخزين المعاينة');});
@@ -4455,13 +4455,21 @@ document.addEventListener('submit',async e=>{
  e.preventDefault();
  if(form.id==='createForm'){
   if(createWizardStep<2){if(validateCreateStep(createWizardStep))setCreateWizardStep(createWizardStep+1);return}
+  if(createGroupBusy)return;
   if(!validateCreateStep(1)||!validateCreateStep(2))return;
-  const result=await SahmApp.createGroup(createDraft(form));
-  if(result&&result.ok){
-   refreshData();currentGroupId=result.groupId;createdGroupId=result.groupId;
-   createdGroupLink=result.publicLink||null;createdLinkWarning=result.linkWarning||null;
-   resetNavigation('created-group',{});toast('تم إنشاء الجمعية وحفظ بياناتها');
-  }return;
+  createGroupBusy=true;
+  const submit=$('#create-final-submit'),oldLabel=submit?submit.textContent:'';
+  if(submit){submit.disabled=true;submit.textContent='جارٍ إنشاء الجمعية...'}
+  try{
+   const result=await SahmApp.createGroup(createDraft(form));
+   if(result&&result.ok){
+    refreshData();currentGroupId=result.groupId;createdGroupId=result.groupId;
+    createdGroupLink=result.publicLink||null;createdLinkWarning=result.linkWarning||null;
+    resetNavigation('created-group',{});toast('تم إنشاء الجمعية وحفظ بياناتها');
+   }else toast(result&&result.message||'تعذر إنشاء الجمعية');
+  }catch(error){toast(SahmSupabase.friendlyError(error));}
+  finally{createGroupBusy=false;if(submit&&submit.isConnected){submit.disabled=false;submit.textContent=oldLabel;}}
+  return;
  }
  if(form.id==='inviteeManualForm'){
   const d=Object.fromEntries(new FormData(form));
