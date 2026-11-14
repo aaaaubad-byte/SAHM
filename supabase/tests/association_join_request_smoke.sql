@@ -79,6 +79,7 @@ BEGIN
  IF (v_member_request->>'estimated_amount_minor')::bigint<>18000 THEN
    RAISE EXCEPTION 'Server-side commitment estimate is incorrect';
  END IF;
+ PERFORM set_config('request.jwt.claim.sub','cccccccc-cccc-4ccc-8ccc-cccccccccccc',true);
  IF EXISTS(SELECT 1 FROM public.association_memberships WHERE association_id=v_association AND user_id='dddddddd-dddd-4ddd-8ddd-dddddddddddd') THEN
    RAISE EXCEPTION 'Submitting a join request created a membership before manager approval';
  END IF;
@@ -87,6 +88,7 @@ BEGIN
    RAISE EXCEPTION 'Submitting a join request created shares before manager approval';
  END IF;
 
+ PERFORM set_config('request.jwt.claim.sub','dddddddd-dddd-4ddd-8ddd-dddddddddddd',true);
  BEGIN
    PERFORM public.submit_join_request('invitation',v_invitation->>'token',2);
    RAISE EXCEPTION 'Duplicate pending request unexpectedly succeeded';
