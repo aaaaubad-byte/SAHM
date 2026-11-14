@@ -105,17 +105,17 @@ test('manager request filters display only the selected request state', () => {
   };
   const render = vm.runInNewContext('(' + source + ')', context);
   render();
-  assert.match(state.rendered, /معلق/);
-  assert.doesNotMatch(state.rendered, /مقبول/);
+  assert.match(state.rendered, /data-id="p1"/);
+  assert.doesNotMatch(state.rendered, /data-id="a1"/);
   context.joinRequestFilter = 'approved';
   render();
-  assert.match(state.rendered, /مقبول/);
-  assert.doesNotMatch(state.rendered, /معلق/);
+  assert.match(state.rendered, /data-id="a1"/);
+  assert.doesNotMatch(state.rendered, /data-id="p1"/);
   context.joinRequestFilter = 'all';
   render();
-  assert.match(state.rendered, /معلق/);
-  assert.match(state.rendered, /مقبول/);
-  assert.match(state.rendered, /مرفوض/);
+  assert.match(state.rendered, /data-id="p1"/);
+  assert.match(state.rendered, /data-id="a1"/);
+  assert.match(state.rendered, /data-id="r1"/);
 });
 
 test('join request form guards repeated submission and restores button state', () => {
