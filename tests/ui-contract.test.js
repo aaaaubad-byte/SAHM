@@ -146,7 +146,7 @@ test('Supabase session handoff never revokes the session after transferring it',
     assert.doesNotMatch(flow, /\.auth\.signOut\(/, 'transferred session must not be revoked remotely');
     assert.match(flow, /clearBootstrapSession\(/, 'bootstrap copy is cleared locally');
   }
-  assert.match(auth, /async function signOut\(\)[\s\S]*?c\.auth\.signOut\(\{ scope: 'local' \}\\)/,
+  assert.match(auth, /async function signOut\(\)[\s\S]*?c\.auth\.signOut\(\{ scope: 'local' \}\)/,
     'the explicit user-requested sign-out still calls Supabase Auth');
   assert.match(auth, /هذا البريد الإلكتروني مرتبط بحساب موجود بالفعل/);
 });
