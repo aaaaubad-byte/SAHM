@@ -1,0 +1,77 @@
+name: SAHM Local Supabase SQL Tests
+
+on:
+  push:
+    branches:
+      - SAHM-SUPABASE
+    paths:
+      - "supabase/migrations/**"
+      - "supabase/SAHM_DATABASE_BASELINE.sql"
+      - "supabase/tests/**"
+      - ".github/workflows/supabase-local-sql-tests.yml"
+
+permissions:
+  contents: read
+
+jobs:
+  local-supabase:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - name: Checkout target branch
+        uses: actions/checkout@v4
+        with:
+          ref: SAHM-SUPABASE
+
+      - name: Install pinned Supabase CLI
+        uses: supabase/setup-cli@v3
+        with:
+          version: 3.1.0
+
+      - name: Create ephemeral local Supabase configuration
+        run: supabase init
+
+      - name: Start isolated local Supabase stack
+        run: supabase start --exclude studio,mail,analytics
+
+      - name: Install PostgreSQL client
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y postgresql-client
+
+      - name: Restore the checked-in schema baseline locally
+        env:
+          DB_URL: postgresql://postgres:postgres@127.0.0.1:54322/postgres
+        run: |
+          set -euo pipefail
+          psql "$DB_URL" --set ON_ERROR_STOP=1 --file supabase/SAHM_DATABASE_BASELINE.sql
+
+      - name: Apply only migrations newer than the checked-in baseline
+        env:
+          DB_URL: postgresql://postgres:postgres@127.0.0.1:54322/postgres
+          BASELINE_VERSION: "20261113212053"
+        run: |
+          set -euo pipefail
+          shopt -s nullglob
+          for migration in supabase/migrations/*.sql; do
+            filename="${migration##*/}"
+            version="${filename%%_*}"
+            if [[ "$version" > "$BASELINE_VERSION" ]]; then
+              echo "Applying local-only migration: $filename"
+              psql "$DB_URL" --set ON_ERROR_STOP=1 --single-transaction --file "$migration"
+            fi
+          done
+
+      - name: Execute SQL invariant and rollback smoke tests
+        env:
+          DB_URL: postgresql://postgres:postgres@127.0.0.1:54322/postgres
+        run: |
+          set -euo pipefail
+          for sql_test in supabase/tests/*.sql; do
+            echo "Running $sql_test"
+            psql "$DB_URL" --set ON_ERROR_STOP=1 --file "$sql_test"
+          done
+
+      - name: Stop the isolated local Supabase stack
+        if: always()
+        run: supabase stop --no-backup || true
