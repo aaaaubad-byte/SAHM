@@ -4446,7 +4446,7 @@ async function handleAppAction(action,el){
      }catch(restoreError){toast('تعذر استعادة بيانات الحساب السابق؛ أعد تسجيل الدخول.');resetNavigation('welcome',{});return;}
     }
     const authText=String(e&&((e.message||e.msg)||e.code)||'');
-    if(/session_not_found|invalid refresh token|refresh token.*not found|auth session missing|session missing/i.test(authText)){
+    if(/session_not_found|session not found|invalid refresh token|refresh token.*not found|auth session missing|session missing|invalid.*session/i.test(authText)){
      pendingAccountLogin=SahmSupabase.accounts().find(a=>a.id===el.dataset.userId)||{id:el.dataset.userId,email:''};
      resetNavigation('account-login',{});
      toast('جلسة الحساب المحفوظ انتهت؛ أعد تسجيل الدخول إليه مرة واحدة لإعادة ربطه.');
