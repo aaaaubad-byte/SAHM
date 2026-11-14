@@ -202,7 +202,7 @@ BEGIN
    RAISE EXCEPTION 'Public-link approval created a non-active membership';
  END IF;
 END;
-$;
+$$;
 
 ROLLBACK;
 SELECT 'SAHM invitation -> join request -> manager approval/rejection workflow passed (transaction rolled back)' AS result;
