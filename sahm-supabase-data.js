@@ -85,7 +85,9 @@
       'draws','draw_eligible_shares','cycle_attendance','chat_messages','chat_read_states',
       'association_events','association_notification_settings','association_user_preferences',
       'invitations','join_requests','notifications','reminders','user_preferences'];
+    var inboxPromise=invoke('get_my_invitation_inbox',{});
     var result = await Promise.all(names.map(function(name){ return rows(name); }));
+    var invitationInbox=await inboxPromise;
     raw = {};
     names.forEach(function(n,i){raw[n]=result[i];});
     var profileMap = {};
@@ -204,12 +206,28 @@
         data:e.after_data||null,before:e.before_data||null
       });
     });
+    var mappedInviteIds={};
     raw.invitations.forEach(function(i){
+      var inboxItem=(invitationInbox||[]).find(function(x){return x.id===i.id;});
+      mappedInviteIds[i.id]=true;
       db.invites.push({
         id:i.id,groupId:i.association_id,name:i.invitee_name,phone:i.invitee_phone_e164||'',
         shares:i.shares_requested==null?null:Number(i.shares_requested),isLegacy:i.shares_requested!=null,
         responseStatus:i.response_status||'pending_response',status:i.status,createdAt:i.created_at,createdBy:i.created_by,
-        expiresAt:i.expires_at,invitedUserId:i.invited_user_id,respondedAt:i.responded_at||null
+        expiresAt:i.expires_at,invitedUserId:i.invited_user_id,respondedAt:i.responded_at||null,
+        groupName:inboxItem&&inboxItem.groupName||null,managerName:inboxItem&&inboxItem.managerName||null,
+        isJoinOpen:inboxItem&&inboxItem.isJoinOpen
+      });
+    });
+    (invitationInbox||[]).forEach(function(i){
+      if(mappedInviteIds[i.id])return;
+      db.invites.push({
+        id:i.id,groupId:i.associationId||i.groupId,name:i.inviteeName||'دعوة واردة',phone:profile.phone||'',
+        shares:i.sharesRequested==null?null:Number(i.sharesRequested),isLegacy:!!i.legacy,
+        responseStatus:i.responseStatus||'pending_response',status:'pending',createdAt:i.createdAt,
+        createdBy:null,expiresAt:i.expiresAt,invitedUserId:user.id,respondedAt:null,
+        groupName:i.groupName||'دعوة للانضمام إلى جمعية',managerName:i.managerName||'',
+        isJoinOpen:!!i.isJoinOpen
       });
     });
     raw.join_requests.forEach(function(r){
