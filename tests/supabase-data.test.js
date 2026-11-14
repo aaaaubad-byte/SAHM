@@ -41,6 +41,8 @@ function loadRemoteGateway(options = {}) {
     },
     rpc: async (name,args) => {
       calls.rpc.push({ name,args });
+      if(options.rpcErrors&&options.rpcErrors[name])return {data:null,error:options.rpcErrors[name]};
+      if(name==='send_installment_reminders')return {data:1,error:null};
       if(name==='create_association')return { data:'association-1', error:null };
       if(name==='create_association_unified')return { data:'association-1', error:null };
       if(name==='manage_association_public_link')return { data:{id:'link-1',token:'public-token',status:'active'}, error:null };
@@ -173,6 +175,30 @@ test('coalesces related invitation and join-request realtime events into one sna
   await new Promise(resolve=>setTimeout(resolve,180));
   assert.equal(calls.tables.length-initialReads,EXPECTED_TABLES.length);
   assert.deepEqual(delivered,['join_requests','invitations']);
+  gateway.clear();
+});
+
+test('remote reminder gateway maps repeat guard and forwards explicit confirmation', async()=>{
+  const options={
+    tableData:{association_cycles:[{id:'cycle-1',association_id:'association-1',cycle_no:1}]},
+    rpcErrors:{send_installment_reminders:{code:'RPT01',message:'أُرسل تذكير بهذا القسط خلال الساعات الست الماضية. هل تريد إرسال تذكير آخر؟'}}
+  };
+  const {gateway,window,calls}=loadRemoteGateway(options);
+  await gateway.init();
+  gateway.install();
+
+  const first=await window.SahmApp.sendReminder({groupId:'association-1',cycle:1,no:1});
+  assert.equal(first.ok,false);
+  assert.equal(first.code,'REMINDER_REPEAT');
+  assert.equal(first.needsConfirm,true);
+  assert.equal(calls.rpc[0].args.p_confirm_repeat,false);
+
+  delete options.rpcErrors.send_installment_reminders;
+  const second=await window.SahmApp.sendReminder({groupId:'association-1',cycle:1,no:1,confirmRepeat:true});
+  assert.equal(second.ok,true);
+  const reminderCalls=calls.rpc.filter(x=>x.name==='send_installment_reminders');
+  assert.equal(reminderCalls.length,2);
+  assert.equal(reminderCalls[1].args.p_confirm_repeat,true);
   gateway.clear();
 });
 
