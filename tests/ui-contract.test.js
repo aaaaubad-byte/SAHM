@@ -45,6 +45,16 @@ test('every registered screen has a real renderer and every static route resolve
   }
 });
 
+test('saved-account reauthentication screen is reachable without logging out the current account', () => {
+  assert.match(html, /'account-login':accountLogin/);
+  assert.match(html, /const AUTH_SCREEN_NAMES=\[[^;]*'account-login'/);
+  assert.match(html, /if\(action==='add-account'\)\{pendingAccountLogin=null;go\('account-login'/);
+  assert.match(html, /id="accountLoginForm"/);
+  assert.match(html, /if\(form\.id==='accountLoginForm'\)/);
+  assert.match(html, /جلسة الحساب المحفوظ انتهت؛ أعد تسجيل الدخول إليه مرة واحدة لإعادة ربطه/);
+  assert.match(html, /if\(action==='cancel-account-login'\)/);
+});
+
 test('all screen engine calls resolve through SahmApp to real SahmData methods', () => {
   const used = new Set([...html.matchAll(/\bSahmApp\.([A-Za-z_$][\w$]*)/g)].map(x => x[1]));
   const actor = stringsFromArray(app, /var ACTOR_OPS = \[([\s\S]*?)\];/);
