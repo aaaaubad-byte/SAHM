@@ -4108,8 +4108,40 @@ function render(){
  screen();
  syncBottomNavigation(!['welcome','register','profile-setup','reset-password','logged-out'].includes(screenName));
 }
-function showModal(title,body,buttons=[['إغلاق','close','outline']]){if(navigation)navigation.openModal();$('#modal-root').innerHTML=`<div class="overlay" data-action="overlay-close"><div class="dialog" onclick="event.stopPropagation()"><h3>${title}</h3><div class="dialog-body">${body}</div><div class="dialog-actions">${buttons.map(([label,act,style='primary'])=>`<button class="btn ${style}" data-action="${act}">${label}</button>`).join('')}</div></div></div>`}function closeModal(){if(navigation)navigation.dismissModal();$('#modal-root').innerHTML=''}
-document.addEventListener('keydown',e=>{const card=e.target.closest?.('.group-card[role="button"]');if(card&&(e.key==='Enter'||e.key===' ')){e.preventDefault();card.click()}});
+let modalReturnFocus=null;
+function showModal(title,body,buttons=[['إغلاق','close','outline']]){
+ if(navigation)navigation.openModal();
+ modalReturnFocus=document.activeElement;
+ $('#modal-root').innerHTML=`<div class="overlay" data-action="overlay-close"><div class="dialog" role="dialog" aria-modal="true" aria-labelledby="modal-title" tabindex="-1" onclick="event.stopPropagation()"><h3 id="modal-title">${title}</h3><div class="dialog-body">${body}</div><div class="dialog-actions">${buttons.map(([label,act,style='primary'])=>`<button class="btn ${style}" data-action="${act}">${label}</button>`).join('')}</div></div></div>`;
+ const dialog=$('#modal-root .dialog');
+ if(dialog){
+  const first=dialog.querySelector('input:not([disabled]),select:not([disabled]),textarea:not([disabled]),button:not([disabled]),a[href],[tabindex]:not([tabindex="-1"])');
+  (first||dialog).focus();
+ }
+}
+function closeModal(){
+ if(navigation)navigation.dismissModal();
+ $('#modal-root').innerHTML='';
+ if(modalReturnFocus&&document.contains(modalReturnFocus))modalReturnFocus.focus();
+ modalReturnFocus=null;
+}
+document.addEventListener('keydown',e=>{
+ const dialog=$('#modal-root .dialog');
+ if(dialog){
+  if(e.key==='Escape'){e.preventDefault();closeModal();return}
+  if(e.key==='Tab'){
+   const focusable=Array.from(dialog.querySelectorAll('a[href],button:not([disabled]),input:not([disabled]),select:not([disabled]),textarea:not([disabled]),[tabindex]:not([tabindex="-1"])'))
+    .filter(el=>!el.hidden&&el.getAttribute('aria-hidden')!=='true');
+   if(!focusable.length){e.preventDefault();dialog.focus();return}
+   const first=focusable[0],last=focusable[focusable.length-1];
+   if(!dialog.contains(document.activeElement)){e.preventDefault();first.focus();return}
+   if(e.shiftKey&&document.activeElement===first){e.preventDefault();last.focus();return}
+   if(!e.shiftKey&&document.activeElement===last){e.preventDefault();first.focus();return}
+  }
+ }
+ const card=e.target.closest?.('.group-card[role="button"]');
+ if(card&&(e.key==='Enter'||e.key===' ')){e.preventDefault();card.click()}
+});
 async function handleAppAction(action,el){
  const g=currentGroup();
  if(action==='pick-device-contacts'){
