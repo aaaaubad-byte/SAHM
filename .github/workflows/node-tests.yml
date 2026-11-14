@@ -3,18 +3,12 @@ name: SAHM Node Tests
 on:
   push:
     branches:
+      - main
       - SAHM-SUPABASE
-    paths:
-      - '**/*.js'
-      - 'tests/**'
-      - '.github/workflows/node-tests.yml'
   pull_request:
     branches:
+      - main
       - SAHM-SUPABASE
-    paths:
-      - '**/*.js'
-      - 'tests/**'
-      - '.github/workflows/node-tests.yml'
   workflow_dispatch:
 
 permissions:
@@ -25,12 +19,12 @@ jobs:
     name: Node unit and contract tests
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout SAHM-SUPABASE
+      - name: Checkout repository
         uses: actions/checkout@v4
       - name: Set up Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: '20'
+          node-version: '22'
       - name: Show runtime
         run: node --version
       - name: Run all Node tests
