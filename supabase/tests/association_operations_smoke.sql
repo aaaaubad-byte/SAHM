@@ -77,6 +77,21 @@ BEGIN
   RAISE EXCEPTION 'Expected one reminder after receipt correction, got %',v_reminders;
  END IF;
 
+ BEGIN
+  PERFORM public.send_installment_reminders(v_cycle,1,NULL);
+  RAISE EXCEPTION 'Repeat reminder was not blocked without confirmation';
+ EXCEPTION WHEN SQLSTATE 'RPT01' THEN
+  NULL;
+ END;
+
+ v_reminders:=public.send_installment_reminders(v_cycle,1,NULL,true);
+ IF v_reminders<>1 THEN
+  RAISE EXCEPTION 'Confirmed repeat expected one recipient, got %',v_reminders;
+ END IF;
+ IF (SELECT count(*) FROM public.reminders WHERE obligation_id=v_obligation)<>2 THEN
+  RAISE EXCEPTION 'Expected exactly two reminder rows after explicit confirmation';
+ END IF;
+
  PERFORM public.set_cycle_attendance(v_cycle,v_membership,true);
 
  v_message:=public.send_chat_message(v_association,'رسالة اختبار تشغيل');
