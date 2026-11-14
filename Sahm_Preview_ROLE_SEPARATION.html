@@ -4001,6 +4001,24 @@ function receiptDetail(){
  const r=SahmApp.receiptDetail(params.id);if(!r||!r.ok){toast(r&&r.message||'سجل الاستلام غير موجود');go('receipts');return}
  shell('تفاصيل الاستلام','groups',header('سجل استلام',r.id)+'<div class="receipt"><div class="receipt-mark">'+(r.voided?'!':'✓')+'</div><div style="text-align:center;margin-top:8px"><b style="font-size:14px">سجل استلام القسط</b><div class="hero-num" style="color:var(--ink)">'+minorMoney(r.amount,r.currency)+'</div><span class="pill '+(r.voided?'red':'green')+'">'+(r.voided?'تم تصحيحه':'تم تسجيل الاستلام')+'</span></div><div class="keyvalue"><span>اسم المشارك</span><b>'+escapeHtml(r.memberName)+'</b></div><div class="keyvalue"><span>الدورة والقسط</span><b>'+r.cycle+' · '+r.no+'</b></div><div class="keyvalue"><span>الفترة الأصلية</span><b>'+dateLabel(r.periodStart)+' — '+dateLabel(r.periodEnd)+'</b></div><div class="keyvalue"><span>وقت التسجيل</span><b>'+escapeHtml(r.recordedAt||'—')+'</b></div><div class="keyvalue"><span>التسجيل الذاتي</span><b>'+(r.self?'نعم':'لا')+'</b></div></div>'+(r.canCorrect?'<button class="btn danger full" data-action="receipt-correct" data-id="'+r.id+'">تصحيح سجل الاستلام</button>':'')+(r.corrections&&r.corrections.length?'<div class="card"><b>سجل التصحيحات</b>'+r.corrections.map(x=>'<div class="listrow"><small>'+escapeHtml(x.reason||'')+'</small></div>').join('')+'</div>':''));
 }
+async function copyText(value,successMessage){
+ const text=String(value||'');if(!text){toast('لا يوجد نص متاح للنسخ');return false}
+ try{
+  if(navigator.clipboard&&typeof navigator.clipboard.writeText==='function'){
+   await navigator.clipboard.writeText(text);toast(successMessage||'تم النسخ');return true;
+  }
+ }catch(_){}
+ let box=null;
+ try{
+  box=document.createElement('textarea');box.value=text;box.setAttribute('readonly','');
+  box.style.position='fixed';box.style.opacity='0';box.style.pointerEvents='none';
+  document.body.appendChild(box);box.focus();box.select();box.setSelectionRange(0,box.value.length);
+  const copied=!!(document.execCommand&&document.execCommand('copy'));
+  box.remove();box=null;
+  if(copied){toast(successMessage||'تم النسخ');return true}
+ }catch(_){if(box)box.remove()}
+ toast('تعذر النسخ تلقائيًا؛ حدد الرابط وانسخه يدويًا');return false;
+}
 function escapeHtml(s){return String(s==null?'':s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]))}
 function chat(){
  const g=currentGroup();if(!g){go('groups');return}const r=SahmApp.chatView(g.id);if(!r||!r.ok){toast(r&&r.message||'تعذر تحميل المحادثة');return}
@@ -4240,17 +4258,20 @@ async function handleAppAction(action,el){
  if(action==='open-group'){go('group-detail',{}, {currentGroupId:el.dataset.id,groupDetailTab:'overview'});return}
  if(action==='home-managed'){go('groups',{}, {groupTab:'manager'});return}if(action==='home-member'){go('groups',{}, {groupTab:'member'});return}
  if(action==='home-slide'){setHomeSlide(Number(el.dataset.index)||0);return}if(action==='group-tab'){groupTab=el.dataset.tab;syncNavigationContext();groups();return}if(action==='detail-tab'){groupDetailTab=el.dataset.tab;syncNavigationContext();groupDetail();return}if(action==='join-request-filter'){joinRequestFilter=el.dataset.filter||'pending';syncNavigationContext();joinRequests();return}
- if(action==='copy-new-invite'){const value=$('#newInviteLink')?.value||'';if(!value){toast('رابط الدعوة غير متاح');return}navigator.clipboard.writeText(value).then(()=>toast('تم نسخ رابط الدعوة')).catch(()=>toast('تعذر النسخ؛ حدّد الرابط وانسخه يدويًا'));return}
+ if(action==='copy-new-invite'){const value=$('#newInviteLink')?.value||'';if(!value){toast('رابط الدعوة غير متاح');return}await copyText(value,'تم نسخ رابط الدعوة');return}
  if(action==='copy-created-link'||action==='copy-group-link'){
   const value=$('#createdPublicLink')?.value||createdGroupLink?.url||'';
   if(!value){toast('لا يوجد رابط نشط للنسخ');return}
-  navigator.clipboard.writeText(value).then(()=>toast('تم نسخ رابط الانضمام')).catch(()=>toast('تعذر النسخ؛ حدّد الرابط وانسخه يدويًا'));return;
+  await copyText(value,'تم نسخ رابط الانضمام');return;
  }
  if(action==='share-group-link'){
   const value=$('#createdPublicLink')?.value||createdGroupLink?.url||'';
   if(!value){toast('لا يوجد رابط نشط للمشاركة');return}
-  if(navigator.share){navigator.share({title:'انضم إلى جمعية في سهم',text:'يمكنك تقديم طلب الانضمام عبر هذا الرابط',url:value}).catch(()=>{});}
-  else navigator.clipboard.writeText(value).then(()=>toast('تم نسخ الرابط للمشاركة')).catch(()=>toast('تعذر النسخ'));return;
+  if(typeof navigator.share==='function'){
+   try{await navigator.share({title:'انضم إلى جمعية في سهم',text:'يمكنك تقديم طلب الانضمام عبر هذا الرابط',url:value});}
+   catch(error){if(error&&error.name!=='AbortError')await copyText(value,'تعذرت المشاركة؛ تم نسخ الرابط');}
+  }else await copyText(value,'المشاركة غير مدعومة؛ تم نسخ الرابط');
+  return;
  }
  if(['create-group-link','rotate-group-link','pause-group-link','resume-group-link','revoke-group-link'].includes(action)){
   if(!g||!isManager())return;
@@ -4389,17 +4410,24 @@ async function handleAppAction(action,el){
  }
  if(action==='add-account'){go('welcome');return}
  if(action==='switch-account'){
-  if(authBusy)return;authBusy=true;
+  if(authBusy)return;authBusy=true;const previousUserId=db.user&&db.user.id;
   try{
    SahmSupabaseData.stopRealtime();
    const switched=await SahmSupabase.switchAccount(el.dataset.userId);
-   SahmSupabaseData.clear();activeProfile=await SahmSupabase.profile(switched.user.id);
+   const nextProfile=await SahmSupabase.profile(switched.user.id);
+   SahmSupabaseData.clear();activeProfile=nextProfile;
    await SahmSupabaseData.init(activeProfile);SahmSupabaseData.install();db=load();currentGroupId=(db.groups[0]||{}).id||null;
    db.session=true;db.verified=!!switched.user.email_confirmed_at;
    db.user=Object.assign(db.user,{id:switched.user.id,email:switched.user.email,name:activeProfile.fullName,phone:activeProfile.phone,city:activeProfile.city,avatarKey:activeProfile.avatarKey});
    selectedAvatarKey=activeProfile.avatarKey||'avatar-01';startRemoteRealtime();closeModal();resetNavigation(activeProfile.completed?'home':'profile-setup',{});
    toast('تم التبديل إلى الحساب المحدد');
-  }catch(e){toast(SahmSupabase.friendlyError(e));}
+  }catch(e){
+   if(previousUserId){
+    try{await SahmSupabase.switchAccount(previousUserId);startRemoteRealtime();}
+    catch(restoreError){toast('تعذر استعادة الحساب السابق؛ أعد تسجيل الدخول.');resetNavigation('welcome',{});}
+   }
+   toast(SahmSupabase.friendlyError(e));
+  }
   finally{authBusy=false;}
   return;
  }
