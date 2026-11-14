@@ -3523,7 +3523,8 @@ function homeInvitations(){
     &&(!i.expiresAt||new Date(i.expiresAt).getTime()>Date.now());
   const mine=!!me&&i.invitedUserId===me;
   const phoneMatch=!!phone&&String(i.phone||'').replace(/\D/g,'')===phone;
-  return open&&i.createdBy!==me&&(mine||phoneMatch);
+  const alreadyApproved=(db.joinRequests||[]).some(x=>x.invitationId===i.id&&x.status==='approved');
+   return open&&!alreadyApproved&&i.createdBy!==me&&(mine||phoneMatch);
  }).sort((a,b)=>String(b.createdAt||'').localeCompare(String(a.createdAt||'')));
  if(!items.length)return '';
  return '<section class="home-invitations"><div class="between"><h2>دعوات واردة</h2><span class="pill gold">'+items.length+' جديدة</span></div>'+
@@ -3829,8 +3830,11 @@ function inviteDetail(){
   const open=!!info.isJoinOpen;
   pendingJoinContext={source:'invitation_id',token:null,info:info,invitationId:info.invitationId||id};
   const statusText=legacy?'دعوة قديمة تتضمن عدد أسهم محددًا في النظام السابق':responseLabel;
+  const approvedRequest=(db.joinRequests||[]).find(x=>x.invitationId===id&&x.status==='approved');
   let actions='';
-  if(legacy){
+  if(approvedRequest){
+   actions='<p class="field-hint">تمت الموافقة على طلب انضمامك إلى هذه الجمعية؛ لا يلزمك إجراء إضافي.</p>';
+  }else if(legacy){
    actions=open
     ?'<button class="btn primary full" data-action="accept-legacy-invite-detail" data-id="'+escapeHtml(id)+'">قبول الدعوة القديمة</button>'
     :'<p class="field-hint">انتهت نافذة الانضمام؛ لا يمكن اعتماد هذه الدعوة القديمة الآن.</p>';
@@ -3911,7 +3915,7 @@ function joinRequestStatus(){
  const request=db.joinRequests.find(x=>x.id===params.id)||null;
  if(!request){toast('طلب الانضمام غير موجود');go('home');return}
  const status=({pending:'بانتظار موافقة المدير',approved:'تمت الموافقة على الطلب',rejected:'تم رفض الطلب',cancelled:'تم إلغاء الطلب'})[request.status]||request.status;
- shell('حالة طلب الانضمام','groups',header('حالة طلب الانضمام')+'<div class="card"><h3>'+escapeHtml(status)+'</h3><div class="keyvalue"><span>الجمعية</span><b>'+escapeHtml((db.groups.find(g=>g.id===request.groupId)||{}).name||'—')+'</b></div><div class="keyvalue"><span>الأسهم المطلوبة</span><b>'+request.requestedShares+'</b></div><div class="keyvalue"><span>التزام الدورة التقديري</span><b>'+minorMoney(request.estimatedAmountMinor,request.currency)+'</b></div><div class="keyvalue"><span>تاريخ التقديم</span><b>'+escapeHtml(request.submittedAt||'—')+'</b></div>'+(request.rejectionReason?'<p>سبب الرفض: '+escapeHtml(request.rejectionReason)+'</p>':'')+'</div>'+
+ shell('حالة طلب الانضمام','groups',header('حالة طلب الانضمام')+'<div class="card"><h3>'+escapeHtml(status)+'</h3><div class="keyvalue"><span>الجمعية</span><b>'+escapeHtml(request.groupName||params.groupName||(db.groups.find(g=>g.id===request.groupId)||{}).name||'الجمعية')+'</b></div><div class="keyvalue"><span>الأسهم المطلوبة</span><b>'+request.requestedShares+'</b></div><div class="keyvalue"><span>التزام الدورة التقديري</span><b>'+minorMoney(request.estimatedAmountMinor,request.currency)+'</b></div><div class="keyvalue"><span>تاريخ التقديم</span><b>'+escapeHtml(request.submittedAt||'—')+'</b></div>'+(request.rejectionReason?'<p>سبب الرفض: '+escapeHtml(request.rejectionReason)+'</p>':'')+'</div>'+
   (request.status==='pending'?'<button class="btn danger full" data-action="cancel-join-request" data-id="'+request.id+'">إلغاء الطلب</button>':''));
 }
 function joinRequests(){
