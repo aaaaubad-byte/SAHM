@@ -3707,8 +3707,9 @@ function joinInstallmentPreview(info,requestedShares){
  const mode=info.installmentMode==='amount'?'amount':'count',fixed=Number(info.installmentAmountMinor)||0;
  if(!Number.isInteger(count)||count<1||!Number.isInteger(days)||days<1||!Number.isFinite(share)||share<1||!Number.isInteger(shares)||shares<1)return '<small class="field-hint">أدخل عدد الأسهم لعرض تفاصيل الأقساط.</small>';
  if(mode==='amount'&&(!Number.isFinite(fixed)||fixed<1||fixed>share))return '<small class="field-hint">تعذر احتساب قيمة الأقساط؛ أعد فتح الرابط أو تواصل مع مدير الجمعية.</small>';
- const ranges=SahmCore.periods(days,count),equalParts=SahmCore.splitAmount(share,count);
- let remaining=share;
+ const ranges=[],equalParts=SahmCore.splitAmount(share,count),baseDays=Math.floor(days/count),extraDays=days%count;
+ let offset=0,remaining=share;
+ for(let i=1;i<=count;i++){const span=baseDays+(i<=extraDays?1:0);ranges.push({no:i,from:offset+1,to:offset+span});offset+=span;}
  const rows=ranges.map(p=>{
   const perShare=mode==='amount'?Math.min(fixed,remaining):equalParts[p.no-1];
   remaining-=perShare;
