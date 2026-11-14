@@ -18,7 +18,8 @@
     var pageSize=500,offset=0,all=[];
     var orderColumn=({
       association_notification_settings:'association_id',
-      user_preferences:'user_id'
+      user_preferences:'user_id',
+      join_requests:'submitted_at'
     })[table] || 'id';
     while(true){
       var q=c().from(table).select(select || '*')
@@ -39,7 +40,9 @@
     return ({association_created:'created',association_updated:'settings',member_joined:'join',member_removed:'leave',
       shares_added:'shares',shares_removed:'shares',invitation_created:'invite',invitation_cancelled:'invite',
       receipt_recorded:'receipt',receipt_corrected:'correction',draw_result:'draw',reminders_sent:'reminder',
-      attendance_marked:'attendance',chat_message:'message'})[type] || type || 'activity';
+      attendance_marked:'attendance',chat_message:'message',
+      join_request_submitted:'join-request',join_request_approved:'join-request',join_request_rejected:'join-request',join_request_cancelled:'join-request',
+      invitation_interested:'invite',invitation_declined:'invite',invitation_deferred:'invite',public_link_created:'invite'})[type] || type || 'activity';
   }
   function eventText(e, profiles) {
     var a=e.after_data||{}, b=e.before_data||{};
@@ -52,6 +55,14 @@
       case 'shares_removed': return 'تم تقليل '+(a.count||'')+' سهم';
       case 'invitation_created': return 'تم إنشاء دعوة إلى '+(a.invitee_name||'عضو');
       case 'invitation_cancelled': return 'تم إلغاء الدعوة';
+      case 'invitation_interested': return 'وافق المدعو على استكمال طلب الانضمام';
+      case 'invitation_declined': return 'رفض المدعو الدعوة';
+      case 'invitation_deferred': return 'أجّل المدعو الرد على الدعوة';
+      case 'join_request_submitted': return 'وصل طلب انضمام جديد';
+      case 'join_request_approved': return 'تمت الموافقة على طلب الانضمام';
+      case 'join_request_rejected': return 'تم رفض طلب الانضمام';
+      case 'join_request_cancelled': return 'ألغى مقدم الطلب طلب الانضمام';
+      case 'public_link_created': return 'تم إنشاء رابط انضمام عام';
       case 'receipt_recorded': return 'تم تسجيل استلام قسط';
       case 'receipt_corrected': return 'تم تصحيح سجل استلام';
       case 'draw_result': return 'تم تثبيت نتيجة القرعة';
@@ -73,7 +84,7 @@
       'installment_periods','installment_obligations','installment_receipts','receipt_corrections',
       'draws','draw_eligible_shares','cycle_attendance','chat_messages','chat_read_states',
       'association_events','association_notification_settings','association_user_preferences',
-      'invitations','notifications','reminders','user_preferences'];
+      'invitations','join_requests','notifications','reminders','user_preferences'];
     var result = await Promise.all(names.map(function(name){ return rows(name); }));
     raw = {};
     names.forEach(function(n,i){raw[n]=result[i];});
@@ -98,7 +109,7 @@
     var db = {
       version:root.SahmData.VERSION, seededOn:new Date().toISOString().slice(0,10), seq:0,
       groups:[],members:[],shares:[],receipts:[],draws:[],messages:[],events:[],
-      notifications:[],chatReads:{},reminders:[],invites:[],corrections:[],emitted:{},
+      notifications:[],chatReads:{},reminders:[],invites:[],joinRequests:[],corrections:[],emitted:{},
       meta:{createdAt:new Date().toISOString(),migrations:[]},
       prefs:{
         session:true,verified:!!user.email_confirmed_at,
@@ -115,10 +126,11 @@
       var notify={}; NOTIFY.forEach(function(t){notify[t]=enabled.indexOf(t)>=0;});
       db.groups.push({
         id:a.id,name:a.name,tone:'blue',currency:a.currency,tz:a.time_zone||'Asia/Aden',
-        cycleType:a.cycle_type,cycleDays:a.cycle_type==='custom'?a.cycle_days:null,
+        cycleType:a.cycle_type,cycleDays:Number(a.cycle_days),firstDrawOn:a.first_draw_on||null,
+        installmentMode:a.installment_mode||'count',installmentAmountMinor:a.installment_amount_minor==null?null:Number(a.installment_amount_minor),
         installments:Number(a.installments_count),shareAmount:Number(a.share_amount_minor),
         startDate:a.start_date,createdOn:String(a.created_at||'').slice(0,10),
-        maxPerMember:Number(a.max_shares_per_member),targetShares:Number(a.target_shares),
+        maxPerMember:a.max_shares_per_member==null?null:Number(a.max_shares_per_member),targetShares:a.target_shares==null?null:Number(a.target_shares),
         quorum:Number(a.quorum_percent),rules:a.rules||'',notify:notify,
         managerUserId:a.manager_user_id,managerName:profileName(a.manager_user_id,profileMap),
         inviteCode:null,inviteOpensOn:a.invite_opens_on||a.start_date,inviteClosesOn:a.invite_closes_on||null,
@@ -195,9 +207,19 @@
     raw.invitations.forEach(function(i){
       db.invites.push({
         id:i.id,groupId:i.association_id,name:i.invitee_name,phone:i.invitee_phone_e164||'',
-        shares:Number(i.shares_requested),status:i.status,createdAt:i.created_at,createdBy:i.created_by,
-        expiresAt:i.expires_at,invitedUserId:i.invited_user_id
+        shares:i.shares_requested==null?null:Number(i.shares_requested),isLegacy:i.shares_requested!=null,
+        responseStatus:i.response_status||'pending_response',status:i.status,createdAt:i.created_at,createdBy:i.created_by,
+        expiresAt:i.expires_at,invitedUserId:i.invited_user_id,respondedAt:i.responded_at||null
       });
+    });
+    raw.join_requests.forEach(function(r){
+      var a=raw.associations.find(function(x){return x.id===r.association_id;});
+      db.joinRequests.push({id:r.id,groupId:r.association_id,applicantUserId:r.applicant_user_id,
+        applicantName:profileName(r.applicant_user_id,profileMap),invitationId:r.invitation_id||null,
+        publicLinkId:r.public_link_id||null,sourceType:r.source_type,requestedShares:Number(r.requested_shares),
+        estimatedAmountMinor:Number(r.estimated_amount_minor),currency:a&&a.currency||'YER',status:r.status,
+        submittedAt:r.submitted_at,decidedAt:r.decided_at||null,decidedByUserId:r.decided_by_user_id||null,
+        rejectionReason:r.rejection_reason||'',membershipId:r.membership_id||null});
     });
     raw.notifications.forEach(function(n){
       var mute=raw.association_user_preferences.find(function(p){return p.association_id===n.association_id && p.user_id===user.id;});
@@ -280,20 +302,27 @@
   async function createGroup(input) {
     try {
       input=input||{};
-      var p={
-        name:input.name,currency:input.currency,startDate:input.startDate,
+      var startDate=String(input.startDate||''),firstDrawOn=String(input.firstDrawOn||'');
+      if(!firstDrawOn&&startDate&&Number(input.durationDays)>0)firstDrawOn=root.SahmCore.addDays(startDate,Number(input.durationDays));
+      var amount=input.shareAmountMinor!==undefined?Number(input.shareAmountMinor):moneyMinor(input.shareAmount,input.currency);
+      var mode=input.installmentMode==='amount'?'amount':'count';
+      var participates=input.managerMode==='both'||input.managerParticipates===true;
+      var payload={name:String(input.name||'').trim(),currency:input.currency,startDate:startDate,firstDrawOn:firstDrawOn,
         inviteOpensOn:input.inviteOpensOn||null,inviteClosesOn:input.inviteClosesOn||null,
-        tz:input.tz||'Asia/Aden',cycleType:input.cycleType,
-        cycleDays:input.cycleType==='custom'?Number(input.cycleDays):undefined,
-        shareAmountMinor:moneyMinor(input.shareAmount,input.currency),installments:Number(input.installments),
-        targetShares:Number(input.targetShares),maxPerMember:Number(input.maxPerMember),
-        managerParticipates:input.managerMode==='both',managerShares:input.managerMode==='both'?Number(input.managerShares)||1:0,
-        quorum:Number(input.quorum)||66,rules:input.rules||''
-      };
-      var id=await invoke('create_association',{p_payload:p});
+        timeZone:input.timeZone||input.tz||'Asia/Aden',shareAmountMinor:amount,installmentMode:mode,
+        installments:mode==='count'?Number(input.installments):undefined,
+        installmentAmountMinor:mode==='amount'?(input.installmentAmountMinor!==undefined?Number(input.installmentAmountMinor):moneyMinor(input.installmentAmount,input.currency)):undefined,
+        managerParticipates:participates,managerShares:participates?Number(input.managerShares)||0:0,
+        quorum:Number(input.quorum)||66,rules:input.rules||''};
+      var id=await invoke('create_association_unified',{p_payload:payload});
+      var link=null,linkWarning=null;
+      try{
+        var ld=await invoke('manage_association_public_link',{p_association_id:id,p_action:'create'});
+        link={id:ld.id,token:ld.token,status:ld.status,url:root.location.origin+root.location.pathname+'?join='+encodeURIComponent(ld.token)};
+      }catch(le){linkWarning=root.SahmSupabase.friendlyError(le);}
       await refresh();
-      return {ok:true,groupId:id,group:store.groups.find(function(g){return g.id===id;})||null};
-    } catch(e){return fail(e);}
+      return {ok:true,groupId:id,group:store.groups.find(function(g){return g.id===id;})||null,publicLink:link,linkWarning:linkWarning};
+    }catch(e){return fail(e);}
   }
   async function updateGroup(groupId,patch) {
     try {
@@ -313,14 +342,13 @@
   }
   async function createInvite(groupId,input) {
     try{
-      input=input||{};
-      var data=await invoke('create_invitation',{
-        p_association_id:groupId,p_name:String(input.name||'').trim(),
-        p_phone:phoneE164(input.phone),p_shares:Number(input.shares)
-      });
+      input=input||{};var phone=input.phone?phoneE164(input.phone):null;
+      var data=await invoke('create_invitation',{p_association_id:groupId,p_name:String(input.name||'').trim(),p_phone:phone});
       await refresh();
       var link=root.location.origin+root.location.pathname+'?invite='+encodeURIComponent(data.token);
-      return {ok:true,invite:{id:data.id,name:input.name,phone:phoneE164(input.phone),shares:Number(input.shares),status:'pending',token:data.token,link:link,expiresInDays:data.expires_in_days},summary:root.SahmApp.inviteSummary(groupId)};
+      return {ok:true,invite:{id:data.id,name:input.name,phone:phone||'',shares:null,isLegacy:false,
+        responseStatus:'pending_response',status:'pending',token:data.token,link:link,expiresInDays:data.expires_in_days},
+        summary:root.SahmApp.inviteSummary(groupId)};
     }catch(e){return fail(e);}
   }
   async function cancelInvite(inviteId){
@@ -334,6 +362,33 @@
       var data=await invoke('accept_invitation',{p_token:token});
       await refresh();return {ok:true,groupId:data.association_id,membershipId:data.membership_id,sharesAdded:data.shares_added};
     }catch(e){return fail(e);}
+  }
+  async function respondToInvite(invitationId,action){
+    try{var d=await invoke('respond_to_invitation',{p_invitation_id:invitationId,p_action:action});await refresh();return Object.assign({ok:true},d||{});}catch(e){return fail(e);}
+  }
+  async function submitJoinRequest(sourceType,token,requestedShares){
+    try{var d=await invoke('submit_join_request',{p_source_type:sourceType,p_token:token,p_requested_shares:Number(requestedShares)});await refresh();return Object.assign({ok:true},d||{});}catch(e){return fail(e);}
+  }
+  async function cancelJoinRequest(requestId){
+    try{var d=await invoke('cancel_join_request',{p_request_id:requestId});await refresh();return Object.assign({ok:true},d||{});}catch(e){return fail(e);}
+  }
+  async function approveJoinRequest(requestId){
+    try{var d=await invoke('approve_join_request',{p_request_id:requestId});await refresh();return Object.assign({ok:true},d||{});}catch(e){return fail(e);}
+  }
+  async function rejectJoinRequest(requestId,reason){
+    try{var d=await invoke('reject_join_request',{p_request_id:requestId,p_reason:reason||null});await refresh();return Object.assign({ok:true},d||{});}catch(e){return fail(e);}
+  }
+  async function managePublicLink(groupId,action){
+    try{var d=await invoke('manage_association_public_link',{p_association_id:groupId,p_action:action});await refresh();
+      if(d&&d.token)d.url=root.location.origin+root.location.pathname+'?join='+encodeURIComponent(d.token);
+      return Object.assign({ok:true},d||{});
+    }catch(e){return fail(e);}
+  }
+  async function previewPublicJoinLink(token){
+    try{return {ok:true,link:await invoke('preview_public_join_link',{p_token:token})};}catch(e){return fail(e);}
+  }
+  async function listMyInvitations(){
+    try{return {ok:true,invitations:await invoke('list_my_invitations',{})||[]};}catch(e){return fail(e);}
   }
   async function addShares(memberId,count){
     try{var n=await invoke('add_shares',{p_membership_id:memberId,p_count:Number(count)});await refresh();return {ok:true,added:n};}catch(e){return fail(e);}
@@ -433,6 +488,11 @@
   function handleRealtime(payload){
     if(!store||!payload||!payload.new)return;
     var row=payload.new, table=payload.table;
+    if(table==='join_requests'||table==='invitations'){
+      refresh().then(function(){if(typeof realtimeCallback==='function')realtimeCallback(payload);})
+        .catch(function(error){if(app&&app.report)app.report('supabase',fail(error));});
+      return;
+    }
     if(table==='chat_messages' && payload.eventType==='INSERT'){
       if(store.messages.some(function(m){return m.id===row.id;}))return;
       raw.chat_messages.push(row);
@@ -474,6 +534,8 @@
       .on('postgres_changes',{event:'INSERT',schema:'public',table:'chat_messages'},handleRealtime)
       .on('postgres_changes',{event:'INSERT',schema:'public',table:'notifications',filter:'user_id=eq.'+user.id},handleRealtime)
       .on('postgres_changes',{event:'UPDATE',schema:'public',table:'notifications',filter:'user_id=eq.'+user.id},handleRealtime)
+      .on('postgres_changes',{event:'*',schema:'public',table:'join_requests'},handleRealtime)
+      .on('postgres_changes',{event:'*',schema:'public',table:'invitations'},handleRealtime)
       .subscribe();
     return true;
   }
@@ -510,6 +572,12 @@
     app.updateGroup=updateGroup;
     app.createInvite=createInvite;
     app.cancelInvite=cancelInvite;
+    app.respondToInvite=respondToInvite;
+    app.submitJoinRequest=submitJoinRequest;
+    app.cancelJoinRequest=cancelJoinRequest;
+    app.approveJoinRequest=approveJoinRequest;
+    app.rejectJoinRequest=rejectJoinRequest;
+    app.managePublicLink=managePublicLink;
     app.addShares=addShares;
     app.removeShares=removeShares;
     app.removeMember=removeMember;
@@ -537,7 +605,10 @@
   }
   root.SahmSupabaseData={
     init:init,refresh:refresh,store:function(){return store;},raw:function(){return raw;},
-    previewInvite:previewInvite,acceptInvite:acceptInvite,updateMyProfile:updateMyProfile,
+    previewInvite:previewInvite,acceptInvite:acceptInvite,respondToInvite:respondToInvite,
+    submitJoinRequest:submitJoinRequest,cancelJoinRequest:cancelJoinRequest,approveJoinRequest:approveJoinRequest,
+    rejectJoinRequest:rejectJoinRequest,managePublicLink:managePublicLink,previewPublicJoinLink:previewPublicJoinLink,
+    listMyInvitations:listMyInvitations,updateMyProfile:updateMyProfile,
     startRealtime:startRealtime,stopRealtime:stopRealtime,install:install,clear:clear,
     isRemote:function(){return !!store;},savePrefs:savePrefs
   };
