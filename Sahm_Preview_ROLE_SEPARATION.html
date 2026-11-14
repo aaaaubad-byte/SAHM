@@ -3276,9 +3276,9 @@ body {
 const $=s=>document.querySelector(s);
 const money=(n,c='YER')=>{const cur=SahmCore.CURRENCIES[c]||SahmCore.CURRENCIES.YER;const minor=Math.round(Number(n||0)*cur.minor);return SahmCore.fmtMoney(minor,c in SahmCore.CURRENCIES?c:'YER')};
 const today=()=>SahmApp.todayIn();
-const AUTH_SCREEN_NAMES=['welcome','register','profile-setup','reset-password','logged-out'];
+const AUTH_SCREEN_NAMES=['welcome','register','profile-setup','reset-password','logged-out','account-login'];
 let db={session:false,verified:false,user:{id:null,name:'',phone:'',city:'',email:'',avatarKey:'avatar-01',notifications:true,biometric:false},groups:[],unread:0},screenName='welcome',params={},groupTab='all',groupDetailTab='overview',toastTimer,homeSlideTimer=null,homeSlideIndex=0,selectedInstallmentCycle=1,selectedInstallmentStatus='all',pendingJoinCode=null,pendingJoinContext=null,lastSubmittedRequestId=null,joinRequestFilter='pending',createGroupBusy=false,bulkInvitesBusy=false,joinRequestBusy=false,joinDecisionBusy=false,createdGroupLink=null,createdLinkWarning=null;
-let selectedAvatarKey='avatar-01',authBusy=false,activeProfile=null;
+let selectedAvatarKey='avatar-01',authBusy=false,activeProfile=null,pendingAccountLogin=null;
 let currentGroupId=(db.groups[0]||{}).id||null,createdGroupId=null,createWizardStep=1,createFormSnapshot={},reminderRequest=null,navigation=null;
 SahmApp.onResult((name,result)=>{if(result&&result.ok===false)toast(result.message||'تعذر تنفيذ العملية');else if(result&&result.persisted===false)toast(result.warning||'تعذر حفظ التغييرات في تخزين المعاينة');});
 
@@ -3469,7 +3469,7 @@ function renderTopbar(title){
 function syncBottomNavigation(visible=!['welcome','phone','otp','profile-setup','logged-out'].includes(screenName)){const bar=$('#bottomnav');if(!bar)return;if(!visible){bar.hidden=true;bar.setAttribute('aria-hidden','true');bar.style.setProperty('display','none','important');return}bar.hidden=false;bar.removeAttribute('hidden');bar.setAttribute('aria-hidden','false');bar.style.setProperty('display','flex','important');bar.style.setProperty('visibility','visible','important');bar.style.setProperty('opacity','1','important')}
 function nav(active){const items=[['groups','groups','الجمعيات'],['home','home','الرئيسية'],['wall','messages','الدردشات']];const bar=$('#bottomnav');syncBottomNavigation(true);bar.innerHTML=items.map(([s,i,t])=>`<button class="navitem ${active===s?'active':''}" data-go="${s}" aria-label="${t}" ${active===s?'aria-current="page"':''}><span class="ni">${uiIcon(i,23)}</span><span>${t}</span></button>`).join('')}
 function shell(title,active,html){renderTopbar(title);nav(active);const screen=$('#screen');screen.className='screen'+(active==='home'?' home-screen':'')+(screenName==='create-group'?' create-group-screen':'');screen.innerHTML=html;if(active!=='home'&&homeSlideTimer){clearInterval(homeSlideTimer);homeSlideTimer=null}}function auth(html){
- const authTitles={welcome:'تسجيل الدخول',register:'إنشاء حساب','profile-setup':'بياناتك الشخصية','reset-password':'تعيين كلمة المرور','logged-out':'تم تسجيل الخروج'};
+ const authTitles={welcome:'تسجيل الدخول',register:'إنشاء حساب','profile-setup':'بياناتك الشخصية','reset-password':'تعيين كلمة المرور','logged-out':'تم تسجيل الخروج','account-login':'إضافة أو استعادة حساب'};
  renderTopbar(authTitles[screenName]||'سهم');
  const bar=$('#bottomnav');bar.hidden=true;bar.setAttribute('aria-hidden','true');bar.style.display='none';
  const screen=$('#screen');screen.className='auth-screen';screen.innerHTML=html;
@@ -4101,6 +4101,16 @@ const AVATAR_OPTIONS=[
 function avatarPicker(){
  return '<div class="avatar-picker" role="group" aria-label="اختر أيقونة الحساب">'+AVATAR_OPTIONS.map(([key,icon])=>'<button type="button" class="avatar-option '+(selectedAvatarKey===key?'selected':'')+'" data-action="choose-avatar" data-avatar="'+key+'" aria-pressed="'+(selectedAvatarKey===key)+'">'+uiIcon(icon,22)+'</button>').join('')+'</div>';
 }
+function accountLogin(){
+ const target=pendingAccountLogin||null;
+ auth(`<div class="auth-brand" style="margin:12px 0 20px"><div class="brand-mark">س</div><h1 style="font-size:22px">${target?'إعادة ربط الحساب':'إضافة حساب آخر'}</h1><p>${target?'انتهت صلاحية جلسة هذا الحساب المحفوظ. أدخل كلمة مروره لتجديد الجلسة بأمان.':'سجّل الدخول بالحساب الآخر لإضافته إلى هذا الجهاز.'}</p></div>
+ <div class="auth-card"><form id="accountLoginForm" novalidate>
+  <div class="field"><label for="accountLoginEmail">البريد الإلكتروني</label><input id="accountLoginEmail" name="email" type="email" autocomplete="username" inputmode="email" required value="${escapeHtml(target&&target.email||'')}" placeholder="name@example.com"></div>
+  <div class="field"><label for="accountLoginPassword">كلمة المرور</label><input id="accountLoginPassword" name="password" type="password" autocomplete="current-password" required minlength="8" placeholder="أدخل كلمة المرور"></div>
+  <button class="btn primary full" type="submit">${target?'إعادة ربط الحساب':'إضافة الحساب'}</button>
+  <button class="link-btn" style="width:100%;margin-top:10px" type="button" data-action="cancel-account-login">العودة إلى الحساب الحالي</button>
+ </form></div>`);
+}
 function profileSetup(){
  const chosen=activeProfile||{};
  if(!selectedAvatarKey)selectedAvatarKey=chosen.avatarKey||'avatar-01';
@@ -4114,7 +4124,7 @@ function profileSetup(){
 }
 function logout(){auth(`<div class="auth-brand"><div class="brand-mark">✓</div><h1>تم تسجيل الخروج</h1></div><div class="auth-card"><button class="btn primary full" data-go="welcome">العودة لتسجيل الدخول</button></div>`)}
 const ALL_SCREEN_REGISTRY={
- welcome:welcome,register:register,'profile-setup':profileSetup,'reset-password':resetPasswordScreen,'logged-out':logout,
+ welcome:welcome,register:register,'account-login':accountLogin,'profile-setup':profileSetup,'reset-password':resetPasswordScreen,'logged-out':logout,
  home:home,groups:groups,'create-group':createGroup,'created-group':createdGroup,'group-detail':groupDetail,
  members:members,invite:invite,invites:invites,'invite-detail':inviteDetail,'join-group':joinGroup,'join-request-status':joinRequestStatus,'join-requests':joinRequests,'join-request-detail':joinRequestDetail,installments:installments,
  'draw-room':drawRoom,'draw-history':drawHistory,receipts:receipts,'receipt-detail':receiptDetail,
@@ -4124,7 +4134,7 @@ function render(){
  const screen=ALL_SCREEN_REGISTRY[screenName];
  if(typeof screen!=='function'){toast('الشاشة المطلوبة غير مسجلة في التطبيق');resetNavigation(db.session?'home':'welcome');return}
  screen();
- syncBottomNavigation(!['welcome','register','profile-setup','reset-password','logged-out'].includes(screenName));
+ syncBottomNavigation(!['welcome','register','account-login','profile-setup','reset-password','logged-out'].includes(screenName));
 }
 let modalReturnFocus=null;
 function showModal(title,body,buttons=[['إغلاق','close','outline']]){
@@ -4408,7 +4418,8 @@ async function handleAppAction(action,el){
   finally{authBusy=false;}
   return;
  }
- if(action==='add-account'){go('welcome');return}
+ if(action==='add-account'){pendingAccountLogin=null;go('account-login',{});return}
+ if(action==='cancel-account-login'){pendingAccountLogin=null;resetNavigation('profile',{});return}
  if(action==='switch-account'){
   if(authBusy)return;authBusy=true;const previousUserSnapshot=Object.assign({},db.user||{}),previousUserId=previousUserSnapshot.id;
   try{
@@ -4422,21 +4433,26 @@ async function handleAppAction(action,el){
    selectedAvatarKey=activeProfile.avatarKey||'avatar-01';startRemoteRealtime();closeModal();resetNavigation(activeProfile.completed?'home':'profile-setup',{});
    toast('تم التبديل إلى الحساب المحدد');
   }catch(e){
-   if(previousUserId){
-    try{
-     await SahmSupabase.switchAccount(previousUserId);
-     if(!SahmSupabaseData.isRemote()){
-      SahmSupabaseData.clear();activeProfile=await SahmSupabase.profile(previousUserId);
-      await SahmSupabaseData.init(activeProfile);SahmSupabaseData.install();db=load();
-      db.session=true;db.user=Object.assign(db.user,previousUserSnapshot,{id:previousUserId,name:activeProfile.fullName,phone:activeProfile.phone,city:activeProfile.city,avatarKey:activeProfile.avatarKey});
-      currentGroupId=(db.groups[0]||{}).id||null;
-     }
-     startRemoteRealtime();
-    }catch(restoreError){toast('تعذر استعادة بيانات الحساب السابق؛ أعد تسجيل الدخول.');resetNavigation('welcome',{});}
+    if(previousUserId){
+     try{
+      await SahmSupabase.switchAccount(previousUserId);
+      if(!SahmSupabaseData.isRemote()){
+       SahmSupabaseData.clear();activeProfile=await SahmSupabase.profile(previousUserId);
+       await SahmSupabaseData.init(activeProfile);SahmSupabaseData.install();db=load();
+       db.session=true;db.user=Object.assign(db.user,previousUserSnapshot,{id:previousUserId,name:activeProfile.fullName,phone:activeProfile.phone,city:activeProfile.city,avatarKey:activeProfile.avatarKey});
+       currentGroupId=(db.groups[0]||{}).id||null;
+      }
+      startRemoteRealtime();
+     }catch(restoreError){toast('تعذر استعادة بيانات الحساب السابق؛ أعد تسجيل الدخول.');resetNavigation('welcome',{});return;}
+    }
+    const authText=String(e&&((e.message||e.msg)||e.code)||'');
+    if(/session_not_found|invalid refresh token|refresh token.*not found|auth session missing|session missing/i.test(authText)){
+     pendingAccountLogin=SahmSupabase.accounts().find(a=>a.id===el.dataset.userId)||{id:el.dataset.userId,email:''};
+     resetNavigation('account-login',{});
+     toast('جلسة الحساب المحفوظ انتهت؛ أعد تسجيل الدخول إليه مرة واحدة لإعادة ربطه.');
+    }else toast(SahmSupabase.friendlyError(e));
    }
-   toast(SahmSupabase.friendlyError(e));
-  }
-  finally{authBusy=false;}
+   finally{authBusy=false;}
   return;
  }
 }
@@ -4461,10 +4477,34 @@ document.addEventListener('change',async e=>{
 });
 document.addEventListener('submit',async e=>{
  const form=e.target;
- if(!['loginForm','registerForm','setupForm','updatePasswordForm','createForm','inviteeManualForm','joinForm','joinRequestForm','chatForm','profileForm'].includes(form.id))return;
+ if(!['loginForm','accountLoginForm','registerForm','setupForm','updatePasswordForm','createForm','inviteeManualForm','joinForm','joinRequestForm','chatForm','profileForm'].includes(form.id))return;
  e.preventDefault();
  const setBusy=(on,label)=>{const b=form.querySelector('button[type="submit"]');if(b){b.disabled=!!on;if(on){b.dataset.oldLabel=b.textContent;b.textContent=label||'جارٍ التنفيذ...'}else if(b.dataset.oldLabel){b.textContent=b.dataset.oldLabel;delete b.dataset.oldLabel}}};
- if(form.id==='loginForm'){
+  if(form.id==='accountLoginForm'){
+  if(authBusy)return;const d=Object.fromEntries(new FormData(form));
+  if(!d.email||!d.password){toast('أدخل البريد الإلكتروني وكلمة المرور');return}
+  authBusy=true;setBusy(true,pendingAccountLogin?'جارٍ إعادة ربط الحساب...':'جارٍ إضافة الحساب...');
+  const previousUserId=db.user&&db.user.id;
+  SahmSupabaseData.stopRealtime();
+  try{
+   const signed=await SahmSupabase.signIn(d.email,d.password);
+   activeProfile=await SahmSupabase.profile(signed.user.id);
+   SahmSupabaseData.clear();await SahmSupabaseData.init(activeProfile);SahmSupabaseData.install();
+   db=load();currentGroupId=(db.groups[0]||{}).id||null;db.session=true;db.verified=!!signed.user.email_confirmed_at;
+   db.user=Object.assign(db.user,{id:signed.user.id,email:signed.user.email,name:activeProfile.fullName,phone:activeProfile.phone,city:activeProfile.city,avatarKey:activeProfile.avatarKey});
+   selectedAvatarKey=activeProfile.avatarKey||'avatar-01';startRemoteRealtime();pendingAccountLogin=null;
+   resetNavigation(activeProfile.completed?'home':'profile-setup',{});
+   toast('تم ربط الحساب بنجاح');
+  }catch(err){
+   if(previousUserId){
+    try{await SahmSupabase.switchAccount(previousUserId);activeProfile=await SahmSupabase.profile(previousUserId);SahmSupabaseData.clear();await SahmSupabaseData.init(activeProfile);SahmSupabaseData.install();db=load();db.session=true;db.user=Object.assign(db.user,{id:previousUserId,name:activeProfile.fullName,phone:activeProfile.phone,city:activeProfile.city,avatarKey:activeProfile.avatarKey});currentGroupId=(db.groups[0]||{}).id||null;startRemoteRealtime();}
+    catch(restoreError){toast('تعذر استعادة الحساب الحالي. أعد فتح التطبيق وسجّل الدخول.');}
+   }
+   toast(SahmSupabase.friendlyError(err));
+  }finally{authBusy=false;setBusy(false)}
+  return;
+ }
+if(form.id==='loginForm'){
   if(authBusy)return;const d=Object.fromEntries(new FormData(form));
   if(!d.email||!d.password){toast('أدخل البريد الإلكتروني وكلمة المرور');return}
   authBusy=true;setBusy(true,'جارٍ تسجيل الدخول...');
