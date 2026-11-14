@@ -79,6 +79,17 @@ BEGIN
    RAISE EXCEPTION 'remove_member did not deactivate membership';
  END IF;
 
+ -- A departed membership must not be reactivated indirectly by add_shares.
+ BEGIN
+   PERFORM public.add_shares(v_membership,1);
+   RAISE EXCEPTION 'add_shares unexpectedly allowed a departed membership';
+ EXCEPTION WHEN check_violation THEN
+   NULL;
+ END;
+ IF EXISTS(SELECT 1 FROM public.shares WHERE membership_id=v_membership AND status='active') THEN
+   RAISE EXCEPTION 'add_shares created active shares for a departed membership';
+ END IF;
+
  PERFORM public.update_association(v_association,jsonb_build_object('name','جمعية اختبار معدلة'));
  v_second_invite:=public.create_invitation(v_association,'فاطمة علي محمد','+967777000003');
  IF NOT public.cancel_invitation((v_second_invite->>'id')::uuid) THEN
