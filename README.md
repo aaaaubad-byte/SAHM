@@ -1,64 +1,35 @@
-# SAHM | سهم — فرع Supabase
+# SAHM | سهم
 
-هذا الفرع هو مسار العمل الخاص بالتطبيق المتصل بقاعدة بيانات Supabase.
+فرع التشغيل والتطوير المعتمد للتطبيق المتصل بـ Supabase.
 
-## فصل الفروع
+## المسار المنشور
+- Branch: `SAHM-SUPABASE`
+- Entry: `index.html` → `Sahm_Preview_ROLE_SEPARATION.html`
+- Render: `sahm-supabase-preview-fixed`
+- Supabase Project: `nusjnnrtpxbpphphmdsc`
 
-- `main`: معاينة محلية مستقلة، وليست مرجع التطبيق المتصل بقاعدة البيانات. لا تُجرَ عليه تغييرات عمل Supabase.
-- `SAHM-SUPABASE`: فرع التطبيق المتصل بقاعدة Supabase، وهو الفرع المعتمد للتطوير والفحص والنشر المرتبط به.
+## ملفات التشغيل
+- `Sahm_Preview_ROLE_SEPARATION.html`: واجهة التطبيق الحالية.
+- `sahm-app.js`: طبقة تنسيق وربط الواجهة بالبيانات.
+- `sahm-core.js`: قواعد الأعمال والحسابات والتحقق.
+- `sahm-data.js`: نموذج البيانات والتطبيع والتوافق الذي تعتمد عليه طبقات التطبيق.
+- `sahm-navigation.js`: التنقل وحالة المسارات.
+- `sahm-supabase.js`: المصادقة والجلسات والملفات الشخصية.
+- `sahm-supabase-data.js`: عمليات Supabase وRPC وRealtime.
+- `sw.js`: Service Worker وتحديث ملفات التطبيق.
+- `manifest.webmanifest`, `terms.html`, `icons/`: ملفات PWA والصفحات والأصول.
 
-## المشروع والبيئة
+## قاعدة البيانات
+ملفات `supabase/SAHM_DATABASE_BASELINE.sql` و`supabase/migrations/` و`supabase/tests/` هي سجل مرجعي واختباري للمخطط. لا تُحذف ولا تُشغّل على قاعدة الإنتاج عشوائياً. تغييرات المخطط الجديدة تكون بإضافات migrations مدروسة ومختبرة.
 
-- مستودع GitHub: `aaaaubad-byte/SAHM`
-- مشروع Supabase: `nusjnnrtpxbpphphmdsc`
-- المنطقة: `ap-northeast-1`
-- خدمة المعاينة على Render: `sahm-supabase-preview-fixed`
-- النشر الآلي: كل commit جديد على `SAHM-SUPABASE` يُنشر إلى خدمة المعاينة.
+## التحقق
+- JavaScript: `node --test tests/*.test.js`
+- SQL: GitHub Actions workflow `.github/workflows/supabase-local-sql-tests.yml` ينشئ بيئة محلية معزولة للاختبار.
+- لا تُزل ملفات الاختبارات أو ملفات قاعدة البيانات لمجرد أنها ليست مطلوبة لتحميل الصفحة؛ فهي ضمان صيانة وليست ملفات نشر للمتصفح.
 
-نقطة دخول الموقع `/` تحوّل إلى `/Sahm_Preview_ROLE_SEPARATION.html`.
-
-## بنية التطبيق
-
-| الملف | المسؤولية |
-|---|---|
-| `Sahm_Preview_ROLE_SEPARATION.html` | واجهات التطبيق ومسارات الشاشات وتفاعلاتها |
-| `sahm-core.js` | قواعد الحساب والتحقق ومنطق الأعمال النقي |
-| `sahm-data.js` | نموذج البيانات المحلي والتطبيع والتوافق واختبارات طبقة البيانات؛ ليس مصدر البيانات التشغيلي في وضع Supabase |
-| `sahm-app.js` | واجهة الربط الموحدة بين الواجهات ومصدر البيانات |
-| `sahm-supabase.js` | عميل Supabase والمصادقة والجلسات والملفات الشخصية |
-| `sahm-supabase-data.js` | قراءة البيانات التشغيلية وتنفيذ العمليات عبر Supabase RPC وRealtime |
-| `sahm-navigation.js` | التنقل وسجل المتصفح |
-| `sw.js` | Service Worker وتحديث ملفات التطبيق |
-| `supabase/SAHM_DATABASE_BASELINE.sql` | لقطة تأسيس للمخطط لاختبارات قاعدة نظيفة ومعزولة |
-| `supabase/migrations/` | سجل ملفات التغييرات التراكمية للمخطط |
-| `supabase/tests/` | اختبارات SQL للعقود والثوابت ومسارات التشغيل |
-| `tests/` | اختبارات JavaScript والمنطق والتكامل وعقود الواجهة |
-
-## الاختبارات
-
-اختبارات JavaScript باستخدام Node.js 22:
-
-```bash
-node --test tests/*.test.js
-```
-
-اختبارات SQL تعمل في بيئة Supabase محلية معزولة من خلال GitHub Actions:
-`.github/workflows/supabase-local-sql-tests.yml`
-
-واختبارات JavaScript:
-`.github/workflows/node-tests.yml`
-
-لا تعتبر نجاح اختبارات JavaScript بديلاً عن اختبارات SQL أو اختبار التطبيق المنشور تفاعليًا.
-
-## ضوابط مهمة
-
-- قاعدة Supabase تحتوي بيانات تشغيلية؛ لا تُصفّرها ولا تُعد إنشاءها ولا تحذف سجلاتها أثناء تنظيف المستودع.
-- لا تُشغّل ملف Baseline على قاعدة الإنتاج؛ هو لإعادة بناء بيئة اختبار نظيفة.
-- راجع ملفات migrations وسجل Supabase قبل أي تغيير بنيوي، ولا تعِد تطبيق ترحيل مطبق.
-- المفتاح الموجود في كود المتصفح يجب أن يكون Publishable/Anon فقط. يمنع وضع `service_role` أو أي Secret Key في ملفات الواجهة أو Git.
-- لا تخلط بيانات المعاينة أو seed مع بيانات المستخدمين الفعلية.
-- لا تدمج `SAHM-SUPABASE` إلى `main` لمجرد توحيد الفروع؛ لكل فرع غرض مختلف.
-
-## حالة الصيانة
-
-يُحدّث هذا الملف عند تغيير معمارية التطبيق أو الفرع المعتمد أو خدمة النشر أو أوامر الاختبار.
+## قواعد العمل
+- هذا الفرع هو المصدر الوحيد لتعديلات التطبيق المتصل بقاعدة Supabase.
+- لا تنشئ نسخ واجهات بديلة ولا تنقل الوظائف إلى ملف آخر قبل التحقق من الاعتمادات.
+- لا تحذف أو تعيد إنشاء بيانات Supabase التشغيلية.
+- لا تضع مفاتيح service_role أو الأسرار في ملفات الواجهة أو المستودع.
+- انشر فقط بعد نجاح الاختبارات والتحقق من Commit المنشور.
