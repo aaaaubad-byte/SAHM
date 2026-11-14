@@ -814,12 +814,19 @@
   /* Secure invitation tokens are minted only by the Supabase RPC. The local
      preview deliberately cannot fabricate invite URLs or security tokens. */
   function createInvitationsBulk(db, actor, gid, invitees) {
-    mustGroup(db, gid);
-    if (!actor || actor !== me(db)) return fail('FORBIDDEN', 'لا يوجد مدير مسجل');
+    var g = mustGroup(db, gid); needManager(g, actor);
     if (!Array.isArray(invitees) || invitees.length < 1 || invitees.length > 50) {
       return fail('INVITE_BATCH_INVALID', 'اختر من جهة اتصال واحدة إلى 50 جهة');
     }
     return fail('REMOTE_REQUIRED', 'إنشاء روابط الدعوات الآمنة يتطلب الاتصال بقاعدة بيانات سهم');
+  }
+  /* Public-link tokens are generated/stored server-side only. */
+  function managePublicLink(db, actor, gid, action) {
+    var g = mustGroup(db, gid); needManager(g, actor);
+    if (!['create','rotate','pause','resume','revoke'].includes(String(action || ''))) {
+      return fail('PUBLIC_LINK_ACTION_INVALID', 'إجراء الرابط العام غير صالح');
+    }
+    return fail('REMOTE_REQUIRED', 'إدارة الرابط العام تتطلب الاتصال بقاعدة بيانات سهم');
   }
 
   function getInviteInfo(db, code) {
@@ -1237,7 +1244,7 @@
     totalUnreadNotifications: totalUnreadNotifications, recentActivity: recentActivity,
     /* operations */
     createGroup: createGroup, updateGroup: updateGroup, previewJoin: previewJoin, addMember: addMember, addShares: addShares, removeShares: removeShares, removeMember: removeMember,
-    setAttendance: setAttendance, inviteSummary: inviteSummary, createInvite: createInvite, createInvitationsBulk: createInvitationsBulk, cancelInvite: cancelInvite, getInviteInfo: getInviteInfo, joinByCode: joinByCode,
+    setAttendance: setAttendance, inviteSummary: inviteSummary, createInvite: createInvite, createInvitationsBulk: createInvitationsBulk, managePublicLink: managePublicLink, cancelInvite: cancelInvite, getInviteInfo: getInviteInfo, joinByCode: joinByCode,
     recordPaid: recordPaid, correctReceipt: correctReceipt, sendReminder: sendReminder, lastReminder: lastReminder, drawStatus: drawStatus, performDraw: performDraw,
     sendMessage: sendMessage, markChatRead: markChatRead, setNotifyType: setNotifyType, setMute: setMute, isMuted: isMuted, markNotificationsRead: markNotificationsRead,
     /* queries */

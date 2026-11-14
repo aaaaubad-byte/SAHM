@@ -368,3 +368,12 @@ test('local bulk invitation API refuses to fabricate secure invitation tokens', 
   assert.equal(result.code, 'REMOTE_REQUIRED');
   assert.equal(w.db.invites.length, 0);
 });
+
+
+test('local public-link API refuses to mint or expose server-managed secrets', () => {
+  const w = fresh();
+  const { group } = createGroup(w);
+  const result = w.D.managePublicLink(w.db, 'me', group.id, 'create');
+  assert.equal(result.ok, false);
+  assert.equal(result.code, 'REMOTE_REQUIRED');
+});
