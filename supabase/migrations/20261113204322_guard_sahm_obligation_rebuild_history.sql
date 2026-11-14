@@ -38,7 +38,7 @@ BEGIN
     END LOOP;
   END LOOP;
 END;
-$function$
+$function$;
 
 
 CREATE OR REPLACE FUNCTION private.remove_shares(p_membership_id uuid, p_count integer)
@@ -82,7 +82,7 @@ BEGIN
   VALUES(v_aid,v_uid,'shares_removed','membership',p_membership_id,'manager',jsonb_build_object('count',v_removed));
   RETURN v_removed;
 END;
-$function$
+$function$;
 
 
 CREATE OR REPLACE FUNCTION private.update_association(p_association_id uuid, p_payload jsonb)
@@ -197,7 +197,7 @@ BEGIN
   );
   RETURN p_association_id;
 END;
-$function$
+$function$;
 
 
 CREATE OR REPLACE FUNCTION private.update_my_profile(p_full_name text, p_city text)
@@ -218,7 +218,7 @@ BEGIN
     WHERE user_id=v_uid;
   RETURN true;
 END;
-$function$
+$function$;
 
 
 CREATE OR REPLACE FUNCTION public.add_shares(p_membership_id uuid, p_count integer)
@@ -226,7 +226,7 @@ CREATE OR REPLACE FUNCTION public.add_shares(p_membership_id uuid, p_count integ
  LANGUAGE sql
  SECURITY DEFINER
  SET search_path TO ''
-AS $function$ SELECT private.add_shares(p_membership_id,p_count); $function$
+AS $function$ SELECT private.add_shares(p_membership_id,p_count); $function$;
 
 
 CREATE OR REPLACE FUNCTION public.cancel_invitation(p_invitation_id uuid)
@@ -234,7 +234,7 @@ CREATE OR REPLACE FUNCTION public.cancel_invitation(p_invitation_id uuid)
  LANGUAGE sql
  SECURITY DEFINER
  SET search_path TO ''
-AS $function$ SELECT private.cancel_invitation(p_invitation_id); $function$
+AS $function$ SELECT private.cancel_invitation(p_invitation_id); $function$;
 
 
 CREATE OR REPLACE FUNCTION public.preview_invitation(p_token text)
@@ -242,7 +242,7 @@ CREATE OR REPLACE FUNCTION public.preview_invitation(p_token text)
  LANGUAGE sql
  STABLE SECURITY DEFINER
  SET search_path TO ''
-AS $function$ SELECT private.preview_invitation(p_token); $function$
+AS $function$ SELECT private.preview_invitation(p_token); $function$;
 
 
 CREATE OR REPLACE FUNCTION public.remove_member(p_membership_id uuid)
@@ -250,7 +250,7 @@ CREATE OR REPLACE FUNCTION public.remove_member(p_membership_id uuid)
  LANGUAGE sql
  SECURITY DEFINER
  SET search_path TO ''
-AS $function$ SELECT private.remove_member(p_membership_id); $function$
+AS $function$ SELECT private.remove_member(p_membership_id); $function$;
 
 
 CREATE OR REPLACE FUNCTION public.remove_shares(p_membership_id uuid, p_count integer)
@@ -258,7 +258,7 @@ CREATE OR REPLACE FUNCTION public.remove_shares(p_membership_id uuid, p_count in
  LANGUAGE sql
  SECURITY DEFINER
  SET search_path TO ''
-AS $function$ SELECT private.remove_shares(p_membership_id,p_count); $function$
+AS $function$ SELECT private.remove_shares(p_membership_id,p_count); $function$;
 
 
 
