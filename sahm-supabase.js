@@ -96,6 +96,7 @@
       if (set.error) throw set.error;
     }
     activeClientKey = key;
+    try { root.localStorage.setItem(ACTIVE_ACCOUNT_KEY, key); } catch (_) {}
     currentUser = sessionValue.user;
     rememberAccount(sessionValue.user);
     bindAuthListener();
@@ -144,6 +145,7 @@
     if (result.error) throw result.error;
     if (!result.data.session && activeClientKey !== 'default') {
       activeClientKey = 'default';
+      try { root.localStorage.removeItem(ACTIVE_ACCOUNT_KEY); } catch (_) {}
       c = getClient('default');
       result = await c.auth.getSession();
       if (result.error) throw result.error;
