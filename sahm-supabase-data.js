@@ -199,7 +199,7 @@
       db.events.push({
         id:e.id,groupId:e.association_id,at:e.occurred_at,type:mapEventType(e.event_type),
         eventType:e.event_type,text:eventText(e,profileMap),actor:e.actor_user_id?profileName(e.actor_user_id,profileMap):'سهم',
-        memberId:e.entity_type==='membership'?e.entity_id:null,
+        memberId:e.entity_type==='membership'?e.entity_id:null,entityId:e.entity_id||null,
         vis:e.visibility==='all'?'group':e.visibility==='manager'?'manager':e.visibility==='private'?'private':'group',
         data:e.after_data||null,before:e.before_data||null
       });
@@ -389,6 +389,17 @@
   }
   async function listMyInvitations(){
     try{return {ok:true,invitations:await invoke('list_my_invitations',{})||[]};}catch(e){return fail(e);}
+  }
+  async function getMyInvitationDetails(invitationId){
+    try{return {ok:true,invitation:await invoke('get_my_invitation_details',{p_invitation_id:invitationId})};}catch(e){return fail(e);}
+  }
+  async function submitJoinRequestByInvitation(invitationId,requestedShares){
+    try{var d=await invoke('submit_join_request_by_invitation',{p_invitation_id:invitationId,p_requested_shares:Number(requestedShares)});await refresh();return Object.assign({ok:true},d||{});}
+    catch(e){return fail(e);}
+  }
+  async function getPublicLinkStatus(groupId){
+    try{return {ok:true,link:await invoke('get_association_public_link_status',{p_association_id:groupId})};}
+    catch(e){return fail(e);}
   }
   async function addShares(memberId,count){
     try{var n=await invoke('add_shares',{p_membership_id:memberId,p_count:Number(count)});await refresh();return {ok:true,added:n};}catch(e){return fail(e);}
@@ -608,7 +619,9 @@
     previewInvite:previewInvite,acceptInvite:acceptInvite,respondToInvite:respondToInvite,
     submitJoinRequest:submitJoinRequest,cancelJoinRequest:cancelJoinRequest,approveJoinRequest:approveJoinRequest,
     rejectJoinRequest:rejectJoinRequest,managePublicLink:managePublicLink,previewPublicJoinLink:previewPublicJoinLink,
-    listMyInvitations:listMyInvitations,updateMyProfile:updateMyProfile,
+    listMyInvitations:listMyInvitations,getMyInvitationDetails:getMyInvitationDetails,
+    submitJoinRequestByInvitation:submitJoinRequestByInvitation,getPublicLinkStatus:getPublicLinkStatus,
+    updateMyProfile:updateMyProfile,
     startRealtime:startRealtime,stopRealtime:stopRealtime,install:install,clear:clear,
     isRemote:function(){return !!store;},savePrefs:savePrefs
   };
