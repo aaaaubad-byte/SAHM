@@ -393,6 +393,14 @@
   async function getMyInvitationDetails(invitationId){
     try{return {ok:true,invitation:await invoke('get_my_invitation_details',{p_invitation_id:invitationId})};}catch(e){return fail(e);}
   }
+  async function acceptLegacyInvitationById(invitationId){
+    try{
+      var d=await invoke('accept_legacy_invitation_by_id',{p_invitation_id:invitationId});
+      await refresh();
+      return {ok:true,groupId:d.association_id,membershipId:d.membership_id,sharesAdded:d.shares_added};
+    }catch(e){return fail(e);}
+  }
+
   async function submitJoinRequestByInvitation(invitationId,requestedShares){
     try{var d=await invoke('submit_join_request_by_invitation',{p_invitation_id:invitationId,p_requested_shares:Number(requestedShares)});await refresh();return Object.assign({ok:true},d||{});}
     catch(e){return fail(e);}
@@ -620,6 +628,7 @@
     submitJoinRequest:submitJoinRequest,cancelJoinRequest:cancelJoinRequest,approveJoinRequest:approveJoinRequest,
     rejectJoinRequest:rejectJoinRequest,managePublicLink:managePublicLink,previewPublicJoinLink:previewPublicJoinLink,
     listMyInvitations:listMyInvitations,getMyInvitationDetails:getMyInvitationDetails,
+    acceptLegacyInvitationById:acceptLegacyInvitationById,
     submitJoinRequestByInvitation:submitJoinRequestByInvitation,getPublicLinkStatus:getPublicLinkStatus,
     updateMyProfile:updateMyProfile,
     startRealtime:startRealtime,stopRealtime:stopRealtime,install:install,clear:clear,
