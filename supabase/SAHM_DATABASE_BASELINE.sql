@@ -264,7 +264,6 @@ CREATE TABLE public.user_preferences (
 
 ALTER TABLE public.association_cycles ADD CONSTRAINT association_cycles_installments_count_check CHECK (installments_count > 0);
 
-ALTER TABLE public.association_cycles ADD CONSTRAINT association_cycles_association_id_fkey FOREIGN KEY (association_id) REFERENCES associations(id) ON DELETE RESTRICT;
 
 ALTER TABLE public.association_cycles ADD CONSTRAINT association_cycles_id_association_id_key UNIQUE (id, association_id);
 
@@ -288,9 +287,7 @@ ALTER TABLE public.association_cycles ADD CONSTRAINT association_cycles_share_am
 
 ALTER TABLE public.association_cycles ADD CONSTRAINT association_cycles_cycle_type_check CHECK (cycle_type = ANY (ARRAY['weekly'::text, 'monthly'::text, 'custom'::text]));
 
-ALTER TABLE public.association_events ADD CONSTRAINT association_events_association_id_fkey FOREIGN KEY (association_id) REFERENCES associations(id) ON DELETE RESTRICT;
 
-ALTER TABLE public.association_events ADD CONSTRAINT association_events_actor_user_id_fkey FOREIGN KEY (actor_user_id) REFERENCES profiles(id) ON DELETE RESTRICT;
 
 ALTER TABLE public.association_events ADD CONSTRAINT association_events_visibility_check CHECK (visibility = ANY (ARRAY['manager'::text, 'member'::text, 'all'::text]));
 
@@ -300,7 +297,6 @@ ALTER TABLE public.association_events ADD CONSTRAINT association_events_id_assoc
 
 ALTER TABLE public.association_memberships ADD CONSTRAINT association_memberships_id_association_id_user_id_key UNIQUE (id, association_id, user_id);
 
-ALTER TABLE public.association_memberships ADD CONSTRAINT association_memberships_user_id_fkey FOREIGN KEY (user_id) REFERENCES profiles(id) ON DELETE RESTRICT;
 
 ALTER TABLE public.association_memberships ADD CONSTRAINT association_memberships_status_check CHECK (status = ANY (ARRAY['active'::text, 'left'::text]));
 
@@ -312,21 +308,16 @@ ALTER TABLE public.association_memberships ADD CONSTRAINT association_membership
 
 ALTER TABLE public.association_memberships ADD CONSTRAINT association_memberships_id_association_id_key UNIQUE (id, association_id);
 
-ALTER TABLE public.association_memberships ADD CONSTRAINT association_memberships_association_id_fkey FOREIGN KEY (association_id) REFERENCES associations(id) ON DELETE RESTRICT;
 
 ALTER TABLE public.association_notification_settings ADD CONSTRAINT association_notification_settings_pkey PRIMARY KEY (association_id);
 
-ALTER TABLE public.association_notification_settings ADD CONSTRAINT association_notification_settings_updated_by_user_id_fkey FOREIGN KEY (updated_by_user_id) REFERENCES profiles(id) ON DELETE RESTRICT;
 
-ALTER TABLE public.association_notification_settings ADD CONSTRAINT association_notification_settings_association_id_fkey FOREIGN KEY (association_id) REFERENCES associations(id) ON DELETE RESTRICT;
 
 ALTER TABLE public.association_user_preferences ADD CONSTRAINT association_user_preferences_pkey PRIMARY KEY (id);
 
 ALTER TABLE public.association_user_preferences ADD CONSTRAINT association_user_preferences_association_id_user_id_key UNIQUE (association_id, user_id);
 
-ALTER TABLE public.association_user_preferences ADD CONSTRAINT association_user_preferences_user_id_fkey FOREIGN KEY (user_id) REFERENCES profiles(id) ON DELETE RESTRICT;
 
-ALTER TABLE public.association_user_preferences ADD CONSTRAINT association_user_preferences_association_id_fkey FOREIGN KEY (association_id) REFERENCES associations(id) ON DELETE RESTRICT;
 
 ALTER TABLE public.associations ADD CONSTRAINT associations_cycle_days_check CHECK (cycle_days > 0);
 
@@ -352,7 +343,6 @@ ALTER TABLE public.associations ADD CONSTRAINT associations_pkey PRIMARY KEY (id
 
 ALTER TABLE public.associations ADD CONSTRAINT associations_id_manager_user_id_key UNIQUE (id, manager_user_id);
 
-ALTER TABLE public.associations ADD CONSTRAINT associations_manager_user_id_fkey FOREIGN KEY (manager_user_id) REFERENCES profiles(id) ON DELETE RESTRICT;
 
 ALTER TABLE public.associations ADD CONSTRAINT associations_name_check CHECK (length(btrim(name)) >= 2 AND length(btrim(name)) <= 120);
 
@@ -362,9 +352,7 @@ ALTER TABLE public.associations ADD CONSTRAINT associations_cycle_type_check CHE
 
 ALTER TABLE public.associations ADD CONSTRAINT associations_share_amount_minor_check CHECK (share_amount_minor > 0);
 
-ALTER TABLE public.chat_messages ADD CONSTRAINT chat_messages_sender_user_id_fkey FOREIGN KEY (sender_user_id) REFERENCES profiles(id) ON DELETE RESTRICT;
 
-ALTER TABLE public.chat_messages ADD CONSTRAINT chat_messages_event_id_association_id_fkey FOREIGN KEY (event_id, association_id) REFERENCES association_events(id, association_id) ON DELETE RESTRICT;
 
 ALTER TABLE public.chat_messages ADD CONSTRAINT chat_messages_kind_check CHECK (kind = ANY (ARRAY['member'::text, 'system'::text]));
 
@@ -372,35 +360,26 @@ ALTER TABLE public.chat_messages ADD CONSTRAINT chat_messages_check CHECK (kind 
 
 ALTER TABLE public.chat_messages ADD CONSTRAINT chat_messages_pkey PRIMARY KEY (id);
 
-ALTER TABLE public.chat_messages ADD CONSTRAINT chat_messages_association_id_fkey FOREIGN KEY (association_id) REFERENCES associations(id) ON DELETE RESTRICT;
 
 ALTER TABLE public.chat_read_states ADD CONSTRAINT chat_read_states_pkey PRIMARY KEY (id);
 
 ALTER TABLE public.chat_read_states ADD CONSTRAINT chat_read_states_association_id_user_id_key UNIQUE (association_id, user_id);
 
-ALTER TABLE public.chat_read_states ADD CONSTRAINT chat_read_states_user_id_fkey FOREIGN KEY (user_id) REFERENCES profiles(id) ON DELETE RESTRICT;
 
-ALTER TABLE public.chat_read_states ADD CONSTRAINT chat_read_states_association_id_fkey FOREIGN KEY (association_id) REFERENCES associations(id) ON DELETE RESTRICT;
 
 ALTER TABLE public.cycle_attendance ADD CONSTRAINT cycle_attendance_cycle_id_membership_id_key UNIQUE (cycle_id, membership_id);
 
 ALTER TABLE public.cycle_attendance ADD CONSTRAINT cycle_attendance_pkey PRIMARY KEY (id);
 
-ALTER TABLE public.cycle_attendance ADD CONSTRAINT cycle_attendance_marked_by_user_id_fkey FOREIGN KEY (marked_by_user_id) REFERENCES profiles(id) ON DELETE RESTRICT;
 
-ALTER TABLE public.cycle_attendance ADD CONSTRAINT cycle_attendance_cycle_id_association_id_fkey FOREIGN KEY (cycle_id, association_id) REFERENCES association_cycles(id, association_id) ON DELETE RESTRICT;
 
-ALTER TABLE public.cycle_attendance ADD CONSTRAINT cycle_attendance_membership_id_association_id_fkey FOREIGN KEY (membership_id, association_id) REFERENCES association_memberships(id, association_id) ON DELETE RESTRICT;
 
 ALTER TABLE public.draw_eligible_shares ADD CONSTRAINT draw_eligible_shares_pkey PRIMARY KEY (id);
 
 ALTER TABLE public.draw_eligible_shares ADD CONSTRAINT draw_eligible_shares_draw_id_share_id_key UNIQUE (draw_id, share_id);
 
-ALTER TABLE public.draw_eligible_shares ADD CONSTRAINT draw_eligible_shares_draw_id_association_id_fkey FOREIGN KEY (draw_id, association_id) REFERENCES draws(id, association_id) ON DELETE RESTRICT;
 
-ALTER TABLE public.draw_eligible_shares ADD CONSTRAINT draw_eligible_shares_share_id_association_id_fkey FOREIGN KEY (share_id, association_id) REFERENCES shares(id, association_id) ON DELETE RESTRICT;
 
-ALTER TABLE public.draws ADD CONSTRAINT draws_winner_share_id_association_id_fkey FOREIGN KEY (winner_share_id, association_id) REFERENCES shares(id, association_id) ON DELETE RESTRICT;
 
 ALTER TABLE public.draws ADD CONSTRAINT draws_share_count_at_draw_check CHECK (share_count_at_draw > 0);
 
@@ -422,9 +401,7 @@ ALTER TABLE public.draws ADD CONSTRAINT draws_association_id_round_no_key UNIQUE
 
 ALTER TABLE public.draws ADD CONSTRAINT draws_id_association_id_key UNIQUE (id, association_id);
 
-ALTER TABLE public.draws ADD CONSTRAINT draws_cycle_id_association_id_fkey FOREIGN KEY (cycle_id, association_id) REFERENCES association_cycles(id, association_id) ON DELETE RESTRICT;
 
-ALTER TABLE public.installment_obligations ADD CONSTRAINT installment_obligations_membership_id_association_id_fkey FOREIGN KEY (membership_id, association_id) REFERENCES association_memberships(id, association_id) ON DELETE RESTRICT;
 
 ALTER TABLE public.installment_obligations ADD CONSTRAINT installment_obligations_id_association_id_key UNIQUE (id, association_id);
 
@@ -436,19 +413,16 @@ ALTER TABLE public.installment_obligations ADD CONSTRAINT installment_obligation
 
 ALTER TABLE public.installment_obligations ADD CONSTRAINT installment_obligations_amount_minor_check CHECK (amount_minor > 0);
 
-ALTER TABLE public.installment_obligations ADD CONSTRAINT installment_obligations_period_id_cycle_id_association_id_fkey FOREIGN KEY (period_id, cycle_id, association_id) REFERENCES installment_periods(id, cycle_id, association_id) ON DELETE RESTRICT;
 
 ALTER TABLE public.installment_obligations ADD CONSTRAINT installment_obligations_currency_check CHECK (currency = ANY (ARRAY['YER'::text, 'SAR'::text, 'USD'::text]));
 
 ALTER TABLE public.installment_obligations ADD CONSTRAINT installment_obligations_id_association_id_membership_id_key UNIQUE (id, association_id, membership_id);
 
-ALTER TABLE public.installment_obligations ADD CONSTRAINT installment_obligations_cycle_id_association_id_fkey FOREIGN KEY (cycle_id, association_id) REFERENCES association_cycles(id, association_id) ON DELETE RESTRICT;
 
 ALTER TABLE public.installment_periods ADD CONSTRAINT installment_periods_per_share_amount_minor_check CHECK (per_share_amount_minor > 0);
 
 ALTER TABLE public.installment_periods ADD CONSTRAINT installment_periods_installment_no_check CHECK (installment_no > 0);
 
-ALTER TABLE public.installment_periods ADD CONSTRAINT installment_periods_cycle_id_association_id_fkey FOREIGN KEY (cycle_id, association_id) REFERENCES association_cycles(id, association_id) ON DELETE RESTRICT;
 
 ALTER TABLE public.installment_periods ADD CONSTRAINT installment_periods_id_cycle_id_association_id_key UNIQUE (id, cycle_id, association_id);
 
@@ -458,7 +432,6 @@ ALTER TABLE public.installment_periods ADD CONSTRAINT installment_periods_pkey P
 
 ALTER TABLE public.installment_periods ADD CONSTRAINT installment_periods_check CHECK (ends_on >= starts_on);
 
-ALTER TABLE public.installment_receipts ADD CONSTRAINT installment_receipts_obligation_id_association_id_membersh_fkey FOREIGN KEY (obligation_id, association_id, membership_id) REFERENCES installment_obligations(id, association_id, membership_id) ON DELETE RESTRICT;
 
 ALTER TABLE public.installment_receipts ADD CONSTRAINT installment_receipts_amount_minor_check CHECK (amount_minor > 0);
 
@@ -472,13 +445,9 @@ ALTER TABLE public.installment_receipts ADD CONSTRAINT installment_receipts_pkey
 
 ALTER TABLE public.installment_receipts ADD CONSTRAINT installment_receipts_id_association_id_key UNIQUE (id, association_id);
 
-ALTER TABLE public.installment_receipts ADD CONSTRAINT installment_receipts_recorded_by_user_id_fkey FOREIGN KEY (recorded_by_user_id) REFERENCES profiles(id) ON DELETE RESTRICT;
 
-ALTER TABLE public.installment_receipts ADD CONSTRAINT installment_receipts_membership_id_association_id_benefici_fkey FOREIGN KEY (membership_id, association_id, beneficiary_user_id) REFERENCES association_memberships(id, association_id, user_id) ON DELETE RESTRICT;
 
-ALTER TABLE public.invitations ADD CONSTRAINT invitations_invited_user_id_fkey FOREIGN KEY (invited_user_id) REFERENCES profiles(id) ON DELETE RESTRICT;
 
-ALTER TABLE public.invitations ADD CONSTRAINT invitations_created_by_fkey FOREIGN KEY (created_by) REFERENCES profiles(id) ON DELETE RESTRICT;
 
 ALTER TABLE public.invitations ADD CONSTRAINT invitations_invitee_phone_e164_check CHECK (invitee_phone_e164 IS NULL OR invitee_phone_e164 ~ '^[+][1-9][0-9]{7,14}$'::text);
 
@@ -486,7 +455,6 @@ ALTER TABLE public.invitations ADD CONSTRAINT invitations_status_check CHECK (st
 
 ALTER TABLE public.invitations ADD CONSTRAINT invitations_token_hash_key UNIQUE (token_hash);
 
-ALTER TABLE public.invitations ADD CONSTRAINT invitations_association_id_fkey FOREIGN KEY (association_id) REFERENCES associations(id) ON DELETE RESTRICT;
 
 ALTER TABLE public.invitations ADD CONSTRAINT invitations_pkey PRIMARY KEY (id);
 
@@ -494,9 +462,7 @@ ALTER TABLE public.invitations ADD CONSTRAINT invitations_shares_requested_check
 
 ALTER TABLE public.notifications ADD CONSTRAINT notifications_pkey PRIMARY KEY (id);
 
-ALTER TABLE public.notifications ADD CONSTRAINT notifications_association_id_fkey FOREIGN KEY (association_id) REFERENCES associations(id) ON DELETE RESTRICT;
 
-ALTER TABLE public.notifications ADD CONSTRAINT notifications_user_id_fkey FOREIGN KEY (user_id) REFERENCES profiles(id) ON DELETE RESTRICT;
 
 ALTER TABLE public.notifications ADD CONSTRAINT notifications_idempotency_key_key UNIQUE (idempotency_key);
 
@@ -504,19 +470,15 @@ ALTER TABLE public.profile_private ADD CONSTRAINT profile_private_phone_e164_key
 
 ALTER TABLE public.profile_private ADD CONSTRAINT profile_private_phone_e164_check CHECK (phone_e164 ~ '^[+][1-9][0-9]{7,14}$'::text);
 
-ALTER TABLE public.profile_private ADD CONSTRAINT profile_private_user_id_fkey FOREIGN KEY (user_id) REFERENCES profiles(id) ON DELETE RESTRICT;
 
 ALTER TABLE public.profile_private ADD CONSTRAINT profile_private_pkey PRIMARY KEY (user_id);
 
 ALTER TABLE public.profiles ADD CONSTRAINT profiles_full_name_check CHECK (length(btrim(full_name)) >= 2 AND length(btrim(full_name)) <= 120);
 
-ALTER TABLE public.profiles ADD CONSTRAINT profiles_id_fkey FOREIGN KEY (id) REFERENCES auth.users(id) ON DELETE CASCADE;
 
 ALTER TABLE public.profiles ADD CONSTRAINT profiles_pkey PRIMARY KEY (id);
 
-ALTER TABLE public.receipt_corrections ADD CONSTRAINT receipt_corrections_corrected_by_user_id_fkey FOREIGN KEY (corrected_by_user_id) REFERENCES profiles(id) ON DELETE RESTRICT;
 
-ALTER TABLE public.receipt_corrections ADD CONSTRAINT receipt_corrections_receipt_id_association_id_fkey FOREIGN KEY (receipt_id, association_id) REFERENCES installment_receipts(id, association_id) ON DELETE RESTRICT;
 
 ALTER TABLE public.receipt_corrections ADD CONSTRAINT receipt_corrections_pkey PRIMARY KEY (id);
 
@@ -524,21 +486,16 @@ ALTER TABLE public.receipt_corrections ADD CONSTRAINT receipt_corrections_action
 
 ALTER TABLE public.receipt_corrections ADD CONSTRAINT receipt_corrections_reason_check CHECK (length(btrim(reason)) >= 3);
 
-ALTER TABLE public.reminders ADD CONSTRAINT reminders_sent_by_user_id_fkey FOREIGN KEY (sent_by_user_id) REFERENCES profiles(id) ON DELETE RESTRICT;
 
-ALTER TABLE public.reminders ADD CONSTRAINT reminders_obligation_id_association_id_fkey FOREIGN KEY (obligation_id, association_id) REFERENCES installment_obligations(id, association_id) ON DELETE RESTRICT;
 
 ALTER TABLE public.reminders ADD CONSTRAINT reminders_pkey PRIMARY KEY (id);
 
-ALTER TABLE public.reminders ADD CONSTRAINT reminders_recipient_user_id_fkey FOREIGN KEY (recipient_user_id) REFERENCES profiles(id) ON DELETE RESTRICT;
 
 ALTER TABLE public.shares ADD CONSTRAINT shares_association_id_share_no_key UNIQUE (association_id, share_no);
 
 ALTER TABLE public.shares ADD CONSTRAINT shares_share_no_check CHECK (share_no > 0);
 
-ALTER TABLE public.shares ADD CONSTRAINT shares_membership_id_association_id_fkey FOREIGN KEY (membership_id, association_id) REFERENCES association_memberships(id, association_id) ON DELETE RESTRICT;
 
-ALTER TABLE public.shares ADD CONSTRAINT shares_association_id_fkey FOREIGN KEY (association_id) REFERENCES associations(id) ON DELETE RESTRICT;
 
 ALTER TABLE public.shares ADD CONSTRAINT shares_id_association_id_key UNIQUE (id, association_id);
 
@@ -550,6 +507,51 @@ ALTER TABLE public.shares ADD CONSTRAINT shares_pkey PRIMARY KEY (id);
 
 ALTER TABLE public.user_preferences ADD CONSTRAINT user_preferences_pkey PRIMARY KEY (user_id);
 
+
+-- Add foreign keys only after all referenced PRIMARY KEY / UNIQUE constraints exist.
+ALTER TABLE public.association_cycles ADD CONSTRAINT association_cycles_association_id_fkey FOREIGN KEY (association_id) REFERENCES associations(id) ON DELETE RESTRICT;
+ALTER TABLE public.association_events ADD CONSTRAINT association_events_association_id_fkey FOREIGN KEY (association_id) REFERENCES associations(id) ON DELETE RESTRICT;
+ALTER TABLE public.association_events ADD CONSTRAINT association_events_actor_user_id_fkey FOREIGN KEY (actor_user_id) REFERENCES profiles(id) ON DELETE RESTRICT;
+ALTER TABLE public.association_memberships ADD CONSTRAINT association_memberships_user_id_fkey FOREIGN KEY (user_id) REFERENCES profiles(id) ON DELETE RESTRICT;
+ALTER TABLE public.association_memberships ADD CONSTRAINT association_memberships_association_id_fkey FOREIGN KEY (association_id) REFERENCES associations(id) ON DELETE RESTRICT;
+ALTER TABLE public.association_notification_settings ADD CONSTRAINT association_notification_settings_updated_by_user_id_fkey FOREIGN KEY (updated_by_user_id) REFERENCES profiles(id) ON DELETE RESTRICT;
+ALTER TABLE public.association_notification_settings ADD CONSTRAINT association_notification_settings_association_id_fkey FOREIGN KEY (association_id) REFERENCES associations(id) ON DELETE RESTRICT;
+ALTER TABLE public.association_user_preferences ADD CONSTRAINT association_user_preferences_user_id_fkey FOREIGN KEY (user_id) REFERENCES profiles(id) ON DELETE RESTRICT;
+ALTER TABLE public.association_user_preferences ADD CONSTRAINT association_user_preferences_association_id_fkey FOREIGN KEY (association_id) REFERENCES associations(id) ON DELETE RESTRICT;
+ALTER TABLE public.associations ADD CONSTRAINT associations_manager_user_id_fkey FOREIGN KEY (manager_user_id) REFERENCES profiles(id) ON DELETE RESTRICT;
+ALTER TABLE public.chat_messages ADD CONSTRAINT chat_messages_sender_user_id_fkey FOREIGN KEY (sender_user_id) REFERENCES profiles(id) ON DELETE RESTRICT;
+ALTER TABLE public.chat_messages ADD CONSTRAINT chat_messages_event_id_association_id_fkey FOREIGN KEY (event_id, association_id) REFERENCES association_events(id, association_id) ON DELETE RESTRICT;
+ALTER TABLE public.chat_messages ADD CONSTRAINT chat_messages_association_id_fkey FOREIGN KEY (association_id) REFERENCES associations(id) ON DELETE RESTRICT;
+ALTER TABLE public.chat_read_states ADD CONSTRAINT chat_read_states_user_id_fkey FOREIGN KEY (user_id) REFERENCES profiles(id) ON DELETE RESTRICT;
+ALTER TABLE public.chat_read_states ADD CONSTRAINT chat_read_states_association_id_fkey FOREIGN KEY (association_id) REFERENCES associations(id) ON DELETE RESTRICT;
+ALTER TABLE public.cycle_attendance ADD CONSTRAINT cycle_attendance_marked_by_user_id_fkey FOREIGN KEY (marked_by_user_id) REFERENCES profiles(id) ON DELETE RESTRICT;
+ALTER TABLE public.cycle_attendance ADD CONSTRAINT cycle_attendance_cycle_id_association_id_fkey FOREIGN KEY (cycle_id, association_id) REFERENCES association_cycles(id, association_id) ON DELETE RESTRICT;
+ALTER TABLE public.cycle_attendance ADD CONSTRAINT cycle_attendance_membership_id_association_id_fkey FOREIGN KEY (membership_id, association_id) REFERENCES association_memberships(id, association_id) ON DELETE RESTRICT;
+ALTER TABLE public.draw_eligible_shares ADD CONSTRAINT draw_eligible_shares_draw_id_association_id_fkey FOREIGN KEY (draw_id, association_id) REFERENCES draws(id, association_id) ON DELETE RESTRICT;
+ALTER TABLE public.draw_eligible_shares ADD CONSTRAINT draw_eligible_shares_share_id_association_id_fkey FOREIGN KEY (share_id, association_id) REFERENCES shares(id, association_id) ON DELETE RESTRICT;
+ALTER TABLE public.draws ADD CONSTRAINT draws_winner_share_id_association_id_fkey FOREIGN KEY (winner_share_id, association_id) REFERENCES shares(id, association_id) ON DELETE RESTRICT;
+ALTER TABLE public.draws ADD CONSTRAINT draws_cycle_id_association_id_fkey FOREIGN KEY (cycle_id, association_id) REFERENCES association_cycles(id, association_id) ON DELETE RESTRICT;
+ALTER TABLE public.installment_obligations ADD CONSTRAINT installment_obligations_membership_id_association_id_fkey FOREIGN KEY (membership_id, association_id) REFERENCES association_memberships(id, association_id) ON DELETE RESTRICT;
+ALTER TABLE public.installment_obligations ADD CONSTRAINT installment_obligations_period_id_cycle_id_association_id_fkey FOREIGN KEY (period_id, cycle_id, association_id) REFERENCES installment_periods(id, cycle_id, association_id) ON DELETE RESTRICT;
+ALTER TABLE public.installment_obligations ADD CONSTRAINT installment_obligations_cycle_id_association_id_fkey FOREIGN KEY (cycle_id, association_id) REFERENCES association_cycles(id, association_id) ON DELETE RESTRICT;
+ALTER TABLE public.installment_periods ADD CONSTRAINT installment_periods_cycle_id_association_id_fkey FOREIGN KEY (cycle_id, association_id) REFERENCES association_cycles(id, association_id) ON DELETE RESTRICT;
+ALTER TABLE public.installment_receipts ADD CONSTRAINT installment_receipts_obligation_id_association_id_membersh_fkey FOREIGN KEY (obligation_id, association_id, membership_id) REFERENCES installment_obligations(id, association_id, membership_id) ON DELETE RESTRICT;
+ALTER TABLE public.installment_receipts ADD CONSTRAINT installment_receipts_recorded_by_user_id_fkey FOREIGN KEY (recorded_by_user_id) REFERENCES profiles(id) ON DELETE RESTRICT;
+ALTER TABLE public.installment_receipts ADD CONSTRAINT installment_receipts_membership_id_association_id_benefici_fkey FOREIGN KEY (membership_id, association_id, beneficiary_user_id) REFERENCES association_memberships(id, association_id, user_id) ON DELETE RESTRICT;
+ALTER TABLE public.invitations ADD CONSTRAINT invitations_invited_user_id_fkey FOREIGN KEY (invited_user_id) REFERENCES profiles(id) ON DELETE RESTRICT;
+ALTER TABLE public.invitations ADD CONSTRAINT invitations_created_by_fkey FOREIGN KEY (created_by) REFERENCES profiles(id) ON DELETE RESTRICT;
+ALTER TABLE public.invitations ADD CONSTRAINT invitations_association_id_fkey FOREIGN KEY (association_id) REFERENCES associations(id) ON DELETE RESTRICT;
+ALTER TABLE public.notifications ADD CONSTRAINT notifications_association_id_fkey FOREIGN KEY (association_id) REFERENCES associations(id) ON DELETE RESTRICT;
+ALTER TABLE public.notifications ADD CONSTRAINT notifications_user_id_fkey FOREIGN KEY (user_id) REFERENCES profiles(id) ON DELETE RESTRICT;
+ALTER TABLE public.profile_private ADD CONSTRAINT profile_private_user_id_fkey FOREIGN KEY (user_id) REFERENCES profiles(id) ON DELETE RESTRICT;
+ALTER TABLE public.profiles ADD CONSTRAINT profiles_id_fkey FOREIGN KEY (id) REFERENCES auth.users(id) ON DELETE CASCADE;
+ALTER TABLE public.receipt_corrections ADD CONSTRAINT receipt_corrections_corrected_by_user_id_fkey FOREIGN KEY (corrected_by_user_id) REFERENCES profiles(id) ON DELETE RESTRICT;
+ALTER TABLE public.receipt_corrections ADD CONSTRAINT receipt_corrections_receipt_id_association_id_fkey FOREIGN KEY (receipt_id, association_id) REFERENCES installment_receipts(id, association_id) ON DELETE RESTRICT;
+ALTER TABLE public.reminders ADD CONSTRAINT reminders_sent_by_user_id_fkey FOREIGN KEY (sent_by_user_id) REFERENCES profiles(id) ON DELETE RESTRICT;
+ALTER TABLE public.reminders ADD CONSTRAINT reminders_obligation_id_association_id_fkey FOREIGN KEY (obligation_id, association_id) REFERENCES installment_obligations(id, association_id) ON DELETE RESTRICT;
+ALTER TABLE public.reminders ADD CONSTRAINT reminders_recipient_user_id_fkey FOREIGN KEY (recipient_user_id) REFERENCES profiles(id) ON DELETE RESTRICT;
+ALTER TABLE public.shares ADD CONSTRAINT shares_membership_id_association_id_fkey FOREIGN KEY (membership_id, association_id) REFERENCES association_memberships(id, association_id) ON DELETE RESTRICT;
+ALTER TABLE public.shares ADD CONSTRAINT shares_association_id_fkey FOREIGN KEY (association_id) REFERENCES associations(id) ON DELETE RESTRICT;
 ALTER TABLE public.user_preferences ADD CONSTRAINT user_preferences_user_id_fkey FOREIGN KEY (user_id) REFERENCES profiles(id) ON DELETE RESTRICT;
 
 CREATE INDEX cycles_association_no_idx ON public.association_cycles USING btree (association_id, cycle_no);
