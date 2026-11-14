@@ -382,6 +382,7 @@ test('local public-link API refuses to mint or expose server-managed secrets', (
 test('latest activity sorts by event timestamp before applying the display limit', () => {
   const w = fresh();
   const { group } = createGroup(w);
+  w.db.events.length = 0; // Exclude the group-created seed event from this ordering fixture.
   w.db.events.push(
     { id: 'event-late', groupId: group.id, at: '2026-11-14T08:00:00Z', type: 'join', text: 'الأحدث', vis: 'group' },
     { id: 'event-old', groupId: group.id, at: '2026-11-11T08:00:00Z', type: 'receipt', text: 'الأقدم', vis: 'group' },
