@@ -3495,7 +3495,7 @@ function setCreateWizardStep(step,updateHistory=true){
  if(form){form.classList.remove('create-step-active-1','create-step-active-2','create-step-active-3');form.classList.add('create-step-active-'+createWizardStep)}
  document.querySelectorAll('.create-step').forEach((node,i)=>node.hidden=i+1!==createWizardStep);
  const names=['البداية والجدولة','بيانات الجمعية والمساهمات'];const title=document.getElementById('create-stage-title');if(title)title.textContent=names[createWizardStep-1];
- const prev=document.getElementById('create-prev'),next=document.getElementById('create-next'),submit=document.getElementById('create-final-submit');if(prev)prev.hidden=createWizardStep===1;if(next)next.hidden=createWizardStep===3;if(submit)submit.hidden=createWizardStep!==3;
+ const prev=document.getElementById('create-prev'),next=document.getElementById('create-next'),submit=document.getElementById('create-final-submit');if(prev)prev.hidden=createWizardStep===1;if(next)next.hidden=createWizardStep===2;if(submit)submit.hidden=createWizardStep!==2;
  document.getElementById('screen')?.scrollTo({top:0,behavior:'smooth'});
 }
 function createInput(form,name){return form.elements[name]&&form.elements[name].value?String(form.elements[name].value).trim():''}

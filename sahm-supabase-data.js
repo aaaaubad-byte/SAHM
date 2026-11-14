@@ -215,7 +215,7 @@
     raw.join_requests.forEach(function(r){
       var a=raw.associations.find(function(x){return x.id===r.association_id;});
       db.joinRequests.push({id:r.id,groupId:r.association_id,applicantUserId:r.applicant_user_id,
-        applicantName:profileName(r.applicant_user_id,profileMap),invitationId:r.invitation_id||null,
+        applicantName:r.applicant_name||profileName(r.applicant_user_id,profileMap),invitationId:r.invitation_id||null,
         publicLinkId:r.public_link_id||null,sourceType:r.source_type,requestedShares:Number(r.requested_shares),
         estimatedAmountMinor:Number(r.estimated_amount_minor),currency:a&&a.currency||'YER',status:r.status,
         submittedAt:r.submitted_at,decidedAt:r.decided_at||null,decidedByUserId:r.decided_by_user_id||null,
