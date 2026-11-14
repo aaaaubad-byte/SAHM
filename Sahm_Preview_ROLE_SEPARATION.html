@@ -4448,17 +4448,28 @@ document.addEventListener('submit',async e=>{
   return;
  }
  if(form.id==='joinRequestForm'){
+  if(joinRequestBusy)return;
   const d=new FormData(form),shares=Number(d.get('requestedShares'));
   if(!Number.isInteger(shares)||shares<1){toast('أدخل عدد أسهم صحيحًا وموجبًا');return}
   if(!d.get('confirmCommitment')){toast('أكد مراجعة عدد الأسهم والالتزام المالي');return}
   if(!pendingJoinContext){toast('انتهت جلسة رابط الانضمام؛ افتح الرابط مجددًا');return}
-  const result=pendingJoinContext.source==='invitation_id'
-   ?await SahmSupabaseData.submitJoinRequestByInvitation(pendingJoinContext.invitationId,shares)
-   :await SahmSupabaseData.submitJoinRequest(pendingJoinContext.source,pendingJoinContext.token,shares);
-  if(result&&result.ok){
-   lastSubmittedRequestId=result.request_id;pendingJoinContext=null;pendingJoinCode=null;
-   refreshData();toast('تم إرسال طلب الانضمام إلى المدير');go('join-request-status',{id:result.request_id});
-  }else toast(result&&result.message||'تعذر إرسال طلب الانضمام');
+  joinRequestBusy=true;
+  const submit=form.querySelector('button[type="submit"]'),oldLabel=submit?submit.textContent:'';
+  if(submit){submit.disabled=true;submit.textContent='جارٍ إرسال الطلب...'}
+  try{
+   const context=pendingJoinContext;
+   const result=context.source==='invitation_id'
+    ?await SahmSupabaseData.submitJoinRequestByInvitation(context.invitationId,shares)
+    :await SahmSupabaseData.submitJoinRequest(context.source,context.token,shares);
+   if(result&&result.ok){
+    lastSubmittedRequestId=result.request_id;pendingJoinContext=null;pendingJoinCode=null;
+    refreshData();toast('تم إرسال طلب الانضمام إلى المدير');go('join-request-status',{id:result.request_id,groupName:context.info&&context.info.name||''});
+   }else toast(result&&result.message||'تعذر إرسال طلب الانضمام');
+  }catch(error){toast(SahmSupabase.friendlyError(error));}
+  finally{
+   joinRequestBusy=false;
+   if(submit){submit.disabled=false;submit.textContent=oldLabel;}
+  }
   return;
  }
  if(form.id==='chatForm'){
