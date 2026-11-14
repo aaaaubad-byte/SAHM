@@ -3277,7 +3277,7 @@ const $=s=>document.querySelector(s);
 const money=(n,c='YER')=>{const cur=SahmCore.CURRENCIES[c]||SahmCore.CURRENCIES.YER;const minor=Math.round(Number(n||0)*cur.minor);return SahmCore.fmtMoney(minor,c in SahmCore.CURRENCIES?c:'YER')};
 const today=()=>SahmApp.todayIn();
 const AUTH_SCREEN_NAMES=['welcome','register','profile-setup','reset-password','logged-out'];
-let db={session:false,verified:false,user:{id:null,name:'',phone:'',city:'',email:'',avatarKey:'avatar-01',notifications:true,biometric:false},groups:[],unread:0},screenName='welcome',params={},groupTab='all',groupDetailTab='overview',toastTimer,homeSlideTimer=null,homeSlideIndex=0,selectedInstallmentCycle=1,selectedInstallmentStatus='all',pendingJoinCode=null,pendingJoinContext=null,lastSubmittedRequestId=null,createdGroupLink=null,createdLinkWarning=null;
+let db={session:false,verified:false,user:{id:null,name:'',phone:'',city:'',email:'',avatarKey:'avatar-01',notifications:true,biometric:false},groups:[],unread:0},screenName='welcome',params={},groupTab='all',groupDetailTab='overview',toastTimer,homeSlideTimer=null,homeSlideIndex=0,selectedInstallmentCycle=1,selectedInstallmentStatus='all',pendingJoinCode=null,pendingJoinContext=null,lastSubmittedRequestId=null,joinRequestFilter='pending',joinRequestBusy=false,createdGroupLink=null,createdLinkWarning=null;
 let selectedAvatarKey='avatar-01',authBusy=false,activeProfile=null;
 let currentGroupId=(db.groups[0]||{}).id||null,createdGroupId=null,createWizardStep=1,createFormSnapshot={},reminderRequest=null,navigation=null;
 SahmApp.onResult((name,result)=>{if(result&&result.ok===false)toast(result.message||'تعذر تنفيذ العملية');else if(result&&result.persisted===false)toast(result.warning||'تعذر حفظ التغييرات في تخزين المعاينة');});
@@ -3324,7 +3324,7 @@ function uiIcon(name,size=20){
 }
 
 function load(){
- const prefs=SahmApp.prefs(),mine=SahmApp.myGroups(),rawGroups=[...(mine.managed||[]),...(mine.joined||[])];
+ const prefs=SahmApp.prefs(),appStore=SahmApp.store(),mine=SahmApp.myGroups(),rawGroups=[...(mine.managed||[]),...(mine.joined||[])];
  const groups=[];
  rawGroups.forEach(g=>{
   const detail=SahmApp.groupDetail(g.id);if(!detail||!detail.ok)return;
@@ -3350,6 +3350,8 @@ function load(){
    notifications:prefs.notifications!==false,biometric:!!prefs.biometric
   }),
   session:!!prefs.session,verified:!!prefs.verified,groups,
+  joinRequests:Array.isArray(appStore.joinRequests)?appStore.joinRequests.slice():[],
+  invites:Array.isArray(appStore.invites)?appStore.invites.slice():[],
   unread:notifResult&&notifResult.ok?notifResult.unread:SahmApp.unreadNotifications()
  };
 }
@@ -3380,7 +3382,7 @@ function routeSnapshot(nextScreen=screenName,nextParams=params,context={}){
  return Object.assign({
   screenName:nextScreen,params:nextParams||{},currentGroupId:currentGroupId,
   groupTab:groupTab,groupDetailTab:groupDetailTab,
-  viewState:{selectedInstallmentCycle:selectedInstallmentCycle,selectedInstallmentStatus:selectedInstallmentStatus,createWizardStep:createWizardStep,createFormSnapshot:$('#createForm')?Object.fromEntries(new FormData($('#createForm'))):createFormSnapshot}
+  viewState:{selectedInstallmentCycle:selectedInstallmentCycle,selectedInstallmentStatus:selectedInstallmentStatus,joinRequestFilter:joinRequestFilter,createWizardStep:createWizardStep,createFormSnapshot:$('#createForm')?Object.fromEntries(new FormData($('#createForm'))):createFormSnapshot}
  },context||{});
 }
 function sameRouteSnapshot(a,b){
@@ -3404,6 +3406,7 @@ function applyNavigationState(state,fromPop=false){
  const view=next.viewState||{};
  selectedInstallmentCycle=Number(view.selectedInstallmentCycle)||1;
  selectedInstallmentStatus=view.selectedInstallmentStatus||'all';
+ joinRequestFilter=['pending','approved','rejected','cancelled','all'].includes(view.joinRequestFilter)?view.joinRequestFilter:joinRequestFilter;
  createWizardStep=Math.max(1,Math.min(2,Number(view.createWizardStep)||1));
  createFormSnapshot=Object.assign({},view.createFormSnapshot||{});
  const sameScreen=previous.screenName===next.screenName&&JSON.stringify(previous.params||{})===JSON.stringify(next.params||{})&&previous.currentGroupId===next.currentGroupId&&previous.groupTab===next.groupTab&&previous.groupDetailTab===next.groupDetailTab;
@@ -3503,10 +3506,13 @@ function homeActivity(){
  const list=SahmApp.recentActivity(5);
  if(!list.length)return '<div class="empty"><b>لا يوجد نشاط حديث</b></div>';
  return list.map(a=>{
-  const isRequest=a.eventType==='join_request_submitted'&&db.groups.some(g=>g.id===a.groupId&&g.role==='manager');
-  const target=isRequest?'join-request-detail':'group-detail';
-  const id=isRequest?(a.entityId||''):a.groupId;
-  return `<button class="activity-card" data-go="${target}" data-id="${escapeHtml(id)}" ${isRequest?'data-group-id="'+escapeHtml(a.groupId)+'"':''}><span class="activity-icon joined">${uiIcon(a.icon,20)}</span><span class="activity-copy"><strong>${escapeHtml(a.title)}</strong><small>${escapeHtml(a.groupName)} <i>·</i> ${escapeHtml(SahmApp.chatTime(a.at))}</small></span><span class="activity-arrow">&gt;</span></button>`;
+  const requestEvent=['join_request_submitted','join_request_approved','join_request_rejected','join_request_cancelled'].includes(a.eventType);
+  const request=(db.joinRequests||[]).find(x=>x.id===a.entityId)||null;
+  const managerRequest=requestEvent&&a.eventType==='join_request_submitted'&&db.groups.some(g=>g.id===a.groupId&&g.role==='manager');
+  const applicantRequest=requestEvent&&request&&request.applicantUserId===String(db.user&&db.user.id||'');
+  const target=managerRequest?'join-request-detail':applicantRequest?'join-request-status':'group-detail';
+  const id=(managerRequest||applicantRequest)?(a.entityId||''):a.groupId;
+  return `<button class="activity-card" data-go="${target}" data-id="${escapeHtml(id)}" ${managerRequest?'data-group-id="'+escapeHtml(a.groupId)+'"':''}><span class="activity-icon joined">${uiIcon(a.icon,20)}</span><span class="activity-copy"><strong>${escapeHtml(a.title)}</strong><small>${escapeHtml(a.groupName)} <i>·</i> ${escapeHtml(SahmApp.chatTime(a.at))}</small></span><span class="activity-arrow">&gt;</span></button>`;
  }).join('')
 }
 function homeInvitations(){
@@ -3521,7 +3527,11 @@ function homeInvitations(){
  }).sort((a,b)=>String(b.createdAt||'').localeCompare(String(a.createdAt||'')));
  if(!items.length)return '';
  return '<section class="home-invitations"><div class="between"><h2>دعوات واردة</h2><span class="pill gold">'+items.length+' جديدة</span></div>'+
- items.map(i=>'<button class="activity-card" data-go="invite-detail" data-id="'+escapeHtml(i.id)+'"><span class="activity-icon joined">'+uiIcon('user-plus',20)+'</span><span class="activity-copy"><strong>'+escapeHtml(i.groupName||((db.groups.find(g=>g.id===i.groupId)||{}).name)||'دعوة إلى جمعية')+'</strong><small>'+escapeHtml(i.name||'دعوة واردة')+' · '+dateLabel(String(i.createdAt||'').slice(0,10))+'</small></span><span class="activity-arrow">&gt;</span></button>').join('')+'</section>';
+ items.map(i=>{
+ const request=(db.joinRequests||[]).find(x=>x.invitationId===i.id&&x.status==='pending');
+ const target=request?'join-request-status':'invite-detail',targetId=request?request.id:i.id;
+ return '<button class="activity-card" data-go="'+target+'" data-id="'+escapeHtml(targetId)+'"><span class="activity-icon joined">'+uiIcon(request?'user-check':'user-plus',20)+'</span><span class="activity-copy"><strong>'+escapeHtml(i.groupName||((db.groups.find(g=>g.id===i.groupId)||{}).name)||'دعوة إلى جمعية')+'</strong><small>'+escapeHtml(request?'طلبك بانتظار موافقة المدير':(i.name||'دعوة واردة'))+' · '+dateLabel(String(i.createdAt||'').slice(0,10))+'</small></span><span class="activity-arrow">&gt;</span></button>';
+ }).join('')+'</section>';
 }
 function setHomeSlide(index){const ss=document.querySelectorAll('#homeCarousel .summary-slide'),dd=document.querySelectorAll('.home-dots button');if(!ss.length)return;homeSlideIndex=((index%ss.length)+ss.length)%ss.length;ss.forEach((x,i)=>{x.classList.toggle('active',i===homeSlideIndex);x.setAttribute('aria-hidden',i!==homeSlideIndex?'true':'false')});dd.forEach((x,i)=>{x.classList.toggle('active',i===homeSlideIndex);x.setAttribute('aria-pressed',i===homeSlideIndex?'true':'false')})}function groups(){const own=db.groups.filter(g=>groupTab==='all'||g.role===groupTab);const empty=groupTab==='manager'?'لا توجد جمعيات تديرها':groupTab==='member'?'لا توجد جمعيات تشارك فيها':'لا توجد جمعيات حتى الآن';shell('الجمعيات','groups',`<div class="toolbar"><input class="searchbox" id="groupSearch" placeholder="ابحث باسم الجمعية أو رمزها..."><button class="btn primary small" data-go="create-group">${uiIcon('plus',15)} إنشاء</button></div><div id="groupList">${own.length?own.map(groupCard).join(''):`<div class="card empty"><div class="big">${uiIcon('groups',27)}</div><b>${empty}</b><button class="btn primary" data-go="create-group">إنشاء جمعية</button></div>`}</div><button class="btn outline full" data-go="join-group">الانضمام إلى جمعية برمز أو رابط</button>`)}
 function setCreateWizardStep(step,updateHistory=true){
@@ -3683,9 +3693,9 @@ function groupDetail(){
  const top='<div class="card group-identity '+(manager?'manager-identity':'member-identity')+'"><div class="between"><span class="role-chip '+(manager?'manager-chip':'member-chip')+'">'+(manager?'أنت مدير الجمعية':'أنت مشارك في الجمعية')+'</span>'+pill(g.status)+'</div><div class="hero-num">'+money(g.share,g.currency)+'</div><div class="eyebrow">حصة السهم الكاملة في الدورة</div><div class="between" style="margin-top:12px"><small>'+d.members+' مشاركين</small><small>'+escapeHtml(g.period)+'</small></div></div>'+tabs;
  let body='';
  if(groupDetailTab==='overview'){
-  if(manager){const counts=d.counts||{paid:0,due:0,late:0};
+  if(manager){const counts=d.counts||{paid:0,due:0,late:0},pendingRequests=(db.joinRequests||[]).filter(x=>x.groupId===g.id&&x.status==='pending').length;
    body='<div class="grid2"><div class="stat"><span>الأسهم المسجلة</span><b>'+g.shares+(g.total==null?' سهم':' / '+g.total)+'</b></div><div class="stat"><span>الجولات المتبقية</span><b>'+Math.max(0,(d.rounds||0)-(d.drawn||0))+'</b></div><div class="stat"><span>أقساط مدفوعة</span><b>'+counts.paid+'</b></div><div class="stat"><span>أقساط متأخرة</span><b>'+counts.late+'</b></div></div>'+
-   '<div class="card manager-panel"><div class="section-head"><h3>إدارة الجمعية</h3></div><div class="manager-action-grid"><button class="manager-action" data-go="members"><span>'+uiIcon('users',22)+'</span><b>الأعضاء والحضور</b></button><button class="manager-action" data-go="join-requests"><span>'+uiIcon('user-check',22)+'</span><b>طلبات الانضمام</b></button><button class="manager-action" data-go="invite"><span>'+uiIcon('user-plus',22)+'</span><b>دعوة عضو</b></button><button class="manager-action" data-go="installments"><span>'+uiIcon('receipt',22)+'</span><b>أقساط الدورة</b></button><button class="manager-action" data-go="draw-room"><span>'+uiIcon('layers',22)+'</span><b>غرفة القرعة</b></button></div></div>'+
+   '<div class="card manager-panel"><div class="section-head"><h3>إدارة الجمعية</h3></div><div class="manager-action-grid"><button class="manager-action" data-go="members"><span>'+uiIcon('users',22)+'</span><b>الأعضاء والحضور</b></button><button class="manager-action" data-go="join-requests"><span>'+uiIcon('user-check',22)+'</span><b>طلبات الانضمام'+(pendingRequests?' · '+pendingRequests+' جديدة':'')+'</b></button><button class="manager-action" data-go="invite"><span>'+uiIcon('user-plus',22)+'</span><b>دعوة عضو</b></button><button class="manager-action" data-go="installments"><span>'+uiIcon('receipt',22)+'</span><b>أقساط الدورة</b></button><button class="manager-action" data-go="draw-room"><span>'+uiIcon('layers',22)+'</span><b>غرفة القرعة</b></button></div></div>'+
    '<div class="card"><div class="keyvalue"><span>تاريخ البداية</span><b>'+dateLabel(g.start)+'</b></div><div class="keyvalue"><span>أول قرعة محسوبة</span><b>'+dateLabel(g.first)+'</b></div><div class="keyvalue"><span>حصة السهم في الدورة</span><b>'+money(g.share,g.currency)+'</b></div><div class="keyvalue"><span>الأقساط داخل الدورة</span><b>'+g.installments+'</b></div><div class="keyvalue"><span>المدة المقدرة</span><b>'+((plan.durationDays)||'—')+' يومًا</b></div><div class="keyvalue"><span>جائزة الجولة المستهدفة</span><b>'+minorMoney(plan.prizeTarget||0,g.currency)+'</b></div></div>';
   }else{const progress=d.myProgress||{};
    body='<div class="grid2"><div class="stat"><span>أسهم مشاركتك</span><b>'+shares+'</b></div><div class="stat"><span>مجموع التزامك في الدورة</span><b>'+money(g.share*shares,g.currency)+'</b></div></div>'+
@@ -3878,7 +3888,7 @@ function joinInstallmentPreview(info,requestedShares){
   const from=SahmCore.addDays(info.startDate,p.from-1),to=SahmCore.addDays(info.startDate,p.to-1);
   return '<div class="listrow"><div class="grow"><strong>القسط '+p.no+'</strong><small>'+dateLabel(from)+(from!==to?' — '+dateLabel(to):'')+'</small></div><b>'+minorMoney(perShare*shares,currency)+'</b></div>';
  }).join('');
- const total=share*shares,first=ranges.length?((mode==='amount'?Math.min(fixed,share):equalParts[0])*shares):0;
+ const total=share*shares,first=ranges.length?amounts[0]*shares:0;
  return '<div class="card join-payment-plan"><div class="keyvalue"><span>إجمالي الالتزام في الدورة</span><b>'+minorMoney(total,currency)+'</b></div><div class="keyvalue"><span>طريقة السداد</span><b>'+(mode==='amount'?'حسب قيمة القسط':'حسب عدد الأقساط')+'</b></div><div class="keyvalue"><span>عدد الأقساط</span><b>'+count+'</b></div><div class="keyvalue"><span>قيمة القسط الأول</span><b>'+minorMoney(first,currency)+'</b></div><div class="field-hint">توزيع الأقساط ومواعيدها</div>'+rows+'</div>';
 }
 function showJoinRequestForm(info,source,token,invitationId){
@@ -3908,10 +3918,15 @@ function joinRequests(){
  const g=currentGroup();if(!g||!isManager()){toast('طلبات الانضمام متاحة لمدير الجمعية فقط');go('group-detail');return}
  const items=(db.joinRequests||[]).filter(x=>x.groupId===g.id);
  const pending=items.filter(x=>x.status==='pending');
- const rows=items.sort((a,b)=>String(b.submittedAt).localeCompare(String(a.submittedAt))).map(x=>
+ const filters=[['pending','بانتظار المراجعة'],['approved','مقبولة'],['rejected','مرفوضة'],['cancelled','ملغاة'],['all','الكل']];
+ if(!filters.some(x=>x[0]===joinRequestFilter))joinRequestFilter='pending';
+ const visible=items.filter(x=>joinRequestFilter==='all'||x.status===joinRequestFilter)
+  .sort((a,b)=>String(b.submittedAt||'').localeCompare(String(a.submittedAt||'')));
+ const rows=visible.map(x=>
   '<button class="listrow" data-go="join-request-detail" data-id="'+x.id+'"><div class="avatar">'+escapeHtml((x.applicantName||'م').slice(0,1))+'</div><div class="grow"><strong>'+escapeHtml(x.applicantName||'مقدم الطلب')+'</strong><small>'+x.requestedShares+' أسهم · '+minorMoney(x.estimatedAmountMinor,x.currency)+'</small><small>'+(x.sourceType==='invitation'?'دعوة شخصية':'رابط عام')+' · '+dateLabel(String(x.submittedAt||'').slice(0,10))+'</small></div>'+pill(x.status)+'</button>'
  ).join('');
- shell('طلبات الانضمام','groups',header('طلبات الانضمام',g.name)+'<div class="grid2"><div class="stat"><span>بانتظار المراجعة</span><b>'+pending.length+'</b></div><div class="stat"><span>إجمالي الطلبات</span><b>'+items.length+'</b></div></div><div class="card">'+(rows||'<div class="empty"><b>لا توجد طلبات انضمام حتى الآن</b></div>')+'</div>');
+ const filterBar='<div class="segmented">'+filters.map(f=>'<button type="button" class="'+(joinRequestFilter===f[0]?'active':'')+'" data-action="join-request-filter" data-filter="'+f[0]+'" aria-pressed="'+(joinRequestFilter===f[0])+'">'+f[1]+'</button>').join('')+'</div>';
+ shell('طلبات الانضمام','groups',header('طلبات الانضمام',g.name)+'<div class="grid2"><div class="stat"><span>بانتظار المراجعة</span><b>'+pending.length+'</b></div><div class="stat"><span>إجمالي الطلبات</span><b>'+items.length+'</b></div></div>'+filterBar+'<div class="card">'+(rows||'<div class="empty"><b>'+(items.length?'لا توجد طلبات في هذه الحالة':'لا توجد طلبات انضمام حتى الآن')+'</b></div>')+'</div>');
 }
 function joinRequestDetail(){
  const g=currentGroup(),request=(db.joinRequests||[]).find(x=>x.id===params.id&&x.groupId===(g||{}).id);
@@ -4161,7 +4176,7 @@ async function handleAppAction(action,el){
  if(action==='create-prev'){if(createWizardStep>1)setCreateWizardStep(createWizardStep-1);return}
  if(action==='open-group'){go('group-detail',{}, {currentGroupId:el.dataset.id,groupDetailTab:'overview'});return}
  if(action==='home-managed'){go('groups',{}, {groupTab:'manager'});return}if(action==='home-member'){go('groups',{}, {groupTab:'member'});return}
- if(action==='home-slide'){setHomeSlide(Number(el.dataset.index)||0);return}if(action==='group-tab'){groupTab=el.dataset.tab;syncNavigationContext();groups();return}if(action==='detail-tab'){groupDetailTab=el.dataset.tab;syncNavigationContext();groupDetail();return}
+ if(action==='home-slide'){setHomeSlide(Number(el.dataset.index)||0);return}if(action==='group-tab'){groupTab=el.dataset.tab;syncNavigationContext();groups();return}if(action==='detail-tab'){groupDetailTab=el.dataset.tab;syncNavigationContext();groupDetail();return}if(action==='join-request-filter'){joinRequestFilter=el.dataset.filter||'pending';syncNavigationContext();joinRequests();return}
  if(action==='copy-new-invite'){const value=$('#newInviteLink')?.value||'';if(!value){toast('رابط الدعوة غير متاح');return}navigator.clipboard.writeText(value).then(()=>toast('تم نسخ رابط الدعوة')).catch(()=>toast('تعذر النسخ؛ حدّد الرابط وانسخه يدويًا'));return}
  if(action==='copy-created-link'||action==='copy-group-link'){
   const value=$('#createdPublicLink')?.value||createdGroupLink?.url||'';
