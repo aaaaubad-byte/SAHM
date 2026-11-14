@@ -58,11 +58,23 @@ test('all screen engine calls resolve through SahmApp to real SahmData methods',
   }
   for (const match of app.matchAll(/api\.([A-Za-z_$][\w$]*)\s*=/g)) appApi.add(match[1]);
 
+  // Remote operations are attached at runtime by SahmSupabaseData.install().
+  // Include those bindings when checking calls made by the screen layer.
+  const installer = remote.match(/function install\(\)\{([\s\S]*?)\n\s*return true;/);
+  assert.ok(installer, 'Supabase gateway installer exists');
+  assert.match(html, /SahmSupabaseData\.install\(\)/, 'the screen bootstrap installs the remote gateway');
+  const remoteBindings = new Map([...installer[1].matchAll(/\bapp\.([A-Za-z_$][\w$]*)\s*=\s*([A-Za-z_$][\w$]*)\s*;/g)]
+    .map(match => [match[1], match[2]]));
+  const remoteFunctions = new Set([...remote.matchAll(/(?:async\s+)?function\s+([A-Za-z_$][\w$]*)\s*\(/g)]
+    .map(match => match[1]));
+
   const dataObject = data.slice(data.indexOf('root.SahmData = {'));
   const dataExports = new Set(objectKeys(dataObject, 'root.SahmData = {'));
   for (const name of used) {
-    assert.ok(appApi.has(name), 'SahmApp.' + name + ' is exported');
-    assert.ok(dataExports.has(name) || ['init','store','viewer','onResult','nowAt','todayIn','chatTime','timeZone','notifyTypes','maxMessage','myGroups','roleOf','chatList','recentActivity','unreadNotifications','tick','storageState','takeNotices','prefs','savePrefs'].includes(name),
+    const remoteMethod = remoteBindings.get(name);
+    assert.ok(appApi.has(name) || remoteBindings.has(name), 'SahmApp.' + name + ' is exported');
+    assert.ok(dataExports.has(name) || (remoteMethod && remoteFunctions.has(remoteMethod)) ||
+      ['init','store','viewer','onResult','nowAt','todayIn','chatTime','timeZone','notifyTypes','maxMessage','myGroups','roleOf','chatList','recentActivity','unreadNotifications','tick','storageState','takeNotices','prefs','savePrefs'].includes(name),
       'SahmApp.' + name + ' maps to a declared source method');
   }
 
