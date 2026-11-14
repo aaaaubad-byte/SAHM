@@ -3980,8 +3980,10 @@ async function handleAppAction(action,el){
  }
  if(action==='cancel-invite'){const r=await SahmApp.cancelInvite(el.dataset.id);if(r&&r.ok){refreshData();invites()}return}
  if(action==='join-confirm'||action==='join-late-confirm'){
-  const code=$('#modal-root').dataset.joinCode||pendingJoinCode,result=await SahmSupabaseData.acceptInvite(code);
-  if(result&&result.ok){closeModal();refreshData();currentGroupId=result.groupId;toast('تم الانضمام عبر الدعوة القديمة');go('group-detail',{}, {currentGroupId:result.groupId});}
+  const invitationId=$('#modal-root').dataset.invitationId;
+  if(!invitationId){toast('معرف الدعوة غير متاح؛ افتح رابط الدعوة مجددًا');return}
+  const result=await SahmSupabaseData.acceptLegacyInvitationById(invitationId);
+  if(result&&result.ok){closeModal();pendingJoinCode=null;pendingJoinContext=null;refreshData();currentGroupId=result.groupId;toast('تم الانضمام عبر الدعوة القديمة');go('group-detail',{}, {currentGroupId:result.groupId});}
   else toast(result&&result.message||'تعذر قبول الدعوة القديمة');return;
  }
  if(action==='invitation-interested'||action==='invitation-declined'||action==='invitation-deferred'){
@@ -4198,7 +4200,7 @@ document.addEventListener('submit',async e=>{
   const info=preview.invite;pendingJoinCode=token;
   if(info.isLegacyInvitation){
    showModal('دعوة قديمة','<b>'+escapeHtml(info.name)+'</b><div class="keyvalue"><span>المدير</span><b>'+escapeHtml(info.managerName)+'</b></div><div class="keyvalue"><span>أسهم الدعوة القديمة</span><b>'+Number(info.sharesRequested||0)+'</b></div><p>هذه دعوة سابقة وفق النظام القديم. قبولها يحافظ على مسار التوافق القديم ويعتمد العضوية مباشرة.</p>',[['قبول الدعوة القديمة','join-confirm','primary'],['إغلاق','close','outline']]);
-   $('#modal-root').dataset.joinCode=token;return;
+   $('#modal-root').dataset.invitationId=info.invitationId;return;
   }
   pendingJoinContext={source:'invitation',token:token,info:info,invitationId:info.invitationId};
   const body='<b>'+escapeHtml(info.name)+'</b><div class="keyvalue"><span>المدير</span><b>'+escapeHtml(info.managerName)+'</b></div><div class="keyvalue"><span>بداية الجمعية</span><b>'+dateLabel(info.startDate)+'</b></div><div class="keyvalue"><span>أول قرعة</span><b>'+dateLabel(info.firstDrawOn)+'</b></div><div class="keyvalue"><span>مدة الدورة</span><b>'+info.cycleDays+' يومًا</b></div><div class="keyvalue"><span>حصة السهم</span><b>'+minorMoney(info.shareAmountMinor,info.currency)+'</b></div><div class="keyvalue"><span>عدد الأقساط</span><b>'+info.installments+'</b></div><p>اختيار «نعم» يفتح نموذج تحديد الأسهم فقط، ولا ينشئ عضوية أو التزامًا نهائيًا.</p>';
