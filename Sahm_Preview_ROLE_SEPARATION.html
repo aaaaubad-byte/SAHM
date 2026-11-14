@@ -3711,15 +3711,79 @@ function members(){
  const list=r.members||[],q=r.quorum||{present:0,people:list.length,required:0,pct:0},shares=list.reduce((n,m)=>n+m.shares,0);
  shell('الأعضاء','groups',header('الأعضاء والحضور',g.name)+'<div class="member-summary"><div><span>المشاركون</span><b>'+list.length+'</b></div><div><span>الأسهم المسجلة</span><b>'+shares+' / '+g.total+'</b></div></div><div class="card"><div class="between"><b>نصاب الحضور</b><strong>'+q.present+' من '+q.people+'</strong></div><div class="progress"><i style="width:'+q.pct+'%"></i></div><small>المطلوب '+q.required+' أشخاص</small></div><div class="toolbar"><input class="searchbox" placeholder="ابحث عن اسم مشارك..." id="memberSearch"><button class="btn primary small" data-go="invite">دعوة عضو</button></div><div class="card" id="membersList">'+(list.map(m=>'<div class="listrow"><div class="avatar '+(m.isManager?'dark':'')+'">'+escapeHtml(m.name.slice(0,1))+'</div><div class="grow"><strong>'+escapeHtml(m.name)+'</strong><small>'+(m.isManager?'مدير الجمعية':'مشارك')+' · '+m.shares+' أسهم</small></div><span class="pill '+(m.present?'green':'')+'">'+(m.present?'حاضر':'غير حاضر')+'</span><button class="btn outline small" data-action="attendance-toggle" data-id="'+m.memberId+'" data-present="'+(!m.present)+'">'+(m.present?'إلغاء الحضور':'تسجيل الحضور')+'</button></div>').join('')||'<div class="empty"><b>لا يوجد أعضاء بعد</b></div>')+'</div><button class="btn outline full" data-go="invites">إدارة الدعوات</button>');
 }
+let pendingInvitees=[];
+function invitePhoneKey(value){
+ let v=String(value||'').replace(/[٠-٩]/g,d=>'٠١٢٣٤٥٦٧٨٩'.indexOf(d)).replace(/[۰-۹]/g,d=>'۰۱۲۳۴۵۶۷۸۹'.indexOf(d));
+ v=v.trim().replace(/[()\s.-]/g,'');
+ if(v.startsWith('00'))v='+'+v.slice(2);
+ if(v.startsWith('+'))return v.replace(/\D/g,'');
+ let digits=v.replace(/\D/g,'').replace(/^0+/,'');
+ return digits.startsWith('967')?digits:'967'+digits;
+}
+function activeInvitationForPhone(groupId,phone){
+ const key=invitePhoneKey(phone);
+ return !!key&&(db.invites||[]).some(i=>i.groupId===groupId&&i.status==='pending'&&
+  ['pending_response','interested','deferred'].includes(i.responseStatus||'pending_response')&&
+  (!i.expiresAt||new Date(i.expiresAt).getTime()>Date.now())&&invitePhoneKey(i.phone)===key);
+}
+function addInviteeToSelection(name,phone){
+ const cleanName=String(name||'').trim(),cleanPhone=String(phone||'').trim();
+ if(!cleanPhone){toast('جهة الاتصال لا تحتوي رقم هاتف؛ أضف الرقم يدويًا');return false}
+ const key=invitePhoneKey(cleanPhone);
+ if(pendingInvitees.some(x=>invitePhoneKey(x.phone)===key)){toast('جهة الاتصال موجودة بالفعل في القائمة');return false}
+ const duplicate=activeInvitationForPhone(currentGroupId,cleanPhone);
+ pendingInvitees.push({name:cleanName,phone:cleanPhone,selected:!duplicate,duplicate:duplicate});
+ return true;
+}
+function renderInviteeSelection(){
+ const list=$('#inviteeList');if(!list)return;
+ const search=String($('#inviteeSearch')?.value||'').trim().toLowerCase();
+ const visible=pendingInvitees.map((item,index)=>({item,index})).filter(({item})=>
+  !search||(item.name+' '+item.phone).toLowerCase().includes(search));
+ list.innerHTML=visible.length?visible.map(({item,index})=>
+  '<div class="listrow invitee-row"><label class="grow invitee-choice">'+
+   '<input type="checkbox" class="invitee-selected" data-index="'+index+'" '+(item.selected&&!item.duplicate?'checked ':'')+(item.duplicate?'disabled':'')+'>'+
+   '<span class="invitee-details"><input class="invitee-name" data-index="'+index+'" maxlength="120" value="'+escapeHtml(item.name)+'" placeholder="اسم جهة الاتصال" aria-label="اسم جهة الاتصال">'+
+   '<small>'+escapeHtml(item.phone)+'</small></span></label>'+
+   (item.duplicate?'<span class="pill gold">دعوة مرسلة مسبقًا</span>':'<span class="pill">جاهز للدعوة</span>')+
+   '<button class="icon-btn" type="button" data-action="remove-invitee" data-index="'+index+'" aria-label="إزالة">×</button></div>'
+ ).join(''):'<div class="empty"><b>'+(pendingInvitees.length?'لا توجد نتائج مطابقة':'لم تضف جهات اتصال بعد')+'</b><small>اختر من جهات اتصال هاتفك أو أضف الاسم والرقم يدويًا.</small></div>';
+ list.querySelectorAll('.invitee-selected').forEach(input=>input.addEventListener('change',()=>{
+  const item=pendingInvitees[Number(input.dataset.index)];if(item&&!item.duplicate)item.selected=input.checked;
+  updateInviteeSelectionBar();
+ }));
+ list.querySelectorAll('.invitee-name').forEach(input=>input.addEventListener('input',()=>{
+  const item=pendingInvitees[Number(input.dataset.index)];if(item)item.name=input.value;
+ }));
+ updateInviteeSelectionBar();
+}
+function updateInviteeSelectionBar(){
+ const count=pendingInvitees.filter(x=>x.selected&&!x.duplicate).length;
+ const countEl=$('#inviteeSelectedCount'),send=$('#sendInviteesButton');
+ if(countEl)countEl.textContent=String(count);
+ if(send){send.disabled=count<1;send.textContent=count?'دعوة للانضمام ('+count+')':'دعوة للانضمام'}
+}
 function invite(){
  const g=currentGroup();
- if(!g||!isManager()){toast('إرسال الدعوات متاح لمدير الجمعية فقط');go('group-detail');return}
+ if(!g||!isManager()){toast('إضافة أعضاء متاحة لمدير الجمعية فقط');go('group-detail');return}
  if(g.locked){toast('أُغلقت العضويات بعد تثبيت أول قرعة');go('group-detail');return}
- shell('دعوة عضو','groups',header('دعوة عضو',g.name)+'<div class="card"><form id="inviteForm">'+
-  '<div class="field"><label>اسم المدعو</label><input name="name" maxlength="120" required></div>'+
-  '<div class="field"><label>رقم الهاتف · اختياري</label><input name="phone" type="tel" inputmode="tel" placeholder="+9677XXXXXXXX"></div>'+
-  '<p>لا يحدد المدير أسهم المدعو؛ يختارها المدعو بنفسه عند تقديم طلب الانضمام.</p>'+
-  '<button class="btn primary full" type="submit">إرسال الدعوة وإنشاء الرابط</button></form></div>');
+ pendingInvitees=[];
+ shell('إضافة أعضاء','groups',header('إضافة أعضاء',g.name)+
+  '<div class="card"><p>اختر عدة جهات اتصال أو أضف الاسم والرقم يدويًا. لا يحدد المدير أسهم المدعو؛ يختارها المدعو عند تقديم طلب الانضمام.</p>'+
+  '<button class="btn outline full" type="button" data-action="pick-device-contacts">اختيار من جهات اتصال الهاتف</button>'+
+  '<small class="field-hint">لن نقرأ دفتر العناوين كاملًا؛ تُستخدم فقط جهات الاتصال التي تختارها.</small></div>'+
+  '<form id="inviteeManualForm" class="card"><h3>إضافة جهة اتصال يدويًا</h3>'+
+  '<div class="field"><label>الاسم</label><input name="name" maxlength="120" required placeholder="اسم الشخص"></div>'+
+  '<div class="field"><label>رقم الهاتف</label><input name="phone" type="tel" inputmode="tel" required placeholder="+9677XXXXXXXX"></div>'+
+  '<button class="btn soft full" type="submit">إضافة إلى القائمة</button></form>'+
+  '<div class="field"><label>بحث في القائمة المحددة</label><input id="inviteeSearch" type="search" placeholder="ابحث بالاسم أو رقم الهاتف"></div>'+
+  '<div id="inviteeList" class="card"></div>'+
+  '<div class="card invitee-selection-bar" style="position:sticky;bottom:0;z-index:5;background:#fff">'+
+  '<div class="between"><span>جهات الاتصال المحددة</span><b id="inviteeSelectedCount">0</b></div>'+
+  '<button id="sendInviteesButton" class="btn primary full" type="button" data-action="submit-bulk-invites" disabled>دعوة للانضمام</button></div>');
+ const search=$('#inviteeSearch');
+ search?.addEventListener('input',renderInviteeSelection);
+ renderInviteeSelection();
 }
 function inviteDetail(){
  const id=String(params.id||'').trim();
@@ -4032,6 +4096,59 @@ function showModal(title,body,buttons=[['إغلاق','close','outline']]){if(nav
 document.addEventListener('keydown',e=>{const card=e.target.closest?.('.group-card[role="button"]');if(card&&(e.key==='Enter'||e.key===' ')){e.preventDefault();card.click()}});
 async function handleAppAction(action,el){
  const g=currentGroup();
+ if(action==='pick-device-contacts'){
+  if(!navigator.contacts||typeof navigator.contacts.select!=='function'){
+   toast('اختيار جهات الاتصال غير مدعوم في هذا المتصفح؛ أضف الاسم والرقم يدويًا');return;
+  }
+  try{
+   const contacts=await navigator.contacts.select(['name','tel'],{multiple:true});
+   let added=0,skipped=0;
+   for(const contact of contacts||[]){
+    const name=Array.isArray(contact.name)?(contact.name[0]||''):String(contact.name||'');
+    const tel=Array.isArray(contact.tel)?(contact.tel.find(Boolean)||''):String(contact.tel||'');
+    if(!tel){skipped++;continue}
+    if(pendingInvitees.length>=50){skipped++;continue}
+    if(addInviteeToSelection(name,tel))added++;else skipped++;
+   }
+   renderInviteeSelection();
+   toast(added?'أُضيفت '+added+' جهة اتصال إلى القائمة':(skipped?'لم تُضف جهات اتصال جديدة':'لم يتم اختيار جهات اتصال'));
+  }catch(error){if(error&&error.name!=='AbortError')toast('تعذر فتح جهات الاتصال؛ يمكنك الإضافة يدويًا')}
+  return;
+ }
+ if(action==='remove-invitee'){
+  const index=Number(el.dataset.index);
+  if(Number.isInteger(index)&&index>=0&&index<pendingInvitees.length){pendingInvitees.splice(index,1);renderInviteeSelection()}
+  return;
+ }
+ if(action==='submit-bulk-invites'){
+  if(!g||!isManager()){toast('إرسال الدعوات متاح لمدير الجمعية فقط');return}
+  const selected=pendingInvitees.filter(x=>x.selected&&!x.duplicate);
+  if(!selected.length){toast('حدد جهة اتصال واحدة على الأقل');return}
+  if(selected.length>50){toast('لا يمكن إرسال أكثر من 50 دعوة في العملية الواحدة');return}
+  const invalid=selected.find(x=>String(x.name||'').trim().length<2||!String(x.phone||'').trim());
+  if(invalid){toast('أكمل اسم ورقم كل جهة اتصال محددة');return}
+  el.disabled=true;const oldLabel=el.textContent;el.textContent='جارٍ إنشاء الدعوات...';
+  const result=await SahmApp.createInvitationsBulk(g.id,selected.map(x=>({name:x.name.trim(),phone:x.phone.trim()})));
+  el.disabled=false;el.textContent=oldLabel;
+  if(!result||!result.ok){toast(result&&result.message||'تعذر إنشاء الدعوات');return}
+  refreshData();
+  const rows=(result.results||[]).map(item=>item.status==='sent'
+   ?'<div class="listrow"><div class="grow"><strong>'+escapeHtml(item.name)+'</strong><small>تم إنشاء الدعوة؛ شارك الرابط مع الشخص ليتمكن من فتحها</small><input class="field-input" readonly value="'+escapeHtml(item.url||'')+'"></div><button class="btn outline small" data-action="copy-bulk-invite-link" data-link="'+escapeHtml(item.url||'')+'">نسخ</button></div>'
+   :'<div class="listrow"><div class="grow"><strong>'+escapeHtml(item.name||'جهة اتصال')+'</strong><small>'+escapeHtml(item.message||'تعذر إرسال الدعوة')+'</small></div><span class="pill red">لم تُرسل</span></div>'
+  ).join('');
+  pendingInvitees=[];renderInviteeSelection();
+  showModal('نتيجة إرسال الدعوات','<div class="grid2"><div class="stat"><span>تم إنشاؤها</span><b>'+Number(result.sentCount||0)+'</b></div><div class="stat"><span>تعذر إرسالها</span><b>'+Number(result.failedCount||0)+'</b></div></div><div class="card">'+rows+'</div><small>لم يتم إرسال رسالة خارجية تلقائيًا. انسخ رابط كل دعوة وشاركه مع صاحبها.</small>',[['إغلاق','close','outline']]);
+  return;
+ }
+ if(action==='copy-bulk-invite-link'){
+  const link=el.dataset.link||'';if(!link)return;
+  try{
+   if(navigator.clipboard&&navigator.clipboard.writeText)await navigator.clipboard.writeText(link);
+   else{const box=document.createElement('textarea');box.value=link;document.body.appendChild(box);box.select();document.execCommand('copy');box.remove();}
+   toast('تم نسخ رابط الدعوة');
+  }catch(_){toast('تعذر نسخ الرابط؛ حدد الرابط وانسخه يدويًا')}
+  return;
+ }
  if(action==='choose-avatar'){
   selectedAvatarKey=AVATAR_OPTIONS.some(x=>x[0]===el.dataset.avatar)?el.dataset.avatar:'avatar-01';
   document.querySelectorAll('.avatar-option').forEach(button=>{
@@ -4197,7 +4314,7 @@ document.addEventListener('change',async e=>{
 });
 document.addEventListener('submit',async e=>{
  const form=e.target;
- if(!['loginForm','registerForm','setupForm','updatePasswordForm','createForm','inviteForm','joinForm','joinRequestForm','chatForm','profileForm'].includes(form.id))return;
+ if(!['loginForm','registerForm','setupForm','updatePasswordForm','createForm','inviteeManualForm','joinForm','joinRequestForm','chatForm','profileForm'].includes(form.id))return;
  e.preventDefault();
  const setBusy=(on,label)=>{const b=form.querySelector('button[type="submit"]');if(b){b.disabled=!!on;if(on){b.dataset.oldLabel=b.textContent;b.textContent=label||'جارٍ التنفيذ...'}else if(b.dataset.oldLabel){b.textContent=b.dataset.oldLabel;delete b.dataset.oldLabel}}};
  if(form.id==='loginForm'){
@@ -4293,13 +4410,12 @@ document.addEventListener('submit',async e=>{
    resetNavigation('created-group',{});toast('تم إنشاء الجمعية وحفظ بياناتها');
   }return;
  }
- if(form.id==='inviteForm'){
-  const g=currentGroup();if(!g||!isManager())return;
-  const d=Object.fromEntries(new FormData(form)),result=await SahmApp.createInvite(g.id,{name:d.name,phone:d.phone});
-  if(result&&result.ok){
-   refreshData();const link=result.invite&&result.invite.link||'';
-   showModal('تم إرسال الدعوة','<p>أُرسلت الدعوة دون تحديد عدد الأسهم. سيحدد المدعو الأسهم بنفسه عند تقديم طلب الانضمام.</p><div class="field"><input id="newInviteLink" readonly value="'+escapeHtml(link)+'"></div>',[['نسخ الرابط','copy-new-invite','primary'],['إغلاق','close','outline']]);
-  }else toast(result&&result.message||'تعذر إرسال الدعوة');
+ if(form.id==='inviteeManualForm'){
+  const d=Object.fromEntries(new FormData(form));
+  if(String(d.name||'').trim().length<2){toast('أدخل اسم جهة الاتصال');return}
+  if(!String(d.phone||'').trim()){toast('أدخل رقم الهاتف');return}
+  if(pendingInvitees.length>=50){toast('يمكن إضافة 50 جهة اتصال كحد أقصى في العملية الواحدة');return}
+  if(addInviteeToSelection(d.name,d.phone)){form.reset();renderInviteeSelection();toast('أضيفت جهة الاتصال إلى القائمة')}
   return;
  }
  if(form.id==='joinForm'){
