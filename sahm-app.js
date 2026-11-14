@@ -21,11 +21,11 @@
 
   /* operations: first argument after (db, actor) is passed through unchanged */
   var ACTOR_OPS = ['createGroup', 'updateGroup', 'addMember', 'addShares', 'removeShares', 'removeMember', 'setAttendance',
-    'createInvite', 'cancelInvite', 'recordPaid', 'correctReceipt', 'sendReminder', 'performDraw', 'sendMessage',
+    'createInvite', 'createInvitationsBulk', 'cancelInvite', 'recordPaid', 'correctReceipt', 'sendReminder', 'performDraw', 'sendMessage',
     'setNotifyType', 'setMute', 'markChatRead', 'markNotificationsRead', 'joinByCode'];
   /* queries that take (db, viewer, ...) */
   var VIEW_QUERIES = ['groupDetail', 'installmentRows', 'memberStatement', 'receiptList', 'receiptDetail', 'eventLog',
-    'memberList', 'inviteList', 'drawHistory', 'notificationList', 'chatView'];
+    'memberList', 'inviteList', 'myInvitations', 'drawHistory', 'notificationList', 'chatView'];
   /* helpers that take (db, ...) with no viewer */
   var PLAIN = ['drawStatus', 'previewJoin', 'inviteSummary', 'getInviteInfo', 'lastReminder'];
 

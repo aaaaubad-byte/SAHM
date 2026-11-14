@@ -801,6 +801,26 @@
     if (!v.role.manager) return fail('FORBIDDEN', 'قائمة الدعوات متاحة لمدير الجمعية فقط');
     return { ok: true, groupId: gid, invites: db.invites.filter(function (i) { return i.groupId === gid; }).map(clone) };
   }
+  /* One facade for incoming invitations. Screens consume the result, not a store array. */
+  function myInvitations(db, viewer) {
+    var phone = normPhone(viewer === me(db) && db.prefs && db.prefs.user ? db.prefs.user.phone : '');
+    return {
+      ok: true,
+      invitations: db.invites.filter(function (i) {
+        return (!!viewer && i.invitedUserId === viewer) || (!!phone && normPhone(i.phone) === phone);
+      }).map(clone)
+    };
+  }
+  /* Secure invitation tokens are minted only by the Supabase RPC. The local
+     preview deliberately cannot fabricate invite URLs or security tokens. */
+  function createInvitationsBulk(db, actor, gid, invitees) {
+    mustGroup(db, gid);
+    if (!actor || actor !== me(db)) return fail('FORBIDDEN', 'لا يوجد مدير مسجل');
+    if (!Array.isArray(invitees) || invitees.length < 1 || invitees.length > 50) {
+      return fail('INVITE_BATCH_INVALID', 'اختر من جهة اتصال واحدة إلى 50 جهة');
+    }
+    return fail('REMOTE_REQUIRED', 'إنشاء روابط الدعوات الآمنة يتطلب الاتصال بقاعدة بيانات سهم');
+  }
 
   function getInviteInfo(db, code) {
     var g = db.groups.find(function (x) { return x.inviteCode === String(code || '').trim(); });
@@ -1217,11 +1237,11 @@
     totalUnreadNotifications: totalUnreadNotifications, recentActivity: recentActivity,
     /* operations */
     createGroup: createGroup, updateGroup: updateGroup, previewJoin: previewJoin, addMember: addMember, addShares: addShares, removeShares: removeShares, removeMember: removeMember,
-    setAttendance: setAttendance, inviteSummary: inviteSummary, createInvite: createInvite, cancelInvite: cancelInvite, getInviteInfo: getInviteInfo, joinByCode: joinByCode,
+    setAttendance: setAttendance, inviteSummary: inviteSummary, createInvite: createInvite, createInvitationsBulk: createInvitationsBulk, cancelInvite: cancelInvite, getInviteInfo: getInviteInfo, joinByCode: joinByCode,
     recordPaid: recordPaid, correctReceipt: correctReceipt, sendReminder: sendReminder, lastReminder: lastReminder, drawStatus: drawStatus, performDraw: performDraw,
     sendMessage: sendMessage, markChatRead: markChatRead, setNotifyType: setNotifyType, setMute: setMute, isMuted: isMuted, markNotificationsRead: markNotificationsRead,
     /* queries */
     groupDetail: groupDetail, installmentRows: installmentRows, memberStatement: memberStatement, receiptList: receiptList, receiptDetail: receiptDetail,
-    eventLog: eventLog, memberList: memberList, inviteList: inviteList, drawHistory: drawHistory, notificationList: notificationList, chatView: chatView
+    eventLog: eventLog, memberList: memberList, inviteList: inviteList, myInvitations: myInvitations, drawHistory: drawHistory, notificationList: notificationList, chatView: chatView
   };
 })(typeof window !== 'undefined' ? window : globalThis);

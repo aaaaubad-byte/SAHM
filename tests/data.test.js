@@ -358,3 +358,13 @@ test('normalizing an older local snapshot adds the join request collection witho
   assert.ok(Array.isArray(old.joinRequests));
   assert.equal(old.groups.length, beforeGroups);
 });
+
+
+test('local bulk invitation API refuses to fabricate secure invitation tokens', () => {
+  const w = fresh();
+  const { group } = createGroup(w, { targetShares: 3, maxPerMember: 2 });
+  const result = w.D.createInvitationsBulk(w.db, 'me', group.id, [{ name: 'مدعو', phone: '+967777123456' }]);
+  assert.equal(result.ok, false);
+  assert.equal(result.code, 'REMOTE_REQUIRED');
+  assert.equal(w.db.invites.length, 0);
+});

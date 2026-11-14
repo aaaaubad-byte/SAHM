@@ -3511,7 +3511,7 @@ function homeActivity(){
 }
 function homeInvitations(){
  const me=String(db.user&&db.user.id||''),phone=String(db.user&&db.user.phone||'').replace(/\D/g,'');
- const items=(db.invites||[]).filter(i=>{
+ const inbox=SahmApp.myInvitations(),items=(inbox&&inbox.invitations||[]).filter(i=>{
   const status=i.responseStatus||'pending_response';
   const open=i.status==='pending'&&['pending_response','interested','deferred'].includes(status)
     &&(!i.expiresAt||new Date(i.expiresAt).getTime()>Date.now());
@@ -3739,7 +3739,8 @@ function invitePhoneKey(value){
 }
 function activeInvitationForPhone(groupId,phone){
  const key=invitePhoneKey(phone);
- return !!key&&(db.invites||[]).some(i=>i.groupId===groupId&&i.status==='pending'&&
+ const list=SahmApp.inviteList(groupId),invites=list&&list.ok?list.invites:[];
+  return !!key&&invites.some(i=>i.status==='pending'&&
   ['pending_response','interested','deferred'].includes(i.responseStatus||'pending_response')&&
   (!i.expiresAt||new Date(i.expiresAt).getTime()>Date.now())&&invitePhoneKey(i.phone)===key);
 }
