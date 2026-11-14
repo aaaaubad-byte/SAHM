@@ -190,7 +190,7 @@ test('applicant approval and rejection notifications open the related request st
         { id: 'notice-rejected', type: 'join_rejected', relatedEntityId: 'request-2', text: 'تم الرفض', at: '2026-11-14', read: true },
         { id: 'notice-other', type: 'reminder', relatedEntityId: null, text: 'تذكير', at: '2026-11-14', read: true }
       ]},
-      markNotificationsRead: () => ({ ok: true })
+     ) markNotificationsRead: () => ({ ok: true })
     },
     toast: () => {},
     escapeHtml: value => String(value),
