@@ -3701,21 +3701,38 @@ function joinGroup(){
   '<div class="card"><form id="joinForm"><div class="field"><label>رابط الانضمام أو الرمز</label><input name="code" value="'+escapeHtml(code)+'" required></div>'+
   '<button class="btn primary full" type="submit">متابعة</button></form><small>اختيار الأسهم وإرسال الطلب لا ينشئان عضوية إلا بعد موافقة مدير الجمعية.</small></div>');
 }
+function joinInstallmentPreview(info,requestedShares){
+ const currency=info.currency||'YER',share=Number(info.shareAmountMinor)||0;
+ const count=Number(info.installments)||0,days=Number(info.cycleDays)||0,shares=Math.max(0,Number(requestedShares)||0);
+ const mode=info.installmentMode==='amount'?'amount':'count',fixed=Number(info.installmentAmountMinor)||0;
+ if(!Number.isInteger(count)||count<1||!Number.isInteger(days)||days<1||!Number.isFinite(share)||share<1||!Number.isInteger(shares)||shares<1)return '<small class="field-hint">أدخل عدد الأسهم لعرض تفاصيل الأقساط.</small>';
+ if(mode==='amount'&&(!Number.isFinite(fixed)||fixed<1||fixed>share))return '<small class="field-hint">تعذر احتساب قيمة الأقساط؛ أعد فتح الرابط أو تواصل مع مدير الجمعية.</small>';
+ const ranges=SahmCore.periods(days,count),equalParts=SahmCore.splitAmount(share,count);
+ let remaining=share;
+ const rows=ranges.map(p=>{
+  const perShare=mode==='amount'?Math.min(fixed,remaining):equalParts[p.no-1];
+  remaining-=perShare;
+  const from=SahmCore.addDays(info.startDate,p.from-1),to=SahmCore.addDays(info.startDate,p.to-1);
+  return '<div class="listrow"><div class="grow"><strong>القسط '+p.no+'</strong><small>'+dateLabel(from)+(from!==to?' — '+dateLabel(to):'')+'</small></div><b>'+minorMoney(perShare*shares,currency)+'</b></div>';
+ }).join('');
+ const total=share*shares,first=ranges.length?((mode==='amount'?Math.min(fixed,share):equalParts[0])*shares):0;
+ return '<div class="card join-payment-plan"><div class="keyvalue"><span>إجمالي الالتزام في الدورة</span><b>'+minorMoney(total,currency)+'</b></div><div class="keyvalue"><span>طريقة السداد</span><b>'+(mode==='amount'?'حسب قيمة القسط':'حسب عدد الأقساط')+'</b></div><div class="keyvalue"><span>عدد الأقساط</span><b>'+count+'</b></div><div class="keyvalue"><span>قيمة القسط الأول</span><b>'+minorMoney(first,currency)+'</b></div><div class="field-hint">توزيع الأقساط ومواعيدها</div>'+rows+'</div>';
+}
 function showJoinRequestForm(info,source,token){
  pendingJoinContext={source:source,token:token,info:info,invitationId:info.invitationId||info.id||null};
  const currency=info.currency||'YER',share=Number(info.shareAmountMinor)||0;
  const details='<div class="card"><h3>'+escapeHtml(info.name||'الجمعية')+'</h3><div class="keyvalue"><span>المدير</span><b>'+escapeHtml(info.managerName||'—')+'</b></div>'+
   '<div class="keyvalue"><span>بداية الجمعية</span><b>'+dateLabel(info.startDate)+'</b></div><div class="keyvalue"><span>أول قرعة</span><b>'+dateLabel(info.firstDrawOn)+'</b></div>'+
   '<div class="keyvalue"><span>مدة الدورة</span><b>'+Number(info.cycleDays||0)+' يومًا</b></div><div class="keyvalue"><span>حصة السهم</span><b>'+minorMoney(share,currency)+'</b></div>'+
-  '<div class="keyvalue"><span>عدد الأقساط</span><b>'+Number(info.installments||1)+'</b></div></div>';
+  '<div class="keyvalue"><span>طريقة السداد</span><b>'+(info.installmentMode==='amount'?'قيمة القسط':'عدد الأقساط')+'</b></div><div class="keyvalue"><span>عدد الأقساط</span><b>'+Number(info.installments||1)+'</b></div></div>';
  const form='<div class="card"><form id="joinRequestForm"><div class="field"><label>عدد الأسهم التي ترغب بها</label><input name="requestedShares" id="requestedShares" type="number" min="1" step="1" value="1" required></div>'+
-  '<div class="keyvalue"><span>قيمة الالتزام في الدورة</span><b id="joinEstimatedAmount">'+minorMoney(share,currency)+'</b></div>'+
+  '<div id="joinPaymentPreview">'+joinInstallmentPreview(info,1)+'</div>'+
   '<small>هذا تقدير لالتزام الدورة، ولا يصبح نهائيًا ولا تُعتمد الأسهم إلا بعد موافقة المدير.</small>'+
   '<label class="terms-check"><input type="checkbox" name="confirmCommitment" required><span>راجعت عدد الأسهم وقيمة الالتزام وأوافق على تقديم الطلب.</span></label>'+
   '<button class="btn primary full" type="submit">إرسال طلب الانضمام</button></form></div>';
  shell('طلب الانضمام','groups',header('تحديد الأسهم وطلب الانضمام',info.name||'')+details+form);
  const input=$('#requestedShares');
- input?.addEventListener('input',()=>{const n=Math.max(0,Number(input.value)||0),out=$('#joinEstimatedAmount');if(out)out.textContent=minorMoney(share*n,currency)});
+ input?.addEventListener('input',()=>{const n=Math.max(0,Number(input.value)||0),out=$('#joinPaymentPreview');if(out)out.innerHTML=joinInstallmentPreview(info,n)});
 }
 function joinRequestStatus(){
  const request=db.joinRequests.find(x=>x.id===params.id)||null;
