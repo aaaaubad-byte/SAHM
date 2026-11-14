@@ -166,3 +166,13 @@ test('viewport metadata allows browser zoom for accessibility', () => {
   assert.doesNotMatch(viewport[1], /user-scalable\s*=\s*no/i);
   assert.doesNotMatch(viewport[1], /maximum-scale\s*=\s*1(?:[;,]|$)/i);
 });
+
+test('modal dialogs expose ARIA semantics and keyboard focus management', () => {
+  assert.match(html, /role="dialog"\s+aria-modal="true"\s+aria-labelledby="modal-title"/);
+  assert.match(html, /<h3 id="modal-title">/);
+  assert.match(html, /modalReturnFocus=document\.activeElement/);
+  assert.match(html, /modalReturnFocus\.focus\(\)/);
+  assert.match(html, /e\.key==='Escape'/);
+  assert.match(html, /e\.key==='Tab'/);
+  assert.match(html, /dialog\.contains\(document\.activeElement\)/);
+});
