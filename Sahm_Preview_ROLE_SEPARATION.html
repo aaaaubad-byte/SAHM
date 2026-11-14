@@ -3486,7 +3486,7 @@ function homeActivity(){
  const list=SahmApp.recentActivity(5);
  if(!list.length)return '<div class="empty"><b>لا يوجد نشاط حديث</b></div>';
  return list.map(a=>{
-  const isRequest=a.eventType==='join_request_submitted'&&isManager(db.groups.find(g=>g.id===a.groupId));
+  const isRequest=a.eventType==='join_request_submitted'&&db.groups.some(g=>g.id===a.groupId&&g.role==='manager');
   const target=isRequest?'join-request-detail':'group-detail';
   const id=isRequest?(a.entityId||''):a.groupId;
   return `<button class="activity-card" data-go="${target}" data-id="${escapeHtml(id)}" ${isRequest?'data-group-id="'+escapeHtml(a.groupId)+'"':''}><span class="activity-icon joined">${uiIcon(a.icon,20)}</span><span class="activity-copy"><strong>${escapeHtml(a.title)}</strong><small>${escapeHtml(a.groupName)} <i>·</i> ${escapeHtml(SahmApp.chatTime(a.at))}</small></span><span class="activity-arrow">&gt;</span></button>`;
@@ -3687,6 +3687,23 @@ function groupDetail(){
  }
  shell(g.name,'groups',top+body);
  if(manager&&groupDetailTab==='tools')loadAssociationPublicLinkStatus(g.id);
+}
+async function loadAssociationPublicLinkStatus(associationId){
+ const target=document.getElementById('association-link-status');
+ if(!target)return;
+ const result=await SahmSupabaseData.getPublicLinkStatus(associationId);
+ if(!result||!result.ok){target.textContent=result&&result.message||'تعذر تحميل حالة الرابط';return}
+ if(currentGroupId!==associationId||screenName!=='group-detail'||groupDetailTab!=='tools')return;
+ const link=result.link||{},status=link.status||'none';
+ const controls=status==='active'
+  ?'<div class="grid2"><button class="btn outline small" data-action="pause-group-link">إيقاف الرابط</button><button class="btn soft small" data-action="rotate-group-link">تجديد الرابط</button></div><button class="btn danger full" data-action="revoke-group-link">إبطال الرابط نهائيًا</button>'
+  :status==='paused'
+   ?'<div class="grid2"><button class="btn primary small" data-action="resume-group-link">إعادة تشغيل الرابط</button><button class="btn outline small" data-action="rotate-group-link">تجديد الرابط</button></div><button class="btn danger full" data-action="revoke-group-link">إبطال الرابط نهائيًا</button>'
+   :'<button class="btn primary full" data-action="create-group-link">إنشاء رابط انضمام</button>';
+ const label=status==='active'?'الرابط نشط':status==='paused'?'الرابط متوقف':status==='revoked'?'الرابط مبطل':'لم يتم إنشاء رابط بعد';
+ target.innerHTML='<div class="keyvalue"><span>الحالة</span><b>'+escapeHtml(label)+'</b></div>'+
+  (link.createdAt?'<small>تاريخ الإنشاء: '+dateLabel(String(link.createdAt).slice(0,10))+'</small>':'')+
+  (status==='active'?'<small>لا يحتفظ النظام بالرمز القابل للمشاركة بعد مغادرة شاشة الإنشاء. استخدم «تجديد الرابط» لإصدار رمز جديد.</small>':'')+controls;
 }
 function members(){
  const g=currentGroup();if(!g){go('groups');return}if(!isManager()){toast('قائمة الأعضاء التفصيلية متاحة لمدير الجمعية');go('group-detail');return}
