@@ -3703,6 +3703,52 @@ function invite(){
   '<p>لا يحدد المدير أسهم المدعو؛ يختارها المدعو بنفسه عند تقديم طلب الانضمام.</p>'+
   '<button class="btn primary full" type="submit">إرسال الدعوة وإنشاء الرابط</button></form></div>');
 }
+function inviteDetail(){
+ const id=String(params.id||'').trim();
+ if(!id){toast('معرف الدعوة غير متاح');go('home');return}
+ shell('تفاصيل الدعوة','groups',header('تفاصيل الدعوة')+'<div class="card"><div class="empty"><b>جاري تحميل تفاصيل الدعوة…</b></div></div>');
+ SahmSupabaseData.getMyInvitationDetails(id).then(result=>{
+  if(screenName!=='invite-detail'||String(params.id||'')!==id)return;
+  if(!result||!result.ok||!result.invitation){
+   shell('تفاصيل الدعوة','groups',header('تعذر فتح الدعوة')+'<div class="card"><p>'+escapeHtml(result&&result.message||'الدعوة غير موجودة أو لم تعد موجهة إلى حسابك')+'</p><button class="btn outline full" data-go="home">العودة للرئيسية</button></div>');
+   return;
+  }
+  const info=result.invitation,legacy=!!info.isLegacyInvitation;
+  const response=info.responseStatus||'pending_response';
+  const responseLabel=({pending_response:'بانتظار ردك',interested:'أبديت رغبتك بالانضمام',deferred:'أجلت الرد',declined:'مرفوضة',legacy_accepted:'تم قبول الدعوة القديمة'})[response]||response;
+  const open=!!info.isJoinOpen;
+  pendingJoinContext={source:'invitation_id',token:null,info:info,invitationId:info.invitationId||id};
+  const statusText=legacy?'دعوة قديمة تتضمن عدد أسهم محددًا في النظام السابق':responseLabel;
+  let actions='';
+  if(legacy){
+   actions=open
+    ?'<button class="btn primary full" data-action="accept-legacy-invite-detail" data-id="'+escapeHtml(id)+'">قبول الدعوة القديمة</button>'
+    :'<p class="field-hint">انتهت نافذة الانضمام؛ لا يمكن اعتماد هذه الدعوة القديمة الآن.</p>';
+  }else if(!open){
+   actions='<p class="field-hint">لا تستقبل الجمعية طلبات انضمام جديدة حاليًا.</p>';
+  }else if(response==='interested'){
+   actions='<button class="btn primary full" data-action="continue-invitation-join" data-id="'+escapeHtml(id)+'">تحديد الأسهم ومتابعة طلب الانضمام</button>';
+  }else{
+   actions='<div class="grid2"><button class="btn primary" data-action="invitation-interested" data-id="'+escapeHtml(id)+'">أرغب بالانضمام</button><button class="btn outline" data-action="invitation-declined" data-id="'+escapeHtml(id)+'">رفض الدعوة</button></div><button class="btn soft full" data-action="invitation-deferred" data-id="'+escapeHtml(id)+'">ليس الآن · تأجيل الرد</button>';
+  }
+  const body='<div class="card"><div class="between"><h3>'+escapeHtml(info.name||'الجمعية')+'</h3>'+pill(info.isJoinOpen?'active':'closed')+'</div>'+
+   '<div class="keyvalue"><span>المدير</span><b>'+escapeHtml(info.managerName||'—')+'</b></div>'+
+   '<div class="keyvalue"><span>حالة الدعوة</span><b>'+escapeHtml(statusText)+'</b></div>'+
+   '<div class="keyvalue"><span>بداية الجمعية</span><b>'+dateLabel(info.startDate)+'</b></div>'+
+   '<div class="keyvalue"><span>أول قرعة</span><b>'+dateLabel(info.firstDrawOn)+'</b></div>'+
+   '<div class="keyvalue"><span>مدة الدورة</span><b>'+Number(info.cycleDays||0)+' يومًا</b></div>'+
+   '<div class="keyvalue"><span>قيمة السهم في الدورة</span><b>'+minorMoney(info.shareAmountMinor,info.currency)+'</b></div>'+
+   '<div class="keyvalue"><span>طريقة السداد</span><b>'+(info.installmentMode==='amount'?'قيمة القسط':'عدد الأقساط')+'</b></div>'+
+   '<div class="keyvalue"><span>عدد الأقساط</span><b>'+Number(info.installments||0)+'</b></div>'+
+   (legacy?'<div class="keyvalue"><span>أسهم الدعوة القديمة</span><b>'+Number(info.sharesRequested||0)+'</b></div>':'')+
+   '<p class="field-hint">'+(legacy?'هذه دعوة قديمة، وقبولها ينشئ العضوية وفق بياناتها الأصلية.':'إبداء الرغبة لا ينشئ عضوية. ستحدد عدد الأسهم وتراجع التزامك المالي قبل إرسال طلب الانضمام، ولن تعتمد العضوية إلا بعد موافقة المدير.')+'</p></div>'+
+   '<div class="card">'+actions+'</div>';
+  shell('تفاصيل الدعوة','groups',header('تفاصيل الدعوة',info.name||'')+body);
+ }).catch(error=>{
+  if(screenName!=='invite-detail'||String(params.id||'')!==id)return;
+  shell('تفاصيل الدعوة','groups',header('تعذر فتح الدعوة')+'<div class="card"><p>'+escapeHtml(error&&error.message||'حدث خطأ أثناء تحميل الدعوة')+'</p><button class="btn outline full" data-go="home">العودة للرئيسية</button></div>');
+ });
+}
 function invites(){
  const g=currentGroup();if(!g||!isManager()){toast('إدارة الدعوات متاحة لمدير الجمعية فقط');go('group-detail');return}
  const r=SahmApp.inviteList(g.id);if(!r||!r.ok){toast(r&&r.message||'تعذر تحميل الدعوات');return}
@@ -3979,6 +4025,16 @@ async function handleAppAction(action,el){
   return;
  }
  if(action==='cancel-invite'){const r=await SahmApp.cancelInvite(el.dataset.id);if(r&&r.ok){refreshData();invites()}return}
+ if(action==='accept-legacy-invite-detail'){
+  const id=el.dataset.id;
+  showModal('تأكيد قبول الدعوة القديمة','سيتم اعتماد عضويتك بالعدد المسجل في الدعوة القديمة وإنشاء الالتزامات المرتبطة بها.',[['قبول الدعوة','join-confirm','primary'],['إلغاء','close','outline']]);
+  $('#modal-root').dataset.invitationId=id;return;
+ }
+ if(action==='continue-invitation-join'){
+  const id=el.dataset.id||pendingJoinContext&&pendingJoinContext.invitationId;
+  if(!pendingJoinContext||pendingJoinContext.invitationId!==id){toast('أعد فتح تفاصيل الدعوة');return}
+  showJoinRequestForm(pendingJoinContext.info,'invitation_id',null,id);return;
+ }
  if(action==='join-confirm'||action==='join-late-confirm'){
   const invitationId=$('#modal-root').dataset.invitationId;
   if(!invitationId){toast('معرف الدعوة غير متاح؛ افتح رابط الدعوة مجددًا');return}
