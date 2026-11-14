@@ -145,3 +145,12 @@ test('Realtime events refresh the screen view model and the open request screen'
   assert.match(source, /screenName==='invite-detail'.*inviteDetail\(\)/);
   assert.match(source, /screenName==='invites'.*invites\(\)/);
 });
+
+
+test('Realtime refreshes the live view model before repainting join workflow screens', () => {
+  const source = extractFunction('startRemoteRealtime', 'currentGroup');
+  assert.ok(source.indexOf('refreshData()') < source.indexOf("screenName==='join-requests'"));
+  assert.match(source, /screenName==='join-requests'\)joinRequests\(\)/);
+  assert.match(source, /screenName==='join-request-detail'\)joinRequestDetail\(\)/);
+  assert.match(source, /screenName==='join-request-status'\)joinRequestStatus\(\)/);
+});
