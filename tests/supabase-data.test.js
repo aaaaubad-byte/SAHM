@@ -191,7 +191,9 @@ test('remote reminder gateway maps repeat guard and forwards explicit confirmati
   assert.equal(first.ok,false);
   assert.equal(first.code,'REMINDER_REPEAT');
   assert.equal(first.needsConfirm,true);
-  assert.equal(calls.rpc[0].args.p_confirm_repeat,false);
+  const firstReminderCalls=calls.rpc.filter(x=>x.name==='send_installment_reminders');
+  assert.equal(firstReminderCalls.length,1);
+  assert.equal(firstReminderCalls[0].args.p_confirm_repeat,false);
 
   delete options.rpcErrors.send_installment_reminders;
   const second=await window.SahmApp.sendReminder({groupId:'association-1',cycle:1,no:1,confirmRepeat:true});
