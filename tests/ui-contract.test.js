@@ -140,7 +140,7 @@ test('navigation runtime is loaded in order and precached by the service worker'
   const navigationScript = html.indexOf('<script src="/sahm-navigation.js"></script>');
   const nextInlineScript = html.indexOf('<script>', navigationScript + '<script src="/sahm-navigation.js"></script>'.length);
   assert.ok(appScript >= 0 && appScript < navigationScript && navigationScript < nextInlineScript);
-  assert.match(sw, /const CACHE_NAME = 'sahm-pwa-v27'/);
+  assert.match(sw, /const CACHE_NAME = 'sahm-pwa-v28'/);
   assert.match(sw, /APP_SHELL[\s\S]*?'\/sahm-navigation\.js'/);
   assert.match(sw, /APP_SHELL[\s\S]*?'\/sahm-supabase-data\.js'/);
   assert.ok(sw.includes("'/sahm-app.js'"));
