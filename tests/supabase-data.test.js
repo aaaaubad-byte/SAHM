@@ -55,7 +55,7 @@ function loadRemoteGateway(options = {}) {
     channel(name) {
       const channel = {
         name,
-        on(type,filter,callback) { calls.realtime.push({type,filter}); return channel; },
+        on(type,filter,callback) { calls.realtime.push({type,filter,callback}); return channel; },
         subscribe() { return channel; }
       };
       return channel;
@@ -79,7 +79,7 @@ function loadRemoteGateway(options = {}) {
     }
   };
   const code=fs.readFileSync(path.join(__dirname,'..','sahm-supabase-data.js'),'utf8');
-  vm.runInNewContext(code,{window,console,Date,Promise,Array,Object,String,Number,Math});
+  vm.runInNewContext(code,{window,console,Date,Promise,Array,Object,String,Number,Math,setTimeout,clearTimeout});
   return { gateway:window.SahmSupabaseData, window, calls, storeRef, profile };
 }
 
@@ -155,6 +155,26 @@ test('remote gateway subscribes only to chat and notifications and clears channe
   assert.equal(gateway.isRemote(),false);
 });
 
+
+test('coalesces related invitation and join-request realtime events into one snapshot refresh', async()=>{
+  const {gateway,calls}=loadRemoteGateway();
+  await gateway.init();
+  const initialReads=calls.tables.length;
+  const delivered=[];
+  gateway.startRealtime(payload=>delivered.push(payload.table));
+
+  const joinSubscription=calls.realtime.find(x=>x.filter.table==='join_requests');
+  const inviteSubscription=calls.realtime.find(x=>x.filter.table==='invitations');
+  assert.ok(joinSubscription&&inviteSubscription);
+
+  joinSubscription.callback({table:'join_requests',eventType:'INSERT',new:{id:'request-1'}});
+  inviteSubscription.callback({table:'invitations',eventType:'UPDATE',new:{id:'invite-1'}});
+
+  await new Promise(resolve=>setTimeout(resolve,180));
+  assert.equal(calls.tables.length-initialReads,EXPECTED_TABLES.length);
+  assert.deepEqual(delivered,['join_requests','invitations']);
+  gateway.clear();
+});
 
 test('remote gateway sends selected contacts through the bulk invitation RPC', async()=>{
   const {gateway,window,calls}=loadRemoteGateway();
