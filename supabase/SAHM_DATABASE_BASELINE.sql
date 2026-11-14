@@ -698,6 +698,22 @@ END;
 $function$
 ;
 
+CREATE OR REPLACE FUNCTION private.is_association_manager(p_id uuid)
+ RETURNS boolean
+ LANGUAGE sql
+ STABLE SECURITY DEFINER
+ SET search_path TO ''
+AS $function$ SELECT EXISTS(SELECT 1 FROM public.associations a WHERE a.id=p_id AND a.manager_user_id=(SELECT auth.uid())); $function$
+;
+
+CREATE OR REPLACE FUNCTION private.is_association_member(p_id uuid)
+ RETURNS boolean
+ LANGUAGE sql
+ STABLE SECURITY DEFINER
+ SET search_path TO ''
+AS $function$ SELECT EXISTS(SELECT 1 FROM public.association_memberships m WHERE m.association_id=p_id AND m.user_id=(SELECT auth.uid()) AND m.status='active'); $function$
+;
+
 CREATE OR REPLACE FUNCTION private.can_view_association(p_id uuid)
  RETURNS boolean
  LANGUAGE sql
@@ -934,21 +950,7 @@ END;
 $function$
 ;
 
-CREATE OR REPLACE FUNCTION private.is_association_manager(p_id uuid)
- RETURNS boolean
- LANGUAGE sql
- STABLE SECURITY DEFINER
- SET search_path TO ''
-AS $function$ SELECT EXISTS(SELECT 1 FROM public.associations a WHERE a.id=p_id AND a.manager_user_id=(SELECT auth.uid())); $function$
-;
 
-CREATE OR REPLACE FUNCTION private.is_association_member(p_id uuid)
- RETURNS boolean
- LANGUAGE sql
- STABLE SECURITY DEFINER
- SET search_path TO ''
-AS $function$ SELECT EXISTS(SELECT 1 FROM public.association_memberships m WHERE m.association_id=p_id AND m.user_id=(SELECT auth.uid()) AND m.status='active'); $function$
-;
 
 CREATE OR REPLACE FUNCTION private.mark_my_notification_read(p_notification_id uuid)
  RETURNS boolean
