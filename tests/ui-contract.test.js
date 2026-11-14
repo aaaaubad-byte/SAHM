@@ -158,3 +158,11 @@ test('unified association UI and invitation renderer follow the new contract', (
   assert.ok(handler.indexOf("const response=") < handler.indexOf("if(response==='interested'"));
   assert.match(html, /shareSummary=g\.total==null/);
 });
+
+
+test('viewport metadata allows browser zoom for accessibility', () => {
+  const viewport = html.match(/<meta name="viewport" content="([^"]+)"/);
+  assert.ok(viewport, 'viewport metadata exists');
+  assert.doesNotMatch(viewport[1], /user-scalable\s*=\s*no/i);
+  assert.doesNotMatch(viewport[1], /maximum-scale\s*=\s*1(?:[;,]|$)/i);
+});
