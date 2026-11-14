@@ -134,3 +134,14 @@ test('latest activity routes manager reviews and applicant outcomes to request s
   assert.match(activity, /join-request-detail/);
   assert.match(activity, /join-request-status/);
 });
+
+
+test('Realtime events refresh the screen view model and the open request screen', () => {
+  const source = extractFunction('startRemoteRealtime', 'currentGroup');
+  assert.match(source, /refreshData\(\)/);
+  assert.match(source, /screenName==='join-requests'.*joinRequests\(\)/);
+  assert.match(source, /screenName==='join-request-detail'.*joinRequestDetail\(\)/);
+  assert.match(source, /screenName==='join-request-status'.*joinRequestStatus\(\)/);
+  assert.match(source, /screenName==='invite-detail'.*inviteDetail\(\)/);
+  assert.match(source, /screenName==='invites'.*invites\(\)/);
+});
