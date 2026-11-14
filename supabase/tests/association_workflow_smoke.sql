@@ -44,22 +44,31 @@ BEGIN
    'rules','اختبار متراجع بالكامل'
  ));
 
- v_first_invite:=public.create_invitation(v_association,'أحمد محمد علي','+967777000002',1);
+ v_first_invite:=public.create_invitation(v_association,'أحمد محمد علي','+967777000002');
  IF v_first_invite->>'token' IS NULL THEN RAISE EXCEPTION 'Invitation token was not returned'; END IF;
+ IF (SELECT shares_requested IS NOT NULL FROM public.invitations WHERE id=(v_first_invite->>'id')::uuid) THEN
+   RAISE EXCEPTION 'New invitation unexpectedly assigned shares';
+ END IF;
 
  PERFORM set_config('request.jwt.claim.sub','bbbbbbbb-bbbb-4bbb-8bbb-bbbbbbbbbbbb',true);
  PERFORM public.complete_my_profile('أحمد محمد علي','+967777000002','avatar-02');
 
  v_preview:=public.preview_invitation(v_first_invite->>'token');
- IF v_preview->>'name'<>'جمعية اختبار تكامل مؤقتة' OR (v_preview->>'sharesRequested')::integer<>1 THEN
+ IF v_preview->>'name'<>'جمعية اختبار تكامل مؤقتة' OR v_preview->>'managerName'<>'عبدالله محمد صالح' THEN
    RAISE EXCEPTION 'Invitation preview returned unexpected association data';
  END IF;
 
- v_accept:=public.accept_invitation(v_first_invite->>'token');
- v_membership:=(v_accept->>'membership_id')::uuid;
- IF (v_accept->>'shares_added')::integer<>1 THEN RAISE EXCEPTION 'Invitation did not add the requested share'; END IF;
+ PERFORM public.respond_to_invitation((v_first_invite->>'id')::uuid,'interested');
+ v_accept:=public.submit_join_request('invitation',v_first_invite->>'token',1);
+ IF v_accept->>'status'<>'pending' OR (v_accept->>'requested_shares')::integer<>1 THEN
+   RAISE EXCEPTION 'Invitation did not create a pending join request';
+ END IF;
 
  PERFORM set_config('request.jwt.claim.sub','aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa',true);
+ v_accept:=public.approve_join_request((v_accept->>'request_id')::uuid);
+ v_membership:=(v_accept->>'membership_id')::uuid;
+ IF (v_accept->>'shares_added')::integer<>1 THEN RAISE EXCEPTION 'Approval did not add the requested share'; END IF;
+
  v_added:=public.add_shares(v_membership,1);
  IF v_added<>1 THEN RAISE EXCEPTION 'add_shares failed'; END IF;
  v_removed:=public.remove_shares(v_membership,1);
@@ -71,7 +80,7 @@ BEGIN
  END IF;
 
  PERFORM public.update_association(v_association,jsonb_build_object('name','جمعية اختبار معدلة'));
- v_second_invite:=public.create_invitation(v_association,'فاطمة علي محمد','+967777000003',1);
+ v_second_invite:=public.create_invitation(v_association,'فاطمة علي محمد','+967777000003');
  IF NOT public.cancel_invitation((v_second_invite->>'id')::uuid) THEN
    RAISE EXCEPTION 'cancel_invitation did not cancel the pending invitation';
  END IF;
