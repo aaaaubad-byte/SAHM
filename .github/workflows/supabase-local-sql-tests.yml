@@ -31,8 +31,25 @@ jobs:
       - name: Create ephemeral local Supabase configuration
         run: supabase init
 
+      - name: Hold repository migrations until after baseline restore
+        run: |
+          set -euo pipefail
+          mkdir -p /tmp/sahm-repo-migrations
+          shopt -s nullglob
+          files=(supabase/migrations/*.sql)
+          if (("${#files[@]}" > 0)); then
+            cp "${files[@]}" /tmp/sahm-repo-migrations/
+            rm -f "${files[@]}"
+          fi
+
       - name: Start isolated local Supabase stack
         run: supabase start --exclude studio,mail,analytics
+
+      - name: Restore repository migration files
+        if: success()
+        run: |
+          set -euo pipefail
+          cp /tmp/sahm-repo-migrations/*.sql supabase/migrations/ 2>/dev/null || true
 
       - name: Install PostgreSQL client
         run: |
