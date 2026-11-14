@@ -4410,7 +4410,7 @@ async function handleAppAction(action,el){
  }
  if(action==='add-account'){go('welcome');return}
  if(action==='switch-account'){
-  if(authBusy)return;authBusy=true;const previousUserId=db.user&&db.user.id;
+  if(authBusy)return;authBusy=true;const previousUserSnapshot=Object.assign({},db.user||{}),previousUserId=previousUserSnapshot.id;
   try{
    SahmSupabaseData.stopRealtime();
    const switched=await SahmSupabase.switchAccount(el.dataset.userId);
@@ -4428,7 +4428,7 @@ async function handleAppAction(action,el){
      if(!SahmSupabaseData.isRemote()){
       SahmSupabaseData.clear();activeProfile=await SahmSupabase.profile(previousUserId);
       await SahmSupabaseData.init(activeProfile);SahmSupabaseData.install();db=load();
-      db.session=true;db.user=Object.assign(db.user,{id:previousUserId,email:activeProfile.email||db.user.email,name:activeProfile.fullName,phone:activeProfile.phone,city:activeProfile.city,avatarKey:activeProfile.avatarKey});
+      db.session=true;db.user=Object.assign(db.user,previousUserSnapshot,{id:previousUserId,name:activeProfile.fullName,phone:activeProfile.phone,city:activeProfile.city,avatarKey:activeProfile.avatarKey});
       currentGroupId=(db.groups[0]||{}).id||null;
      }
      startRemoteRealtime();
