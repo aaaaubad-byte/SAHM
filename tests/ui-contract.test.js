@@ -138,15 +138,15 @@ test('email auth and staged profile onboarding replace the demo OTP flow', () =>
 test('Supabase session handoff never revokes the session after transferring it', () => {
   assert.match(auth, /var BOOTSTRAP_STORAGE_KEY = 'sb-'/);
   assert.match(auth, /autoRefreshToken: key !== 'default'/);
-  assert.match(auth, /function clearBootstrapSession\\(client\\)[\\s\\S]*?removeItem\\(BOOTSTRAP_STORAGE_KEY\\)/);
+  assert.match(auth, /function clearBootstrapSession\(client\)[\s\S]*?removeItem\(BOOTSTRAP_STORAGE_KEY\)/);
   const signup = auth.slice(auth.indexOf('async function signUp'), auth.indexOf('function rememberAccount'));
   const signin = auth.slice(auth.indexOf('async function signIn'), auth.indexOf('async function switchAccount'));
   const legacySession = auth.slice(auth.indexOf('async function session'), auth.indexOf('async function user'));
   for (const flow of [signup, signin, legacySession]) {
-    assert.doesNotMatch(flow, /\\.auth\\.signOut\\(/, 'transferred session must not be revoked remotely');
-    assert.match(flow, /clearBootstrapSession\\(/, 'bootstrap copy is cleared locally');
+    assert.doesNotMatch(flow, /\.auth\.signOut\(/, 'transferred session must not be revoked remotely');
+    assert.match(flow, /clearBootstrapSession\(/, 'bootstrap copy is cleared locally');
   }
-  assert.match(auth, /async function signOut\\(\\)[\\s\\S]*?c\\.auth\\.signOut\\(\\{ scope: 'local' \\}\\)/,
+  assert.match(auth, /async function signOut\(\)[\s\S]*?c\.auth\.signOut\(\{ scope: 'local' \}\\)/,
     'the explicit user-requested sign-out still calls Supabase Auth');
   assert.match(auth, /هذا البريد الإلكتروني مرتبط بحساب موجود بالفعل/);
 });
