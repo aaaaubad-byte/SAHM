@@ -154,3 +154,54 @@ test('Realtime refreshes the live view model before repainting join workflow scr
   assert.match(source, /screenName==='join-request-detail'\)joinRequestDetail\(\)/);
   assert.match(source, /screenName==='join-request-status'\)joinRequestStatus\(\)/);
 });
+
+
+test('applicant request outcomes appear in latest activity without manager-only events', () => {
+  const source = extractFunction('homeActivity', 'homeInvitations');
+  const context = {
+    db: {
+      user: { id: 'applicant-1' },
+      groups: [],
+      joinRequests: [
+        { id: 'request-pending', groupId: 'group-1', groupName: 'جمعية الطلبات', applicantUserId: 'applicant-1', status: 'pending', submittedAt: '2026-11-13T10:00:00Z' },
+        { id: 'request-approved', groupId: 'group-2', groupName: 'جمعية أخرى', applicantUserId: 'applicant-1', status: 'approved', submittedAt: '2026-11-12T10:00:00Z', decidedAt: '2026-11-14T10:00:00Z' }
+      ]
+    },
+    SahmApp: { recentActivity: () => [], chatTime: value => String(value) },
+    escapeHtml: value => String(value),
+    uiIcon: name => '<svg data-icon="' + name + '"></svg>'
+  };
+  const render = vm.runInNewContext('(' + source + ')', context);
+  const html = render();
+  assert.match(html, /data-go="join-request-status" data-id="request-approved"/);
+  assert.match(html, /data-go="join-request-status" data-id="request-pending"/);
+  assert.ok(html.indexOf('request-approved') < html.indexOf('request-pending'), 'decision activity is ordered by its decision time');
+  assert.match(html, /تمت الموافقة على طلب انضمامك/);
+  assert.match(html, /طلبك بانتظار موافقة المدير/);
+});
+
+test('applicant approval and rejection notifications open the related request status', () => {
+  const source = extractFunction('notifications', 'audit');
+  const state = { markup: '' };
+  const context = {
+    SahmApp: {
+      notificationList: () => ({ ok: true, notifications: [
+        { id: 'notice-approved', type: 'join_approved', relatedEntityId: 'request-1', text: 'تمت الموافقة', at: '2026-11-14', read: true },
+        { id: 'notice-rejected', type: 'join_rejected', relatedEntityId: 'request-2', text: 'تم الرفض', at: '2026-11-14', read: true },
+        { id: 'notice-other', type: 'reminder', relatedEntityId: null, text: 'تذكير', at: '2026-11-14', read: true }
+      ]},
+      markNotificationsRead: () => ({ ok: true })
+    },
+    toast: () => {},
+    escapeHtml: value => String(value),
+    header: () => '',
+    shell: (title, active, markup) => { state.markup = markup; }
+  };
+  const render = vm.runInNewContext('(' + source + ')', context);
+  render();
+  assert.match(state.markup, /data-go="join-request-status" data-id="request-1"/);
+  assert.match(state.markup, /data-go="join-request-status" data-id="request-2"/);
+  assert.match(state.markup, /الموافقة على طلب انضمامك/);
+  assert.match(state.markup, /رفض طلب انضمامك/);
+  assert.match(state.markup, /إشعار سهم/);
+});
