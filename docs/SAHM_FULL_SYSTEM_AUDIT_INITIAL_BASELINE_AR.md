@@ -366,3 +366,49 @@
 - لذلك قد تُحمّل ملفات التطبيق المحلية من cache دون أن تتوفر مكتبة Supabase عند التشغيل بلا إنترنت، ما قد يمنع تهيئة التطبيق.
 - لا يوجد حتى الآن cache لبيانات Supabase أو طابور عمليات كتابة مؤجلة أو آلية مصالحة تعارضات.
 - رفع cache version يحسن تحديث App Shell فقط، ولا يحول التطبيق إلى Offline-First.
+
+
+---
+
+## 18. إصلاح تكرار التذكيرات في التشغيل البعيد
+
+### الخلل
+
+- نموذج البيانات المحلي يفرض فترة منع تكرار قدرها 6 ساعات، ولا يسمح بالإرسال مجدداً إلا بعد تأكيد صريح.
+- دالة الإنتاج `send_installment_reminders` لم تكن تطبق هذه الحماية.
+- بوابة Supabase كانت تتجاهل `confirmRepeat` القادم من الواجهة؛ لذلك كان تأكيد التكرار في التشغيل البعيد غير مكتمل.
+
+### الإصلاح
+
+- أضيف overload رباعي الوسائط إلى `private/public.send_installment_reminders` يستقبل `p_confirm_repeat`.
+- عند وجود تذكير حديث لنفس الالتزام والمستلم خلال 6 ساعات، يرفض الخادم الإرسال بـ SQLSTATE `RPT01` ما لم يصل التأكيد.
+- بقي overload الثلاثي القديم موجوداً للتوافق، وأصبح يستدعي الحماية الجديدة مع `confirm=false`.
+- أضيف overload عام رباعي الوسائط، مع منع anon وPUBLIC والسماح لـ authenticated فقط.
+- بوابة العميل تمرر `p_confirm_repeat` وتحوّل `RPT01` إلى `REMINDER_REPEAT` الذي تتوقعه الواجهة.
+- أضيف اختبار SQL واختبار عقد للبوابة البعيدة.
+
+### الملفات وCommits
+
+- `supabase/migrations/20261114035509_guard_installment_reminder_repeat_confirmation.sql` — Commit `6da911433c732197c20676b387c868b29c66d5f8`.
+- `supabase/tests/association_operations_smoke.sql` — Commit `a9ae6c24054b413457bb7c8f42ddacc55021d1d5`.
+- `sahm-supabase-data.js` — Commit `87dd573b970f6984fb188f35515705d5fd88601d`.
+- `tests/supabase-data.test.js` — Commit `8620db8ab98c53f69e3a9659c2aa0ee4539380c4`.
+- أضيف workflow لتشغيل اختبارات Node على الفرع: `.github/workflows/node-tests.yml` — Commit `334be426ce99958a873cf9efc1d4d253cff2f43e`.
+
+### التحقق الفعلي
+
+في معاملة اختبار على قاعدة الإنتاج وببيانات مؤقتة:
+
+1. تسجيل إيصال ثم تصحيحه.
+2. إرسال التذكير الأول: recipient count = 1.
+3. إعادة الإرسال دون تأكيد: رفض بـ `RPT01`.
+4. إعادة الإرسال مع `p_confirm_repeat=true`: recipient count = 1.
+5. التحقق من وجود صفّي تذكير فقط بعد الإرسالين المسموحين.
+6. التراجع عن كل بيانات الاختبار.
+
+**النتيجة: PASS.** كما تحققت أن overload الثلاثي والرباعي موجودان، وأن authenticated يستطيع تنفيذ الرباعي بينما anon لا يستطيع.
+
+### حدود التحقق
+
+- أضيف اختبار البوابة البعيدة إلى مجموعة Node، لكن لم تتوفر نتيجة تشغيل المجموعة كاملة على آخر Commit.
+- أضيف Workflow جديد لتشغيل `node --test tests/*.test.js` على pushes وpull requests إلى `SAHM-SUPABASE`؛ لم تتوفر نتيجة تشغيله بعد.
