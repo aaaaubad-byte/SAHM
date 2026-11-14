@@ -4023,8 +4023,15 @@ function wall(){
 }
 function notifications(){
  const r=SahmApp.notificationList();if(!r||!r.ok){toast('تعذر تحميل الإشعارات');return}SahmApp.markNotificationsRead();
- const labels={received:'تسجيل استلام قسط',reminder:'تذكير بقسط',drawResult:'نتيجة القرعة',late:'تأخر قسط',drawSoon:'اقتراب موعد القرعة',drawDue:'موعد القرعة',joined:'انضمام عضو',completed:'اكتمال الأقساط'};
- shell('الإشعارات','notifications',header('الإشعارات','تنبيهات حسابك')+'<div class="card">'+(r.notifications.map(x=>'<div class="listrow"><div class="avatar">'+(x.type==='drawResult'?'★':'♧')+'</div><div class="grow"><strong>'+escapeHtml(labels[x.type]||'إشعار سهم')+'</strong><small>'+escapeHtml(x.text)+'</small><small>'+escapeHtml(x.at||'')+'</small></div>'+(!x.read?'<span class="pill gold">جديد</span>':'<span class="pill">مقروء</span>')+'</div>').join('')||'<div class="empty"><b>لا توجد إشعارات</b></div>')+'</div>');
+ const labels={received:'تسجيل استلام قسط',reminder:'تذكير بقسط',drawResult:'نتيجة القرعة',late:'تأخر قسط',drawSoon:'اقتراب موعد القرعة',drawDue:'موعد القرعة',joined:'انضمام عضو',completed:'اكتمال الأقساط',join_approved:'الموافقة على طلب انضمامك',join_rejected:'رفض طلب انضمامك'};
+ const rows=(r.notifications||[]).map(x=>{
+  const decision=['join_approved','join_rejected'].includes(x.type)&&x.relatedEntityId;
+  const content='<div class="avatar">'+(x.type==='drawResult'?'★':decision?'✓':'♧')+'</div><div class="grow"><strong>'+escapeHtml(labels[x.type]||'إشعار سهم')+'</strong><small>'+escapeHtml(x.text)+'</small><small>'+escapeHtml(x.at||'')+'</small></div>'+(!x.read?'<span class="pill gold">جديد</span>':'<span class="pill">مقروء</span>');
+  return decision
+   ?'<button type="button" class="listrow" data-go="join-request-status" data-id="'+escapeHtml(x.relatedEntityId)+'">'+content+'</button>'
+   :'<div class="listrow">'+content+'</div>';
+ }).join('');
+ shell('الإشعارات','notifications',header('الإشعارات','تنبيهات حسابك')+'<div class="card">'+(rows||'<div class="empty"><b>لا توجد إشعارات</b></div>')+'</div>');
 }
 function audit(){
  const g=currentGroup();if(!g||!isManager()){toast('سجل العمليات متاح لمدير الجمعية');go('group-detail');return}
