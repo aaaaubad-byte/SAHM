@@ -3238,7 +3238,22 @@ body {
 .avatar-option.selected{border:2px solid var(--teal);background:var(--teal-soft);color:var(--teal)}
 @media(max-width:360px){.avatar-picker{grid-template-columns:repeat(4,minmax(0,1fr))}}
 .phone-country-row{display:flex;gap:8px;align-items:stretch;direction:rtl}.phone-country-row select{flex:0 0 43%;min-width:0;font-size:11px;padding-inline:8px}.phone-country-row input{flex:1;min-width:0;direction:ltr;text-align:left}
-@media(max-width:360px){.phone-country-row select{flex-basis:46%;font-size:10px}}</style></head>
+@media(max-width:360px){.phone-country-row select{flex-basis:46%;font-size:10px}}
+/* Contact multi-select workflow */
+.invitee-row{gap:9px;padding:10px 0;min-width:0}
+.invitee-choice{display:flex;align-items:center;gap:10px;min-width:0;flex:1;cursor:pointer}
+.invitee-choice>input[type=checkbox]{width:19px;height:19px;flex:0 0 19px;accent-color:var(--teal)}
+.invitee-details{display:block;min-width:0;flex:1}
+.invitee-name{width:100%;min-width:0;border:0!important;background:transparent!important;color:var(--ink);font:inherit;font-size:13px;font-weight:700;padding:2px 0;outline:none}
+.invitee-name:focus{box-shadow:inset 0 -1px var(--teal)}
+.invitee-details small{direction:ltr;text-align:right;overflow-wrap:anywhere}
+.invitee-row .pill{font-size:9px}
+.invitee-result-actions{display:flex;gap:6px;flex:none}
+.invitee-result-actions .btn{min-width:48px;padding-inline:8px}
+.invitee-link{direction:ltr;text-align:left;font-size:10px;min-width:0;overflow:hidden;text-overflow:ellipsis}
+.invitee-selection-bar{box-shadow:0 -5px 18px rgba(18,32,48,.06);border:1px solid var(--line)}
+@media(max-width:370px){.invitee-row{flex-wrap:wrap}.invitee-result-actions{margin-inline-start:auto}}
+</style></head>
 <body><noscript><main dir="rtl" style="font-family:Arial,sans-serif;padding:24px;color:#142f39"><h1>سهم</h1></main></noscript><div class="workspace"><div class="phone" id="app">
 <div id="topbar" class="topbar" style="display:none"></div><main id="screen" class="auth-screen">
 <div class="auth-brand" style="margin:12px 0 20px"><div class="brand-mark">س</div><h1 style="font-size:24px">سهم</h1><p>إدارة الجمعيات التساهمية</p></div>
@@ -4133,11 +4148,26 @@ async function handleAppAction(action,el){
   if(!result||!result.ok){toast(result&&result.message||'تعذر إنشاء الدعوات');return}
   refreshData();
   const rows=(result.results||[]).map(item=>item.status==='sent'
-   ?'<div class="listrow"><div class="grow"><strong>'+escapeHtml(item.name)+'</strong><small>تم إنشاء الدعوة؛ شارك الرابط مع الشخص ليتمكن من فتحها</small><input class="field-input" readonly value="'+escapeHtml(item.url||'')+'"></div><button class="btn outline small" data-action="copy-bulk-invite-link" data-link="'+escapeHtml(item.url||'')+'">نسخ</button></div>'
+   ?'<div class="listrow"><div class="grow"><strong>'+escapeHtml(item.name)+'</strong><small>تم إنشاء الدعوة؛ شارك الرابط مع الشخص ليتمكن من فتحها</small><input class="field invitee-link" readonly value="'+escapeHtml(item.url||'')+'"></div><div class="invitee-result-actions"><button class="btn outline small" data-action="copy-bulk-invite-link" data-link="'+escapeHtml(item.url||'')+'">نسخ</button><button class="btn soft small" data-action="share-bulk-invite-link" data-link="'+escapeHtml(item.url||'')+'">مشاركة</button></div></div>'
    :'<div class="listrow"><div class="grow"><strong>'+escapeHtml(item.name||'جهة اتصال')+'</strong><small>'+escapeHtml(item.message||'تعذر إرسال الدعوة')+'</small></div><span class="pill red">لم تُرسل</span></div>'
   ).join('');
   pendingInvitees=[];renderInviteeSelection();
   showModal('نتيجة إرسال الدعوات','<div class="grid2"><div class="stat"><span>تم إنشاؤها</span><b>'+Number(result.sentCount||0)+'</b></div><div class="stat"><span>تعذر إرسالها</span><b>'+Number(result.failedCount||0)+'</b></div></div><div class="card">'+rows+'</div><small>لم يتم إرسال رسالة خارجية تلقائيًا. انسخ رابط كل دعوة وشاركه مع صاحبها.</small>',[['إغلاق','close','outline']]);
+  return;
+ }
+ if(action==='share-bulk-invite-link'){
+  const link=el.dataset.link||'';if(!link)return;
+  const title='دعوة للانضمام إلى سهم';
+  if(typeof navigator.share==='function'){
+   try{await navigator.share({title:title,text:'تمت دعوتك للانضمام إلى جمعية في تطبيق سهم. افتح الرابط لإكمال الخطوات.',url:link});}
+   catch(error){if(error&&error.name!=='AbortError')toast('تعذرت المشاركة؛ استخدم زر النسخ')}
+  }else{
+   try{
+    if(navigator.clipboard&&navigator.clipboard.writeText)await navigator.clipboard.writeText(link);
+    else{const box=document.createElement('textarea');box.value=link;document.body.appendChild(box);box.select();document.execCommand('copy');box.remove();}
+    toast('المشاركة غير مدعومة هنا؛ تم نسخ الرابط');
+   }catch(_){toast('تعذر نسخ الرابط؛ حدد الرابط وانسخه يدويًا')}
+  }
   return;
  }
  if(action==='copy-bulk-invite-link'){
