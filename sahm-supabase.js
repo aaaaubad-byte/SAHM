@@ -6,25 +6,36 @@
   var SUPABASE_URL = 'https://nusjnnrtpxbpphphmdsc.supabase.co';
   var PUBLISHABLE_KEY = 'sb_publishable_RE6_iJo4rqaD4-FqOCMh5A_ZB05bU10';
   var TERMS_VERSION = '2026-11-14';
-  var client = null;
+  var clients = Object.create(null);
+  var activeClientKey = 'default';
   var currentUser = null;
   var authListener = null;
+  var ACCOUNT_INDEX_KEY = 'sahm.saved.accounts.v1';
 
-  function getClient() {
-    if (client) return client;
+  function readAccounts() {
+    try { return JSON.parse(root.localStorage.getItem(ACCOUNT_INDEX_KEY) || '[]').filter(function (x) { return x && x.id && x.email; }); }
+    catch (_) { return []; }
+  }
+  function writeAccounts(items) {
+    try { root.localStorage.setItem(ACCOUNT_INDEX_KEY, JSON.stringify(items)); } catch (_) {}
+  }
+  function accountStorageKey(id) { return 'account-' + String(id).replace(/[^a-zA-Z0-9_-]/g, ''); }
+  function getClient(key) {
+    key = key || activeClientKey;
+    if (clients[key]) return clients[key];
     if (!root.supabase || typeof root.supabase.createClient !== 'function') {
       throw new Error('تعذر تحميل مكتبة الاتصال الآمن. تحقق من اتصال الإنترنت ثم أعد المحاولة.');
     }
-    client = root.supabase.createClient(SUPABASE_URL, PUBLISHABLE_KEY, {
-      auth: {
-        autoRefreshToken: true,
-        persistSession: true,
-        detectSessionInUrl: true,
-        flowType: 'pkce'
-      },
+    var authOptions = {
+      autoRefreshToken: true, persistSession: true, detectSessionInUrl: key === 'default',
+      flowType: 'pkce'
+    };
+    if (key !== 'default') authOptions.storageKey = 'sahm-auth-' + key;
+    clients[key] = root.supabase.createClient(SUPABASE_URL, PUBLISHABLE_KEY, {
+      auth: authOptions,
       global: { headers: { 'X-Client-Info': 'sahm-web/1.0.0' } }
     });
-    return client;
+    return clients[key];
   }
 
   function friendly(error) {
@@ -60,30 +71,78 @@
     };
   }
 
-  async function signIn(email, password) {
-    var c = getClient();
-    var result = await c.auth.signInWithPassword({
-      email: String(email || '').trim().toLowerCase(),
-      password: password
-    });
-    if (result.error) throw result.error;
-    currentUser = result.data.user || null;
-    return { user: currentUser, session: result.data.session };
+  function rememberAccount(userValue) {
+    if (!userValue || !userValue.id || !userValue.email) return;
+    var items = readAccounts().filter(function (x) { return x.id !== userValue.id; });
+    items.unshift({ id: userValue.id, email: userValue.email, label: userValue.user_metadata && (userValue.user_metadata.full_name || userValue.user_metadata.name) || userValue.email });
+    writeAccounts(items);
   }
 
+  async function activateSession(sessionValue) {
+    if (!sessionValue || !sessionValue.user) throw new Error('لم يتم العثور على جلسة الحساب.');
+    var id = sessionValue.user.id, key = accountStorageKey(id), target = getClient(key);
+    var stored = await target.auth.getSession();
+    if (!stored.data.session || stored.data.session.refresh_token !== sessionValue.refresh_token) {
+      var set = await target.auth.setSession({ access_token: sessionValue.access_token, refresh_token: sessionValue.refresh_token });
+      if (set.error) throw set.error;
+    }
+    activeClientKey = key;
+    currentUser = sessionValue.user;
+    rememberAccount(sessionValue.user);
+    return { user: currentUser, session: (await target.auth.getSession()).data.session };
+  }
+
+  async function signIn(email, password) {
+    var defaultClient = getClient('default');
+    var result = await defaultClient.auth.signInWithPassword({
+      email: String(email || '').trim().toLowerCase(), password: password
+    });
+    if (result.error) throw result.error;
+    var activated = await activateSession(result.data.session);
+    await defaultClient.auth.signOut({ scope: 'local' });
+    return activated;
+  }
+
+  async function switchAccount(userId) {
+    var key = accountStorageKey(userId), target = getClient(key);
+    var result = await target.auth.getUser();
+    if (result.error || !result.data.user) throw result.error || new Error('انتهت جلسة هذا الحساب. سجّل الدخول إليه مجددًا.');
+    activeClientKey = key;
+    currentUser = result.data.user;
+    rememberAccount(currentUser);
+    return { user: currentUser, session: (await target.auth.getSession()).data.session };
+  }
+
+  function accounts() { return readAccounts(); }
+
   async function signOut() {
-    var c = getClient();
+    var c = getClient(), id = currentUser && currentUser.id;
     var result = await c.auth.signOut({ scope: 'local' });
     if (result.error) throw result.error;
+    if (id) writeAccounts(readAccounts().filter(function (x) { return x.id !== id; }));
+    activeClientKey = 'default';
     currentUser = null;
     return true;
   }
 
   async function session() {
-    var c = getClient();
+    var c = getClient(activeClientKey);
     var result = await c.auth.getSession();
     if (result.error) throw result.error;
+    if (!result.data.session && activeClientKey !== 'default') {
+      activeClientKey = 'default';
+      c = getClient('default');
+      result = await c.auth.getSession();
+      if (result.error) throw result.error;
+    }
+    if (result.data.session && result.data.session.user && activeClientKey === 'default') {
+      var legacy = result.data.session;
+      var activated = await activateSession(legacy);
+      await c.auth.signOut({ scope: 'local' });
+      return activated.session;
+    }
     currentUser = result.data.session && result.data.session.user || null;
+    if (currentUser) rememberAccount(currentUser);
     return result.data.session || null;
   }
 
@@ -167,6 +226,8 @@
     client: getClient,
     signUp: signUp,
     signIn: signIn,
+    switchAccount: switchAccount,
+    accounts: accounts,
     signOut: signOut,
     session: session,
     user: user,
