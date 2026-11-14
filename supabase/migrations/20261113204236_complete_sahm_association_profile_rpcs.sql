@@ -45,9 +45,7 @@ BEGIN
   VALUES(v_aid,v_uid,'shares_added','membership',p_membership_id,'manager',jsonb_build_object('count',p_count));
   RETURN p_count;
 END;
-$function$
-
-
+$function$;
 CREATE OR REPLACE FUNCTION private.cancel_invitation(p_invitation_id uuid)
  RETURNS boolean
  LANGUAGE plpgsql
@@ -75,9 +73,7 @@ BEGIN
   END IF;
   RETURN v_rows=1;
 END;
-$function$
-
-
+$function$;
 CREATE OR REPLACE FUNCTION private.preview_invitation(p_token text)
  RETURNS jsonb
  LANGUAGE plpgsql
@@ -116,9 +112,7 @@ BEGIN
   IF v_result IS NULL THEN RAISE EXCEPTION 'الدعوة غير موجودة أو منتهية أو غير متاحة لهذا الحساب' USING ERRCODE='22023'; END IF;
   RETURN v_result;
 END;
-$function$
-
-
+$function$;
 CREATE OR REPLACE FUNCTION private.remove_member(p_membership_id uuid)
  RETURNS boolean
  LANGUAGE plpgsql
@@ -154,9 +148,7 @@ BEGIN
   VALUES(v_aid,v_uid,'member_removed','membership',p_membership_id,'manager',jsonb_build_object('user_id',v_user_id));
   RETURN true;
 END;
-$function$
-
-
+$function$;
 CREATE OR REPLACE FUNCTION private.assert_association_pre_financial(p_association_id uuid)
  RETURNS void
  LANGUAGE plpgsql
@@ -174,9 +166,7 @@ BEGIN
     RAISE EXCEPTION 'لا يمكن تغيير العضويات أو الإعدادات بعد بدء سجل الأقساط أو التذكيرات أو القرعات' USING ERRCODE='23514';
   END IF;
 END;
-$function$
-
-
+$function$;
 CREATE OR REPLACE FUNCTION private.rebuild_open_association_obligations(p_association_id uuid)
  RETURNS void
  LANGUAGE plpgsql
@@ -217,9 +207,7 @@ BEGIN
     END LOOP;
   END LOOP;
 END;
-$function$
-
-
+$function$;
 CREATE OR REPLACE FUNCTION private.remove_shares(p_membership_id uuid, p_count integer)
  RETURNS integer
  LANGUAGE plpgsql
@@ -261,9 +249,7 @@ BEGIN
   VALUES(v_aid,v_uid,'shares_removed','membership',p_membership_id,'manager',jsonb_build_object('count',v_removed));
   RETURN v_removed;
 END;
-$function$
-
-
+$function$;
 CREATE OR REPLACE FUNCTION private.update_association(p_association_id uuid, p_payload jsonb)
  RETURNS uuid
  LANGUAGE plpgsql
@@ -376,9 +362,7 @@ BEGIN
   );
   RETURN p_association_id;
 END;
-$function$
-
-
+$function$;
 CREATE OR REPLACE FUNCTION private.update_my_profile(p_full_name text, p_city text)
  RETURNS boolean
  LANGUAGE plpgsql
@@ -397,9 +381,7 @@ BEGIN
     WHERE user_id=v_uid;
   RETURN true;
 END;
-$function$
-
-
+$function$;
 CREATE OR REPLACE FUNCTION public.add_shares(p_membership_id uuid, p_count integer)
  RETURNS integer
  LANGUAGE sql
