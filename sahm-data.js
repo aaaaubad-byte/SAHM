@@ -356,7 +356,7 @@
   /* idempotent: fills every field introduced after earlier versions without touching existing values */
   function normalizeDb(db) {
     var K = C();
-    ['groups', 'members', 'shares', 'receipts', 'draws', 'messages', 'events', 'notifications', 'reminders', 'invites', 'corrections'].forEach(function (k) { if (!Array.isArray(db[k])) db[k] = []; });
+    ['groups', 'members', 'shares', 'receipts', 'draws', 'messages', 'events', 'notifications', 'reminders', 'invites', 'joinRequests', 'corrections'].forEach(function (k) { if (!Array.isArray(db[k])) db[k] = []; });
     ['chatReads', 'emitted'].forEach(function (k) { if (!db[k] || typeof db[k] !== 'object') db[k] = {}; });
     if (!db.meta || typeof db.meta !== 'object') db.meta = { createdAt: db.seededOn || null, migrations: [] };
     if (!Array.isArray(db.meta.migrations)) db.meta.migrations = [];
@@ -565,16 +565,28 @@
     return transact(db, function () {
       var K = C(); input = input || {};
       if (!actor) throw E('FORBIDDEN', 'لا يوجد مستخدم مسجل');
+      var unified = input.firstDrawOn !== undefined || input.durationDays !== undefined ||
+        input.shareAmountMinor !== undefined || input.installmentMode !== undefined;
       var errs = K.validateGroup(input);
       if (errs.length) return fail('VALIDATION', 'بيانات الجمعية غير مكتملة أو غير صحيحة', { errors: errs });
-      var today = nowAt(TZ).slice(0, 10), gid = nextId(db, 'g');
+      var today = nowAt(input.tz || input.timeZone || TZ).slice(0, 10), gid = nextId(db, 'g');
+      var mode = unified && input.installmentMode === 'amount' ? 'amount' : 'count';
+      var shareAmount = unified ? Number(input.shareAmountMinor) : K.parseMoney(input.shareAmount, input.currency);
+      var days = unified ? Number(input.durationDays || K.firstDrawDurationDays(input.startDate, input.firstDrawOn)) :
+        (input.cycleType === 'custom' ? Number(input.cycleDays) : (input.cycleType === 'weekly' ? 7 : 30));
+      var fixed = mode === 'amount' ? Number(input.installmentAmountMinor) : null;
+      var installmentCount = mode === 'amount' ? Math.ceil(shareAmount / fixed) : Number(input.installments);
       var g = {
-        id: gid, name: input.name.trim(), tone: input.tone || 'blue', currency: input.currency, tz: input.tz || TZ, cycleType: input.cycleType,
-        cycleDays: input.cycleType === 'custom' ? Number(input.cycleDays) : null, installments: Number(input.installments),
-        shareAmount: K.parseMoney(input.shareAmount, input.currency), startDate: input.startDate, createdOn: today,
-        maxPerMember: Number(input.maxPerMember), targetShares: Number(input.targetShares),
+        id: gid, name: input.name.trim(), tone: input.tone || 'blue', currency: input.currency,
+        tz: input.tz || input.timeZone || TZ, cycleType: unified ? 'custom' : input.cycleType,
+        cycleDays: days, firstDrawOn: unified ? (input.firstDrawOn || K.addDays(input.startDate, days)) : null,
+        installments: installmentCount, installmentMode: mode, installmentAmountMinor: fixed,
+        shareAmount: shareAmount, startDate: input.startDate, createdOn: today,
+        maxPerMember: unified ? null : Number(input.maxPerMember),
+        targetShares: unified ? null : Number(input.targetShares),
         quorum: input.quorum ? Number(input.quorum) : 66, rules: String(input.rules || '').trim(), notify: {},
         managerUserId: actor, managerName: actor === me(db) ? db.prefs.user.name : 'المدير',
+        managerParticipates: input.managerMode === 'both',
         inviteOpensOn: input.inviteOpensOn || today, inviteClosesOn: input.inviteClosesOn || null, lockedAt: null
       };
       g.inviteCode = inviteCodeFor(db, gid);
@@ -584,10 +596,9 @@
       if (input.managerMode === 'both') {
         addMemberCore(db, g, { name: g.managerName, userId: actor, shares: Number(input.managerShares), joinedAt: today, isManager: true, confirmLateImpact: true, silent: true });
       }
-      return { groupId: gid, group: clone(g), plan: K.groupPlan(g, g.targetShares) };
+      return { groupId: gid, group: clone(g), plan: K.groupPlan(g, K.groupShares(db, gid).length) };
     });
   }
-
   var FREE_FIELDS = ['name', 'rules', 'quorum', 'inviteOpensOn', 'inviteClosesOn', 'tone'];
   var FIN_FIELDS = ['currency', 'cycleType', 'cycleDays', 'installments', 'shareAmount', 'startDate'];
   var COUNT_FIELDS = ['targetShares', 'maxPerMember'];
@@ -608,13 +619,19 @@
         name: g.name, currency: g.currency, cycleType: g.cycleType, cycleDays: g.cycleDays, installments: g.installments, shareAmount: majorOf(g), startDate: g.startDate,
         inviteOpensOn: g.inviteOpensOn, inviteClosesOn: g.inviteClosesOn, targetShares: g.targetShares, maxPerMember: g.maxPerMember, quorum: g.quorum, managerMode: 'only', tz: g.tz
       };
+      if (g.firstDrawOn) {
+        cand.firstDrawOn = g.firstDrawOn; cand.durationDays = g.cycleDays;
+        cand.shareAmountMinor = g.shareAmount; cand.installmentMode = g.installmentMode || 'count';
+        cand.installmentAmountMinor = g.installmentAmountMinor;
+      }
       keys.forEach(function (k) { cand[k] = patch[k]; });
+      if (g.firstDrawOn) cand.shareAmountMinor = K.parseMoney(cand.shareAmount, cand.currency);
       var errs = K.validateGroup(cand);
       if (errs.length) return fail('VALIDATION', 'التعديل غير صحيح', { errors: errs });
       var assigned = K.groupShares(db, g.id).length;
-      if (Number(cand.targetShares) < assigned) throw E('TARGET_BELOW_ASSIGNED', 'العدد المستهدف أقل من الأسهم المخصصة فعلًا (' + assigned + ')');
+      if (cand.targetShares != null && Number(cand.targetShares) < assigned) throw E('TARGET_BELOW_ASSIGNED', 'العدد المستهدف أقل من الأسهم المخصصة فعلًا (' + assigned + ')');
       var maxOwned = 0; K.groupMembers(db, g.id).forEach(function (m) { maxOwned = Math.max(maxOwned, K.memberShares(db, m.id).length); });
-      if (Number(cand.maxPerMember) < maxOwned) throw E('MAX_PER_BELOW_OWNED', 'الحد الأقصى لأسهم الفرد أقل مما يملكه عضو حاليًا (' + maxOwned + ')');
+      if (cand.maxPerMember != null && Number(cand.maxPerMember) < maxOwned) throw E('MAX_PER_BELOW_OWNED', 'الحد الأقصى لأسهم الفرد أقل مما يملكه عضو حاليًا (' + maxOwned + ')');
       var before = {}, after = {};
       keys.forEach(function (k) {
         var nv = patch[k];
@@ -637,7 +654,8 @@
     var today = todayOf(g), joinDate = input.joinDate || today, n = Number(input.shares) || 0;
     if (!K.isValidDate(joinDate)) return fail('DATE_INVALID', 'تاريخ الانضمام غير صحيح');
     var assigned = K.groupShares(db, gid).length, lp = K.lateJoinPreview(g, joinDate, n, today, 0);
-    return { ok: true, lateImpact: lp, hasLateImpact: lp.items.length > 0, assigned: assigned, remaining: Math.max(0, g.targetShares - assigned), locked: K.isLocked(db, gid) };
+    return { ok: true, lateImpact: lp, hasLateImpact: lp.items.length > 0, assigned: assigned,
+      remaining: g.targetShares == null ? null : Math.max(0, g.targetShares - assigned), locked: K.isLocked(db, gid) };
   }
   function addMemberCore(db, g, o) {
     var K = C(); needLocked(db, g, 'إضافة أعضاء أو أسهم');
@@ -645,9 +663,9 @@
     if (!name) throw E('NAME_REQUIRED', 'أدخل اسم العضو'); if (name.length > 60) throw E('NAME_TOO_LONG', 'اسم العضو طويل');
     var n = Number(o.shares);
     if (!Number.isInteger(n) || n < 1) throw E('SHARES_INVALID', 'عدد الأسهم يجب أن يكون عددًا صحيحًا موجبًا');
-    if (n > g.maxPerMember) throw E('MAX_PER_MEMBER', 'عدد الأسهم يتجاوز الحد الأقصى للفرد (' + g.maxPerMember + ')');
+    if (g.maxPerMember != null && n > g.maxPerMember) throw E('MAX_PER_MEMBER', 'عدد الأسهم يتجاوز الحد الأقصى للفرد (' + g.maxPerMember + ')');
     var assigned = K.groupShares(db, g.id).length;
-    if (assigned + n > g.targetShares) throw E('TARGET_EXCEEDED', 'عدد الأسهم يتجاوز المتبقي من العدد المستهدف (' + (g.targetShares - assigned) + ')');
+    if (g.targetShares != null && assigned + n > g.targetShares) throw E('TARGET_EXCEEDED', 'عدد الأسهم يتجاوز المتبقي من العدد المستهدف (' + (g.targetShares - assigned) + ')');
     if (o.userId && memberOf(db, g, o.userId)) throw E('ALREADY_MEMBER', 'هذا المستخدم عضو في الجمعية بالفعل');
     var today = todayOf(g), joinedAt = o.joinedAt || today;
     if (!K.isValidDate(joinedAt)) throw E('DATE_INVALID', 'تاريخ الانضمام غير صحيح');
@@ -678,8 +696,8 @@
       opts = opts || {}; var n = Number(count);
       if (!Number.isInteger(n) || n < 1) throw E('SHARES_INVALID', 'عدد الأسهم يجب أن يكون عددًا صحيحًا موجبًا');
       var owned = K.memberShares(db, m.id), assigned = K.groupShares(db, g.id).length;
-      if (owned.length + n > g.maxPerMember) throw E('MAX_PER_MEMBER', 'عدد الأسهم يتجاوز الحد الأقصى للفرد (' + g.maxPerMember + ')');
-      if (assigned + n > g.targetShares) throw E('TARGET_EXCEEDED', 'عدد الأسهم يتجاوز المتبقي من العدد المستهدف (' + (g.targetShares - assigned) + ')');
+      if (g.maxPerMember != null && owned.length + n > g.maxPerMember) throw E('MAX_PER_MEMBER', 'عدد الأسهم يتجاوز الحد الأقصى للفرد (' + g.maxPerMember + ')');
+      if (g.targetShares != null && assigned + n > g.targetShares) throw E('TARGET_EXCEEDED', 'عدد الأسهم يتجاوز المتبقي من العدد المستهدف (' + (g.targetShares - assigned) + ')');
       var today = todayOf(g), lp = K.lateJoinPreview(g, today, n, today, 0);
       if (lp.items.length && !opts.confirmLateImpact) throw E('LATE_IMPACT_CONFIRM_REQUIRED', 'إضافة سهم بعد بداية الجمعية تنشئ أقساطًا متأخرة، ويلزم تأكيدها', { preview: lp });
       var at = nowAt(g.tz), top = owned.reduce(function (a, s) { return Math.max(a, s.no); }, 0), ids = [];
@@ -739,7 +757,8 @@
     var g = group(db, gid); if (!g) return fail('GROUP_NOT_FOUND', 'الجمعية غير موجودة');
     var assigned = C().groupShares(db, gid).length, pending = 0;
     db.invites.forEach(function (i) { if (i.groupId === gid && i.status === 'pending') pending += i.shares; });
-    return { ok: true, target: g.targetShares, assigned: assigned, pendingShares: pending, remaining: Math.max(0, g.targetShares - assigned - pending) };
+    return { ok: true, target: g.targetShares, assigned: assigned, pendingShares: pending,
+      remaining: g.targetShares == null ? null : Math.max(0, g.targetShares - assigned - pending) };
   }
   function inviteWindow(g, today) {
     if (g.inviteOpensOn && today < g.inviteOpensOn) return 'not-open';
@@ -1176,7 +1195,8 @@
     var hasReceipts = db.receipts.some(function (r) { return r.groupId === gid && !r.voided; });
     var rounds = frozenCount(db, g), pub = clone(g); if (!v.role.manager) delete pub.inviteCode;
     var out = { ok: true, group: pub, role: { manager: v.role.manager, participant: !!v.role.member, label: roleOf(db, g, viewer).label, shares: v.role.member ? K.memberShares(db, v.role.member.id).length : 0 },
-      phase: sum.phase, phaseLabel: sum.phaseLabel, locked: locked, rounds: rounds, provisional: !locked, shortfall: Math.max(0, g.targetShares - K.groupShares(db, gid).length),
+      phase: sum.phase, phaseLabel: sum.phaseLabel, locked: locked, rounds: rounds, provisional: !locked,
+      shortfall: g.targetShares == null ? null : Math.max(0, g.targetShares - K.groupShares(db, gid).length),
       drawn: sum.drawn, nextDraw: sum.nextDraw, cycle: sum.cycle, plan: K.groupPlan(g, rounds), members: sum.members, previewNote: LOCAL_PREVIEW_NOTE, privacyNote: PRIVACY_NOTE,
       permissions: { canEdit: v.role.manager, canEditFinancials: v.role.manager && !locked && !hasReceipts, canAddMembers: v.role.manager && !locked, canInvite: v.role.manager && !locked,
         canRecordPaid: v.role.manager, canCorrect: v.role.manager, canRemind: v.role.manager, canDraw: v.role.manager, canSetNotify: v.role.manager, canChat: true, canMute: true } };

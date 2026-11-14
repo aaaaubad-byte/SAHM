@@ -75,8 +75,12 @@
      end of period k = floor(k*D/N): consecutive, no gaps/overlap, lengths differ by at most one day */
   function periods(D, N) {
     if (!Number.isInteger(D) || !Number.isInteger(N) || D < 1 || N < 1 || N > D) throw new RangeError('INVALID_PERIODS');
-    var out = [], prev = 0;
-    for (var k = 1; k <= N; k++) { var end = Math.floor(k * D / N); out.push({ no: k, from: prev + 1, to: end }); prev = end; }
+    var out = [], base = Math.floor(D / N), rem = D % N, from = 1;
+    for (var k = 1; k <= N; k++) {
+      var span = base + (k <= rem ? 1 : 0), end = from + span - 1;
+      out.push({ no: k, from: from, to: end });
+      from = end + 1;
+    }
     return out;
   }
   function maxInstallments(g) { return cycleLen(g); }
@@ -88,14 +92,38 @@
     for (var i = 0; i < N; i++) out.push(base + (i < rem ? 1 : 0));
     return out;
   }
+  /* Exact per-share installment amounts for both supported plans.
+     Fixed-amount mode leaves only the residual in the final installment. */
+  function installmentAmounts(g) {
+    var total = Number(g && g.shareAmount), count = Number(g && g.installments);
+    if (!Number.isSafeInteger(total) || total < 0 || !Number.isInteger(count) || count < 1) throw new RangeError('INVALID_INSTALLMENT_PLAN');
+    if (!g || g.installmentMode !== 'amount') return splitAmount(total, count);
+    var fixed = Number(g.installmentAmountMinor);
+    if (!Number.isSafeInteger(fixed) || fixed < 1 || fixed > total || count !== Math.ceil(total / fixed)) {
+      throw new RangeError('INVALID_FIXED_INSTALLMENT_PLAN');
+    }
+    var out = [], remaining = total;
+    for (var i = 0; i < count; i++) {
+      var amount = Math.min(fixed, remaining);
+      if (amount < 1) throw new RangeError('INVALID_FIXED_INSTALLMENT_PLAN');
+      out.push(amount);
+      remaining -= amount;
+    }
+    if (remaining !== 0) throw new RangeError('INVALID_FIXED_INSTALLMENT_PLAN');
+    return out;
+  }
 
   function cycleStart(g, c) { return addDays(g.startDate, (c - 1) * cycleLen(g)); }
   function instRange(g, c, k) {
     var p = periods(cycleLen(g), g.installments)[k - 1], cs = cycleStart(g, c);
     return { start: addDays(cs, p.from - 1), end: addDays(cs, p.to - 1), from: p.from, to: p.to };
   }
-  function firstDrawDate(g) { return addDays(g.startDate, cycleLen(g)); }
-  function roundDate(g, r) { return addDays(g.startDate, r * cycleLen(g)); }
+  function firstDrawDate(g) {
+    return g && isValidDate(g.firstDrawOn) ? g.firstDrawOn : addDays(g.startDate, cycleLen(g));
+  }
+  function roundDate(g, r) {
+    return addDays(firstDrawDate(g), (Number(r) - 1) * cycleLen(g));
+  }
   function durationInfo(g, shareCount) {
     var days = shareCount * cycleLen(g), end = addDays(g.startDate, days);
     return { rounds: shareCount, days: days, endDate: end, lastDay: addDays(end, -1) };
@@ -118,9 +146,11 @@
   function groupPlan(g, shareCount) {
     var D = cycleLen(g), N = Number(g.installments), T = Number(g.shareAmount);
     if (!Number.isInteger(N) || N < 1 || N > D || !Number.isInteger(T) || T < 0) return null;
-    var amounts = splitAmount(T, N), per = periods(D, N);
+    var amounts = installmentAmounts(g), per = periods(D, N);
     var plan = {
       cycleDays: D, cycleLabel: cycleLabel(g), installments: N, shareAmount: T, shareCount: shareCount || 0,
+      installmentMode: g.installmentMode === 'amount' ? 'amount' : 'count',
+      installmentAmountMinor: g.installmentAmountMinor == null ? null : Number(g.installmentAmountMinor),
       installmentsPlan: per.map(function (p) { return { no: p.no, fromDay: p.from, toDay: p.to, days: p.to - p.from + 1, perShare: amounts[p.no - 1] }; })
     };
     if (isValidDate(g.startDate)) {
@@ -135,7 +165,7 @@
   }
   /* what one participant owes (reference §6.2–6.3); rounds = number of lottery rounds */
   function memberCommitment(g, sharesCount, rounds) {
-    var amounts = splitAmount(Number(g.shareAmount), Number(g.installments));
+    var amounts = installmentAmounts(g);
     return { shares: sharesCount, perInstallment: amounts.map(function (a) { return a * sharesCount; }),
       perCycle: g.shareAmount * sharesCount, overall: rounds > 0 ? g.shareAmount * sharesCount * rounds : 0 };
   }
@@ -154,7 +184,7 @@
   function memberShares(db, mid) { return db.shares.filter(function (s) { return s.memberId === mid; }); }
   function groupMembers(db, gid) { return db.members.filter(function (m) { return m.groupId === gid; }); }
   function isLocked(db, gid) { return db.draws.some(function (d) { return d.groupId === gid; }); }
-  function shareAmounts(g) { return splitAmount(g.shareAmount, g.installments); }
+  function shareAmounts(g) { return installmentAmounts(g); }
   function activeReceipts(db, filter) {
     return db.receipts.filter(function (r) {
       if (r.voided) return false;
@@ -332,11 +362,68 @@
   /* ---------- validation ---------- */
   var LEGACY_FIELDS = ['paymentMethod', 'paymentMethods', 'proofRequired', 'requireProof', 'referenceNo', 'transferRef', 'receiptImage', 'firstDrawDate', 'firstDraw'];
 
-  /* structured validation for creating an association: returns [{field, code, message}] */
-  function validateGroup(d) {
+  /* Validation for the date-based unified association contract. */
+  function validateUnifiedGroup(d) {
     var e = [];
     function bad(field, code, message) { e.push({ field: field, code: code, message: message }); }
+    var name = typeof d.name === 'string' ? d.name.trim() : '';
+    if (name.length < 2) bad('name', 'NAME_REQUIRED', 'أدخل اسم الجمعية');
+    else if (name.length > 120) bad('name', 'NAME_TOO_LONG', 'اسم الجمعية لا يزيد على 120 حرفًا');
+    if (!CURRENCIES[d.currency]) bad('currency', 'CURRENCY_REQUIRED', 'اختر العملة');
+    if (!isValidDate(d.startDate)) bad('startDate', 'START_DATE_INVALID', 'أدخل تاريخ بداية صحيحًا');
+    if (!isValidDate(d.firstDrawOn)) bad('firstDrawOn', 'FIRST_DRAW_INVALID', 'أدخل تاريخ أول قرعة صحيحًا');
+    var days = isValidDate(d.startDate) && isValidDate(d.firstDrawOn) ? diffDays(d.firstDrawOn, d.startDate) : 0;
+    if (days < 1 || days > 3650) bad('firstDrawOn', 'FIRST_DRAW_RANGE_INVALID', 'يجب أن تكون أول قرعة بعد البداية خلال مدة لا تتجاوز 3650 يومًا');
+    if (d.durationDays !== undefined && d.durationDays !== null && Number(d.durationDays) !== days) {
+      bad('durationDays', 'DURATION_MISMATCH', 'مدة الدورة لا تطابق التاريخين المحددين');
+    }
+    var total = d.shareAmountMinor !== undefined && d.shareAmountMinor !== null
+      ? Number(d.shareAmountMinor) : (CURRENCIES[d.currency] ? parseMoney(d.shareAmount, d.currency) : null);
+    if (!Number.isSafeInteger(total) || total < 1) bad('shareAmountMinor', 'SHARE_AMOUNT_INVALID', 'أدخل قيمة حصة سهم صحيحة وموجبة');
+    var mode = d.installmentMode || 'count', count = 0, fixed = null;
+    if (mode === 'count') {
+      count = Number(d.installments);
+      if (!Number.isInteger(count) || count < 1 || (days > 0 && count > days)) {
+        bad('installments', 'INSTALLMENTS_INVALID', 'عدد الأقساط غير صالح أو يتجاوز مدة الدورة');
+      }
+    } else if (mode === 'amount') {
+      fixed = d.installmentAmountMinor !== undefined && d.installmentAmountMinor !== null
+        ? Number(d.installmentAmountMinor) : (CURRENCIES[d.currency] ? parseMoney(d.installmentAmount, d.currency) : null);
+      if (!Number.isSafeInteger(fixed) || fixed < 1 || (Number.isSafeInteger(total) && fixed > total)) {
+        bad('installmentAmountMinor', 'FIXED_INSTALLMENT_INVALID', 'قيمة القسط يجب أن تكون موجبة ولا تتجاوز حصة السهم');
+      } else if (Number.isSafeInteger(total)) {
+        count = Math.ceil(total / fixed);
+        if (days > 0 && count > days) bad('installmentAmountMinor', 'INSTALLMENTS_EXCEED_DAYS', 'عدد الأقساط الناتج يتجاوز مدة الدورة');
+        if (Number(d.installments) > 0 && Number(d.installments) !== count) {
+          bad('installments', 'INSTALLMENT_COUNT_MISMATCH', 'عدد الأقساط لا يطابق قيمة القسط المحددة');
+        }
+      }
+    } else bad('installmentMode', 'INSTALLMENT_MODE_INVALID', 'اختر طريقة سداد صحيحة');
+    var tz = d.tz || d.timeZone || 'Asia/Aden';
+    if (!isValidTimeZone(tz)) bad('tz', 'TZ_INVALID', 'المنطقة الزمنية غير صحيحة');
+    if (d.inviteOpensOn && !isValidDate(d.inviteOpensOn)) bad('inviteOpensOn', 'INVITE_DATE_INVALID', 'تاريخ فتح الانضمام غير صحيح');
+    if (d.inviteClosesOn && !isValidDate(d.inviteClosesOn)) bad('inviteClosesOn', 'INVITE_DATE_INVALID', 'تاريخ إغلاق الانضمام غير صحيح');
+    if (isValidDate(d.inviteOpensOn) && isValidDate(d.inviteClosesOn) && d.inviteClosesOn < d.inviteOpensOn) {
+      bad('inviteClosesOn', 'INVITE_RANGE_INVALID', 'تاريخ إغلاق الانضمام قبل تاريخ فتحه');
+    }
+    var quorum = d.quorum === undefined || d.quorum === null || d.quorum === '' ? 66 : Number(d.quorum);
+    if (!Number.isInteger(quorum) || quorum < 1 || quorum > 100) bad('quorum', 'QUORUM_INVALID', 'نسبة النصاب بين 1 و100');
+    var managerMode = d.managerMode || 'only';
+    if (managerMode !== 'only' && managerMode !== 'both') bad('managerMode', 'MANAGER_MODE_INVALID', 'اختر «مدير فقط» أو «مدير ومشارك»');
+    if (managerMode === 'both' && (!Number.isSafeInteger(Number(d.managerShares)) || Number(d.managerShares) < 1)) {
+      bad('managerShares', 'MANAGER_SHARES_INVALID', 'أدخل عدد أسهم المدير');
+    }
+    if (d.rules != null && String(d.rules).length > 4000) bad('rules', 'RULES_TOO_LONG', 'نص القواعد طويل جدًا');
+    return e;
+  }
+
+  /* structured validation for creating an association: returns [{field, code, message}] */
+  function validateGroup(d) {
     d = d || {};
+    if (d.firstDrawOn !== undefined || d.durationDays !== undefined ||
+        d.shareAmountMinor !== undefined || d.installmentMode !== undefined) return validateUnifiedGroup(d);
+    var e = [];
+    function bad(field, code, message) { e.push({ field: field, code: code, message: message }); }
     LEGACY_FIELDS.forEach(function (f) {
       if (d[f] !== undefined && d[f] !== null && d[f] !== '')
         bad(f, f === 'firstDrawDate' || f === 'firstDraw' ? 'FIRST_DRAW_NOT_EDITABLE' : 'FIELD_NOT_SUPPORTED',
@@ -401,7 +488,7 @@
     isValidDate: isValidDate, isValidTimeZone: isValidTimeZone,
     toDay: toDay, fromDay: fromDay, addDays: addDays, diffDays: diffDays, todayIn: todayIn, fmtDate: fmtDate,
     cycleLen: cycleLen, cycleLabel: cycleLabel, periods: periods, maxInstallments: maxInstallments, splitAmount: splitAmount,
-    cycleStart: cycleStart, instRange: instRange, firstDrawDate: firstDrawDate, roundDate: roundDate,
+    cycleStart: cycleStart, instRange: instRange, firstDrawDate: firstDrawDate, roundDate: roundDate, installmentAmounts: installmentAmounts,
     durationInfo: durationInfo, currentCycle: currentCycle, locate: locate, groupPlan: groupPlan, memberCommitment: memberCommitment,
     instStatus: instStatus, STATUS_LABEL: STATUS_LABEL,
     groupShares: groupShares, memberShares: memberShares, groupMembers: groupMembers, isLocked: isLocked, shareAmounts: shareAmounts,

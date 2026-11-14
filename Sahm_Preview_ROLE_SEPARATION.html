@@ -3331,7 +3331,7 @@ function load(){
   const memberResult=SahmApp.memberList(g.id),memberRows=memberResult&&memberResult.ok?memberResult.members:[];
   const minor=(SahmCore.CURRENCIES[g.currency]||SahmCore.CURRENCIES.YER).minor;
   const actualShares=memberRows.reduce((n,m)=>n+(Number(m.shares)||0),0);
-  const perShare=SahmCore.splitAmount(g.shareAmount,g.installments).map(v=>v/minor);
+  const perShare=SahmCore.shareAmounts(g).map(v=>v/minor);
   const phaseStatus={pending:'PENDING_MEMBERS',open:'READY_FOR_DRAW',running:'ACTIVE_REVOLVING',completed:'COMPLETED'};
   groups.push({
    id:g.id,name:g.name,currency:g.currency,share:g.shareAmount/minor,installmentAmount:perShare[0]||0,total:g.targetShares,maxPer:g.maxPerMember,
@@ -4151,7 +4151,11 @@ async function handleAppAction(action,el){
    ?'<div class="listrow"><div class="grow"><strong>'+escapeHtml(item.name)+'</strong><small>تم إنشاء الدعوة؛ شارك الرابط مع الشخص ليتمكن من فتحها</small><input class="field invitee-link" readonly value="'+escapeHtml(item.url||'')+'"></div><div class="invitee-result-actions"><button class="btn outline small" data-action="copy-bulk-invite-link" data-link="'+escapeHtml(item.url||'')+'">نسخ</button><button class="btn soft small" data-action="share-bulk-invite-link" data-link="'+escapeHtml(item.url||'')+'">مشاركة</button></div></div>'
    :'<div class="listrow"><div class="grow"><strong>'+escapeHtml(item.name||'جهة اتصال')+'</strong><small>'+escapeHtml(item.message||'تعذر إرسال الدعوة')+'</small></div><span class="pill red">لم تُرسل</span></div>'
   ).join('');
-  pendingInvitees=[];renderInviteeSelection();
+  const failedContacts = new Set();
+  (result.results||[]).forEach((item,index)=>{if(item.status!=='sent'&&selected[index])failedContacts.add(selected[index]);});
+  pendingInvitees = pendingInvitees.filter(item=>!selected.includes(item)||failedContacts.has(item));
+  pendingInvitees.forEach(item=>{if(failedContacts.has(item)){item.selected=true;item.duplicate=false;}});
+  renderInviteeSelection();
   showModal('نتيجة إرسال الدعوات','<div class="grid2"><div class="stat"><span>تم إنشاؤها</span><b>'+Number(result.sentCount||0)+'</b></div><div class="stat"><span>تعذر إرسالها</span><b>'+Number(result.failedCount||0)+'</b></div></div><div class="card">'+rows+'</div><small>لم يتم إرسال رسالة خارجية تلقائيًا. انسخ رابط كل دعوة وشاركه مع صاحبها.</small>',[['إغلاق','close','outline']]);
   return;
  }
