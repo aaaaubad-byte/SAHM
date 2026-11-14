@@ -3469,11 +3469,13 @@ function shell(title,active,html){renderTopbar(title);nav(active);const screen=$
  }
 }
 function groupCard(g){
- const manager=g.role==='manager',total=Number(g.total)||0,shares=Number(g.shares)||0,percent=total?Math.min(100,Math.round(shares/total*100)):0;
+ const manager=g.role==='manager',hasTarget=g.total!==null&&g.total!==undefined&&g.total!==''&&Number.isFinite(Number(g.total));
+ const total=hasTarget?Math.max(0,Number(g.total)):null,shares=Number(g.shares)||0;
+ const percent=hasTarget&&total>0?Math.min(100,Math.round(shares/total*100)):0;
  return `<article class="card group-card ${manager?'manager-card':'member-card'}" data-action="open-group" data-id="${escapeHtml(g.id)}" tabindex="0" role="button" aria-label="فتح جمعية ${escapeHtml(g.name)}">
  <div class="between"><div class="row"><div class="avatar ${manager?'dark':''}">${escapeHtml(g.name.slice(0,1))}</div><div class="grow"><strong>${escapeHtml(g.name)}</strong><small class="eyebrow">${escapeHtml(g.id)} · ${manager?'إدارة الجمعية':'عضوية مشاركة'}</small></div></div>${pill(g.status)}</div>
- <div class="group-card-metrics"><div><span>الدفعة لكل سهم</span><b>${money(g.share,g.currency)}</b></div><div><span>${manager?'الأسهم المكتملة':'أسهمك'}</span><b>${manager?`${shares} / ${total}`:`${Number(g.myShares)||0} سهم`}</b></div><div><span>المشاركون</span><b>${g.members}</b></div></div>
- ${manager?`<div class="progress"><i style="width:${percent}%"></i></div><div class="progress-caption"><span>اكتمال الأسهم</span><b>${percent}%</b></div>`:''}
+ <div class="group-card-metrics"><div><span>الدفعة لكل سهم</span><b>${money(g.share,g.currency)}</b></div><div><span>${manager?(hasTarget?'الأسهم المكتملة':'إجمالي الأسهم'):'أسهمك'}</span><b>${manager?(hasTarget?`${shares} / ${total}`:`${shares} سهم`):`${Number(g.myShares)||0} سهم`}</b></div><div><span>المشاركون</span><b>${g.members}</b></div></div>
+ ${manager&&hasTarget?`<div class="progress"><i style="width:${percent}%"></i></div><div class="progress-caption"><span>اكتمال الأسهم</span><b>${percent}%</b></div>`:''}
  <div class="group-card-footer"><span>${escapeHtml(g.period||'')}</span><span>التفاصيل ${uiIcon('arrow',15)}</span></div></article>`
 }
 function home(){
@@ -4254,8 +4256,8 @@ async function handleAppAction(action,el){
  }
  if(action==='invitation-interested'||action==='invitation-declined'||action==='invitation-deferred'){
   if(!pendingJoinContext||!['invitation','invitation_id'].includes(pendingJoinContext.source))return;
-  if(response==='interested'&&pendingJoinContext.info&&!pendingJoinContext.info.isJoinOpen){toast('أُغلق استقبال الأعضاء في هذه الجمعية');return;}
   const response=action==='invitation-interested'?'interested':action==='invitation-declined'?'decline':'defer';
+  if(response==='interested'&&pendingJoinContext.info&&!pendingJoinContext.info.isJoinOpen){toast('أُغلق استقبال الأعضاء في هذه الجمعية');return;}
   const result=await SahmApp.respondToInvite(pendingJoinContext.invitationId,response);
   if(result&&result.ok){
    closeModal();refreshData();

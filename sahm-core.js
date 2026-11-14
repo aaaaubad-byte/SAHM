@@ -71,8 +71,8 @@
   var CYCLE_LABEL = { weekly: 'أسبوعية', monthly: 'شهرية', custom: 'مخصصة' };
   function cycleLabel(g) { return g.cycleType === 'custom' ? 'كل ' + cycleLen(g) + ' يومًا' : CYCLE_LABEL[g.cycleType]; }
 
-  /* installment period k (1..N) inside a cycle of D days: [from,to] as day numbers 1..D.
-     end of period k = floor(k*D/N): consecutive, no gaps/overlap, lengths differ by at most one day */
+  /* Installment day ranges follow the database contract: the remainder days are assigned
+     to the first periods, keeping all ranges consecutive and covering the whole cycle. */
   function periods(D, N) {
     if (!Number.isInteger(D) || !Number.isInteger(N) || D < 1 || N < 1 || N > D) throw new RangeError('INVALID_PERIODS');
     var out = [], base = Math.floor(D / N), rem = D % N, from = 1;
