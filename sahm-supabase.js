@@ -12,6 +12,7 @@
   var activeClientKey = (function(){try{return root.localStorage.getItem(ACTIVE_ACCOUNT_KEY)||'default';}catch(_){return 'default';}})();
   var currentUser = null;
   var authListener = null;
+  var authCallback = null;
 
   function readAccounts() {
     try { return JSON.parse(root.localStorage.getItem(ACCOUNT_INDEX_KEY) || '[]').filter(function (x) { return x && x.id && x.email; }); }
@@ -97,6 +98,7 @@
     activeClientKey = key;
     currentUser = sessionValue.user;
     rememberAccount(sessionValue.user);
+    bindAuthListener();
     return { user: currentUser, session: (await target.auth.getSession()).data.session };
   }
 
@@ -119,6 +121,7 @@
     try { root.localStorage.setItem(ACTIVE_ACCOUNT_KEY, key); } catch (_) {}
     currentUser = result.data.user;
     rememberAccount(currentUser);
+    bindAuthListener();
     return { user: currentUser, session: (await target.auth.getSession()).data.session };
   }
 
@@ -217,17 +220,20 @@
     return result.data.user;
   }
 
-  function onAuthStateChange(callback) {
-    var c = getClient();
-    if (authListener) authListener.unsubscribe();
-    var result = c.auth.onAuthStateChange(function (event, sessionValue) {
+  function bindAuthListener() {
+    if (authListener) { authListener.unsubscribe(); authListener = null; }
+    if (typeof authCallback !== 'function') return null;
+    var result = getClient().auth.onAuthStateChange(function (event, sessionValue) {
       currentUser = sessionValue && sessionValue.user || null;
-      if (typeof callback === 'function') {
-        Promise.resolve().then(function () { callback(event, sessionValue || null); });
-      }
+      Promise.resolve().then(function () { authCallback(event, sessionValue || null); });
     });
     authListener = result.data.subscription;
     return authListener;
+  }
+
+  function onAuthStateChange(callback) {
+    authCallback = typeof callback === 'function' ? callback : null;
+    return bindAuthListener();
   }
 
   root.SahmSupabase = {
