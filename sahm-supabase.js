@@ -7,10 +7,11 @@
   var PUBLISHABLE_KEY = 'sb_publishable_RE6_iJo4rqaD4-FqOCMh5A_ZB05bU10';
   var TERMS_VERSION = '2026-11-14';
   var clients = Object.create(null);
-  var activeClientKey = 'default';
+  var ACCOUNT_INDEX_KEY = 'sahm.saved.accounts.v1';
+  var ACTIVE_ACCOUNT_KEY = 'sahm.active.account.v1';
+  var activeClientKey = (function(){try{return root.localStorage.getItem(ACTIVE_ACCOUNT_KEY)||'default';}catch(_){return 'default';}})();
   var currentUser = null;
   var authListener = null;
-  var ACCOUNT_INDEX_KEY = 'sahm.saved.accounts.v1';
 
   function readAccounts() {
     try { return JSON.parse(root.localStorage.getItem(ACCOUNT_INDEX_KEY) || '[]').filter(function (x) { return x && x.id && x.email; }); }
@@ -64,10 +65,17 @@
     });
     if (result.error) throw result.error;
     currentUser = result.data.user || null;
+    var signedSession = result.data.session || null;
+    if (signedSession) {
+      var activated = await activateSession(signedSession);
+      await c.auth.signOut({ scope: 'local' });
+      currentUser = activated.user;
+      signedSession = activated.session;
+    }
     return {
       user: currentUser,
-      session: result.data.session || null,
-      needsEmailConfirmation: !result.data.session
+      session: signedSession,
+      needsEmailConfirmation: !signedSession
     };
   }
 
@@ -108,6 +116,7 @@
     var result = await target.auth.getUser();
     if (result.error || !result.data.user) throw result.error || new Error('انتهت جلسة هذا الحساب. سجّل الدخول إليه مجددًا.');
     activeClientKey = key;
+    try { root.localStorage.setItem(ACTIVE_ACCOUNT_KEY, key); } catch (_) {}
     currentUser = result.data.user;
     rememberAccount(currentUser);
     return { user: currentUser, session: (await target.auth.getSession()).data.session };
@@ -121,6 +130,7 @@
     if (result.error) throw result.error;
     if (id) writeAccounts(readAccounts().filter(function (x) { return x.id !== id; }));
     activeClientKey = 'default';
+    try { root.localStorage.removeItem(ACTIVE_ACCOUNT_KEY); } catch (_) {}
     currentUser = null;
     return true;
   }
