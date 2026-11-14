@@ -3277,7 +3277,7 @@ const $=s=>document.querySelector(s);
 const money=(n,c='YER')=>{const cur=SahmCore.CURRENCIES[c]||SahmCore.CURRENCIES.YER;const minor=Math.round(Number(n||0)*cur.minor);return SahmCore.fmtMoney(minor,c in SahmCore.CURRENCIES?c:'YER')};
 const today=()=>SahmApp.todayIn();
 const AUTH_SCREEN_NAMES=['welcome','register','profile-setup','reset-password','logged-out'];
-let db={session:false,verified:false,user:{id:null,name:'',phone:'',city:'',email:'',avatarKey:'avatar-01',notifications:true,biometric:false},groups:[],unread:0},screenName='welcome',params={},groupTab='all',groupDetailTab='overview',toastTimer,homeSlideTimer=null,homeSlideIndex=0,selectedInstallmentCycle=1,selectedInstallmentStatus='all',pendingJoinCode=null,pendingJoinContext=null,lastSubmittedRequestId=null,joinRequestFilter='pending',joinRequestBusy=false,createdGroupLink=null,createdLinkWarning=null;
+let db={session:false,verified:false,user:{id:null,name:'',phone:'',city:'',email:'',avatarKey:'avatar-01',notifications:true,biometric:false},groups:[],unread:0},screenName='welcome',params={},groupTab='all',groupDetailTab='overview',toastTimer,homeSlideTimer=null,homeSlideIndex=0,selectedInstallmentCycle=1,selectedInstallmentStatus='all',pendingJoinCode=null,pendingJoinContext=null,lastSubmittedRequestId=null,joinRequestFilter='pending',joinRequestBusy=false,joinDecisionBusy=false,createdGroupLink=null,createdLinkWarning=null;
 let selectedAvatarKey='avatar-01',authBusy=false,activeProfile=null;
 let currentGroupId=(db.groups[0]||{}).id||null,createdGroupId=null,createWizardStep=1,createFormSnapshot={},reminderRequest=null,navigation=null;
 SahmApp.onResult((name,result)=>{if(result&&result.ok===false)toast(result.message||'تعذر تنفيذ العملية');else if(result&&result.persisted===false)toast(result.warning||'تعذر حفظ التغييرات في تخزين المعاينة');});
@@ -4266,9 +4266,15 @@ async function handleAppAction(action,el){
   return;
  }
  if(action==='cancel-join-request'){
-  const result=await SahmSupabaseData.cancelJoinRequest(el.dataset.id);
-  if(result&&result.ok){refreshData();toast('تم إلغاء طلب الانضمام');if(screenName==='join-request-status')joinRequestStatus();else if(screenName==='join-requests')joinRequests();}
-  else toast(result&&result.message||'تعذر إلغاء الطلب');return;
+  if(joinDecisionBusy)return;
+  joinDecisionBusy=true;el.disabled=true;
+  try{
+   const result=await SahmSupabaseData.cancelJoinRequest(el.dataset.id);
+   if(result&&result.ok){refreshData();toast('تم إلغاء طلب الانضمام');if(screenName==='join-request-status')joinRequestStatus();else if(screenName==='join-requests')joinRequests();}
+   else toast(result&&result.message||'تعذر إلغاء الطلب');
+  }catch(error){toast(SahmSupabase.friendlyError(error));}
+  finally{joinDecisionBusy=false;if(el.isConnected)el.disabled=false;}
+  return;
  }
  if(action==='approve-join-request'){
   const request=(db.joinRequests||[]).find(x=>x.id===el.dataset.id);
@@ -4276,19 +4282,31 @@ async function handleAppAction(action,el){
   $('#modal-root').dataset.requestId=el.dataset.id;return;
  }
  if(action==='approve-join-request-confirm'){
-  const id=$('#modal-root').dataset.requestId,result=await SahmApp.approveJoinRequest(id);
-  if(result&&result.ok){closeModal();refreshData();toast('تم اعتماد طلب الانضمام');go('join-requests');}
-  else toast(result&&result.message||'تعذرت الموافقة على الطلب');return;
+  if(joinDecisionBusy)return;
+  joinDecisionBusy=true;el.disabled=true;
+  try{
+   const id=$('#modal-root').dataset.requestId,result=await SahmApp.approveJoinRequest(id);
+   if(result&&result.ok){closeModal();refreshData();toast('تم اعتماد طلب الانضمام');go('join-requests');}
+   else toast(result&&result.message||'تعذرت الموافقة على الطلب');
+  }catch(error){toast(SahmSupabase.friendlyError(error));}
+  finally{joinDecisionBusy=false;if(el.isConnected)el.disabled=false;}
+  return;
  }
  if(action==='reject-join-request'){
   showModal('رفض طلب الانضمام','<div class="field"><label>سبب الرفض · اختياري</label><textarea id="joinRejectReason" rows="3" maxlength="1000"></textarea></div>',[['تأكيد الرفض','reject-join-request-confirm','danger'],['إلغاء','close','outline']]);
   $('#modal-root').dataset.requestId=el.dataset.id;return;
  }
  if(action==='reject-join-request-confirm'){
-  const root=$('#modal-root'),id=root.dataset.requestId,reason=$('#joinRejectReason')?.value||'';
-  const result=await SahmApp.rejectJoinRequest(id,reason);
-  if(result&&result.ok){closeModal();refreshData();toast('تم رفض طلب الانضمام');go('join-requests');}
-  else toast(result&&result.message||'تعذر رفض الطلب');return;
+  if(joinDecisionBusy)return;
+  joinDecisionBusy=true;el.disabled=true;
+  try{
+   const root=$('#modal-root'),id=root.dataset.requestId,reason=$('#joinRejectReason')?.value||'';
+   const result=await SahmApp.rejectJoinRequest(id,reason);
+   if(result&&result.ok){closeModal();refreshData();toast('تم رفض طلب الانضمام');go('join-requests');}
+   else toast(result&&result.message||'تعذر رفض الطلب');
+  }catch(error){toast(SahmSupabase.friendlyError(error));}
+  finally{joinDecisionBusy=false;if(el.isConnected)el.disabled=false;}
+  return;
  }
  if(action==='attendance-toggle'){const r=await SahmApp.setAttendance(el.dataset.id,el.dataset.present==='true');if(r&&r.ok){refreshData();members()}return}
  if(action==='record-paid'){
