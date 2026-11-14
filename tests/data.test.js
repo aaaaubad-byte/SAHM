@@ -377,3 +377,17 @@ test('local public-link API refuses to mint or expose server-managed secrets', (
   assert.equal(result.ok, false);
   assert.equal(result.code, 'REMOTE_REQUIRED');
 });
+
+
+test('latest activity sorts by event timestamp before applying the display limit', () => {
+  const w = fresh();
+  const { group } = createGroup(w);
+  w.db.events.push(
+    { id: 'event-late', groupId: group.id, at: '2026-11-14T08:00:00Z', type: 'join', text: 'الأحدث', vis: 'group' },
+    { id: 'event-old', groupId: group.id, at: '2026-11-11T08:00:00Z', type: 'receipt', text: 'الأقدم', vis: 'group' },
+    { id: 'event-mid', groupId: group.id, at: '2026-11-13T08:00:00Z', type: 'draw', text: 'الأوسط', vis: 'group' }
+  );
+  const rows = w.D.recentActivity(w.db, 2, 'me');
+  assert.deepEqual(rows.map(x => x.title), ['الأحدث', 'الأوسط']);
+  assert.deepEqual(rows.map(x => x.at), ['2026-11-14T08:00:00Z', '2026-11-13T08:00:00Z']);
+});
