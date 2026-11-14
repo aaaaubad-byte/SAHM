@@ -6,6 +6,8 @@
   var SUPABASE_URL = 'https://nusjnnrtpxbpphphmdsc.supabase.co';
   var PUBLISHABLE_KEY = 'sb_publishable_RE6_iJo4rqaD4-FqOCMh5A_ZB05bU10';
   var TERMS_VERSION = '2026-11-14';
+  // Supabase's default browser storage key, used only for the temporary sign-in/callback client.
+  var BOOTSTRAP_STORAGE_KEY = 'sb-' + SUPABASE_URL.split('//')[1].split('.')[0] + '-auth-token';
   var clients = Object.create(null);
   var ACCOUNT_INDEX_KEY = 'sahm.saved.accounts.v1';
   var ACTIVE_ACCOUNT_KEY = 'sahm.active.account.v1';
@@ -29,10 +31,13 @@
       throw new Error('تعذر تحميل مكتبة الاتصال الآمن. تحقق من اتصال الإنترنت ثم أعد المحاولة.');
     }
     var authOptions = {
-      autoRefreshToken: true, persistSession: true, detectSessionInUrl: key === 'default',
-      flowType: 'pkce'
+      // The default client is a short-lived bootstrap client. Only account clients refresh tokens.
+      autoRefreshToken: key !== 'default',
+      persistSession: true,
+      detectSessionInUrl: key === 'default',
+      flowType: 'pkce',
+      storageKey: key === 'default' ? BOOTSTRAP_STORAGE_KEY : 'sahm-auth-' + key
     };
-    if (key !== 'default') authOptions.storageKey = 'sahm-auth-' + key;
     clients[key] = root.supabase.createClient(SUPABASE_URL, PUBLISHABLE_KEY, {
       auth: authOptions,
       global: { headers: { 'X-Client-Info': 'sahm-web/1.0.0' } }
@@ -44,13 +49,24 @@
     var msg = String(error && (error.message || error.msg) || '');
     if (/Invalid login credentials/i.test(msg)) return 'البريد الإلكتروني أو كلمة المرور غير صحيحة.';
     if (/Email not confirmed/i.test(msg)) return 'يجب تأكيد بريدك الإلكتروني من الرسالة المرسلة إليك أولاً.';
-    if (/User already registered/i.test(msg)) return 'تعذر إنشاء الحساب بهذه البيانات. جرّب تسجيل الدخول أو استعادة كلمة المرور.';
+    if (/User already registered|user_already_exists/i.test(msg) || String(error && error.code || '') === 'user_already_exists') return 'هذا البريد الإلكتروني مرتبط بحساب موجود بالفعل. سجّل الدخول أو استخدم استعادة كلمة المرور.';
     if (/Password should be at least/i.test(msg)) return 'كلمة المرور قصيرة؛ استخدم 8 أحرف على الأقل.';
     if (/rate limit|too many requests/i.test(msg)) return 'تم تجاوز عدد المحاولات المسموح مؤقتًا. حاول لاحقًا.';
     if (/network|fetch/i.test(msg)) return 'تعذر الاتصال بالخادم. تحقق من الإنترنت ثم أعد المحاولة.';
     if (/phone.*already|duplicate key/i.test(msg)) return 'رقم الهاتف مسجل مسبقًا بحساب آخر.';
     if (/three|ثلاثة مقاطع|الاسم الكامل/i.test(msg)) return 'اكتب الاسم الثلاثي على الأقل.';
     return msg || 'حدث خطأ غير متوقع. حاول مرة أخرى.';
+  }
+
+  // Do not call auth.signOut() on the bootstrap client after copying its session:
+  // even scope:'local' revokes the server session that the account client now uses.
+  async function clearBootstrapSession(client) {
+    try {
+      if (client && client.auth && typeof client.auth.stopAutoRefresh === 'function') {
+        await client.auth.stopAutoRefresh();
+      }
+    } catch (_) {}
+    try { root.localStorage.removeItem(BOOTSTRAP_STORAGE_KEY); } catch (_) {}
   }
 
   async function signUp(email, password, acceptedTerms) {
@@ -69,7 +85,7 @@
     var signedSession = result.data.session || null;
     if (signedSession) {
       var activated = await activateSession(signedSession);
-      await c.auth.signOut({ scope: 'local' });
+      await clearBootstrapSession(c);
       currentUser = activated.user;
       signedSession = activated.session;
     }
@@ -110,7 +126,7 @@
     });
     if (result.error) throw result.error;
     var activated = await activateSession(result.data.session);
-    await defaultClient.auth.signOut({ scope: 'local' });
+    await clearBootstrapSession(defaultClient);
     return activated;
   }
 
@@ -153,7 +169,7 @@
     if (result.data.session && result.data.session.user && activeClientKey === 'default') {
       var legacy = result.data.session;
       var activated = await activateSession(legacy);
-      await c.auth.signOut({ scope: 'local' });
+      await clearBootstrapSession(c);
       return activated.session;
     }
     currentUser = result.data.session && result.data.session.user || null;
