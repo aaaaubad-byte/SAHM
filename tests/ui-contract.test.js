@@ -176,3 +176,56 @@ test('modal dialogs expose ARIA semantics and keyboard focus management', () => 
   assert.match(html, /e\.key==='Tab'/);
   assert.match(html, /dialog\.contains\(document\.activeElement\)/);
 });
+
+
+test('every rendered button, route, form, and modal action is connected to a handler', () => {
+  const registry = html.match(/const ALL_SCREEN_REGISTRY\\s*=\\s*\\{([\\s\\S]*?)\\n\\};/);
+  assert.ok(registry, 'central route registry exists');
+  const routes = new Set([...registry[1].matchAll(/['"]?([A-Za-z_$][\\w$-]*)['"]?\\s*:/g)].map(x => x[1]));
+
+  const staticRoutes = new Set([...html.matchAll(/data-go=["']([^"']+)["']/g)]
+    .map(x => x[1]).filter(x => !x.includes('${')));
+  for (const route of staticRoutes) assert.ok(routes.has(route), 'button route resolves: ' + route);
+
+  const buttons = [...html.matchAll(/<button\\b([^>]*)>/gi)].map(x => x[1]);
+  assert.ok(buttons.length >= 100, 'all screen templates contribute their buttons');
+  for (const attrs of buttons) {
+    assert.match(attrs, /data-action|data-go|type=["']submit["']/, 'button has a delegated action, route, or form-submit role: ' + attrs);
+  }
+
+  const actions = new Set([...html.matchAll(/data-action=["']([^"']+)["']/g)]
+    .map(x => x[1]).filter(x => !x.includes('${')));
+  const actionCases = new Set([...html.matchAll(/action===["']([^"']+)["']/g)].map(x => x[1]));
+  const groupedActions = new Set([...html.matchAll(/\\[([^\\]]+)\\]\\.includes\\(action\\)/g)]
+    .flatMap(x => [...x[1].matchAll(/["']([^"']+)["']/g)].map(y => y[1])));
+  const changeActions = new Set(['mute-toggle', 'notify-toggle']);
+  for (const action of actions) {
+    assert.ok(actionCases.has(action) || groupedActions.has(action) || changeActions.has(action),
+      'data-action is handled by click or change logic: ' + action);
+  }
+
+  assert.match(html, /document\\.addEventListener\\('click',[\\s\\S]*?handleAppAction\\(action,el\\)/);
+  assert.match(html, /dialog\\.addEventListener\\('click',[\\s\\S]*?handleAppAction\\(actionButton\\.dataset\\.action,actionButton\\)/);
+  assert.match(html, /buttons\\.map\\(\\(\\[label,act/);
+
+  const formIds = new Set([...html.matchAll(/<form\\b[^>]*\\bid=["']([^"']+)["']/gi)].map(x => x[1]));
+  const handledForms = new Set([...html.matchAll(/form\\.id===["']([^"']+)["']/g)].map(x => x[1]));
+  for (const id of formIds) assert.ok(handledForms.has(id), 'form submit is handled: ' + id);
+
+  const anchors = [...html.matchAll(/<a\\b([^>]*)>/gi)].map(x => x[1]);
+  for (const attrs of anchors) assert.match(attrs, /\\bhref\\s*=/i, 'anchor has a destination');
+});
+
+test('copy and share buttons have clipboard fallbacks for browsers without Clipboard API', () => {
+  assert.match(html, /async function copyText\\(/);
+  assert.match(html, /document\\.execCommand\\('copy'\\)/);
+  assert.match(html, /await copyText\\(value,'تم نسخ رابط الانضمام'\\)/);
+  assert.match(html, /await copyText\\(value,'المشاركة غير مدعومة؛ تم نسخ الرابط'\\)/);
+});
+
+test('account switch failures attempt to restore the previously active account', () => {
+  assert.match(html, /previousUserSnapshot=Object\\.assign\\(\\{\\},db\\.user\\|\\|\\{\\}\\)/);
+  assert.match(html, /await SahmSupabase\\.switchAccount\\(previousUserId\\)/);
+  assert.match(html, /await SahmSupabaseData\\.init\\(activeProfile\\)/);
+  assert.match(html, /startRemoteRealtime\\(\\)/);
+});
