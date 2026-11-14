@@ -212,3 +212,13 @@ test('cancel, approve and reject actions guard repeated UI clicks during server 
   assert.equal((html.match(/joinDecisionBusy=true;el\.disabled=true;/g) || []).length, 3);
   assert.equal((html.match(/finally\{joinDecisionBusy=false;if\(el\.isConnected\)el\.disabled=false;\}/g) || []).length, 3);
 });
+
+
+test('association creation and bulk invitations guard duplicate submissions', () => {
+  assert.match(html, /if\(createGroupBusy\)return;/);
+  assert.match(html, /createGroupBusy=true/);
+  assert.match(html, /finally\{createGroupBusy=false/);
+  assert.match(html, /if\(bulkInvitesBusy\)return;/);
+  assert.match(html, /bulkInvitesBusy=true/);
+  assert.match(html, /finally\{bulkInvitesBusy=false/);
+});
