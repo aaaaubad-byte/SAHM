@@ -16,6 +16,10 @@ INSERT INTO auth.users(
  ('eeeeeeee-eeee-4eee-8eee-eeeeeeeeeeee','authenticated','authenticated',
   'sahm-join-retry@example.invalid','!',
   '{"provider":"email","providers":["email"]}'::jsonb,
+  '{"terms_accepted":true,"terms_version":"2026-11-14"}'::jsonb,now(),now()),
+ ('ffffffff-ffff-4fff-8fff-ffffffffffff','authenticated','authenticated',
+  'sahm-public-join@example.invalid','!',
+  '{"provider":"email","providers":["email"]}'::jsonb,
   '{"terms_accepted":true,"terms_version":"2026-11-14"}'::jsonb,now(),now());
 
 SELECT set_config('request.jwt.claim.sub','cccccccc-cccc-4ccc-8ccc-cccccccccccc',true);
@@ -31,6 +35,9 @@ DECLARE
  v_approved jsonb;
  v_rejected_request jsonb;
  v_resubmitted jsonb;
+ v_public_link jsonb;
+ v_public_preview jsonb;
+ v_public_request jsonb;
  v_manager_membership uuid;
  v_member_membership uuid;
  v_request_id uuid;
@@ -159,8 +166,43 @@ BEGIN
  IF EXISTS(SELECT 1 FROM public.association_memberships WHERE association_id=v_association AND user_id='eeeeeeee-eeee-4eee-8eee-eeeeeeeeeeee') THEN
    RAISE EXCEPTION 'Rejected/resubmitted/cancelled requests created a membership';
  END IF;
+
+ -- The public link uses the same request model but has no personal invitation.
+ PERFORM set_config('request.jwt.claim.sub','cccccccc-cccc-4ccc-8ccc-cccccccccccc',true);
+ v_public_link:=public.manage_association_public_link(v_association,'create');
+ IF v_public_link->>'token' IS NULL THEN RAISE EXCEPTION 'Public join link token was not returned'; END IF;
+
+ PERFORM set_config('request.jwt.claim.sub','ffffffff-ffff-4fff-8fff-ffffffffffff',true);
+ PERFORM public.complete_my_profile('عضو رابط عام صالح','+967777000104','avatar-04');
+ v_public_preview:=public.preview_public_join_link(v_public_link->>'token');
+ IF v_public_preview->>'name'<>'جمعية اختبار طلبات الانضمام' THEN
+   RAISE EXCEPTION 'Public-link preview returned unexpected association data';
+ END IF;
+ v_public_request:=public.submit_join_request('public_link',v_public_link->>'token',1);
+ IF v_public_request->>'status'<>'pending' THEN RAISE EXCEPTION 'Public link did not create a pending request'; END IF;
+
+ PERFORM set_config('request.jwt.claim.sub','cccccccc-cccc-4ccc-8ccc-cccccccccccc',true);
+ PERFORM public.manage_association_public_link(v_association,'pause');
+ PERFORM set_config('request.jwt.claim.sub','ffffffff-ffff-4fff-8fff-ffffffffffff',true);
+ BEGIN
+   PERFORM public.submit_join_request('public_link',v_public_link->>'token',1);
+   RAISE EXCEPTION 'Paused public link unexpectedly accepted a new request';
+ EXCEPTION WHEN SQLSTATE '22023' THEN
+   NULL;
+ END;
+
+ PERFORM set_config('request.jwt.claim.sub','cccccccc-cccc-4ccc-8ccc-cccccccccccc',true);
+ PERFORM public.manage_association_public_link(v_association,'resume');
+ v_approved:=public.approve_join_request((v_public_request->>'request_id')::uuid);
+ IF v_approved->>'status'<>'approved' OR (v_approved->>'shares_added')::integer<>1 THEN
+   RAISE EXCEPTION 'Manager approval did not finalize the public-link request';
+ END IF;
+ IF EXISTS(SELECT 1 FROM public.association_memberships WHERE association_id=v_association
+   AND user_id='ffffffff-ffff-4fff-8fff-ffffffffffff' AND status<>'active') THEN
+   RAISE EXCEPTION 'Public-link approval created a non-active membership';
+ END IF;
 END;
-$$;
+$;
 
 ROLLBACK;
 SELECT 'SAHM invitation -> join request -> manager approval/rejection workflow passed (transaction rolled back)' AS result;
