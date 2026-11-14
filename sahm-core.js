@@ -246,6 +246,89 @@
       met: people.length > 0 && present * 100 >= g.quorum * people.length };
   }
 
+  /* ---------- unified association workflow guards ---------- */
+  var JOIN_REQUEST_STATUS = Object.freeze({
+    pending: 'pending', approved: 'approved', rejected: 'rejected', cancelled: 'cancelled'
+  });
+  var INVITATION_RESPONSE_STATUS = Object.freeze({
+    pending: 'pending_response', interested: 'interested', declined: 'declined', deferred: 'deferred'
+  });
+
+  /* New-flow duration is derived from the two selected dates; legacy cycle helpers remain unchanged. */
+  function firstDrawDurationDays(startDate, firstDrawDate) {
+    if (!isValidDate(startDate) || !isValidDate(firstDrawDate)) {
+      throw new RangeError('INVALID_ASSOCIATION_DATES');
+    }
+    var days = diffDays(firstDrawDate, startDate);
+    if (!Number.isInteger(days) || days < 1) throw new RangeError('FIRST_DRAW_MUST_FOLLOW_START');
+    return days;
+  }
+
+  /* UI advisory only. The database must repeat this check using its own clock and association timezone. */
+  function isJoinWindowOpen(startDate, timeZone, now) {
+    if (!isValidDate(startDate)) throw new RangeError('INVALID_ASSOCIATION_START_DATE');
+    var zone = timeZone || 'Asia/Aden';
+    if (!isValidTimeZone(zone)) throw new RangeError('INVALID_ASSOCIATION_TIME_ZONE');
+    var instant = now === undefined ? new Date() : (now instanceof Date ? now : new Date(now));
+    if (!Number.isFinite(instant.getTime())) throw new RangeError('INVALID_CURRENT_INSTANT');
+    var parts = new Intl.DateTimeFormat('en-CA', {
+      timeZone: zone, calendar: 'gregory', numberingSystem: 'latn',
+      year: 'numeric', month: '2-digit', day: '2-digit'
+    }).formatToParts(instant);
+    var part = {};
+    parts.forEach(function (x) { if (x.type !== 'literal') part[x.type] = x.value; });
+    var localDate = part.year + '-' + part.month + '-' + part.day;
+    return localDate < startDate;
+  }
+
+  function nextInvitationResponseStatus(currentStatus, action) {
+    var current = currentStatus || INVITATION_RESPONSE_STATUS.pending;
+    if (current !== INVITATION_RESPONSE_STATUS.pending && current !== INVITATION_RESPONSE_STATUS.deferred) {
+      throw new RangeError('INVITATION_RESPONSE_IS_TERMINAL');
+    }
+    if (action === 'interested') return INVITATION_RESPONSE_STATUS.interested;
+    if (action === 'decline') return INVITATION_RESPONSE_STATUS.declined;
+    if (action === 'defer') return INVITATION_RESPONSE_STATUS.deferred;
+    throw new RangeError('INVALID_INVITATION_RESPONSE_ACTION');
+  }
+
+  function nextJoinRequestStatus(currentStatus, action, actorRole) {
+    if (currentStatus !== JOIN_REQUEST_STATUS.pending) throw new RangeError('JOIN_REQUEST_IS_TERMINAL');
+    if (action === 'cancel' && actorRole === 'applicant') return JOIN_REQUEST_STATUS.cancelled;
+    if (action === 'approve' && actorRole === 'manager') return JOIN_REQUEST_STATUS.approved;
+    if (action === 'reject' && actorRole === 'manager') return JOIN_REQUEST_STATUS.rejected;
+    throw new RangeError('JOIN_REQUEST_TRANSITION_FORBIDDEN');
+  }
+
+  function hasPendingJoinRequest(requests, associationId, applicantUserId) {
+    return (requests || []).some(function (r) {
+      return r.association_id === associationId && r.applicant_user_id === applicantUserId &&
+        r.status === JOIN_REQUEST_STATUS.pending;
+    });
+  }
+
+  /* Only approved requests contribute requested shares; pending/rejected/cancelled never do. */
+  function summarizeJoinRequests(requests, associationId) {
+    var out = { pendingCount: 0, approvedCount: 0, rejectedCount: 0, cancelledCount: 0, approvedShares: 0 };
+    (requests || []).forEach(function (r) {
+      if (associationId && r.association_id !== associationId) return;
+      if (r.status === JOIN_REQUEST_STATUS.pending) out.pendingCount++;
+      else if (r.status === JOIN_REQUEST_STATUS.approved) {
+        out.approvedCount++;
+        out.approvedShares += Math.max(0, Number(r.requested_shares) || 0);
+      } else if (r.status === JOIN_REQUEST_STATUS.rejected) out.rejectedCount++;
+      else if (r.status === JOIN_REQUEST_STATUS.cancelled) out.cancelledCount++;
+    });
+    return out;
+  }
+
+  /* Legacy invites with a fixed share count are retained on their original acceptance path. */
+  function isLegacyInvitation(invitation) {
+    var value = invitation && (invitation.shares_requested !== undefined
+      ? invitation.shares_requested : invitation.sharesRequested);
+    return Number.isInteger(Number(value)) && Number(value) > 0;
+  }
+
   /* ---------- validation ---------- */
   var LEGACY_FIELDS = ['paymentMethod', 'paymentMethods', 'proofRequired', 'requireProof', 'referenceNo', 'transferRef', 'receiptImage', 'firstDrawDate', 'firstDraw'];
 
@@ -325,6 +408,11 @@
     activeReceipts: activeReceipts,
     obligation: obligation, cycleObligations: cycleObligations, memberProgress: memberProgress, lateJoinPreview: lateJoinPreview,
     eligibleShares: eligibleShares, shareLabel: shareLabel, pickWinner: pickWinner, prizeTarget: prizeTarget, prizeInfo: prizeInfo,
-    requiredPeople: requiredPeople, quorumInfo: quorumInfo, validateBasics: validateBasics, validateGroup: validateGroup
+    requiredPeople: requiredPeople, quorumInfo: quorumInfo,
+    JOIN_REQUEST_STATUS: JOIN_REQUEST_STATUS, INVITATION_RESPONSE_STATUS: INVITATION_RESPONSE_STATUS,
+    firstDrawDurationDays: firstDrawDurationDays, isJoinWindowOpen: isJoinWindowOpen,
+    nextInvitationResponseStatus: nextInvitationResponseStatus, nextJoinRequestStatus: nextJoinRequestStatus,
+    hasPendingJoinRequest: hasPendingJoinRequest, summarizeJoinRequests: summarizeJoinRequests,
+    isLegacyInvitation: isLegacyInvitation, validateBasics: validateBasics, validateGroup: validateGroup
   };
 })(typeof window !== 'undefined' ? window : globalThis);

@@ -145,3 +145,60 @@ test('installment status changes only after the inclusive end date', () => {
   assert.equal(K.instStatus(range, false, '2026-11-11'), 'late');
   assert.equal(K.instStatus(range, true, '2026-11-11'), 'paid');
 });
+
+
+test('new association cycle duration is derived from the selected first draw date', () => {
+  assert.equal(K.firstDrawDurationDays('2027-01-01', '2027-01-31'), 30);
+  assert.equal(K.firstDrawDurationDays('2024-02-28', '2024-03-01'), 2);
+  assert.throws(() => K.firstDrawDurationDays('2027-01-01', '2027-01-01'), RangeError);
+  assert.throws(() => K.firstDrawDurationDays('2027-02-30', '2027-03-01'), RangeError);
+});
+
+test('join window closes at midnight in the association timezone, not the device timezone', () => {
+  assert.equal(K.isJoinWindowOpen('2026-12-02', 'Asia/Aden', '2026-12-01T20:59:59Z'), true);
+  assert.equal(K.isJoinWindowOpen('2026-12-02', 'Asia/Aden', '2026-12-01T21:00:00Z'), false);
+  assert.equal(K.isJoinWindowOpen('2026-04-01', 'America/New_York', '2026-04-01T03:59:59Z'), true);
+  assert.equal(K.isJoinWindowOpen('2026-04-01', 'America/New_York', '2026-04-01T04:00:00Z'), false);
+  assert.throws(() => K.isJoinWindowOpen('2026-12-02', 'Not/A_Timezone', '2026-12-01T20:00:00Z'), RangeError);
+});
+
+test('invitation response is separate from invitation acceptance and remains deferrable', () => {
+  const S = K.INVITATION_RESPONSE_STATUS;
+  assert.equal(K.nextInvitationResponseStatus(undefined, 'interested'), S.interested);
+  assert.equal(K.nextInvitationResponseStatus(S.deferred, 'interested'), S.interested);
+  assert.equal(K.nextInvitationResponseStatus(undefined, 'defer'), S.deferred);
+  assert.equal(K.nextInvitationResponseStatus(undefined, 'decline'), S.declined);
+  assert.throws(() => K.nextInvitationResponseStatus(S.declined, 'interested'), RangeError);
+});
+
+test('join request transitions enforce actor and terminal-state rules', () => {
+  const S = K.JOIN_REQUEST_STATUS;
+  assert.equal(K.nextJoinRequestStatus(S.pending, 'cancel', 'applicant'), S.cancelled);
+  assert.equal(K.nextJoinRequestStatus(S.pending, 'approve', 'manager'), S.approved);
+  assert.equal(K.nextJoinRequestStatus(S.pending, 'reject', 'manager'), S.rejected);
+  assert.throws(() => K.nextJoinRequestStatus(S.pending, 'approve', 'applicant'), RangeError);
+  assert.throws(() => K.nextJoinRequestStatus(S.approved, 'cancel', 'applicant'), RangeError);
+  assert.throws(() => K.nextJoinRequestStatus(S.cancelled, 'approve', 'manager'), RangeError);
+});
+
+test('only approved join requests contribute shares and pending requests are unique per user and association', () => {
+  const requests = [
+    { association_id: 'a', applicant_user_id: 'u', requested_shares: 3, status: 'pending' },
+    { association_id: 'a', applicant_user_id: 'v', requested_shares: 2, status: 'approved' },
+    { association_id: 'a', applicant_user_id: 'w', requested_shares: 8, status: 'rejected' },
+    { association_id: 'a', applicant_user_id: 'x', requested_shares: 5, status: 'cancelled' },
+    { association_id: 'b', applicant_user_id: 'u', requested_shares: 4, status: 'approved' }
+  ];
+  assert.equal(K.hasPendingJoinRequest(requests, 'a', 'u'), true);
+  assert.equal(K.hasPendingJoinRequest(requests, 'a', 'v'), false);
+  assert.deepEqual(K.summarizeJoinRequests(requests, 'a'), {
+    pendingCount: 1, approvedCount: 1, rejectedCount: 1, cancelledCount: 1, approvedShares: 2
+  });
+});
+
+test('legacy invitation share counts are distinguished from new share-free invitations', () => {
+  assert.equal(K.isLegacyInvitation({ shares_requested: 2 }), true);
+  assert.equal(K.isLegacyInvitation({ sharesRequested: 1 }), true);
+  assert.equal(K.isLegacyInvitation({ shares_requested: null }), false);
+  assert.equal(K.isLegacyInvitation({}), false);
+});
