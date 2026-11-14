@@ -4111,7 +4111,7 @@ function render(){
 let modalReturnFocus=null;
 function showModal(title,body,buttons=[['إغلاق','close','outline']]){
  if(navigation)navigation.openModal();
- modalReturnFocus=document.activeElement;
+ if(!$('#modal-root .dialog'))modalReturnFocus=document.activeElement;
  $('#modal-root').innerHTML=`<div class="overlay" data-action="overlay-close"><div class="dialog" role="dialog" aria-modal="true" aria-labelledby="modal-title" tabindex="-1" onclick="event.stopPropagation()"><h3 id="modal-title">${title}</h3><div class="dialog-body">${body}</div><div class="dialog-actions">${buttons.map(([label,act,style='primary'])=>`<button class="btn ${style}" data-action="${act}">${label}</button>`).join('')}</div></div></div>`;
  const dialog=$('#modal-root .dialog');
  if(dialog){
