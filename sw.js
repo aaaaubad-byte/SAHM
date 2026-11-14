@@ -1,5 +1,5 @@
 /* Sahm PWA — activate new builds immediately; app code is always network-first so old cached copies are never preferred. */
-const CACHE_NAME = 'sahm-pwa-v25';
+const CACHE_NAME = 'sahm-pwa-v26';
 const APP_SHELL = [
   '/',
   '/Sahm_Preview_ROLE_SEPARATION.html',
