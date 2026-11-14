@@ -3366,9 +3366,16 @@ function save(){
 function refreshData(){const previous=currentGroupId;db=load();currentGroupId=db.groups.some(g=>g.id===previous)?previous:((db.groups[0]||{}).id||null);return db}
 function startRemoteRealtime(){
  return SahmSupabaseData.startRealtime(()=>{
+  refreshData();
   if(screenName==='chat')chat();
   else if(screenName==='notifications')notifications();
   else if(screenName==='home')home();
+  else if(screenName==='join-requests')joinRequests();
+  else if(screenName==='join-request-detail')joinRequestDetail();
+  else if(screenName==='join-request-status')joinRequestStatus();
+  else if(screenName==='invite-detail')inviteDetail();
+  else if(screenName==='invites')invites();
+  else if(screenName==='group-detail'&&groupDetailTab==='overview')groupDetail();
  });
 }
 
