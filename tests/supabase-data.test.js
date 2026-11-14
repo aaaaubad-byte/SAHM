@@ -9,7 +9,7 @@ const EXPECTED_TABLES = [
   'installment_periods','installment_obligations','installment_receipts','receipt_corrections',
   'draws','draw_eligible_shares','cycle_attendance','chat_messages','chat_read_states',
   'association_events','association_notification_settings','association_user_preferences',
-  'invitations','notifications','reminders','user_preferences'
+  'invitations','join_requests','notifications','reminders','user_preferences'
 ];
 
 function loadRemoteGateway(options = {}) {
@@ -42,6 +42,13 @@ function loadRemoteGateway(options = {}) {
     rpc: async (name,args) => {
       calls.rpc.push({ name,args });
       if(name==='create_association')return { data:'association-1', error:null };
+      if(name==='create_association_unified')return { data:'association-1', error:null };
+      if(name==='manage_association_public_link')return { data:{id:'link-1',token:'public-token',status:'active'}, error:null };
+      if(name==='create_invitations_bulk')return { data:{
+        total:1,sentCount:1,failedCount:0,
+        results:[{status:'sent',id:'invite-1',name:'مدعو',token:'invite-token'}]
+      }, error:null };
+      if(name==='get_my_invitation_inbox')return { data:[], error:null };
       if(name==='accept_invitation')return { data:{association_id:'association-1',membership_id:'membership-1',shares_added:1}, error:null };
       return { data:true,error:null };
     },
@@ -92,21 +99,26 @@ test('remote gateway loads the full RLS-scoped table snapshot into SahmApp', asy
   assert.equal(gateway.isRemote(),true);
 });
 
-test('remote mutation layer writes through database RPC, not SahmData local operations', async()=>{
+test('remote mutation layer creates the date-based unified association through RPC', async()=>{
   const {gateway,window,calls}=loadRemoteGateway();
   await gateway.init();
   gateway.install();
   const result=await window.SahmApp.createGroup({
-    name:'جمعية الاختبار',currency:'YER',startDate:'2026-12-01',
-    cycleType:'monthly',shareAmount:'100',installments:2,targetShares:10,
-    maxPerMember:2,managerMode:'only',quorum:66,tz:'Asia/Aden'
+    name:'جمعية موحدة',currency:'YER',startDate:'2026-12-01',firstDrawOn:'2026-12-31',
+    durationDays:30,shareAmountMinor:10000,installmentMode:'amount',
+    installmentAmountMinor:4000,managerMode:'only',quorum:66,tz:'Asia/Aden'
   });
   assert.equal(result.ok,true);
   assert.equal(result.groupId,'association-1');
-  const call=calls.rpc.find(x=>x.name==='create_association');
+  const call=calls.rpc.find(x=>x.name==='create_association_unified');
   assert.ok(call);
-  assert.equal(call.args.p_payload.name,'جمعية الاختبار');
-  assert.equal(call.args.p_payload.shareAmountMinor,100);
+  assert.equal(call.args.p_payload.firstDrawOn,'2026-12-31');
+  assert.equal(call.args.p_payload.installmentMode,'amount');
+  assert.equal(call.args.p_payload.installmentAmountMinor,4000);
+  const link=calls.rpc.find(x=>x.name==='manage_association_public_link');
+  assert.ok(link);
+  assert.equal(link.args.p_action,'create');
+  assert.match(result.publicLink.url,/\\?join=public-token$/);
 });
 
 
@@ -133,10 +145,28 @@ test('remote gateway subscribes only to chat and notifications and clears channe
   const {gateway,calls}=loadRemoteGateway();
   await gateway.init();
   gateway.startRealtime(()=>{});
-  assert.equal(calls.realtime.length,3);
+  assert.equal(calls.realtime.length,5);
   assert.ok(calls.realtime.some(x=>x.filter.table==='chat_messages'));
   assert.ok(calls.realtime.some(x=>x.filter.table==='notifications'&&x.filter.filter==='user_id=eq.user-1'));
+  assert.ok(calls.realtime.some(x=>x.filter.table==='join_requests'));
+  assert.ok(calls.realtime.some(x=>x.filter.table==='invitations'));
   gateway.clear();
   assert.equal(calls.removed,1);
   assert.equal(gateway.isRemote(),false);
+});
+
+
+test('remote gateway sends selected contacts through the bulk invitation RPC', async()=>{
+  const {gateway,window,calls}=loadRemoteGateway();
+  await gateway.init();
+  gateway.install();
+  const result=await window.SahmApp.createInvitationsBulk('association-1',[{name:'مدعو',phone:'+967777123456'}]);
+  assert.equal(result.ok,true);
+  assert.equal(result.sentCount,1);
+  assert.equal(result.failedCount,0);
+  assert.match(result.results[0].url,/\\?invite=invite-token$/);
+  const call=calls.rpc.find(x=>x.name==='create_invitations_bulk');
+  assert.ok(call);
+  assert.equal(call.args.p_association_id,'association-1');
+  assert.equal(call.args.p_invitees[0].name,'مدعو');
 });

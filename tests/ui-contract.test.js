@@ -128,7 +128,21 @@ test('navigation runtime is loaded in order and precached by the service worker'
   const navigationScript = html.indexOf('<script src="/sahm-navigation.js"></script>');
   const nextInlineScript = html.indexOf('<script>', navigationScript + '<script src="/sahm-navigation.js"></script>'.length);
   assert.ok(appScript >= 0 && appScript < navigationScript && navigationScript < nextInlineScript);
-  assert.match(sw, /const CACHE_NAME = 'sahm-pwa-v25'/);
+  assert.match(sw, /const CACHE_NAME = 'sahm-pwa-v27'/);
   assert.match(sw, /APP_SHELL[\s\S]*?'\/sahm-navigation\.js'/);
   assert.match(sw, /APP_SHELL[\s\S]*?'\/sahm-supabase-data\.js'/);
+  assert.ok(sw.includes("'/sahm-app.js'"));
+});
+
+
+test('unified association UI and invitation renderer follow the new contract', () => {
+  assert.match(html, /name="firstDrawOn"/);
+  assert.match(html, /name="installmentMode"/);
+  assert.match(html, /SahmCore\.installmentAmounts/);
+  assert.match(html, /createInvitationsBulk/);
+  assert.match(html, /data-action="submit-bulk-invites"/);
+  assert.equal((html.match(/function inviteDetail\(\)\{/g) || []).length, 1);
+  const handler = html.slice(html.indexOf("if(action==='invitation-interested'"), html.indexOf("if(action==='cancel-join-request'"));
+  assert.ok(handler.indexOf("const response=") < handler.indexOf("if(response==='interested'"));
+  assert.match(html, /shareSummary=g\.total==null/);
 });

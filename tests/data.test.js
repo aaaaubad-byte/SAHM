@@ -18,7 +18,7 @@ function createGroup(w, overrides = {}) {
 test('data store loads a versioned seed and required collections', () => {
   const w = fresh();
   assert.equal(w.db.version, w.D.VERSION);
-  for (const key of ['groups', 'members', 'shares', 'receipts', 'draws', 'messages', 'events', 'notifications', 'reminders', 'invites', 'corrections']) {
+  for (const key of ['groups', 'members', 'shares', 'receipts', 'draws', 'messages', 'events', 'notifications', 'reminders', 'invites', 'joinRequests', 'corrections']) {
     assert.ok(Array.isArray(w.db[key]), key);
   }
 });
@@ -321,4 +321,40 @@ test('chat list is sourced from accessible associations and sorted by newest mes
   assert.ok(rows.indexOf(secondRow) < rows.indexOf(firstRow), 'newer conversation appears first');
   assert.equal(secondRow.last.text, 'رسالة أحدث');
   assert.equal(firstRow.last.text, 'رسالة أقدم');
+});
+
+
+test('unified local association creation stores a nullable target and accepts members without legacy caps', () => {
+  const w = fresh();
+  w.clock.now = '2026-12-01T10:00';
+  const result = w.D.createGroup(w.db, 'me', {
+    name: 'جمعية جديدة', currency: 'YER',
+    startDate: '2026-12-01', firstDrawOn: '2026-12-31', durationDays: 30,
+    shareAmountMinor: 10000, installmentMode: 'amount', installmentAmountMinor: 4000,
+    managerMode: 'only', quorum: 66, tz: 'Asia/Aden'
+  });
+  assert.equal(result.ok, true, JSON.stringify(result));
+  const group = w.db.groups.find(x => x.id === result.groupId);
+  assert.equal(group.firstDrawOn, '2026-12-31');
+  assert.equal(group.cycleDays, 30);
+  assert.equal(group.targetShares, null);
+  assert.equal(group.maxPerMember, null);
+  assert.equal(group.installments, 3);
+  assert.deepEqual(w.K.shareAmounts(group), [4000, 4000, 2000]);
+  const added = w.D.addMember(w.db, 'me', group.id, {
+    name: 'مشارك بلا سقف', userId: 'unbounded-user', shares: 4,
+    joinedAt: '2026-12-01', confirmLateImpact: true
+  });
+  assert.equal(added.ok, true, JSON.stringify(added));
+  assert.equal(w.K.groupShares(w.db, group.id).length, 4);
+});
+
+test('normalizing an older local snapshot adds the join request collection without disturbing existing rows', () => {
+  const w = fresh();
+  const old = w.D.buildSeed('2026-11-13');
+  delete old.joinRequests;
+  const beforeGroups = old.groups.length;
+  w.D.normalizeDb(old);
+  assert.ok(Array.isArray(old.joinRequests));
+  assert.equal(old.groups.length, beforeGroups);
 });

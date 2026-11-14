@@ -202,3 +202,43 @@ test('legacy invitation share counts are distinguished from new share-free invit
   assert.equal(K.isLegacyInvitation({ shares_requested: null }), false);
   assert.equal(K.isLegacyInvitation({}), false);
 });
+
+
+test('installment day remainder is assigned to the earliest installments like the database', () => {
+  assert.deepEqual(K.periods(8, 3), [
+    { no: 1, from: 1, to: 3 },
+    { no: 2, from: 4, to: 6 },
+    { no: 3, from: 7, to: 8 }
+  ]);
+});
+
+test('fixed per-installment plan leaves the exact residual in the final installment', () => {
+  assert.deepEqual(K.installmentAmounts({
+    shareAmount: 10000, installments: 3, installmentMode: 'amount', installmentAmountMinor: 4000
+  }), [4000, 4000, 2000]);
+  assert.deepEqual(K.installmentAmounts({
+    shareAmount: 10000, installments: 3, installmentMode: 'count'
+  }), [3334, 3333, 3333]);
+  assert.throws(() => K.installmentAmounts({
+    shareAmount: 10000, installments: 2, installmentMode: 'amount', installmentAmountMinor: 4000
+  }), /INVALID_FIXED_INSTALLMENT_PLAN/);
+});
+
+test('explicit first draw date anchors draw rounds while legacy dates retain their fallback', () => {
+  const modern = { startDate: '2026-01-01', firstDrawOn: '2026-02-05', cycleType: 'custom', cycleDays: 35 };
+  assert.equal(K.firstDrawDate(modern), '2026-02-05');
+  assert.equal(K.roundDate(modern, 2), '2026-03-12');
+  assert.equal(K.firstDrawDate({ startDate: '2026-01-01', cycleType: 'monthly' }), '2026-01-31');
+});
+
+test('unified association validation accepts date-based fields without target caps', () => {
+  const valid = {
+    name: 'جمعية جديدة', currency: 'YER',
+    startDate: '2027-01-01', firstDrawOn: '2027-01-31', durationDays: 30,
+    shareAmountMinor: 10000, installmentMode: 'amount', installmentAmountMinor: 4000,
+    managerMode: 'only', quorum: 66, tz: 'Asia/Aden'
+  };
+  assert.deepEqual(K.validateGroup(valid), []);
+  assert.ok(K.validateGroup({ ...valid, durationDays: 29 }).some(x => x.code === 'DURATION_MISMATCH'));
+  assert.ok(K.validateGroup({ ...valid, installmentAmountMinor: 100 }).some(x => x.code === 'INSTALLMENTS_EXCEED_DAYS'));
+});
