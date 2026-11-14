@@ -3277,7 +3277,7 @@ const $=s=>document.querySelector(s);
 const money=(n,c='YER')=>{const cur=SahmCore.CURRENCIES[c]||SahmCore.CURRENCIES.YER;const minor=Math.round(Number(n||0)*cur.minor);return SahmCore.fmtMoney(minor,c in SahmCore.CURRENCIES?c:'YER')};
 const today=()=>SahmApp.todayIn();
 const AUTH_SCREEN_NAMES=['welcome','register','profile-setup','reset-password','logged-out'];
-let db={session:false,verified:false,user:{id:null,name:'',phone:'',city:'',email:'',avatarKey:'avatar-01',notifications:true,biometric:false},groups:[],unread:0},screenName='welcome',params={},groupTab='all',groupDetailTab='overview',toastTimer,homeSlideTimer=null,homeSlideIndex=0,selectedInstallmentCycle=1,selectedInstallmentStatus='all',pendingJoinCode=null,pendingJoinContext=null,lastSubmittedRequestId=null,joinRequestFilter='pending',createGroupBusy=false,joinRequestBusy=false,joinDecisionBusy=false,createdGroupLink=null,createdLinkWarning=null;
+let db={session:false,verified:false,user:{id:null,name:'',phone:'',city:'',email:'',avatarKey:'avatar-01',notifications:true,biometric:false},groups:[],unread:0},screenName='welcome',params={},groupTab='all',groupDetailTab='overview',toastTimer,homeSlideTimer=null,homeSlideIndex=0,selectedInstallmentCycle=1,selectedInstallmentStatus='all',pendingJoinCode=null,pendingJoinContext=null,lastSubmittedRequestId=null,joinRequestFilter='pending',createGroupBusy=false,bulkInvitesBusy=false,joinRequestBusy=false,joinDecisionBusy=false,createdGroupLink=null,createdLinkWarning=null;
 let selectedAvatarKey='avatar-01',authBusy=false,activeProfile=null;
 let currentGroupId=(db.groups[0]||{}).id||null,createdGroupId=null,createWizardStep=1,createFormSnapshot={},reminderRequest=null,navigation=null;
 SahmApp.onResult((name,result)=>{if(result&&result.ok===false)toast(result.message||'تعذر تنفيذ العملية');else if(result&&result.persisted===false)toast(result.warning||'تعذر حفظ التغييرات في تخزين المعاينة');});
@@ -4137,27 +4137,30 @@ async function handleAppAction(action,el){
   return;
  }
  if(action==='submit-bulk-invites'){
+  if(bulkInvitesBusy)return;
   if(!g||!isManager()){toast('إرسال الدعوات متاح لمدير الجمعية فقط');return}
   const selected=pendingInvitees.filter(x=>x.selected&&!x.duplicate);
   if(!selected.length){toast('حدد جهة اتصال واحدة على الأقل');return}
   if(selected.length>50){toast('لا يمكن إرسال أكثر من 50 دعوة في العملية الواحدة');return}
   const invalid=selected.find(x=>String(x.name||'').trim().length<2||!String(x.phone||'').trim());
   if(invalid){toast('أكمل اسم ورقم كل جهة اتصال محددة');return}
-  el.disabled=true;const oldLabel=el.textContent;el.textContent='جارٍ إنشاء الدعوات...';
-  const result=await SahmApp.createInvitationsBulk(g.id,selected.map(x=>({name:x.name.trim(),phone:x.phone.trim()})));
-  el.disabled=false;el.textContent=oldLabel;
-  if(!result||!result.ok){toast(result&&result.message||'تعذر إنشاء الدعوات');return}
-  refreshData();
-  const rows=(result.results||[]).map(item=>item.status==='sent'
-   ?'<div class="listrow"><div class="grow"><strong>'+escapeHtml(item.name)+'</strong><small>تم إنشاء الدعوة؛ شارك الرابط مع الشخص ليتمكن من فتحها</small><input class="field invitee-link" readonly value="'+escapeHtml(item.url||'')+'"></div><div class="invitee-result-actions"><button class="btn outline small" data-action="copy-bulk-invite-link" data-link="'+escapeHtml(item.url||'')+'">نسخ</button><button class="btn soft small" data-action="share-bulk-invite-link" data-link="'+escapeHtml(item.url||'')+'">مشاركة</button></div></div>'
-   :'<div class="listrow"><div class="grow"><strong>'+escapeHtml(item.name||'جهة اتصال')+'</strong><small>'+escapeHtml(item.message||'تعذر إرسال الدعوة')+'</small></div><span class="pill red">لم تُرسل</span></div>'
-  ).join('');
-  const failedContacts = new Set();
-  (result.results||[]).forEach((item,index)=>{if(item.status!=='sent'&&selected[index])failedContacts.add(selected[index]);});
-  pendingInvitees = pendingInvitees.filter(item=>!selected.includes(item)||failedContacts.has(item));
-  pendingInvitees.forEach(item=>{if(failedContacts.has(item)){item.selected=true;item.duplicate=false;}});
-  renderInviteeSelection();
-  showModal('نتيجة إرسال الدعوات','<div class="grid2"><div class="stat"><span>تم إنشاؤها</span><b>'+Number(result.sentCount||0)+'</b></div><div class="stat"><span>تعذر إرسالها</span><b>'+Number(result.failedCount||0)+'</b></div></div><div class="card">'+rows+'</div><small>لم يتم إرسال رسالة خارجية تلقائيًا. انسخ رابط كل دعوة وشاركه مع صاحبها.</small>',[['إغلاق','close','outline']]);
+  bulkInvitesBusy=true;el.disabled=true;const oldLabel=el.textContent;el.textContent='جارٍ إنشاء الدعوات...';
+  try{
+   const result=await SahmApp.createInvitationsBulk(g.id,selected.map(x=>({name:x.name.trim(),phone:x.phone.trim()})));
+   if(!result||!result.ok){toast(result&&result.message||'تعذر إنشاء الدعوات');return}
+   refreshData();
+   const rows=(result.results||[]).map(item=>item.status==='sent'
+    ?'<div class="listrow"><div class="grow"><strong>'+escapeHtml(item.name)+'</strong><small>تم إنشاء الدعوة؛ شارك الرابط مع الشخص ليتمكن من فتحها</small><input class="field invitee-link" readonly value="'+escapeHtml(item.url||'')+'"></div><div class="invitee-result-actions"><button class="btn outline small" data-action="copy-bulk-invite-link" data-link="'+escapeHtml(item.url||'')+'">نسخ</button><button class="btn soft small" data-action="share-bulk-invite-link" data-link="'+escapeHtml(item.url||'')+'">مشاركة</button></div></div>'
+    :'<div class="listrow"><div class="grow"><strong>'+escapeHtml(item.name||'جهة اتصال')+'</strong><small>'+escapeHtml(item.message||'تعذر إرسال الدعوة')+'</small></div><span class="pill red">لم تُرسل</span></div>'
+   ).join('');
+   const failedContacts = new Set();
+   (result.results||[]).forEach((item,index)=>{if(item.status!=='sent'&&selected[index])failedContacts.add(selected[index]);});
+   pendingInvitees = pendingInvitees.filter(item=>!selected.includes(item)||failedContacts.has(item));
+   pendingInvitees.forEach(item=>{if(failedContacts.has(item)){item.selected=true;item.duplicate=false;}});
+   renderInviteeSelection();
+   showModal('نتيجة إرسال الدعوات','<div class="grid2"><div class="stat"><span>تم إنشاؤها</span><b>'+Number(result.sentCount||0)+'</b></div><div class="stat"><span>تعذر إرسالها</span><b>'+Number(result.failedCount||0)+'</b></div></div><div class="card">'+rows+'</div><small>لم يتم إرسال رسالة خارجية تلقائيًا. انسخ رابط كل دعوة وشاركه مع صاحبها.</small>',[['إغلاق','close','outline']]);
+  }catch(error){toast(SahmSupabase.friendlyError(error));}
+  finally{bulkInvitesBusy=false;if(el.isConnected){el.disabled=false;el.textContent=oldLabel;}}
   return;
  }
  if(action==='share-bulk-invite-link'){
