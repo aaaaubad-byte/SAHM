@@ -1114,7 +1114,11 @@
   function recentActivity(db, n, viewer) {
     var ids = {}; db.groups.forEach(function (g) { var r = roleOf(db, g, viewer); if (r.manager || r.participant) ids[g.id] = { g: g, r: r }; });
     var icon = { join: 'user-plus', receipt: 'receipt', draw: 'layers', 'join-request':'user-check', invite:'user-plus' };
-    return db.events.filter(function (e) { return ids[e.groupId] && eventVisible(e, ids[e.groupId].r); }).slice(0, n || 3).map(function (e) {
+    return db.events.filter(function (e) { return ids[e.groupId] && eventVisible(e, ids[e.groupId].r); })
+      .slice().sort(function (a, b) {
+        var aAt = String(a.at || ''), bAt = String(b.at || '');
+        return aAt === bAt ? 0 : (aAt < bAt ? 1 : -1);
+      }).slice(0, n || 3).map(function (e) {
       return { title: e.text, groupId: e.groupId, groupName: ids[e.groupId].g.name, at: e.at, icon: icon[e.type] || 'activity', eventType: e.eventType || e.type, entityId: e.entityId || null };
     });
   }
