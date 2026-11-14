@@ -4038,7 +4038,7 @@ function audit(){
  const r=SahmApp.eventLog(g.id,{limit:100}),rows=r&&r.ok?r.events:[];
  shell('سجل العمليات','groups',header('سجل أحداث الجمعية',g.name)+'<div class="card">'+(rows.map(x=>'<div class="listrow"><div class="avatar">⌁</div><div class="grow"><strong>'+escapeHtml(x.text)+'</strong><small>'+escapeHtml(x.actor||'سهم')+'</small></div><small class="eyebrow">'+escapeHtml(x.at||'')+'</small></div>').join('')||'<div class="empty"><b>لا توجد أحداث مسجلة</b></div>')+'</div>');
 }
-function profile(){const avatarIcon=(AVATAR_OPTIONS.find(x=>x[0]===(db.user.avatarKey||'avatar-01'))||AVATAR_OPTIONS[0])[1];shell('حسابي','profile',`${header('الملف الشخصي','حسابك الموحد في سهم')}<div class="card"><div class="row"><div class="avatar dark" style="width:51px;height:51px;border-radius:17px;font-size:18px">${uiIcon(avatarIcon,25)}</div><div><b style="font-size:13px">${db.user.name}</b><div class="eyebrow">${db.user.phone}</div><div class="eyebrow">${db.user.city}</div></div><span class="pill green">حساب موحد</span></div></div><div class="card"><div class="listrow"><div class="avatar">♙</div><div class="grow"><strong>بيانات الملف الشخصي</strong></div><button class="btn outline small" data-go="edit-profile">تعديل</button></div><div class="listrow"><div class="avatar">▤</div><div class="grow"><strong>جمعياتي</strong></div><button class="btn outline small" data-go="groups">عرض</button></div><div class="listrow"><div class="avatar">⚙</div><div class="grow"><strong>إعدادات الحساب</strong></div><button class="btn outline small" data-go="settings">فتح</button></div><div class="listrow"><div class="avatar">⌁</div><div class="grow"><strong>سجل العمليات</strong></div><button class="btn outline small" data-go="audit">عرض</button></div></div><button class="btn danger full" data-action="logout-confirm">تسجيل الخروج</button>`)}
+function profile(){const avatarIcon=(AVATAR_OPTIONS.find(x=>x[0]===(db.user.avatarKey||'avatar-01'))||AVATAR_OPTIONS[0])[1];const savedAccounts=SahmSupabase.accounts();shell('حسابي','profile',`${header('الملف الشخصي','حسابك في سهم')}<div class="card"><div class="row"><div class="avatar dark" style="width:51px;height:51px;border-radius:17px;font-size:18px">${uiIcon(avatarIcon,25)}</div><div class="grow"><b style="font-size:13px">${escapeHtml(db.user.name)}</b><div class="eyebrow">${escapeHtml(db.user.email||'')}</div><div class="eyebrow">${escapeHtml(db.user.phone||'')}</div><div class="eyebrow">${escapeHtml(db.user.city||'')}</div></div><span class="pill green">الحساب الحالي</span></div></div><div class="card"><div class="between"><strong>الحسابات المحفوظة على هذا الجهاز</strong><button class="btn outline small" data-action="add-account">إضافة حساب</button></div>${savedAccounts.map(a=>`<div class="listrow"><div class="avatar">♙</div><div class="grow"><strong>${escapeHtml(a.label||a.email)}</strong><small>${escapeHtml(a.email)}</small></div>${a.id===db.user.id?'<span class="pill green">نشط</span>':`<button class="btn outline small" data-action="switch-account" data-user-id="${escapeHtml(a.id)}">تبديل</button>`}</div>`).join('')||'<small class="field-hint">لا توجد حسابات محفوظة أخرى.</small>'}</div><div class="card"><div class="listrow"><div class="avatar">♙</div><div class="grow"><strong>بيانات الملف الشخصي</strong></div><button class="btn outline small" data-go="edit-profile">تعديل</button></div><div class="listrow"><div class="avatar">▤</div><div class="grow"><strong>جمعياتي</strong></div><button class="btn outline small" data-go="groups">عرض</button></div><div class="listrow"><div class="avatar">⚙</div><div class="grow"><strong>إعدادات الحساب</strong></div><button class="btn outline small" data-go="settings">فتح</button></div><div class="listrow"><div class="avatar">⌁</div><div class="grow"><strong>سجل العمليات</strong></div><button class="btn outline small" data-go="audit">عرض</button></div></div><button class="btn danger full" data-action="logout-confirm">تسجيل الخروج من هذا الحساب</button>`)}
 function editProfile(){shell('تعديل الملف','profile',`${header('تعديل بياناتك','الملف الشخصي')}<form id="profileForm"><div class="field"><label>الاسم</label><input name="name" value="${escapeHtml(db.user.name)}" required></div><div class="field"><label>رقم الهاتف</label><input value="${db.user.phone}" disabled></div><div class="field"><label>المدينة</label><input name="city" value="${escapeHtml(db.user.city)}"></div><button class="btn primary full" type="submit">حفظ التعديلات</button></form>`)}
 function settings(){shell('الإعدادات','profile',`${header('الإعدادات','تفضيلات الحساب')}<div class="card"><div class="between"><div><b style="font-size:11px">التنبيهات</b><small class="field-hint">تفعيل أو إيقاف إشعارات الحساب</small></div><input type="checkbox" id="notifToggle" ${db.user.notifications?'checked':''} style="width:20px;height:20px;accent-color:var(--teal)"></div><div class="listrow"><div class="avatar">🔒</div><div class="grow"><strong>حماية الجلسة</strong><small>غير متاحة في معاينة الويب الحالية</small></div><span class="pill">غير متاح</span></div><div class="listrow"><div class="avatar">☎</div><div class="grow"><strong>رقم الهاتف</strong><small>${db.user.phone}</small></div><span class="pill">مسجل</span></div></div><button class="btn danger full" data-action="logout-confirm">إنهاء الجلسة وتسجيل الخروج</button>`)}
 function welcome(){
@@ -4115,6 +4115,7 @@ function showModal(title,body,buttons=[['إغلاق','close','outline']]){
  $('#modal-root').innerHTML=`<div class="overlay" data-action="overlay-close"><div class="dialog" role="dialog" aria-modal="true" aria-labelledby="modal-title" tabindex="-1" onclick="event.stopPropagation()"><h3 id="modal-title">${title}</h3><div class="dialog-body">${body}</div><div class="dialog-actions">${buttons.map(([label,act,style='primary'])=>`<button class="btn ${style}" data-action="${act}">${label}</button>`).join('')}</div></div></div>`;
  const dialog=$('#modal-root .dialog');
  if(dialog){
+  dialog.addEventListener('click',function(event){const actionButton=event.target.closest('[data-action]');if(actionButton){event.preventDefault();event.stopPropagation();handleAppAction(actionButton.dataset.action,actionButton);}});
   const first=dialog.querySelector('input:not([disabled]),select:not([disabled]),textarea:not([disabled]),button:not([disabled]),a[href],[tabindex]:not([tabindex="-1"])');
   (first||dialog).focus();
  }
@@ -4378,8 +4379,29 @@ async function handleAppAction(action,el){
   const root=$('#modal-root'),reason=$('#receiptCorrectionReason')?.value||'';if(reason.trim().length<3){toast('اكتب سبب التصحيح (3 أحرف على الأقل)');return}
   const r=await SahmApp.correctReceipt(root.dataset.receiptId,{action:'void',reason});if(r&&r.ok){const id=root.dataset.receiptId;closeModal();refreshData();params={id};receiptDetail();toast('تم توثيق التصحيح')}return;
  }
- if(action==='logout-confirm'){showModal('تسجيل الخروج','هل تريد إنهاء الجلسة الحالية؟ ستبقى بيانات المعاينة المحفوظة كما هي.',[['نعم، تسجيل الخروج','logout-now','danger'],['إلغاء','close','outline']]);return}
- if(action==='logout-now'){SahmSupabase.signOut().then(()=>{SahmSupabaseData.clear();db={session:false,verified:false,user:{id:null,name:'',phone:'',city:'',email:'',avatarKey:'avatar-01',notifications:true,biometric:false},groups:[],unread:0};currentGroupId=null;closeModal();resetNavigation('welcome',{});}).catch(e=>toast(SahmSupabase.friendlyError(e)));return}
+ if(action==='logout-confirm'){showModal('تسجيل الخروج','هل تريد تسجيل الخروج من هذا الحساب؟ ستظل الحسابات الأخرى محفوظة على هذا الجهاز.',[['نعم، تسجيل الخروج','logout-now','danger'],['إلغاء','close','outline']]);return}
+ if(action==='logout-now'){
+  if(authBusy)return;authBusy=true;
+  try{await SahmSupabase.signOut();SahmSupabaseData.clear();db={session:false,verified:false,user:{id:null,name:'',phone:'',city:'',email:'',avatarKey:'avatar-01',notifications:true,biometric:false},groups:[],unread:0};currentGroupId=null;activeProfile=null;closeModal();resetNavigation('welcome',{});}
+  catch(e){toast(SahmSupabase.friendlyError(e));}
+  finally{authBusy=false;}
+  return;
+ }
+ if(action==='add-account'){go('welcome');return}
+ if(action==='switch-account'){
+  if(authBusy)return;authBusy=true;
+  try{
+   const switched=await SahmSupabase.switchAccount(el.dataset.userId);
+   SahmSupabaseData.clear();activeProfile=await SahmSupabase.profile(switched.user.id);
+   await SahmSupabaseData.init(activeProfile);SahmSupabaseData.install();db=load();currentGroupId=(db.groups[0]||{}).id||null;
+   db.session=true;db.verified=!!switched.user.email_confirmed_at;
+   db.user=Object.assign(db.user,{id:switched.user.id,email:switched.user.email,name:activeProfile.fullName,phone:activeProfile.phone,city:activeProfile.city,avatarKey:activeProfile.avatarKey});
+   selectedAvatarKey=activeProfile.avatarKey||'avatar-01';startRemoteRealtime();closeModal();resetNavigation(activeProfile.completed?'home':'profile-setup',{});
+   toast('تم التبديل إلى الحساب المحدد');
+  }catch(e){toast(SahmSupabase.friendlyError(e));}
+  finally{authBusy=false;}
+  return;
+ }
 }
 document.addEventListener('click',async e=>{
  const el=e.target.closest('[data-go],[data-action]');if(!el)return;const route=el.dataset.go,action=el.dataset.action;
