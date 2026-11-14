@@ -4423,8 +4423,16 @@ async function handleAppAction(action,el){
    toast('تم التبديل إلى الحساب المحدد');
   }catch(e){
    if(previousUserId){
-    try{await SahmSupabase.switchAccount(previousUserId);startRemoteRealtime();}
-    catch(restoreError){toast('تعذر استعادة الحساب السابق؛ أعد تسجيل الدخول.');resetNavigation('welcome',{});}
+    try{
+     await SahmSupabase.switchAccount(previousUserId);
+     if(!SahmSupabaseData.isRemote()){
+      SahmSupabaseData.clear();activeProfile=await SahmSupabase.profile(previousUserId);
+      await SahmSupabaseData.init(activeProfile);SahmSupabaseData.install();db=load();
+      db.session=true;db.user=Object.assign(db.user,{id:previousUserId,email:activeProfile.email||db.user.email,name:activeProfile.fullName,phone:activeProfile.phone,city:activeProfile.city,avatarKey:activeProfile.avatarKey});
+      currentGroupId=(db.groups[0]||{}).id||null;
+     }
+     startRemoteRealtime();
+    }catch(restoreError){toast('تعذر استعادة بيانات الحساب السابق؛ أعد تسجيل الدخول.');resetNavigation('welcome',{});}
    }
    toast(SahmSupabase.friendlyError(e));
   }
