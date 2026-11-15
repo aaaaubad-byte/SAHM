@@ -12,9 +12,10 @@ const { K } = loadModules();
 function extractFunction(name, nextName) {
   const start = html.indexOf('function ' + name + '(');
   assert.notEqual(start, -1, name + ' exists');
-  const end = html.indexOf('\nfunction ' + nextName + '(', start);
-  assert.notEqual(end, -1, nextName + ' follows ' + name);
-  return html.slice(start, end).trim();
+  const nextFunction = new RegExp('\\n(?:async\\s+)?function\\s+' + nextName + '\\s*\\(');
+  const nextMatch = nextFunction.exec(html.slice(start));
+  assert.ok(nextMatch, nextName + ' follows ' + name);
+  return html.slice(start, start + nextMatch.index).trim();
 }
 
 test('remote RLS-scoped join requests are copied into the screen view model', () => {
