@@ -4407,40 +4407,84 @@ async function bootSahm(){
 bootSahm();
 </script>
 <script>
-/* Sahm PWA: automatic activation and network-first app documents. */
+/* Sahm PWA: detect published builds quickly and notify before activation. */
 if ('serviceWorker' in navigator) {
   let sahmReloading = false;
-  const activateWaitingWorker = registration => {
-    if (registration && registration.waiting) {
-      registration.waiting.postMessage({ type: 'SKIP_WAITING' });
-    }
+  let sahmUpdateNoticeShown = false;
+  let sahmRegistration = null;
+
+  const showSahmUpdateNotice = () => {
+    if (sahmUpdateNoticeShown || !document.body) return;
+    sahmUpdateNoticeShown = true;
+    const notice = document.createElement('div');
+    notice.setAttribute('role', 'status');
+    notice.setAttribute('aria-live', 'polite');
+    notice.style.cssText = 'position:fixed;z-index:99999;top:12px;left:12px;right:12px;max-width:430px;margin:auto;padding:13px 14px;background:#172338;color:#fff;border:1px solid #52617b;border-radius:12px;box-shadow:0 8px 28px #0003;display:flex;align-items:center;justify-content:space-between;gap:12px;font:600 13px Alexandria,Arial,sans-serif;direction:rtl';
+    const message = document.createElement('span');
+    message.textContent = 'يتوفر تحديث جديد لتطبيق سهم';
+    const button = document.createElement('button');
+    button.type = 'button';
+    button.textContent = 'تحديث الآن';
+    button.style.cssText = 'flex:none;border:0;border-radius:8px;padding:9px 13px;background:#fff;color:#2345b5;font:700 12px Alexandria,Arial,sans-serif;cursor:pointer';
+    button.addEventListener('click', () => {
+      button.disabled = true;
+      button.textContent = 'جارٍ التحديث…';
+      const waiting = sahmRegistration && sahmRegistration.waiting;
+      if (waiting) waiting.postMessage({ type: 'SKIP_WAITING' });
+      else if (sahmRegistration) sahmRegistration.update().catch(() => {});
+    });
+    notice.append(message, button);
+    document.body.appendChild(notice);
   };
+
   navigator.serviceWorker.addEventListener('controllerchange', () => {
     if (sahmReloading) return;
     sahmReloading = true;
+    try { sessionStorage.setItem('sahm-build-updated', '1'); } catch (_) {}
     window.location.reload();
   });
+
   window.addEventListener('load', async () => {
     try {
       const registration = await navigator.serviceWorker.register('/sw.js', {
         scope: '/',
         updateViaCache: 'none'
       });
-      activateWaitingWorker(registration);
+      sahmRegistration = registration;
+
+      try {
+        if (sessionStorage.getItem('sahm-build-updated') === '1') {
+          sessionStorage.removeItem('sahm-build-updated');
+          const confirmation = document.createElement('div');
+          confirmation.textContent = 'تم تحديث سهم بنجاح';
+          confirmation.setAttribute('role', 'status');
+          confirmation.style.cssText = 'position:fixed;z-index:99999;top:12px;left:12px;right:12px;max-width:430px;margin:auto;padding:12px;background:#176b4b;color:#fff;border-radius:10px;text-align:center;font:600 12px Alexandria,Arial,sans-serif';
+          document.body.appendChild(confirmation);
+          window.setTimeout(() => confirmation.remove(), 3500);
+        }
+      } catch (_) {}
+
+      const inspectUpdate = () => {
+        if (registration.waiting && navigator.serviceWorker.controller) showSahmUpdateNotice();
+      };
+      inspectUpdate();
       registration.addEventListener('updatefound', () => {
         const worker = registration.installing;
         if (!worker) return;
         worker.addEventListener('statechange', () => {
-          if (worker.state === 'installed') activateWaitingWorker(registration);
+          if (worker.state === 'installed' && navigator.serviceWorker.controller) {
+            showSahmUpdateNotice();
+          }
         });
       });
+
       await registration.update();
-      activateWaitingWorker(registration);
+      inspectUpdate();
       window.setInterval(() => {
         if (document.visibilityState === 'visible') {
           registration.update().catch(error => console.warn('Sahm update check failed:', error));
         }
-      }, 300000);
+      }, 30000);
       window.addEventListener('focus', () => registration.update().catch(() => {}));
       document.addEventListener('visibilitychange', () => {
         if (document.visibilityState === 'visible') registration.update().catch(() => {});
