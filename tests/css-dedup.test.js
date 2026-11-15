@@ -212,3 +212,11 @@ test('stylesheet contains no superseded declarations in repeated selector scopes
     }
   }
 });
+
+
+test('stylesheet contains no empty style rules or empty media blocks', () => {
+  for (const rule of collectRules(styleMatch[1])) {
+    assert.ok(rule.declarations.length > 0, 'empty CSS rule: ' + rule.selector);
+  }
+  assert.doesNotMatch(styleMatch[1], /@media[^{]*\{\s*\}/i, 'empty media wrappers are removed');
+});
