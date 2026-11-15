@@ -2810,11 +2810,11 @@ body {
 <style id="sahm-typography-system-6-sizes">
 /* Approved typography: IBM Plex Sans Arabic for Arabic; DM Sans for Latin and numerals. */
 #app {
-  --sahm-font-page-title: 24px;
-  --sahm-font-section-title: 20px;
-  --sahm-font-card-title: 18px;
-  --sahm-font-body: 16px;
-  --sahm-font-secondary: 14px;
+  --sahm-font-page-title: 22px;
+  --sahm-font-section-title: 18px;
+  --sahm-font-card-title: 16px;
+  --sahm-font-body: 15px;
+  --sahm-font-secondary: 13px;
   --sahm-font-helper: 12px;
   font-family: 'IBM Plex Sans Arabic',sans-serif;
   font-size: var(--sahm-font-body) !important;
@@ -2852,7 +2852,7 @@ body {
 </head>
 <body><noscript><main dir="rtl" style="font-family:'IBM Plex Sans Arabic',sans-serif;padding:24px;color:#142f39"><h1>سهم</h1></main></noscript><div class="workspace"><div class="phone" id="app">
 <div id="topbar" class="topbar" style="display:none"></div><main id="screen" class="auth-screen">
-<div class="auth-brand" style="margin:12px 0 20px"><div class="brand-mark">س</div><h1 style="font-size:24px">سهم</h1><p>إدارة الجمعيات التساهمية</p></div>
+<div class="auth-brand" style="margin:12px 0 20px"><div class="brand-mark">س</div><h1 style="font-size:var(--sahm-font-page-title)">سهم</h1><p>إدارة الجمعيات التساهمية</p></div>
 <div class="auth-card"><form id="loginForm">
 <div class="field"><label for="loginEmail">البريد الإلكتروني</label><input id="loginEmail" name="email" type="email" autocomplete="username" required placeholder="name@example.com"></div>
 <div class="field"><label for="loginPassword">كلمة المرور</label><input id="loginPassword" name="password" type="password" autocomplete="current-password" required placeholder="أدخل كلمة المرور"></div>
@@ -3763,7 +3763,7 @@ function profile(){
 function editProfile(){shell('تعديل الملف','profile',`${header('تعديل بياناتك','الملف الشخصي')}<form id="profileForm"><div class="field"><label>الاسم</label><input name="name" value="${escapeHtml(db.user.name)}" required></div><div class="field"><label>رقم الهاتف</label><input value="${db.user.phone}" disabled></div><div class="field"><label>المدينة</label><input name="city" value="${escapeHtml(db.user.city)}"></div><button class="btn primary full" type="submit">حفظ التعديلات</button></form>`)}
 function settings(){shell('الإعدادات','profile',`${header('الإعدادات','تفضيلات الحساب')}<div class="card"><div class="between"><div><b style="font-size:11px">التنبيهات</b><small class="field-hint">تفعيل أو إيقاف إشعارات الحساب</small></div><input type="checkbox" id="notifToggle" ${db.user.notifications?'checked':''} style="width:20px;height:20px;accent-color:var(--teal)"></div><div class="listrow"><div class="avatar">🔒</div><div class="grow"><strong>حماية الجلسة</strong><small>غير متاحة في معاينة الويب الحالية</small></div><span class="pill">غير متاح</span></div><div class="listrow"><div class="avatar">☎</div><div class="grow"><strong>رقم الهاتف</strong><small>${db.user.phone}</small></div><span class="pill">مسجل</span></div></div><button class="btn danger full" data-action="logout-confirm">إنهاء الجلسة وتسجيل الخروج</button>`)}
 function welcome(){
- auth(`<div class="auth-brand" style="margin:12px 0 20px"><div class="brand-mark">س</div><h1 style="font-size:24px">سهم</h1><p>إدارة الجمعيات التساهمية</p></div>
+ auth(`<div class="auth-brand" style="margin:12px 0 20px"><div class="brand-mark">س</div><h1 style="font-size:var(--sahm-font-page-title)">سهم</h1><p>إدارة الجمعيات التساهمية</p></div>
  <div class="auth-card"><form id="loginForm" novalidate>
   <div class="field"><label for="loginEmail">البريد الإلكتروني</label><input id="loginEmail" name="email" type="email" autocomplete="username" inputmode="email" required placeholder="name@example.com"></div>
   <div class="field"><label for="loginPassword">كلمة المرور</label><input id="loginPassword" name="password" type="password" autocomplete="current-password" required minlength="8" placeholder="أدخل كلمة المرور"></div>
@@ -3772,7 +3772,7 @@ function welcome(){
  </form><div class="auth-divider"><span>ليس لديك حساب؟</span></div><button class="link-btn" style="width:100%;margin-top:10px" type="button" data-go="register">إنشاء حساب</button></div>`)
 }
 function resetPasswordScreen(){
- auth(`<div class="auth-brand" style="margin:8px 0 18px"><div class="brand-mark">س</div><h1 style="font-size:22px">تعيين كلمة مرور جديدة</h1><p>أدخل كلمة المرور الجديدة لحسابك</p></div>
+ auth(`<div class="auth-brand" style="margin:8px 0 18px"><div class="brand-mark">س</div><h1 style="font-size:var(--sahm-font-page-title)">تعيين كلمة مرور جديدة</h1><p>أدخل كلمة المرور الجديدة لحسابك</p></div>
  <div class="auth-card"><form id="updatePasswordForm" novalidate>
   <div class="field"><label for="newPassword">كلمة المرور الجديدة</label><input id="newPassword" name="password" type="password" autocomplete="new-password" minlength="8" required placeholder="8 أحرف على الأقل"></div>
   <div class="field"><label for="newPasswordConfirm">تأكيد كلمة المرور</label><input id="newPasswordConfirm" name="confirmPassword" type="password" autocomplete="new-password" minlength="8" required placeholder="أعد كتابة كلمة المرور"></div>
@@ -3780,7 +3780,7 @@ function resetPasswordScreen(){
  </form></div>`)
 }
 function register(){
- auth(`<div class="auth-brand" style="margin:8px 0 18px"><div class="brand-mark">س</div><h1 style="font-size:22px">إنشاء حساب جديد</h1><p>ابدأ بإنشاء حسابك باستخدام بريدك الإلكتروني</p></div>
+ auth(`<div class="auth-brand" style="margin:8px 0 18px"><div class="brand-mark">س</div><h1 style="font-size:var(--sahm-font-page-title)">إنشاء حساب جديد</h1><p>ابدأ بإنشاء حسابك باستخدام بريدك الإلكتروني</p></div>
  <div class="auth-card"><form id="registerForm" novalidate>
   <div class="field"><label for="registerEmail">البريد الإلكتروني</label><input id="registerEmail" name="email" type="email" autocomplete="email" inputmode="email" required placeholder="name@example.com"></div>
   <div class="field"><label for="registerPassword">كلمة المرور</label><input id="registerPassword" name="password" type="password" autocomplete="new-password" minlength="8" required placeholder="8 أحرف على الأقل"></div>
@@ -3806,7 +3806,7 @@ function avatarPicker(){
 }
 function accountLogin(){
  const target=pendingAccountLogin||null;
- auth(`<div class="auth-brand" style="margin:12px 0 20px"><div class="brand-mark">س</div><h1 style="font-size:22px">${target?'إعادة ربط الحساب':'إضافة حساب آخر'}</h1><p>${target?'انتهت صلاحية جلسة هذا الحساب المحفوظ. أدخل كلمة مروره لتجديد الجلسة بأمان.':'سجّل الدخول بالحساب الآخر لإضافته إلى هذا الجهاز.'}</p></div>
+ auth(`<div class="auth-brand" style="margin:12px 0 20px"><div class="brand-mark">س</div><h1 style="font-size:var(--sahm-font-page-title)">${target?'إعادة ربط الحساب':'إضافة حساب آخر'}</h1><p>${target?'انتهت صلاحية جلسة هذا الحساب المحفوظ. أدخل كلمة مروره لتجديد الجلسة بأمان.':'سجّل الدخول بالحساب الآخر لإضافته إلى هذا الجهاز.'}</p></div>
  <div class="auth-card"><form id="accountLoginForm" novalidate>
   <div class="field"><label for="accountLoginEmail">البريد الإلكتروني</label><input id="accountLoginEmail" name="email" type="email" autocomplete="username" inputmode="email" required value="${escapeHtml(target&&target.email||'')}" placeholder="name@example.com"></div>
   <div class="field"><label for="accountLoginPassword">كلمة المرور</label><input id="accountLoginPassword" name="password" type="password" autocomplete="current-password" required minlength="8" placeholder="أدخل كلمة المرور"></div>
@@ -3817,7 +3817,7 @@ function accountLogin(){
 function profileSetup(){
  const chosen=activeProfile||{};
  if(!selectedAvatarKey)selectedAvatarKey=chosen.avatarKey||'avatar-01';
- auth(`<div class="auth-brand" style="margin:8px 0 18px"><div class="brand-mark">س</div><h1 style="font-size:22px">بياناتك الشخصية</h1><p>أكمل بيانات الحساب للمتابعة</p></div>
+ auth(`<div class="auth-brand" style="margin:8px 0 18px"><div class="brand-mark">س</div><h1 style="font-size:var(--sahm-font-page-title)">بياناتك الشخصية</h1><p>أكمل بيانات الحساب للمتابعة</p></div>
  <div class="auth-card"><form id="setupForm" novalidate>
   <div class="field"><label>أيقونة الحساب</label>${avatarPicker()}<small class="field-hint">اختر أيقونة جاهزة؛ لا يتم رفع أو تخزين صور شخصية.</small></div>
   <div class="field"><label for="profileFullName">الاسم الكامل (ثلاثي)</label><input id="profileFullName" name="fullName" required minlength="5" maxlength="120" autocomplete="name" value="${escapeHtml(chosen.fullName||'')}" placeholder="الاسم الأول، الأب، العائلة"><small class="field-hint">أدخل ثلاثة مقاطع على الأقل.</small></div>
@@ -4443,13 +4443,13 @@ if ('serviceWorker' in navigator) {
     const notice = document.createElement('div');
     notice.setAttribute('role', 'status');
     notice.setAttribute('aria-live', 'polite');
-    notice.style.cssText = 'position:fixed;z-index:99999;top:12px;left:12px;right:12px;max-width:430px;margin:auto;padding:13px 14px;background:#172338;color:#fff;border:1px solid #52617b;border-radius:12px;box-shadow:0 8px 28px #0003;display:flex;align-items:center;justify-content:space-between;gap:12px;font:600 13px "IBM Plex Sans Arabic",sans-serif;direction:rtl';
+    notice.style.cssText = 'position:fixed;z-index:99999;top:12px;left:12px;right:12px;max-width:430px;margin:auto;padding:13px 14px;background:#172338;color:#fff;border:1px solid #52617b;border-radius:12px;box-shadow:0 8px 28px #0003;display:flex;align-items:center;justify-content:space-between;gap:12px;font:600 15px "IBM Plex Sans Arabic",sans-serif;direction:rtl';
     const message = document.createElement('span');
     message.textContent = 'يتوفر تحديث جديد لتطبيق سهم';
     const button = document.createElement('button');
     button.type = 'button';
     button.textContent = 'تحديث الآن';
-    button.style.cssText = 'flex:none;border:0;border-radius:8px;padding:9px 13px;background:#fff;color:#2345b5;font:700 12px "IBM Plex Sans Arabic",sans-serif;cursor:pointer';
+    button.style.cssText = 'flex:none;border:0;border-radius:8px;padding:9px 13px;background:#fff;color:#2345b5;font:700 13px "IBM Plex Sans Arabic",sans-serif;cursor:pointer';
     button.addEventListener('click', () => {
       button.disabled = true;
       button.textContent = 'جارٍ التحديث…';
@@ -4482,7 +4482,7 @@ if ('serviceWorker' in navigator) {
           const confirmation = document.createElement('div');
           confirmation.textContent = 'تم تحديث سهم بنجاح';
           confirmation.setAttribute('role', 'status');
-          confirmation.style.cssText = 'position:fixed;z-index:99999;top:12px;left:12px;right:12px;max-width:430px;margin:auto;padding:12px;background:#176b4b;color:#fff;border-radius:10px;text-align:center;font:600 12px "IBM Plex Sans Arabic",sans-serif';
+          confirmation.style.cssText = 'position:fixed;z-index:99999;top:12px;left:12px;right:12px;max-width:430px;margin:auto;padding:12px;background:#176b4b;color:#fff;border-radius:10px;text-align:center;font:600 13px "IBM Plex Sans Arabic",sans-serif';
           document.body.appendChild(confirmation);
           window.setTimeout(() => confirmation.remove(), 3500);
         }
