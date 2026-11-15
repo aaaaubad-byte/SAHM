@@ -526,3 +526,25 @@ test('create-association flow is two flat steps with one primary action and no s
   assert.match(flow, /SahmCore\.periods\(duration,count\)/);
   assert.doesNotMatch(html, /create-step-active-|\.create-section|\.create-field|\.create-manager|\.create-rules-grid/);
 });
+
+
+test('line-icon system decorates inner screens only and never draws icon bubbles', () => {
+  const start = html.indexOf('function decorateIcons(){');
+  const end = html.indexOf('(function(){', start);
+  const decorator = html.slice(start, end);
+  assert.match(decorator, /classList\.contains\('home-screen'\)\|\|screen\.classList\.contains\('auth-screen'\)\)return/, 'home and auth screens are skipped');
+  assert.doesNotMatch(decorator, /topbar|bottomnav|navitem/, 'top and bottom bars are never touched');
+  for (const target of ['.avatar', '.btn', '.keyvalue>span:first-child', '.empty', 'h3']) assert.ok(decorator.includes(target), 'decorates ' + target);
+
+  const style = html.match(/<style\b[^>]*>([\s\S]*?)<\/style>/i)[1];
+  const block = style.slice(style.indexOf('Line-icon system'));
+  const rules = block.match(/[^{}]+\{[^}]*\}/g) || [];
+  for (const rule of rules) {
+    const selector = rule.slice(0, rule.indexOf('{'));
+    if (selector.includes('#modal-root')) continue;
+    assert.ok(selector.includes(':not(.home-screen)'), 'scoped away from the home screen: ' + selector.trim().slice(0, 60));
+  }
+  assert.match(block, /\.avatar\{[^}]*background:transparent!important/);
+  assert.doesNotMatch(style, /\.cg-success-icon\{[^}]*background:/, 'success mark is a bare glyph');
+  assert.doesNotMatch(html, /class="cg-sub"/, 'no explanatory sub-lines on the create flow');
+});

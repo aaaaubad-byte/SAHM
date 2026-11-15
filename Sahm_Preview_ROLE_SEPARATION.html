@@ -2200,21 +2200,40 @@ body {
 .cg-step[hidden],.cg-form [hidden]{display:none!important}
 .cg-head{display:flex;align-items:center;justify-content:space-between;gap:10px;margin:0 0 4px}
 .cg-head h3{margin:0;color:var(--ink);font-weight:800}
-.cg-sub{margin:0 0 14px;color:var(--muted)}
 .cg-row{display:grid;grid-template-columns:58fr 42fr;gap:8px}
 .cg-seg{display:grid;grid-template-columns:1fr 1fr;gap:6px;margin:0 0 12px}
 .cg-seg label{position:relative;display:flex;align-items:center;justify-content:center;min-height:44px;padding:0 8px;border:1px solid var(--line);border-radius:var(--radius-control);background:#fafbfd;color:var(--ink2);font-weight:700;text-align:center;cursor:pointer}
 .cg-seg input{position:absolute;opacity:0;pointer-events:none}
 .cg-seg label:has(input:checked){border-color:var(--primary);background:var(--mint);color:var(--primary-dark)}
 .cg-result{display:flex;flex-direction:column;gap:2px;margin:0 0 12px;padding:10px 12px;border-radius:var(--radius-control);background:var(--mint);color:var(--primary-dark)}
-.cg-result small{color:var(--muted)}
 .cg-card>.btn{margin-top:14px}
 .cg-card~.btn{margin-top:10px}
 .cg-success{display:flex;flex-direction:column;align-items:center;margin-bottom:12px;text-align:center}
-.cg-success-icon{display:grid;place-items:center;width:52px;height:52px;margin-bottom:10px;border-radius:50%;background:var(--primary);color:#fff}
+.cg-success-icon{display:grid;place-items:center;margin-bottom:8px;color:var(--primary)}
+.cg-success-icon svg{width:58px;height:58px;stroke-width:1.5}
 .cg-success h1{margin:0 0 2px;color:var(--ink);font-weight:800}
 .cg-success strong{color:var(--ink2)}
 .invitee-selection-bar{position:sticky;bottom:0;z-index:5;box-shadow:0 -5px 18px rgba(18,32,48,.06)}
+/* Line-icon system: monoline glyphs, never inside bubbles. Inner screens only; home, top bar and bottom bar are excluded. */
+#screen:not(.home-screen):not(.auth-screen) svg.ic,#modal-root svg.ic{flex:0 0 auto;stroke-width:1.75}
+#screen:not(.home-screen):not(.auth-screen) svg.hd{width:20px;height:20px;color:var(--primary)}
+#screen:not(.home-screen):not(.auth-screen) :is(h3,b):has(>svg.hd){display:inline-flex;align-items:center;gap:8px}
+#screen:not(.home-screen):not(.auth-screen) .section-head h3:has(>svg.hd){margin:0}
+#screen:not(.home-screen):not(.auth-screen) .btn:has(>svg.bt),#modal-root .btn:has(>svg.bt){gap:8px}
+#screen:not(.home-screen):not(.auth-screen) .btn.small svg.bt,#modal-root .btn.small svg.bt{width:16px;height:16px}
+#screen:not(.home-screen):not(.auth-screen) :is(.btn.outline,.btn.soft) svg.bt,#modal-root :is(.btn.outline,.btn.soft) svg.bt{color:var(--primary)}
+#screen:not(.home-screen):not(.auth-screen) svg.lb{width:16px;height:16px;color:var(--muted)}
+#screen:not(.home-screen):not(.auth-screen) :is(.keyvalue>span,.stat>span,.member-summary>div>span,.group-card-metrics>div>span,.field>label):has(>svg.lb){display:flex;align-items:center;gap:7px}
+#screen:not(.home-screen):not(.auth-screen) .avatar{display:inline-flex;align-items:center;justify-content:center;flex:0 0 auto;width:auto!important;height:auto!important;min-width:0;padding:0;border-radius:0!important;background:transparent!important;box-shadow:none;color:var(--primary)!important}
+#screen:not(.home-screen):not(.auth-screen) .avatar.dark{color:var(--ink)!important}
+#screen:not(.home-screen):not(.auth-screen) .avatar.gold{color:#94651d!important}
+#screen:not(.home-screen):not(.auth-screen) .avatar svg{width:24px;height:24px}
+#screen:not(.home-screen):not(.auth-screen) .avatar-option{background:transparent;border-color:transparent;border-radius:0;border-bottom:2px solid transparent}
+#screen:not(.home-screen):not(.auth-screen) .avatar-option.selected{background:transparent;border-bottom-color:var(--primary);color:var(--primary)}
+#screen:not(.home-screen):not(.auth-screen) .empty .big svg.em{width:34px;height:34px;stroke-width:1.5;color:var(--muted)}
+#screen:not(.home-screen):not(.auth-screen) .receipt-mark svg.rm{width:46px;height:46px;stroke-width:1.5;color:var(--primary)}
+#screen:not(.home-screen):not(.auth-screen) .receipt-mark svg.rm.warn{color:#b42318}
+#screen:not(.home-screen):not(.auth-screen) .searchbox{padding-inline-start:40px;background:#fff url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%2368778d' stroke-width='1.75' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m20 20-4.5-4.5M18 10a8 8 0 1 1-16 0 8 8 0 0 1 16 0z'/%3E%3C/svg%3E") no-repeat right 12px center/18px 18px}
 </style>
 <style id="sahm-typography-system-6-sizes">
 
@@ -2325,10 +2344,94 @@ function uiIcon(name,size=20){
   shuffle:'m18 14 4 4-4 4m-16-16h2c6 0 8 12 14 12h2M18 2l4 4-4 4m-12 8H6c-1.5 0-2.7-.8-3.7-2M14 6h4',
   'shield-check':'M12 22s8-4 8-11V5l-8-3-8 3v6c0 7 8 11 8 11zm-4-11 3 3 5-6',
   calculator:'M4 3h16v18H4zM8 7h8M8 12h2m4 0h2M8 16h2m4 0h2',
-  wallet:'M4 6.5A2.5 2.5 0 0 1 6.5 4H20v16H6a3 3 0 0 1-3-3V6.5zM3 8h17m-4 5h4m-4 0a1 1 0 1 0 0 .01'
+  wallet:'M4 6.5A2.5 2.5 0 0 1 6.5 4H20v16H6a3 3 0 0 1-3-3V6.5zM3 8h17m-4 5h4m-4 0a1 1 0 1 0 0 .01',
+  clock:'M12 7v5l3 2m7-2a10 10 0 1 1-20 0 10 10 0 0 1 20 0z',
+  trophy:'M8 21h8m-4-4v4M7 4h10v5a5 5 0 0 1-10 0V4zM7 6H4v1a3 3 0 0 0 3 3m10-4h3v1a3 3 0 0 1-3 3',
+  star:'m12 3 2.7 5.6 6.1.9-4.4 4.3 1 6.1L12 17l-5.4 2.9 1-6.1-4.4-4.3 6.1-.9L12 3z',
+  alert:'M12 9v4m0 4h.01M10.3 3.9 2.4 18a2 2 0 0 0 1.7 3h15.8a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0z',
+  check:'M20 6 9 17l-5-5',
+  coins:'M12 6c4.4 0 8 1.1 8 2.5S16.4 11 12 11 4 9.9 4 8.5 7.6 6 12 6zM4 8.5v4c0 1.4 3.6 2.5 8 2.5s8-1.1 8-2.5v-4M4 12.5v4c0 1.4 3.6 2.5 8 2.5s8-1.1 8-2.5v-4',
+  edit:'M12 20h9M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4 12.5-12.5z',
+  trash:'M3 6h18M8 6V4h8v2m-9 0 1 14h8l1-14M10 11v5m4-5v5',
+  settings:'M4 6h10m4 0h2M4 12h4m4 0h8M4 18h12m4 0h0M14 4v4m-6 2v4m8 2v4',
+  lock:'M6 11h12v9H6zM8 11V7a4 4 0 0 1 8 0v4',
+  phone:'M5 4h4l2 5-2.5 1.5a11 11 0 0 0 5 5L15 13l5 2v4a2 2 0 0 1-2 2A16 16 0 0 1 3 6a2 2 0 0 1 2-2z',
+  contact:'M4 4h14a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2H4V4zm4 0v16m5-9a2 2 0 1 0 0-4 2 2 0 0 0 0 4zm-3.5 6a3.5 3.5 0 0 1 7 0',
+  inbox:'M22 12h-6l-2 3h-4l-2-3H2m3.5-6.9L2 12v6a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-6l-3.5-6.9A2 2 0 0 0 16.7 4H7.3a2 2 0 0 0-1.8 1.1z',
+  scroll:'M3 12a9 9 0 1 0 3-6.7L3 8m0-4v4h4m5-1v5l3 2',
+  eye:'M2 12s3.6-7 10-7 10 7 10 7-3.6 7-10 7S2 12 2 12zm10 3a3 3 0 1 0 0-6 3 3 0 0 0 0 6z',
+  filter:'M3 5h18l-7 8v6l-4 2v-8L3 5z',
+  download:'M12 3v12m-5-5 5 5 5-5M5 21h14',
+  refresh:'M21 12a9 9 0 0 1-15.5 6.2L3 16m0 5v-5h5M3 12a9 9 0 0 1 15.5-6.2L21 8m0-5v5h-5',
+  pause:'M10 4H6v16h4zm8 0h-4v16h4z',
+  play:'M6 4l14 8-14 8V4z',
+  hourglass:'M6 2h12M6 22h12M7 2v4l5 6-5 6v4m10-20v4l-5 6 5 6v4',
+  mail:'M4 5h16v14H4zM4 7l8 6 8-6',
+  'map-pin':'M12 21s7-6.2 7-11a7 7 0 1 0-14 0c0 4.8 7 11 7 11zm0-8.5a2.5 2.5 0 1 0 0-5 2.5 2.5 0 0 0 0 5z',
+  hash:'M5 9h14M5 15h14M10 4 8 20m8-16-2 16',
+  target:'M12 22a10 10 0 1 0 0-20 10 10 0 0 0 0 20zm0-5a5 5 0 1 0 0-10 5 5 0 0 0 0 10zm0-4a1 1 0 1 0 0-2 1 1 0 0 0 0 2z'
  };
  return '<svg viewBox="0 0 24 24" width="'+size+'" height="'+size+'" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="'+(paths[name]||paths.groups)+'"/></svg>';
 }
+
+/* Line-icon system: monoline glyphs on headings, buttons, labels and rows, never inside containers.
+   Applies to inner screens only; the home screen, top bar and bottom bar are left untouched. */
+const IC_GLYPH={'⌁':'scroll','★':'trophy','✓':'check-circle','!':'alert','♧':'bell'};
+const IC_GO={'create-group':'plus-circle','join-group':'link','invite':'user-plus','invites':'send','group-detail':'landmark','groups':'landmark','members':'users','member-reception':'users','join-requests':'inbox','join-request-detail':'inbox','installments':'receipt','receipts':'file-text','audit':'scroll','draw-room':'shuffle','draw-history':'trophy','chat':'messages','news':'wall','home':'home','settings':'settings','edit-profile':'edit','notifications':'bell','profile':'user','welcome':'user','register':'user-plus'};
+const IC_ACTION={'copy-group-link':'copy','copy-new-invite':'copy','copy-bulk-invite-link':'copy','share-group-link':'share','share-bulk-invite-link':'share','pick-device-contacts':'contact','submit-bulk-invites':'send','record-paid':'check-circle','send-reminder':'bell','send-reminder-all':'bell','schedule-draw':'calendar-days','run-draw':'shuffle','create-group-link':'link','rotate-group-link':'refresh','pause-group-link':'pause','resume-group-link':'play','revoke-group-link':'x','approve-join-request':'check-circle','reject-join-request':'x','cancel-join-request':'x','cancel-invite':'x','invitation-interested':'check-circle','invitation-declined':'x','invitation-deferred':'clock','accept-legacy-invite-detail':'check-circle','continue-invitation-join':'arrow','create-next':'arrow','receipt-correct':'edit','switch-account':'refresh','add-account':'user-plus','logout-confirm':'exit-screen','close':'x','confirm-public-link-action':'alert','join-confirm':'check-circle','draw-presentation-completed':'check-circle','draw-presentation-failed':'alert'};
+const IC_TRAILING=['create-next','continue-invitation-join'];
+const IC_TEXT=[[/^إنشاء الجمعية$/,'check'],[/^(إغلاق|إلغاء)$/,'x'],[/^تأكيد/,'check'],[/^حفظ/,'check'],[/^تعديل/,'edit'],[/إنشاء حساب/,'user-plus'],[/تسجيل الخروج/,'exit-screen'],[/عرض/,'eye']];
+const IC_HEAD=[[/السداد/,'wallet'],[/رابط/,'link'],[/إعدادات|إدارة/,'settings'],[/القرعة|الدورات/,'shuffle'],[/نشر الأحداث|الأخبار|أخبار/,'wall'],[/الإشعارات/,'bell'],[/المدير/,'user-check'],[/ملخص/,'clipboard-list'],[/إضافة يدوية/,'user-plus'],[/الأعضاء|العضوية|المشارك/,'users'],[/دعوة|دعوات/,'send'],[/طلب/,'inbox'],[/التزام|الأقساط|القسط/,'wallet'],[/سجل|عمليات/,'scroll'],[/استلام/,'receipt'],[/كلمة المرور|الأمان/,'lock'],[/الحساب|الملف|بيانات/,'user'],[/جمعية|الجمعية/,'landmark']];
+const IC_LABEL=[[/متأخر/,'alert'],[/مدفوع/,'check-circle'],[/مستحق/,'clock'],[/اسم الجمعية|^الجمعية$/,'landmark'],[/بداية|تاريخ الإنشاء/,'calendar-days'],[/قرعة|الجولات|الجولة/,'shuffle'],[/قيمة|الدفعة|حصة|مبلغ|جائزة|التزام|إجمالي/,'wallet'],[/مدة|موعد|الدورة/,'clock'],[/القسط|الأقساط/,'receipt'],[/أسهم|الأسهم|السهم/,'layers'],[/المدير|مدير/,'user-check'],[/الأعضاء|المشارك|العضو/,'users'],[/الدعوات|دعوة/,'send'],[/طلبات|طلب/,'inbox'],[/الهاتف|رقم/,'phone'],[/البريد/,'mail'],[/المدينة/,'map-pin'],[/^الاسم|اسم/,'user'],[/العملة/,'coins'],[/طريقة/,'wallet'],[/كلمة المرور/,'lock'],[/الحالة|حالة/,'info']];
+const IC_EMPTY={wall:'messages',chat:'messages',notifications:'bell',news:'wall',audit:'scroll',installments:'receipt',members:'users',invites:'send','join-requests':'inbox',receipts:'file-text','draw-history':'trophy',groups:'landmark','managed-groups':'landmark','joined-groups':'landmark'};
+function icPick(rules,text){const t=String(text||'').trim();for(const r of rules)if(r[0].test(t))return r[1];return ''}
+function icSvg(name,size,cls){return name?uiIcon(name,size).replace('<svg ','<svg class="ic '+cls+'" '):''}
+function decorateIcons(){
+ const screen=document.getElementById('screen');
+ if(!screen||screen.classList.contains('home-screen')||screen.classList.contains('auth-screen'))return;
+ const roots=[screen,document.getElementById('modal-root')].filter(Boolean);
+ roots.forEach(root=>{
+  root.querySelectorAll('.avatar').forEach(el=>{
+   if(el.querySelector('svg'))return;
+   const t=el.textContent.trim();
+   const name=IC_GLYPH[t]||(/^[0-9٠-٩]+$/.test(t)?'layers':(el.closest('.group-card,.chat-list-row')?'landmark':'user'));
+   el.innerHTML=icSvg(name,22,'av');
+  });
+  root.querySelectorAll('.receipt-mark').forEach(el=>{
+   if(el.querySelector('svg'))return;
+   const bad=el.textContent.trim()==='!';
+   el.innerHTML=icSvg(bad?'alert':'check-circle',46,'rm'+(bad?' warn':''));
+  });
+  root.querySelectorAll('h3, .card>.between>b:first-child, .card>b:first-child').forEach(el=>{
+   if(el.querySelector('svg')||el.closest('.group-card'))return;
+   const name=icPick(IC_HEAD,el.textContent);
+   if(name)el.insertAdjacentHTML('afterbegin',icSvg(name,20,'hd'));
+  });
+  root.querySelectorAll('.btn').forEach(el=>{
+   if(el.querySelector('svg'))return;
+   const act=el.dataset.action,go=el.dataset.go;
+   const name=(act&&IC_ACTION[act])||(go&&IC_GO[go])||icPick(IC_TEXT,el.textContent);
+   if(!name)return;
+   const svg=icSvg(name,18,'bt');
+   if(act&&IC_TRAILING.includes(act))el.insertAdjacentHTML('beforeend',svg);else el.insertAdjacentHTML('afterbegin',svg);
+  });
+  root.querySelectorAll('.keyvalue>span:first-child, .stat>span:first-child, .member-summary>div>span:first-child, .group-card-metrics>div>span:first-child, .field>label:first-child').forEach(el=>{
+   if(el.querySelector('svg')||el.closest('.cg-seg'))return;
+   const name=icPick(IC_LABEL,el.textContent);
+   if(name)el.insertAdjacentHTML('afterbegin',icSvg(name,16,'lb'));
+  });
+  root.querySelectorAll('.empty').forEach(el=>{
+   if(el.querySelector('.big,svg'))return;
+   el.insertAdjacentHTML('afterbegin','<div class="big">'+icSvg(IC_EMPTY[screenName]||'inbox',34,'em')+'</div>');
+  });
+ });
+}
+(function(){
+ if(typeof MutationObserver==='undefined')return;
+ const app=document.getElementById('app');if(!app)return;
+ let queued=false;
+ new MutationObserver(()=>{if(queued)return;queued=true;requestAnimationFrame(()=>{queued=false;decorateIcons()})}).observe(app,{childList:true,subtree:true});
+})();
 
 function load(){
  const prefs=SahmApp.prefs(),appStore=SahmApp.store(),mine=SahmApp.myGroups(),rawGroups=[...(mine.managed||[]),...(mine.joined||[])];
@@ -2579,7 +2682,7 @@ function setHomeSlide(index){const ss=document.querySelectorAll('#homeCarousel .
  if(search&&list)search.addEventListener('input',()=>{
   const q=String(search.value||'').trim().toLowerCase();
   const filtered=!q?own:own.filter(g=>(String(g.name||'')+' '+String(g.inviteCode||'')).toLowerCase().includes(q));
-  list.innerHTML=filtered.length?filtered.map(groupCard).join():(q?'<div class="card empty"><b>لا توجد جمعيات تطابق البحث</b><small>جرّب اسماً أو رمزاً مختلفاً</small></div>':'<div class="card empty"><div class="big">'+uiIcon('groups',27)+'</div><b>'+empty+'</b></div>');
+  list.innerHTML=filtered.length?filtered.map(groupCard).join():(q?'<div class="card empty"><b>لا توجد جمعيات تطابق البحث</b></div>':'<div class="card empty"><div class="big">'+uiIcon('groups',27)+'</div><b>'+empty+'</b></div>');
  });
 }
 function managedGroups(){groupTab='manager';syncNavigationContext();groups()}
@@ -2666,14 +2769,14 @@ function setCreateFormValues(form){
 function createGroup(){
  const html=[
  '<form id="createForm" class="cg-form" novalidate><div class="card cg-card">',
- '<div class="cg-step" id="create-step-1"><div class="cg-head"><h3>الجمعية</h3><span class="eyebrow">الخطوة 1 من '+CREATE_STEP_COUNT+'</span></div><p class="cg-sub">الاسم والموعدان وقيمة السهم.</p>',
+ '<div class="cg-step" id="create-step-1"><div class="cg-head"><h3>الجمعية</h3><span class="eyebrow">الخطوة 1 من '+CREATE_STEP_COUNT+'</span></div>',
  '<div class="field"><label for="cg-name">اسم الجمعية</label><input id="cg-name" name="name" maxlength="120" autocomplete="off" required></div>',
  '<div class="grid2"><div class="field"><label for="cg-start">تاريخ البداية</label><input id="cg-start" name="startDate" type="date" required></div>',
  '<div class="field"><label for="cg-first">تاريخ أول قرعة</label><input id="cg-first" name="firstDrawOn" type="date" required></div></div>',
- '<div class="cg-result" id="cg-result" role="status" hidden><b>مدة الدورة: <span id="cg-duration">—</span></b><small>تنتهي الدورة الأولى قبل القرعة بيوم.</small></div>',
+ '<div class="cg-result" id="cg-result" role="status" hidden><b>مدة الدورة: <span id="cg-duration">—</span></b></div>',
  '<div class="cg-row"><div class="field"><label for="cg-share">قيمة السهم في الدورة</label><input id="cg-share" name="shareAmount" type="number" min="0.01" step="0.01" inputmode="decimal" required></div>',
  '<div class="field"><label for="cg-currency">العملة</label><select id="cg-currency" name="currency" required><option value="">اختر</option><option value="YER">ريال يمني</option><option value="SAR">ريال سعودي</option><option value="USD">دولار</option></select></div></div></div>',
- '<div class="cg-step" id="create-step-2" hidden><div class="cg-head"><h3>السداد والمدير</h3><span class="eyebrow">الخطوة 2 من '+CREATE_STEP_COUNT+'</span></div><p class="cg-sub">طريقة سداد السهم، ثم دورك في الجمعية.</p>',
+ '<div class="cg-step" id="create-step-2" hidden><div class="cg-head"><h3>السداد والمدير</h3><span class="eyebrow">الخطوة 2 من '+CREATE_STEP_COUNT+'</span></div>',
  '<div class="field"><label>طريقة السداد</label><div class="cg-seg" role="radiogroup" aria-label="طريقة السداد"><label><input type="radio" name="installmentMode" value="count" checked><span>عدد الأقساط</span></label><label><input type="radio" name="installmentMode" value="amount"><span>قيمة القسط</span></label></div></div>',
  '<div class="field" id="installments-count-field"><label for="cg-count">عدد الأقساط</label><input id="cg-count" name="installments" type="number" min="1" step="1" value="1" required></div>',
  '<div class="field" id="installment-amount-field" hidden><label for="cg-amount">قيمة القسط الواحد</label><input id="cg-amount" name="installmentAmount" type="number" min="0.01" step="0.01" inputmode="decimal"></div>',
@@ -2827,7 +2930,7 @@ function renderInviteeSelection(){
    '<small>'+escapeHtml(item.phone)+'</small></span></label>'+
    (item.duplicate?'<span class="pill gold">دعوة مرسلة مسبقًا</span>':'<span class="pill">جاهز للدعوة</span>')+
    '<button class="icon-btn" type="button" data-action="remove-invitee" data-index="'+index+'" aria-label="إزالة">×</button></div>'
- ).join(''):'<div class="empty"><b>'+(pendingInvitees.length?'لا توجد نتائج مطابقة':'لم تضف جهات اتصال بعد')+'</b><small>اختر من جهات اتصال هاتفك أو أضف الاسم والرقم يدويًا.</small></div>';
+ ).join(''):'<div class="empty"><b>'+(pendingInvitees.length?'لا توجد نتائج مطابقة':'لم تضف جهات اتصال بعد')+'</b></div>';
  list.querySelectorAll('.invitee-selected').forEach(input=>input.addEventListener('change',()=>{
   const item=pendingInvitees[Number(input.dataset.index)];if(item&&!item.duplicate)item.selected=input.checked;
   updateInviteeSelectionBar();
@@ -2867,7 +2970,7 @@ function invite(){
  if(!g||!isManager()){toast('إضافة أعضاء متاحة لمدير الجمعية فقط');go('group-detail');return}
  if(g.locked){toast('أُغلقت العضويات بعد تثبيت أول قرعة');go('group-detail');return}
  pendingInvitees=[];
- shell('إضافة أعضاء','groups','<div class="card cg-card"><div class="cg-head"><h3>'+escapeHtml(g.name)+'</h3></div><p class="cg-sub">تُستخدم جهات الاتصال التي تختارها فقط، ويحدد المدعو أسهمه بنفسه.</p>'+
+ shell('إضافة أعضاء','groups','<div class="card cg-card"><div class="cg-head"><h3>'+escapeHtml(g.name)+'</h3></div>'+
   inviteePickerHtml()+'</div>'+inviteeListHtml()+inviteeBarHtml());
  bindInviteePicker();
 }
@@ -3132,7 +3235,7 @@ function wall(){
    (item.unread?'<span class="pill blue">'+item.unread+'</span>':'')+
   '</button>';
  }).join('');
- shell('الدردشات','wall',header('الدردشات','محادثات جمعياتك')+'<div class="card">'+(items||'<div class="empty"><b>لا توجد محادثات بعد</b><p>ستظهر محادثات الجمعيات التي تديرها أو تشارك فيها هنا.</p></div>')+'</div>');
+ shell('الدردشات','wall',header('الدردشات','محادثات جمعياتك')+'<div class="card">'+(items||'<div class="empty"><b>لا توجد محادثات بعد</b></div>')+'</div>');
 }
 function notifications(){
  const r=SahmApp.notificationList();if(!r||!r.ok){toast('تعذر تحميل الإشعارات');return}
@@ -3163,7 +3266,7 @@ function profile(){
  shell('حسابي','profile',`${header('الملف الشخصي','حسابك في سهم')}<div class="card"><div class="row"><div class="avatar dark" style="width:51px;height:51px;border-radius:17px;font-size:18px">${uiIcon(avatarIcon,25)}</div><div class="grow"><b style="font-size:var(--sahm-font-secondary)">${escapeHtml(db.user.name)}</b><div class="eyebrow">${escapeHtml(db.user.email||'')}</div><div class="eyebrow">${escapeHtml(db.user.phone||'')}</div><div class="eyebrow">${escapeHtml(db.user.city||'')}</div></div><span class="pill green">الحساب الحالي</span></div></div><div class="card"><div class="between"><strong>الحسابات المحفوظة على هذا الجهاز</strong><button class="btn outline small" data-action="add-account">إضافة حساب</button></div>${savedAccounts.map(a=>`<div class="listrow"><div class="avatar">♙</div><div class="grow"><strong>${escapeHtml(a.label||a.email)}</strong><small>${escapeHtml(a.email)}</small></div>${a.id===db.user.id?'<span class="pill green">نشط</span>':`<button class="btn outline small" data-action="switch-account" data-user-id="${escapeHtml(a.id)}">تبديل</button>`}</div>`).join('')||'<small class="field-hint">لا توجد حسابات محفوظة أخرى.</small>'}</div><div class="card"><div class="listrow"><div class="avatar">♙</div><div class="grow"><strong>بيانات الملف الشخصي</strong></div><button class="btn outline small" data-go="edit-profile">تعديل</button></div><div class="listrow"><div class="avatar">▤</div><div class="grow"><strong>جمعياتي</strong></div><button class="btn outline small" data-go="groups">عرض</button></div><div class="listrow"><div class="avatar">⚙</div><div class="grow"><strong>إعدادات الحساب</strong></div><button class="btn outline small" data-go="settings">فتح</button></div>${auditLink}</div><button class="btn danger full" data-action="logout-confirm">تسجيل الخروج من هذا الحساب</button>`);
 }
 function editProfile(){shell('تعديل الملف','profile',`${header('تعديل بياناتك','الملف الشخصي')}<form id="profileForm"><div class="field"><label>الاسم</label><input name="name" value="${escapeHtml(db.user.name)}" required></div><div class="field"><label>رقم الهاتف</label><input value="${db.user.phone}" disabled></div><div class="field"><label>المدينة</label><input name="city" value="${escapeHtml(db.user.city)}"></div><button class="btn primary full" type="submit">حفظ التعديلات</button></form>`)}
-function settings(){shell('الإعدادات','profile',`${header('الإعدادات','تفضيلات الحساب')}<div class="card"><div class="between"><div><b style="font-size:var(--sahm-font-helper)">التنبيهات</b><small class="field-hint">تفعيل أو إيقاف إشعارات الحساب</small></div><input type="checkbox" id="notifToggle" ${db.user.notifications?'checked':''} style="width:20px;height:20px;accent-color:var(--teal)"></div><div class="listrow"><div class="avatar">🔒</div><div class="grow"><strong>حماية الجلسة</strong><small>غير متاحة في معاينة الويب الحالية</small></div><span class="pill">غير متاح</span></div><div class="listrow"><div class="avatar">☎</div><div class="grow"><strong>رقم الهاتف</strong><small>${db.user.phone}</small></div><span class="pill">مسجل</span></div></div><button class="btn danger full" data-action="logout-confirm">إنهاء الجلسة وتسجيل الخروج</button>`)}
+function settings(){shell('الإعدادات','profile',`${header('الإعدادات','تفضيلات الحساب')}<div class="card"><div class="between"><div><b style="font-size:var(--sahm-font-helper)">التنبيهات</b></div><input type="checkbox" id="notifToggle" ${db.user.notifications?'checked':''} style="width:20px;height:20px;accent-color:var(--teal)"></div><div class="listrow"><div class="avatar">🔒</div><div class="grow"><strong>حماية الجلسة</strong><small>غير متاحة في معاينة الويب الحالية</small></div><span class="pill">غير متاح</span></div><div class="listrow"><div class="avatar">☎</div><div class="grow"><strong>رقم الهاتف</strong><small>${db.user.phone}</small></div><span class="pill">مسجل</span></div></div><button class="btn danger full" data-action="logout-confirm">إنهاء الجلسة وتسجيل الخروج</button>`)}
 function welcome(){
  auth(`<div class="auth-brand" style="margin:12px 0 20px"><div class="brand-mark">س</div><h1 style="font-size:var(--sahm-font-page-title)">سهم</h1><p>إدارة الجمعيات التساهمية</p></div>
  <div class="auth-card"><form id="loginForm" novalidate>
