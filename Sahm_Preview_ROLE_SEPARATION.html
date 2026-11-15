@@ -1638,7 +1638,7 @@ textarea:focus-visible {
 html {
   background: #e9edf4;
   color: var(--ink);
-  font-family: 'IBM Plex Sans Arabic',system-ui,-apple-system,'Segoe UI',Tahoma,Arial,sans-serif;
+  font-family: 'IBM Plex Sans Arabic',sans-serif;
   width: 100%;
   height: 100%;
   min-height: 100%;
@@ -1648,7 +1648,7 @@ html {
 
 /* Typography: IBM Plex Sans Arabic for Arabic UI; DM Sans for Latin text and numeric glyphs. */
 :where(.numeric,[data-numeric],.ltr,[dir="ltr"],.amount,.hero-num,.stat b,.member-summary b,.group-card-metrics b,.progress-caption b,.summary-index,.badge,.count,input[type="number"],input[inputmode="numeric"],input[inputmode="decimal"],input[inputmode="tel"]) {
-  font-family: 'DM Sans','IBM Plex Sans Arabic',system-ui,-apple-system,'Segoe UI',Tahoma,Arial,sans-serif;
+  font-family: 'DM Sans','IBM Plex Sans Arabic',sans-serif;
   font-variant-numeric: tabular-nums;
 }
 body {
@@ -2354,7 +2354,7 @@ body {
   width:18px !important;
   height:18px !important;
   color:#496b9d !important;
-  font-family:Arial,sans-serif !important;
+  font-family:inherit !important;
   
   font-weight:500 !important;
   line-height:1 !important;
@@ -2807,15 +2807,25 @@ body {
   box-shadow:inset 0 0 0 1px rgba(36,79,201,.08) !important;
 }
 </style>
-<style id="sahm-typography-system-4-sizes">
-/* Canonical typography system: 18 / 16 / 14 / 12px. Icon glyphs keep dedicated sizing. */
-#app { font-size: 14px !important; }
-#app *:not(.ni):not(.brand-mark):not(.receipt-mark):not(.shortcut-arrow):not(.icon):not(.material-symbols-outlined):not(.manager-action-icon):not(.member-action-icon) { font-size: 14px !important; }
-#app :is(h1,h2,.topbar-screen-title,.dialog h3,.auth-brand h1,.create-success-card h1) { font-size: 18px !important; }
-#app :is(h3,.section-head h3,.create-section-head h2,.empty b,.summary-copy strong,.home-shortcut strong,.home-screen .home-action-card strong) { font-size: 16px !important; }
-#app :is(small,.eyebrow,.pill,.role-chip,.stat span,.listrow small,.manager-action small,.member-action small,.group-card-metrics span,.member-summary span,.progress-caption,.group-card-footer,.summary-index,.activity-copy small,.create-section-head p,.create-manager-choice small,.create-success-card small,.create-rules-grid span,.field-hint,.invitee-link,#bottomnav .navitem > span:last-child) { font-size: 12px !important; }
-#app :is(.hero-num,.stat b,.member-summary b,.summary-copy b) { font-size: 18px !important; }
-/* Dedicated icon and brand glyph sizing; these are not text-scale levels. */
+<style id="sahm-typography-system-6-sizes">
+/* Canonical text scale: page title 20, section 17, card title 15, body 14, secondary 12, helper 11px. */
+#app {
+  --sahm-font-page-title: 20px;
+  --sahm-font-section-title: 17px;
+  --sahm-font-card-title: 15px;
+  --sahm-font-body: 14px;
+  --sahm-font-secondary: 12px;
+  --sahm-font-helper: 11px;
+  font-size: var(--sahm-font-body) !important;
+}
+#app *:not(.ni):not(.brand-mark):not(.receipt-mark):not(.shortcut-arrow):not(.icon):not(.material-symbols-outlined):not(.manager-action-icon):not(.member-action-icon) { font-size: var(--sahm-font-body) !important; }
+#app :is(h1,h2,.topbar-screen-title,.dialog h3,.auth-brand h1,.create-success-card h1) { font-size: var(--sahm-font-page-title) !important; }
+#app :is(h3,.section-head h3,.create-section-head h2) { font-size: var(--sahm-font-section-title) !important; }
+#app :is(h4,.empty b,.summary-copy strong,.home-shortcut strong,.home-screen .home-action-card strong) { font-size: var(--sahm-font-card-title) !important; }
+#app :is(small,.eyebrow,.pill,.role-chip,.stat span,.listrow small,.manager-action small,.member-action small,.group-card-metrics span,.member-summary span,.progress-caption,.group-card-footer,.summary-index,.activity-copy small,#bottomnav .navitem > span:last-child) { font-size: var(--sahm-font-secondary) !important; }
+#app :is(.field-hint,.create-section-head p,.create-manager-choice small,.create-success-card small,.create-rules-grid span,.invitee-link) { font-size: var(--sahm-font-helper) !important; }
+#app :is(.hero-num,.stat b,.member-summary b,.summary-copy b) { font-size: var(--sahm-font-page-title) !important; }
+/* Icon and brand glyph sizing remains independent from the text scale. */
 #app .navitem .ni { font-size: 21px !important; }
 #app .manager-action span, #app .member-action span { font-size: 19px !important; }
 #app .brand-mark { font-size: 18px !important; }
@@ -2825,7 +2835,7 @@ body {
 #app #bottomnav .navitem .ni { font-size: 0 !important; }
 </style>
 </head>
-<body><noscript><main dir="rtl" style="font-family:Arial,sans-serif;padding:24px;color:#142f39"><h1>سهم</h1></main></noscript><div class="workspace"><div class="phone" id="app">
+<body><noscript><main dir="rtl" style="font-family:'IBM Plex Sans Arabic',sans-serif;padding:24px;color:#142f39"><h1>سهم</h1></main></noscript><div class="workspace"><div class="phone" id="app">
 <div id="topbar" class="topbar" style="display:none"></div><main id="screen" class="auth-screen">
 <div class="auth-brand" style="margin:12px 0 20px"><div class="brand-mark">س</div><h1 style="font-size:24px">سهم</h1><p>إدارة الجمعيات التساهمية</p></div>
 <div class="auth-card"><form id="loginForm">
@@ -4418,13 +4428,13 @@ if ('serviceWorker' in navigator) {
     const notice = document.createElement('div');
     notice.setAttribute('role', 'status');
     notice.setAttribute('aria-live', 'polite');
-    notice.style.cssText = 'position:fixed;z-index:99999;top:12px;left:12px;right:12px;max-width:430px;margin:auto;padding:13px 14px;background:#172338;color:#fff;border:1px solid #52617b;border-radius:12px;box-shadow:0 8px 28px #0003;display:flex;align-items:center;justify-content:space-between;gap:12px;font:600 13px "IBM Plex Sans Arabic",Arial,sans-serif;direction:rtl';
+    notice.style.cssText = 'position:fixed;z-index:99999;top:12px;left:12px;right:12px;max-width:430px;margin:auto;padding:13px 14px;background:#172338;color:#fff;border:1px solid #52617b;border-radius:12px;box-shadow:0 8px 28px #0003;display:flex;align-items:center;justify-content:space-between;gap:12px;font:600 13px "IBM Plex Sans Arabic",sans-serif;direction:rtl';
     const message = document.createElement('span');
     message.textContent = 'يتوفر تحديث جديد لتطبيق سهم';
     const button = document.createElement('button');
     button.type = 'button';
     button.textContent = 'تحديث الآن';
-    button.style.cssText = 'flex:none;border:0;border-radius:8px;padding:9px 13px;background:#fff;color:#2345b5;font:700 12px "IBM Plex Sans Arabic",Arial,sans-serif;cursor:pointer';
+    button.style.cssText = 'flex:none;border:0;border-radius:8px;padding:9px 13px;background:#fff;color:#2345b5;font:700 12px "IBM Plex Sans Arabic",sans-serif;cursor:pointer';
     button.addEventListener('click', () => {
       button.disabled = true;
       button.textContent = 'جارٍ التحديث…';
@@ -4457,7 +4467,7 @@ if ('serviceWorker' in navigator) {
           const confirmation = document.createElement('div');
           confirmation.textContent = 'تم تحديث سهم بنجاح';
           confirmation.setAttribute('role', 'status');
-          confirmation.style.cssText = 'position:fixed;z-index:99999;top:12px;left:12px;right:12px;max-width:430px;margin:auto;padding:12px;background:#176b4b;color:#fff;border-radius:10px;text-align:center;font:600 12px "IBM Plex Sans Arabic",Arial,sans-serif';
+          confirmation.style.cssText = 'position:fixed;z-index:99999;top:12px;left:12px;right:12px;max-width:430px;margin:auto;padding:12px;background:#176b4b;color:#fff;border-radius:10px;text-align:center;font:600 12px "IBM Plex Sans Arabic",sans-serif';
           document.body.appendChild(confirmation);
           window.setTimeout(() => confirmation.remove(), 3500);
         }
