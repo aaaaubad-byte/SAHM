@@ -344,3 +344,19 @@ test('role separation, draw room, publication channels and personal notification
   assert.match(html, /function news\(\)/);
   assert.match(html, /news:news/);
 });
+
+
+test('confirmed unused stylesheet components and Supabase data helpers stay removed', () => {
+  const styleMatch = html.match(/<style\\b[^>]*>([\\s\\S]*?)<\\/style>/i);
+  assert.ok(styleMatch, 'application stylesheet exists');
+  const unusedClasses = ["dot","formgrid","wheel-wrap","member-tabs","payment-progress","draw-percent","vote-panel","vote-number","compact-empty","topbar-icons","create-card-arrow","home-create-card","create-card-icon","home-actions","home-action-btn","home-action-icon","create-intro","create-intro-icon","create-intro-copy","create-kicker","create-fields-grid","create-submit-area","create-optional","create-summary-grid","create-summary-total","create-summary-foot","create-label-icon","created-link-row","created-link-actions","manual-contact-form","invite-candidate-row","invite-candidate-identity","invite-candidate-avatar","invite-share-field","invite-remove","created-invite-footer","create-unified-section","create-field-wide","create-subsection-title"];
+  for (const className of unusedClasses) {
+    const selector = new RegExp('\\\\.' + className + '(?![\\\\w-])');
+    assert.doesNotMatch(styleMatch[1], selector, 'unused CSS selector removed: ' + className);
+  }
+  for (const variable of ["--gold","--card","--red","--blue","--radius"]) {
+    assert.doesNotMatch(styleMatch[1], new RegExp(variable + '\\\\s*:'), 'unused CSS token removed: ' + variable);
+  }
+  assert.doesNotMatch(remote, /\\bfunction\\s+profileCompletionRows\\s*\\(/);
+  assert.doesNotMatch(remote, /\\bfunction\\s+afterMutation\\s*\\(/);
+});
