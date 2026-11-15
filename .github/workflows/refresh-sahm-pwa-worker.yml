@@ -1,0 +1,62 @@
+name: Refresh Sahm PWA worker version
+
+on:
+  push:
+    branches:
+      - SAHM-SUPABASE
+    paths-ignore:
+      - sw.js
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: sahm-pwa-worker-version
+  cancel-in-progress: false
+
+jobs:
+  refresh-worker:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out source commit
+        uses: actions/checkout@v4
+        with:
+          ref: SAHM-SUPABASE
+          fetch-depth: 0
+
+      - name: Stamp worker with source commit
+        env:
+          BUILD_ID: ${{ github.sha }}
+        run: |
+          python3 - <<'PY'
+          import os
+          import re
+          from pathlib import Path
+
+          path = Path("sw.js")
+          source = path.read_text(encoding="utf-8")
+          build_id = os.environ["BUILD_ID"][:12]
+          updated, count = re.subn(
+              r"^const BUILD_ID = '[^']+';$",
+              f"const BUILD_ID = '{build_id}';",
+              source,
+              count=1,
+              flags=re.MULTILINE,
+          )
+          if count != 1:
+              raise SystemExit("Expected exactly one BUILD_ID declaration in sw.js")
+          path.write_text(updated, encoding="utf-8")
+          PY
+
+      - name: Commit worker version when changed
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add sw.js
+          if git diff --cached --quiet; then
+            echo "Worker already matches this source commit."
+            exit 0
+          fi
+          git commit -m "chore(pwa): stamp worker for ${GITHUB_SHA::12}"
+          git push origin HEAD:SAHM-SUPABASE
