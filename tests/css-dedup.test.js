@@ -188,3 +188,27 @@ test('stylesheet does not repeat an identical declaration for the same selector 
     }
   }
 });
+
+test('stylesheet contains no superseded declarations in repeated selector scopes, except compatibility fallbacks', () => {
+  const groups = new Map();
+  for (const rule of collectRules(styleMatch[1])) {
+    const key = [rule.context, rule.selector].join('|');
+    if (!groups.has(key)) groups.set(key, []);
+    groups.get(key).push(rule.declarations);
+  }
+  const fallbackSensitive = value =>
+    /(?:env|var|calc|clamp|min|max|color-mix|url|image-set)\s*\(|(?:dvh|svh|lvh|dvw|svw|lvw)\b|-(?:webkit|moz|ms|o)-/i.test(value);
+  for (const [scope, ruleSets] of groups) {
+    for (let index = 0; index < ruleSets.length; index++) {
+      for (const current of ruleSets[index]) {
+        const later = ruleSets.slice(index + 1).flat().filter(next =>
+          next.property === current.property && (!current.important || next.important)
+        );
+        if (!later.length) continue;
+        const winning = later[later.length - 1];
+        if (fallbackSensitive(current.value) || fallbackSensitive(winning.value)) continue;
+        assert.fail('superseded CSS declaration remains: ' + scope + ' | ' + current.property + ' | ' + current.value);
+      }
+    }
+  }
+});
