@@ -373,3 +373,54 @@ test('all navigation and topbar auth visibility use the canonical auth screen re
   assert.match(html, /syncBottomNavigation\(!AUTH_SCREEN_NAMES\.includes\(screenName\)\)/);
   assert.doesNotMatch(html, /\['welcome','phone','otp','profile-setup','logged-out'\]/);
 });
+
+
+test('priority UX fixes keep managed/member routes separate and wire visible search fields', () => {
+  const groupStart = html.indexOf('function groups(){');
+  const groupEnd = html.indexOf('function setCreateWizardStep', groupStart);
+  const groupsScreen = html.slice(groupStart, groupEnd);
+  assert.match(html, /'managed-groups':managedGroups/);
+  assert.match(html, /'joined-groups':joinedGroups/);
+  assert.match(html, /function managedGroups\(\)\{groupTab='manager'/);
+  assert.match(html, /function joinedGroups\(\)\{groupTab='member'/);
+  assert.match(html, /go\('managed-groups'/);
+  assert.match(html, /go\('joined-groups'/);
+  assert.match(groupsScreen, /search\.addEventListener\('input'/);
+  assert.equal((groupsScreen.match(/data-go="create-group"/g) || []).length, 1,
+    'the groups screen exposes only one create-association button');
+
+  const memberStart = html.indexOf('function members(){');
+  const memberEnd = html.indexOf('let pendingInvitees', memberStart);
+  const membersScreen = html.slice(memberStart, memberEnd);
+  assert.match(membersScreen, /search\.addEventListener\('input'/);
+  assert.match(membersScreen, /container\.innerHTML=filtered\.length/);
+
+  const navStart = html.indexOf('function nav(active){');
+  const navEnd = html.indexOf('function shell(', navStart);
+  const navCode = html.slice(navStart, navEnd);
+  assert.match(navCode, /const groupScreens=/);
+  assert.match(navCode, /const wallScreens=/);
+  assert.match(navCode, /resolvedActive===s/);
+
+  const statusStart = html.indexOf('async function loadAssociationPublicLinkStatus');
+  const statusEnd = html.indexOf('function members(){', statusStart);
+  const linkStatus = html.slice(statusStart, statusEnd);
+  assert.match(linkStatus, /if\(status==='active'\)/);
+  assert.match(linkStatus, /data-action="pause-group-link"/);
+  assert.match(linkStatus, /data-action="revoke-group-link"/);
+  assert.match(linkStatus, /canInvite\?'<button class="btn soft small" data-action="rotate-group-link"/);
+  assert.match(linkStatus, /استقبال الأعضاء مغلق/);
+  assert.doesNotMatch(html, /data-action="rotate-group-link">إدارة رابط الانضمام/);
+
+  const profileStart = html.indexOf('function profile(){');
+  const profileEnd = html.indexOf('function editProfile(){', profileStart);
+  const profileScreen = html.slice(profileStart, profileEnd);
+  assert.match(profileScreen, /const managedGroup=db\.groups\.find\(g=>g\.role==='manager'\)/);
+  assert.match(profileScreen, /const auditLink=managedGroup\?/);
+  assert.doesNotMatch(profileScreen, />سجل العمليات</);
+  assert.match(html, /if\(route==='audit'&&el\.dataset\.groupId\)context\.currentGroupId=el\.dataset\.groupId/);
+
+  const style = html.match(/<style\b[^>]*>([\s\S]*?)<\/style>/i)[1];
+  assert.ok(style.lastIndexOf('#bottomnav .navitem.active {') > style.indexOf('background:transparent !important'),
+    'the canonical active-state CSS overrides the legacy transparent rule');
+});
