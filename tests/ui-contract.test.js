@@ -320,7 +320,7 @@ test('role separation, draw room, publication channels and personal notification
   assert.doesNotMatch(html, /quorumInfo|quorum|attendance-toggle|setAttendance|>حاضر<|>غير حاضر<|تسجيل الحضور|إلغاء الحضور/);
   assert.doesNotMatch(html, /name=["']tz["']|المنطقة الزمنية للجمعية/);
   assert.match(html, /agreementLocked/);
-  assert.match(html, /const managerOnly=\['members','invite','invites','join-requests','join-request-detail','audit'\]/);
+  assert.match(html, /const managerOnly=\\['members','member-reception','invite','invites','join-requests','join-request-detail','audit'\\]/);
   assert.match(html, /s==='draw-room'[\s\S]*?targetDetail\.role\.manager\|\|targetDetail\.role\.participant/);
   assert.match(html, /SahmApp\.getDrawRoom\(/);
   assert.match(html, /SahmApp\.getDrawHistory\(/);
@@ -423,4 +423,31 @@ test('priority UX fixes keep managed/member routes separate and wire visible sea
   const style = html.match(/<style\b[^>]*>([\s\S]*?)<\/style>/i)[1];
   assert.match(style, /#bottomnav \.navitem\[aria-current="page"\]\s*\{[\s\S]*?background:#edf2ff !important/);
   assert.match(html, /'aria-current="page"'/);
+});
+
+
+test('member reception is the central manager entry point and destructive link changes require confirmation', () => {
+  assert.match(html, /'member-reception':memberReception/);
+  assert.match(html, /const managerOnly=\\['members','member-reception','invite','invites','join-requests','join-request-detail','audit'\\]/);
+
+  const receptionStart = html.indexOf('function memberReception(){');
+  const receptionEnd = html.indexOf('function joinGroup(){', receptionStart);
+  const reception = html.slice(receptionStart, receptionEnd);
+  assert.match(reception, /استقبال الأعضاء/);
+  assert.match(reception, /data-go="members"/);
+  assert.match(reception, /data-go="invite"/);
+  assert.match(reception, /data-go="invites"/);
+  assert.match(reception, /data-go="join-requests"/);
+  assert.match(reception, /loadAssociationPublicLinkStatus\\(g\\.id,canInvite\\)/);
+
+  const createdStart = html.indexOf('function showCreatedGroup(g){');
+  const createdEnd = html.indexOf('function groupDetail(){', createdStart);
+  const created = html.slice(createdStart, createdEnd);
+  assert.match(created, /data-go="member-reception"/);
+  assert.doesNotMatch(created, /data-go="invite"|data-go="invites"|data-go="join-requests"/);
+
+  assert.match(html, /action==='confirm-public-link-action'/);
+  assert.match(html, /سيصبح الرابط الحالي غير صالح/);
+  assert.match(html, /سيُبطل الرابط العام نهائيًا/);
+  assert.match(html, /\\['rotate-group-link','revoke-group-link'\\]\\.includes\\(action\\)/);
 });
