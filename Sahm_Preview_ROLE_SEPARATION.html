@@ -791,8 +791,7 @@ textarea:focus-visible{
     padding-top: calc(20px + env(safe-area-inset-top));
   }
 }
-@media(min-width:900px){
-}
+
 @media(prefers-reduced-motion:reduce){
   *{
     scroll-behavior: auto !important;
@@ -1294,8 +1293,7 @@ textarea:focus-visible{
     box-shadow: 0 5px 10px rgba(23,43,78,.08),0 16px 26px rgba(23,43,78,.13) !important;
   }
 }
-@media(max-height:700px){
-}
+
 @media(prefers-reduced-motion:reduce){
   .home-shortcut{
     transition: none !important;
@@ -1412,9 +1410,7 @@ textarea:focus-visible{
 .toast{
   z-index: 90;
 }
-@media(max-width:600px){
-  
-}
+
 /* Removed obsolete absolute-positioned footer override; footer is a flex child. */
 
 
@@ -1444,7 +1440,7 @@ textarea:focus-visible{
 .pill, .role-chip, .progress{ border-radius:var(--radius-small); }
 
 
-@media(max-width:600px){}
+
 
 
 /* Home quick actions: integrated, embossed glass controls beneath the group cards. */
@@ -1457,7 +1453,7 @@ textarea:focus-visible{
 
 
 
-/* Match create/join actions to the existing white group shortcut cards. */
+
 
 
 .home-screen .home-action-card .shortcut-icon{
@@ -1534,8 +1530,7 @@ textarea:focus-visible{
   max-height: none !important;
   padding: 12px 14px !important;
 }
-@media(max-width:600px){
-}
+
 
 
 
@@ -1625,8 +1620,7 @@ textarea:focus-visible{
   transition:color .16s ease !important;
 }
 #topbar .icon-btn svg{ width:22px !important;height:22px !important; }
-@media(max-width:600px){
-}
+
 
 
 
@@ -1756,40 +1750,24 @@ textarea:focus-visible{
   display: none !important;
 }
 
-/* SAHM — redesigned create-group screen, aligned with the home visual language. */
-
-.create-group-page{ width:100%;  margin:0 auto; color:var(--ink); }
-
-.create-section{
-    border-radius:var(--radius-card,16px);
-   
-  
-}
 
 
 
 
 
-.create-field:first-of-type{ margin-top:0 !important; }
 
-.create-field input, .create-field select{
-   width:100%; padding:9px 11px !important;
-   
-   
-  font:inherit;  outline:none;
-  transition:border-color .18s,box-shadow .18s,background .18s;
-}
 
-.create-field input::placeholder{ color:#aab4c1; }
 
-.create-submit{
-   
-   
-   font-weight:800 !important; gap:8px;
-}
-@media(max-width:380px){
- .create-field input, .create-field select{ padding:8px !important;  }
-}
+
+
+
+
+
+
+
+
+
+
 #topbar .home-topbar{ direction:rtl;justify-content:flex-end; }
 .home-topbar-actions{ display:flex;align-items:center;gap:8px; }
 .home-topbar-actions .icon-btn{ position:relative;color:var(--primary); }
@@ -1828,238 +1806,122 @@ textarea:focus-visible{
 }
 /* Create-group form: compact sections, clear typography, and unframed line icons. */
 
-.create-form{ gap:10px !important; }
-
-.create-section-head{
-  display:flex !important;
-  align-items:center !important;
-  gap:9px !important;
-  
-}
-.create-section-head h2{
-  
-  
-  
-  line-height:1.5 !important;
-  
-}
-.create-section-icon{
-  width:auto !important;
-  height:auto !important;
-  min-width:0 !important;
-  min-height:0 !important;
-  padding:0 !important;
-  border:0 !important;
-  border-radius:0 !important;
-  background:transparent !important;
-  box-shadow:none !important;
-  
-}
-.create-section-icon svg{
-  width:20px;
-  height:20px;
-  stroke:currentColor;
-  stroke-width:1.9;
-}
-
-.create-field input, .create-field select{
-  min-height:43px !important;
-  border:1px solid #dce3ed !important;
-  border-radius:9px !important;
-  background:#fbfcfe !important;
-  color:#172338 !important;
-  
-  box-shadow:none !important;
-}
-.create-field input:focus, .create-field select:focus{
-  border-color: #6f8be4 !important;
-  background: #fff !important;
-  box-shadow: 0 0 0 3px rgba(49,88,214,.11) !important;
-}
-
-@media(max-width:600px){
-}
-@media(max-width:600px){
-  
-}
-@media(min-width:601px){
-}
-
-/* New-group setup: same compact cards, typography, blue accent and quiet surfaces as Sahm home. */
-#screen.create-group-screen{
-  background: var(--bg)!important;
-  padding: 14px 14px 28px!important;
-}
-.create-form{display:flex;flex-direction:column;}
-.create-section{margin:0!important;border:1px solid #e2e8f1!important;border-radius:12px!important;background:#fff!important;scroll-margin-top:12px}
-.create-section-head{display:flex;align-items:center;gap:9px;margin:0 0 10px!important}
-.create-section-icon{display:grid;place-items:center;width:25px;height:25px;flex:none;}
-
-.create-section-head h2{font-weight:850!important;margin:0!important}
-.create-section-head p{color:#7d899c;margin:1px 0 0;line-height:1.5}
-.create-field{
-  margin: 8px 0 0!important;
-  min-width: 0;
-}
-.create-field label{font-weight:800!important;margin:0 0 5px!important}
-.create-field input, .create-field select, .create-field textarea{width:100%;min-height:42px;padding:9px 10px;border:1px solid #dce3ed!important;border-radius:9px!important;font:inherit;outline:none;}
-.create-field textarea{min-height:64px;resize:vertical}
-.create-manager-choice{display:flex;flex-direction:column;gap:9px;padding:11px;margin-top:10px;border:1px solid #e7ebf2;border-radius:10px;}
-
-.create-manager-choice small{display:block;color:#7c899b;margin-top:3px}
-.create-manager-options{display:flex;gap:8px;flex-wrap:wrap}
-.create-manager-options label{display:flex;align-items:center;gap:6px;padding:8px 10px;border:1px solid #e0e6ef;border-radius:8px;background:#fff;font-weight:700;}
-.create-manager-options input{accent-color:#3158d6}
-.create-note{display:flex;align-items:flex-start;gap:8px;padding:9px 10px;margin-top:10px;border-radius:9px;}
-.create-note>span{display:flex;flex:none;margin-top:2px}
-.create-note svg{width:15px;height:15px}
-.create-note p{line-height:1.8;margin:0}
-.create-submit{min-height:46px!important;border-radius:10px!important;background:#3158d6!important;box-shadow:0 4px 11px rgba(49,88,214,.16)!important;}
 
 
 
-/* Sahm create wizard and invitation completion */
-.create-group-page{max-width:520px}
-.create-form{gap:12px}.create-step{display:flex;flex-direction:column;gap:11px}.create-step[hidden], #manual-contact-panel[hidden], .create-step-actions [hidden]{display:none!important}
-.create-section{border-color:#dce4f0!important;box-shadow:0 4px 14px rgba(23,35,56,.055)!important;padding:14px!important}
-.create-section-head{margin-bottom:12px!important}.create-section-head h2{color:#15243b!important}
-.create-section-icon{color:#3158d6!important}.create-field label{color:#293b55!important;display:flex!important;align-items:center;gap:5px}
-.create-field input, .create-field select, .create-field textarea{border-color:#d4deeb!important;background:#f8faff!important;color:#172338!important;box-shadow:inset 0 1px 2px rgba(25,45,75,.025)!important}
-.create-field input:focus, .create-field select:focus, .create-field textarea:focus{
-  background: #fff!important;
-  border-color: #6685df!important;
-  box-shadow: 0 0 0 3px rgba(49,88,214,.13)!important;
-}
-.create-manager-choice{background:#f6f8fd;border-color:#dce4f2}.create-manager-choice strong{
-  display: block;
-  
-  color: #263954;
-}
-.create-manager-options label{color:#344a68;border-color:#d4deeb}.create-note{background:#eef3ff;color:#3158d6}.create-note p{color:#526887;}
-.create-live-summary{
-  border-color: #cbd9f1!important;
-  background: linear-gradient(180deg,#fff,#fbfcff)!important;
-}
-.create-step-actions{display:flex;gap:9px;padding:3px 0 12px}.create-step-actions .btn{flex:1;min-width:0;min-height:47px;}
-.create-step-actions [data-action="create-prev"]{max-width:38%}.create-step-actions .btn.primary{background:#3158d6!important;box-shadow:0 5px 14px rgba(49,88,214,.2)!important}
-.create-success-card{display:flex;align-items:center;gap:13px;padding:17px;margin:0 0 12px;border:1px solid #cddcf8;border-radius:13px;background:linear-gradient(115deg,#eaf0ff,#fff);box-shadow:0 5px 16px rgba(49,88,214,.09)}
-.create-success-icon{width:46px;height:46px;display:grid;place-items:center;flex:none;color:#fff;background:#3158d6;border-radius:13px;box-shadow:0 5px 12px rgba(49,88,214,.2)}
-.create-success-card h1{color:#172338;margin:0 0 4px;font-weight:850}.create-success-card strong{display:block;color:#314a72}.create-success-card small{display:block;color:#71819b;margin-top:2px}
-.create-rules-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px}.create-rules-grid>div{min-width:0;display:flex;flex-direction:column;gap:5px;padding:10px;border:1px solid #e3e9f3;border-radius:9px;background:#f8faff}
-.create-rules-grid span{color:#65758e}.create-rules-grid b{color:#1e304d;overflow-wrap:anywhere;line-height:1.5}
-@media(max-width:380px){.create-section{
-  padding: 12px!important;
-}.create-rules-grid{gap:6px}.create-rules-grid>div{padding:8px}}
-
-
-/* First step only: compact, legible, balanced form layout */
-#create-step-1{padding-top:2px}
-#create-step-1 .create-section{padding:16px!important;border:1px solid #d9e2ef!important;border-radius:15px!important;box-shadow:0 3px 12px rgba(28,45,76,.055)!important;background:#fff!important}
-
-#create-step-1 .create-section-head h2{color:#1d2d47!important}
 
 
 
-#create-step-1 .create-field label{flex-wrap:wrap;}
-#create-step-1 .create-field input, #create-step-1 .create-field select, #create-step-1 .create-field textarea{border-radius:10px!important;color:#1b2b43!important;}
-#create-step-1 .create-section>.create-field{margin-bottom:14px!important}
-#create-step-1 .create-section>.create-field:last-child{margin-bottom:0!important}
-#create-step-1 .create-manager-choice{margin-top:14px;}
-
-#create-step-1 .create-manager-choice strong{color:#253852!important}
-#create-step-1 .create-manager-choice small{color:#687a93!important}
-
-#create-step-1 .create-manager-options label{border-radius:9px!important;}
-
-#create-step-1 #manager-shares-field{margin-top:12px!important}
-#create-step-1 .create-step-actions{margin-top:2px}
-@media(max-width:370px){#create-step-1 .create-section{padding:13px!important}#create-step-1 .create-field input, #create-step-1 .create-field select{padding:9px 8px!important;}#create-step-1 .create-manager-options label{padding:6px 4px!important}}
-@media(min-width:430px){#create-step-1 .create-section{padding:18px!important}}
 
 
 
-/* First create stage — aligned with Sahm's main card, control and typography tokens. */
-#screen.create-group-screen .create-form.create-step-active-1{display:flex!important;flex-direction:column!important;gap:0!important;padding:15px 14px 13px!important;border:1px solid var(--line)!important;border-radius:var(--radius-card)!important;background:var(--surface)!important;box-shadow:0 3px 10px rgba(23,43,79,.025)!important}
-#create-step-1{gap:0!important;padding:0!important}
-#create-step-1 .create-section-head{
-  display: flex!important;
-  align-items: center!important;
-  gap: 9px!important;
-  margin: 0 0 14px!important;
-  padding: 0 0 12px!important;
-  border-bottom: 1px solid var(--line)!important;
-}
-#create-step-1 .create-section-head h2{margin:0!important;color:var(--ink)!important;line-height:1.5!important;font-weight:850!important}
-#create-step-1 .create-section-icon{
-  width: 28px!important;
-  height: 28px!important;
-  min-width: 28px!important;
-  display: grid!important;
-  place-items: center!important;
-  flex: none!important;
-  padding: 0!important;
-  border: 0!important;
-  border-radius: var(--radius-control)!important;
-  background: var(--mint)!important;
-  color: var(--primary)!important;
-}
-#create-step-1 .create-section-icon svg{
-  width: 17px!important;
-  height: 17px!important;
-  stroke: currentColor!important;
-  stroke-width: 1.9!important;
-  fill: none!important;
-}
-#create-step-1 .create-field{
-  display: flex!important;
-  flex-direction: column!important;
-  gap: 5px!important;
-  min-width: 0!important;
-  margin: 0!important;
-}
-#create-step-1 .create-field label{display:flex!important;align-items:center!important;gap:6px!important;min-height:18px!important;margin:0!important;color:#35445d!important;line-height:1.55!important;font-weight:800!important}
-#create-step-1 .create-field input, #create-step-1 .create-field select, #create-step-1 .create-field textarea{display:block!important;box-sizing:border-box!important;width:100%!important;min-width:0!important;min-height:43px!important;padding:9px 11px!important;border:1px solid #cbd5e2!important;border-radius:var(--radius-control)!important;background:#f8faff!important;color:var(--ink)!important;line-height:1.65!important;font-weight:500!important;box-shadow:inset 0 1px 2px rgba(25,45,75,.025)!important;outline:none!important;transition:border-color .18s,box-shadow .18s,background .18s!important}
-#create-step-1 .create-field select{appearance:auto!important;-webkit-appearance:menulist!important}
-#create-step-1 .create-field textarea{
-  min-height: 72px!important;
-  resize: vertical!important;
-}
-#create-step-1 .create-field input:focus, #create-step-1 .create-field select:focus, #create-step-1 .create-field textarea:focus{
-  outline: none;
-  border-color: var(--primary)!important;
-  background: #fff!important;
-  box-shadow: 0 0 0 3px rgba(49,88,214,.13)!important;
-}
-#create-step-1 .create-manager-choice{display:flex!important;flex-direction:column!important;align-items:stretch!important;gap:8px!important;margin:14px 0 0!important;padding:12px 0 0!important;border:0!important;border-top:1px solid var(--line)!important;border-radius:0!important;background:transparent!important}
-#create-step-1 .create-manager-choice>div:first-child{
-  display: flex!important;
-  flex-direction: column!important;
-  gap: 3px!important;
-  min-width: 0!important;
-}
-#create-step-1 .create-manager-choice strong{color:var(--ink2)!important;line-height:1.5!important;font-weight:850!important}
-#create-step-1 .create-manager-choice small{color:var(--muted)!important;line-height:1.6!important}
-#create-step-1 .create-manager-options{
-  display: grid!important;
-  grid-template-columns: repeat(2,minmax(0,1fr))!important;
-  gap: 7px!important;
-}
-#create-step-1 .create-manager-options label{display:flex!important;align-items:center!important;justify-content:center!important;gap:6px!important;min-width:0!important;min-height:40px!important;margin:0!important;padding:7px 8px!important;border:1px solid #cbd5e2!important;border-radius:var(--radius-control)!important;background:#f8faff!important;color:#35445d!important;line-height:1.45!important;font-weight:750!important;text-align:center!important;white-space:normal!important}
-#create-step-1 .create-manager-options label:focus-within{border-color:var(--primary)!important;background:var(--mint)!important;color:var(--primary-dark)!important}
-#create-step-1 .create-manager-options input{
-  width: 15px!important;
-  height: 15px!important;
-  margin: 0!important;
-  accent-color: var(--primary)!important;
-  flex: none!important;
-}
-#create-step-1 #manager-shares-field{margin:11px 0 0!important}
-#create-step-1 #manager-shares-field[hidden]{display:none!important}
-#createForm.create-step-active-1 .create-step-actions{margin:14px 0 0!important;padding:12px 0 0!important;border-top:1px solid var(--line)!important}
-#createForm.create-step-active-1 .create-step-actions .btn{min-height:46px!important;border-radius:var(--radius-control)!important;font-weight:800!important}
-#createForm.create-step-active-1 #create-next{flex:1 1 100%!important;max-width:none!important}
-@media(max-width:380px){#screen.create-group-screen .create-form.create-step-active-1{padding:13px 11px 11px!important}#create-step-1 .create-field input, #create-step-1 .create-field select{padding-inline:9px!important}#create-step-1 .create-manager-options label{padding-inline:5px!important}}
-@media(max-width:600px){}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 .auth-divider{display:flex;align-items:center;gap:10px;color:var(--muted);margin:16px 0 10px}.auth-divider:before, .auth-divider:after{content:"";height:1px;background:var(--line);flex:1}
 .terms-check{display:flex;align-items:flex-start;gap:9px;margin:6px 0 14px;line-height:1.8}.terms-check input{width:18px;height:18px;flex:0 0 18px;accent-color:var(--teal);margin-top:3px}.terms-check a{color:var(--teal);font-weight:700;text-decoration:underline}
 .field-hint{display:block;color:var(--muted);margin-top:5px}
@@ -2080,7 +1942,7 @@ textarea:focus-visible{
 .invitee-result-actions{display:flex;gap:6px;flex:none}
 .invitee-result-actions .btn{min-width:48px;padding-inline:8px}
 .invitee-link{direction:ltr;text-align:left;min-width:0;overflow:hidden;text-overflow:ellipsis}
-.invitee-selection-bar{box-shadow:0 -5px 18px rgba(18,32,48,.06);border:1px solid var(--line)}
+
 @media(max-width:370px){.invitee-row{flex-wrap:wrap}.invitee-result-actions{margin-inline-start:auto}}
 
 
@@ -2285,9 +2147,11 @@ body {
 #bottomnav .navitem.active,
 #bottomnav .navitem[aria-current="page"] {
   color: var(--primary);
-  background: #edf2ff;
+  background: transparent;
   font-weight: 800;
 }
+#bottomnav .navitem{-webkit-tap-highlight-color:transparent}
+#bottomnav .navitem:focus,#bottomnav .navitem:focus-visible{outline:none;box-shadow:none}
 #bottomnav .navitem .ni {
   display: grid;
   flex: 0 0 25px;
@@ -2332,6 +2196,47 @@ body {
   #bottomnav.bottomnav:not([hidden]) { padding-inline: 5px; }
 }
 
+/* Flat creation flow: one full-width surface, no cards, one primary action pinned at the bottom. */
+#screen.flat-screen{display:flex;flex-direction:column;padding:0!important;background:#fff}
+.cg-form{display:flex;flex:1 0 auto;flex-direction:column;width:100%;color:var(--ink)}
+.cg-form [hidden]{display:none!important}
+.cg-body{flex:1 0 auto;padding:20px}
+.cg-title{margin:0 0 4px;color:var(--ink);font-weight:800}
+.cg-sub{margin:0 0 20px;color:var(--muted)}
+.cg-field{display:flex;flex-direction:column;gap:8px;margin:0 0 20px;min-width:0}
+.cg-field>label,.cg-label{color:var(--ink2);font-weight:700}
+.cg-field small{color:var(--muted)}
+.cg-field input,.cg-field select{width:100%;min-height:52px;padding:0 14px;border:1px solid var(--line);border-radius:var(--radius-control);background:#fff;color:var(--ink);font:inherit}
+.cg-field input:focus,.cg-field select:focus{border-color:var(--primary);outline:none;box-shadow:none}
+.cg-row{display:grid;grid-template-columns:65fr 35fr;gap:12px}
+.cg-seg{display:grid;grid-template-columns:1fr 1fr;border:1px solid var(--line);border-radius:var(--radius-control);overflow:hidden}
+.cg-seg label{position:relative;display:flex;align-items:center;justify-content:center;min-height:50px;padding:0 8px;color:var(--ink2);font-weight:700;text-align:center;cursor:pointer}
+.cg-seg label+label{border-inline-start:1px solid var(--line)}
+.cg-seg input{position:absolute;opacity:0;pointer-events:none}
+.cg-seg label:has(input:checked){background:var(--mint);color:var(--primary-dark)}
+.cg-seg label:has(input:focus-visible){outline:2px solid var(--primary);outline-offset:-2px}
+.cg-result{display:flex;flex-direction:column;gap:2px;margin:0 0 20px;padding:12px 14px;border-radius:var(--radius-control);background:var(--mint);color:var(--primary-dark)}
+.cg-result small{color:var(--muted)}
+.cg-list{margin:0 0 20px}
+.cg-line{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:12px 0;border-bottom:1px solid var(--line)}
+.cg-line span{color:var(--muted)}
+.cg-line b{color:var(--ink);text-align:end}
+.cg-summary{margin-top:8px}
+.cg-summary h3{margin:0 0 4px;color:var(--ink);font-weight:800}
+.cg-actions{position:sticky;bottom:0;z-index:5;display:flex;flex-direction:column;gap:10px;margin-top:auto;padding:12px 20px calc(12px + env(safe-area-inset-bottom,0px));border-top:1px solid var(--line);background:#fff}
+.cg-actions .btn{width:100%;min-height:52px}
+.cg-success{display:flex;flex-direction:column;align-items:center;text-align:center}
+.cg-success-icon{display:grid;place-items:center;width:56px;height:56px;margin-bottom:12px;border-radius:50%;background:var(--primary);color:#fff}
+.cg-success h1{margin:0 0 4px;color:var(--ink);font-weight:800}
+.cg-success strong{margin-bottom:20px;color:var(--ink2)}
+.cg-success .cg-summary,.cg-success .cg-field{align-self:stretch;text-align:start}
+.cg-success .cg-field{margin-top:20px}
+.cg-linkrow{display:flex;align-items:center;gap:8px}
+.cg-linkrow input{flex:1;direction:ltr;text-align:left}
+.cg-iconbtn{display:grid;place-items:center;flex:0 0 52px;width:52px;height:52px;border:1px solid var(--line);border-radius:var(--radius-control);background:#fff;color:var(--ink)}
+.cg-manual{margin:12px 0 20px;border-top:1px solid var(--line);border-bottom:1px solid var(--line)}
+.cg-manual summary{padding:14px 0;color:var(--ink2);font-weight:700;cursor:pointer}
+.cg-manual form{padding:0 0 4px}
 </style>
 <style id="sahm-typography-system-6-sizes">
 
@@ -2349,10 +2254,10 @@ body {
 #app *:not(.ni):not(.brand-mark):not(.receipt-mark):not(.shortcut-arrow):not(.icon):not(.material-symbols-outlined):not(.manager-action-icon):not(.member-action-icon){
   font-size: var(--sahm-font-body) !important;
 }
-#app :is(h1,.topbar-screen-title,.dialog h3,.auth-brand h1,.create-success-card h1){
+#app :is(h1,.topbar-screen-title,.dialog h3,.auth-brand h1){
   font-size: var(--sahm-font-page-title) !important;
 }
-#app :is(h2,h3,.section-head h3,.create-section-head h2){
+#app :is(h2,h3,.section-head h3){
   font-size: var(--sahm-font-section-title) !important;
 }
 #app :is(h4,.empty b,.summary-copy strong,.home-shortcut strong,.home-screen .home-action-card strong){
@@ -2361,7 +2266,7 @@ body {
 #app :is(small,.eyebrow,.pill,.role-chip,.stat span,.listrow small,.manager-action small,.member-action small,.group-card-metrics span,.member-summary span,.progress-caption,.group-card-footer,.summary-index,.activity-copy small,#bottomnav .navitem > span:last-child){
   font-size: var(--sahm-font-secondary) !important;
 }
-#app :is(.field-hint,.create-section-head p,.create-manager-choice small,.create-success-card small,.create-rules-grid span,.invitee-link){
+#app :is(.field-hint,.invitee-link){
   font-size: var(--sahm-font-helper) !important;
 }
 #app :is(.hero-num,.stat b,.member-summary b,.summary-copy b){
@@ -2538,7 +2443,7 @@ function applyNavigationState(state,fromPop=false){
  selectedInstallmentCycle=Number(view.selectedInstallmentCycle)||1;
  selectedInstallmentStatus=view.selectedInstallmentStatus||'all';
  joinRequestFilter=['pending','approved','rejected','cancelled','all'].includes(view.joinRequestFilter)?view.joinRequestFilter:joinRequestFilter;
- createWizardStep=Math.max(1,Math.min(2,Number(view.createWizardStep)||1));
+ createWizardStep=Math.max(1,Math.min(CREATE_STEP_COUNT,Number(view.createWizardStep)||1));
  createFormSnapshot=Object.assign({},view.createFormSnapshot||{});
  const sameScreen=previous.screenName===next.screenName&&JSON.stringify(previous.params||{})===JSON.stringify(next.params||{})&&previous.currentGroupId===next.currentGroupId&&previous.groupTab===next.groupTab&&previous.groupDetailTab===next.groupDetailTab;
  const same=sameRouteSnapshot(previous,next);
@@ -2604,7 +2509,7 @@ function nav(active){
  const bar=$('#bottomnav');syncBottomNavigation(true);
  bar.innerHTML=items.map(([s,i,t])=>`<button class="navitem ${resolvedActive===s?'active':''}" data-go="${s}" aria-label="${t}" ${resolvedActive===s?'aria-current="page"':''}><span class="ni">${uiIcon(i,23)}</span><span>${t}</span></button>`).join('');
 }
-function shell(title,active,html){renderTopbar(title);nav(active);const screen=$('#screen');screen.className='screen'+(active==='home'?' home-screen':'')+(screenName==='create-group'?' create-group-screen':'');screen.innerHTML=html;if(active!=='home'&&homeSlideTimer){clearInterval(homeSlideTimer);homeSlideTimer=null}}function auth(html){
+function shell(title,active,html){renderTopbar(title);nav(active);const screen=$('#screen');screen.className='screen'+(active==='home'?' home-screen':'')+(['create-group','created-group','invite'].includes(screenName)?' flat-screen':'');screen.innerHTML=html;if(active!=='home'&&homeSlideTimer){clearInterval(homeSlideTimer);homeSlideTimer=null}}function auth(html){
  const authTitles={welcome:'تسجيل الدخول',register:'إنشاء حساب','profile-setup':'بياناتك الشخصية','reset-password':'تعيين كلمة المرور','logged-out':'تم تسجيل الخروج','account-login':'إضافة أو استعادة حساب'};
  renderTopbar(authTitles[screenName]||'سهم');
  const bar=$('#bottomnav');bar.hidden=true;bar.setAttribute('aria-hidden','true');bar.style.display='none';
@@ -2701,14 +2606,14 @@ function setHomeSlide(index){const ss=document.querySelectorAll('#homeCarousel .
 }
 function managedGroups(){groupTab='manager';syncNavigationContext();groups()}
 function joinedGroups(){groupTab='member';syncNavigationContext();groups()}
+const CREATE_STEP_COUNT=3;
 function setCreateWizardStep(step,updateHistory=true){
- const previous=createWizardStep;createWizardStep=Math.max(1,Math.min(2,step));const form=document.getElementById('createForm');
+ const previous=createWizardStep;createWizardStep=Math.max(1,Math.min(CREATE_STEP_COUNT,step));const form=document.getElementById('createForm');
  if(form)createFormSnapshot=Object.fromEntries(new FormData(form));
  if(updateHistory&&navigation&&screenName==='create-group'&&previous!==createWizardStep)navigation.navigate(routeSnapshot());
- if(form){form.classList.remove('create-step-active-1','create-step-active-2','create-step-active-3');form.classList.add('create-step-active-'+createWizardStep)}
- document.querySelectorAll('.create-step').forEach((node,i)=>node.hidden=i+1!==createWizardStep);
- const names=['البداية والجدولة','بيانات الجمعية والمساهمات'];const title=document.getElementById('create-stage-title');if(title)title.textContent=names[createWizardStep-1];
- const prev=document.getElementById('create-prev'),next=document.getElementById('create-next'),submit=document.getElementById('create-final-submit');if(prev)prev.hidden=createWizardStep===1;if(next)next.hidden=createWizardStep===2;if(submit)submit.hidden=createWizardStep!==2;
+ document.querySelectorAll('.cg-step').forEach((node,i)=>node.hidden=i+1!==createWizardStep);
+ const next=document.getElementById('create-next'),submit=document.getElementById('create-final-submit');
+ if(next)next.hidden=createWizardStep===CREATE_STEP_COUNT;if(submit)submit.hidden=createWizardStep!==CREATE_STEP_COUNT;
  document.getElementById('screen')?.scrollTo({top:0,behavior:'smooth'});
 }
 function createInput(form,name){return form.elements[name]&&form.elements[name].value?String(form.elements[name].value).trim():''}
@@ -2725,10 +2630,7 @@ function createDraft(form){
   installmentAmountMinor:mode==='amount'&&SahmCore.CURRENCIES[currency]?SahmCore.parseMoney(createInput(form,'installmentAmount'),currency):null,
   managerMode:createInput(form,'managerMode')==='both'?'both':'only',
   managerShares:createInput(form,'managerMode')==='both'?Number(createInput(form,'managerShares')):0,
-  
-  inviteOpensOn:createInput(form,'inviteOpensOn')||undefined,
-  inviteClosesOn:createInput(form,'inviteClosesOn')||undefined,
-  rules:createInput(form,'rules')
+  rules:''
  };
 }
 function validateCreateStep(step){
@@ -2738,14 +2640,13 @@ function validateCreateStep(step){
  if(invalid){invalid.reportValidity();return false}
  const d=createDraft(f);
  if(step===1){
+  if(!d.name||d.name.length<2||d.name.length>120){toast('أدخل اسم الجمعية');return false}
   if(!SahmCore.isValidDate(d.startDate)){toast('حدد تاريخ بداية الجمعية');return false}
   if(!SahmCore.isValidDate(d.firstDrawOn)){toast('حدد موعد أول قرعة');return false}
   if(d.firstDrawOn<=d.startDate){toast('موعد أول قرعة يجب أن يكون بعد تاريخ البداية');return false}
   if(d.durationDays<1||d.durationDays>3650){toast('مدة الدورة بين يوم واحد و3650 يومًا');return false}
-
  }
  if(step===2){
-  if(!d.name||d.name.length<2||d.name.length>120){toast('أدخل اسم الجمعية');return false}
   if(!SahmCore.CURRENCIES[d.currency]){toast('اختر العملة');return false}
   if(!d.shareAmountMinor||d.shareAmountMinor<1){toast('أدخل قيمة حصة السهم');return false}
   if(d.installmentMode==='count'){
@@ -2754,12 +2655,8 @@ function validateCreateStep(step){
    if(!d.installmentAmountMinor||d.installmentAmountMinor<1||d.installmentAmountMinor>d.shareAmountMinor){toast('قيمة القسط يجب أن تكون موجبة ولا تتجاوز حصة السهم');return false}
    if(Math.ceil(d.shareAmountMinor/d.installmentAmountMinor)>d.durationDays){toast('عدد الأقساط الناتج يتجاوز مدة الدورة');return false}
   }else{toast('اختر طريقة السداد');return false}
-  if(d.managerMode==='both'&&(!Number.isInteger(d.managerShares)||d.managerShares<1)){toast('أدخل عدد أسهم المدير');return false}
-
-  if(d.inviteOpensOn&&!SahmCore.isValidDate(d.inviteOpensOn)){toast('تاريخ فتح الانضمام غير صحيح');return false}
-  if(d.inviteClosesOn&&!SahmCore.isValidDate(d.inviteClosesOn)){toast('تاريخ إغلاق الانضمام غير صحيح');return false}
-  if(d.inviteOpensOn&&d.inviteClosesOn&&d.inviteClosesOn<d.inviteOpensOn){toast('تاريخ إغلاق الانضمام يسبق تاريخ فتحه');return false}
  }
+ if(step===3&&d.managerMode==='both'&&(!Number.isInteger(d.managerShares)||d.managerShares<1)){toast('أدخل عدد أسهم المدير');return false}
  return true;
 }
 function createPreview(form){
@@ -2776,16 +2673,14 @@ function createPreview(form){
   periods=ranges.map((r,i)=>({no:i+1,start:SahmCore.addDays(d.startDate,r.from-1),end:SahmCore.addDays(d.startDate,r.to-1),amount:amounts[i]||0}));
  }
  const put=(id,value)=>{const node=document.getElementById(id);if(node)node.textContent=value};
- put('cg-duration-preview',duration?duration+' يومًا':'—');
- put('cg-first-draw-preview',d.firstDrawOn?dateLabel(d.firstDrawOn):'—');
- put('cs-start',d.startDate?dateLabel(d.startDate):'—');
- put('cs-first',d.firstDrawOn?dateLabel(d.firstDrawOn):'—');
- put('cs-duration',duration?duration+' يومًا':'—');
- put('cs-share',minor?minorMoney(minor,currency):'—');
- put('cs-installments',count?count+' أقساط':'—');
- put('cs-manager',d.managerMode==='both'?'مدير ومشارك · '+d.managerShares+' أسهم':'مدير فقط');
+ const result=document.getElementById('cg-result');if(result)result.hidden=!duration;
+ put('cg-duration',duration?duration+' يومًا':'—');
+ put('cs-name',d.name||'—');
+ put('cs-period',duration?dateLabel(d.startDate)+' ← '+dateLabel(d.firstDrawOn):'—');
+ put('cs-share',minor?minorMoney(minor,currency)+(count?' · '+count+' أقساط':''):'—');
+ put('cs-manager',d.managerMode==='both'?'مدير ومشارك · '+(d.managerShares||0)+' أسهم':'مدير فقط');
  const list=document.getElementById('cg-installment-preview');
- if(list)list.innerHTML=periods.length?periods.map(p=>'<div class="keyvalue"><span>القسط '+p.no+' · '+dateLabel(p.start)+' إلى '+dateLabel(p.end)+'</span><b>'+minorMoney(p.amount,currency)+'</b></div>').join(''):'<small>أدخل تاريخي الجمعية وطريقة السداد لعرض مواعيد الأقساط.</small>';
+ if(list)list.innerHTML=periods.map(p=>'<div class="cg-line"><span>القسط '+p.no+' · '+dateLabel(p.start)+' إلى '+dateLabel(p.end)+'</span><b>'+minorMoney(p.amount,currency)+'</b></div>').join('');
 }
 function setCreateFormValues(form){
  Object.entries(createFormSnapshot||{}).forEach(([name,value])=>{
@@ -2796,34 +2691,30 @@ function setCreateFormValues(form){
 }
 function createGroup(){
  const html=[
- '<div class="create-group-page"><form id="createForm" class="create-form" novalidate>',
- '<div class="create-step" id="create-step-1"><section class="create-section"><div class="create-section-head"><span class="create-section-icon">'+uiIcon('calendar-days',20)+'</span><h2>البداية والجدولة</h2></div>',
- '<div class="field create-field"><label>تاريخ بداية الجمعية</label><input name="startDate" type="date" required></div>',
- '<div class="field create-field"><label>تاريخ أول قرعة</label><input name="firstDrawOn" type="date" required><small>اختر التاريخ، وسيحسب سهم مدة الدورة تلقائيًا.</small></div>',
- '<div class="card"><div class="keyvalue"><span>مدة الدورة الواحدة</span><b id="cg-duration-preview">—</b></div><div class="keyvalue"><span>أول قرعة</span><b id="cg-first-draw-preview">—</b></div></div>',
-
- '<div class="create-note"><span>'+uiIcon('info',16)+'</span><p>المدة هي عدد الأيام بين تاريخ البداية وتاريخ أول قرعة، وتنتهي الدورة الأولى في اليوم السابق لموعد القرعة.</p></div></section></div>',
- '<div class="create-step" id="create-step-2" hidden><section class="create-section"><div class="create-section-head"><span class="create-section-icon">'+uiIcon('landmark',20)+'</span><h2>بيانات الجمعية والمساهمات</h2></div>',
- '<div class="field create-field"><label>اسم الجمعية</label><input name="name" maxlength="120" required></div>',
- '<div class="field create-field"><label>العملة</label><select name="currency" required><option value="">اختر العملة</option><option value="YER">ريال يمني</option><option value="SAR">ريال سعودي</option><option value="USD">دولار أمريكي</option></select></div>',
- '<div class="field create-field"><label>قيمة حصة السهم في الدورة</label><input name="shareAmount" type="number" min="0.01" step="0.01" inputmode="decimal" required><small>هذا كامل التزام السهم في الدورة الواحدة.</small></div>',
- '<div class="field create-field"><label>طريقة السداد</label><select name="installmentMode" id="installmentMode" required><option value="count">تحديد عدد الأقساط</option><option value="amount">تحديد قيمة القسط</option></select></div>',
- '<div class="field create-field" id="installments-count-field"><label>عدد الأقساط</label><input name="installments" type="number" min="1" step="1" value="1" required></div>',
- '<div class="field create-field" id="installment-amount-field" hidden><label>قيمة القسط الواحد</label><input name="installmentAmount" type="number" min="0.01" step="0.01" inputmode="decimal"><small>يحسب النظام عدد الأقساط، ويجعل القسط الأخير بالقيمة المتبقية عند الحاجة.</small></div>',
- '<div class="create-manager-choice"><div><strong>مشاركة المدير</strong><small>المدير يشارك في الأسهم فقط عند اختيار ذلك.</small></div><div class="create-manager-options"><label><input type="radio" name="managerMode" value="only" checked><span>مدير فقط</span></label><label><input type="radio" name="managerMode" value="both"><span>مدير ومشارك</span></label></div></div>',
- '<div class="field create-field" id="manager-shares-field" hidden><label>عدد أسهم المدير</label><input name="managerShares" type="number" min="1" step="1"></div>',
- '<details class="card"><summary><b>إعدادات إضافية</b></summary>',
- '<div class="field create-field"><label>فتح الانضمام من تاريخ · اختياري</label><input name="inviteOpensOn" type="date"></div><div class="field create-field"><label>إغلاق الانضمام في تاريخ · اختياري</label><input name="inviteClosesOn" type="date"></div>',
- '<div class="field create-field"><label>قواعد الجمعية · اختياري</label><textarea name="rules" rows="3" maxlength="4000"></textarea></div></details>',
- '<section class="create-section create-live-summary"><div class="create-section-head"><span class="create-section-icon">'+uiIcon('calculator',20)+'</span><h2>مراجعة مختصرة</h2></div>',
- '<div class="create-rules-grid"><div><span>بداية الجمعية</span><b id="cs-start">—</b></div><div><span>أول قرعة</span><b id="cs-first">—</b></div><div><span>مدة الدورة</span><b id="cs-duration">—</b></div><div><span>حصة السهم</span><b id="cs-share">—</b></div><div><span>طريقة السداد</span><b id="cs-installments">—</b></div><div><span>مشاركة المدير</span><b id="cs-manager">—</b></div></div><div id="cg-installment-preview"></div></section></section></div>',
- '<div class="create-step-actions"><button class="btn outline" id="create-prev" type="button" data-action="create-prev" hidden>السابق</button><button class="btn primary" id="create-next" type="button" data-action="create-next">متابعة</button><button class="btn primary create-submit" id="create-final-submit" type="submit" hidden>إنشاء الجمعية</button></div></form></div>'
+ '<form id="createForm" class="cg-form" novalidate><div class="cg-body">',
+ '<div class="cg-step" id="create-step-1"><h2 class="cg-title">الجمعية</h2><p class="cg-sub">الاسم وموعدا البداية وأول قرعة.</p>',
+ '<div class="cg-field"><label for="cg-name">اسم الجمعية</label><input id="cg-name" name="name" maxlength="120" autocomplete="off" required></div>',
+ '<div class="cg-field"><label for="cg-start">تاريخ بداية الجمعية</label><input id="cg-start" name="startDate" type="date" required></div>',
+ '<div class="cg-field"><label for="cg-first">تاريخ أول قرعة</label><input id="cg-first" name="firstDrawOn" type="date" required></div>',
+ '<div class="cg-result" id="cg-result" role="status" hidden><b>مدة الدورة: <span id="cg-duration">—</span></b><small>تنتهي الدورة الأولى قبل القرعة بيوم.</small></div></div>',
+ '<div class="cg-step" id="create-step-2" hidden><h2 class="cg-title">المبلغ والأقساط</h2><p class="cg-sub">التزام السهم الواحد في الدورة وطريقة سداده.</p>',
+ '<div class="cg-row"><div class="cg-field"><label for="cg-share">قيمة السهم في الدورة</label><input id="cg-share" name="shareAmount" type="number" min="0.01" step="0.01" inputmode="decimal" required></div>',
+ '<div class="cg-field"><label for="cg-currency">العملة</label><select id="cg-currency" name="currency" required><option value="">اختر</option><option value="YER">ريال يمني</option><option value="SAR">ريال سعودي</option><option value="USD">دولار</option></select></div></div>',
+ '<div class="cg-field"><span class="cg-label">طريقة السداد</span><div class="cg-seg" role="radiogroup" aria-label="طريقة السداد"><label><input type="radio" name="installmentMode" value="count" checked><span>عدد الأقساط</span></label><label><input type="radio" name="installmentMode" value="amount"><span>قيمة القسط</span></label></div></div>',
+ '<div class="cg-field" id="installments-count-field"><label for="cg-count">عدد الأقساط</label><input id="cg-count" name="installments" type="number" min="1" step="1" value="1" required></div>',
+ '<div class="cg-field" id="installment-amount-field" hidden><label for="cg-amount">قيمة القسط الواحد</label><input id="cg-amount" name="installmentAmount" type="number" min="0.01" step="0.01" inputmode="decimal"></div>',
+ '<div class="cg-list" id="cg-installment-preview"></div></div>',
+ '<div class="cg-step" id="create-step-3" hidden><h2 class="cg-title">المدير</h2><p class="cg-sub">هل تشارك بأسهم في الجمعية أم تديرها فقط؟</p>',
+ '<div class="cg-field"><div class="cg-seg" role="radiogroup" aria-label="مشاركة المدير"><label><input type="radio" name="managerMode" value="only" checked><span>مدير فقط</span></label><label><input type="radio" name="managerMode" value="both"><span>مدير ومشارك</span></label></div></div>',
+ '<div class="cg-field" id="manager-shares-field" hidden><label for="cg-manager-shares">عدد أسهم المدير</label><input id="cg-manager-shares" name="managerShares" type="number" min="1" step="1"></div>',
+ '<div class="cg-summary"><h3>ملخص</h3><div class="cg-line"><span>الجمعية</span><b id="cs-name">—</b></div><div class="cg-line"><span>من البداية إلى أول قرعة</span><b id="cs-period">—</b></div><div class="cg-line"><span>السهم</span><b id="cs-share">—</b></div><div class="cg-line"><span>المدير</span><b id="cs-manager">—</b></div></div></div>',
+ '</div><div class="cg-actions"><button class="btn primary" id="create-next" type="button" data-action="create-next">متابعة</button><button class="btn primary" id="create-final-submit" type="submit" hidden>إنشاء الجمعية</button></div></form>'
  ].join('');
  shell('إنشاء جمعية جديدة',null,html);
  const form=$('#createForm');setCreateFormValues(form);
  const update=()=>{
   const mode=form.elements.installmentMode.value||'count';
-  const manager=form.querySelector('input[name="managerMode"]:checked')?.value||'only';
+  const manager=form.elements.managerMode.value||'only';
   $('#installments-count-field').hidden=mode!=='count';
   form.elements.installments.required=mode==='count';
   $('#installment-amount-field').hidden=mode!=='amount';
@@ -2841,14 +2732,14 @@ function createGroup(){
 }
 function createdGroup(){const g=currentGroup();if(!g){go('home');return}showCreatedGroup(g)}
 function showCreatedGroup(g){
- const link=createdGroupLink,linkCard=link&&link.status==='paused'?'<p>الرابط متوقف حاليًا؛ يمكنك إدارته من شاشة استقبال الأعضاء.</p>':link&&link.url
-  ? '<div class="field"><input id="createdPublicLink" readonly value="'+escapeHtml(link.url)+'"></div><div class="grid2"><button class="btn primary" data-action="copy-group-link">نسخ الرابط</button><button class="btn outline" data-action="share-group-link">مشاركة الرابط</button></div>'
-  : '<p>لم يتم إصدار رابط في هذه الجلسة. يمكنك إنشاؤه من شاشة استقبال الأعضاء.</p>';
- const summary='<div class="create-rules-grid"><div><span>بداية الجمعية</span><b>'+dateLabel(g.start)+'</b></div><div><span>أول قرعة</span><b>'+dateLabel(g.first)+'</b></div><div><span>مدة الدورة</span><b>'+Number(g.cycleDays||0)+' يومًا</b></div><div><span>حصة السهم</span><b>'+money(g.share,g.currency)+'</b></div><div><span>الأقساط</span><b>'+g.installments+'</b></div></div>';
- const content='<div class="create-group-page created-group-page"><section class="create-success-card"><span class="create-success-icon">'+uiIcon('check-circle',30)+'</span><div><h1>تم إنشاء الجمعية بنجاح</h1><strong>'+escapeHtml(g.name)+'</strong></div></section>'+
-  '<section class="create-section"><div class="create-section-head"><span class="create-section-icon">'+uiIcon('clipboard-list',20)+'</span><h2>ملخص الجمعية</h2></div>'+summary+'</section>'+
-  '<section class="create-section"><div class="create-section-head"><span class="create-section-icon">'+uiIcon('link',20)+'</span><h2>رابط الانضمام العام</h2></div><p>يمكن مشاركة الرابط مع أي شخص؛ فتح الرابط ينشئ طلب انضمام ولا يعتمد العضوية تلقائيًا.</p>'+linkCard+'</section>'+
-  '<button class="btn primary full" data-go="member-reception">إدارة استقبال الأعضاء</button><button class="btn outline full" data-go="group-detail">فتح الجمعية</button></div>';
+ const link=createdGroupLink;
+ const linkBlock=link&&link.status==='paused'?'<small>الرابط متوقف حاليًا؛ يمكنك إدارته من شاشة استقبال الأعضاء.</small>':link&&link.url
+  ? '<div class="cg-linkrow"><input id="createdPublicLink" readonly aria-label="رابط الانضمام" value="'+escapeHtml(link.url)+'"><button class="cg-iconbtn" type="button" data-action="copy-group-link" aria-label="نسخ الرابط">'+uiIcon('copy',20)+'</button><button class="cg-iconbtn" type="button" data-action="share-group-link" aria-label="مشاركة الرابط">'+uiIcon('share',20)+'</button></div>'
+  : '<small>لم يتم إصدار رابط في هذه الجلسة. يمكنك إنشاؤه من شاشة استقبال الأعضاء.</small>';
+ const content='<div class="cg-form"><div class="cg-body cg-success"><span class="cg-success-icon">'+uiIcon('check-circle',30)+'</span><h1>تم إنشاء الجمعية</h1><strong>'+escapeHtml(g.name)+'</strong>'+
+  '<div class="cg-summary"><div class="cg-line"><span>بداية الجمعية</span><b>'+dateLabel(g.start)+'</b></div><div class="cg-line"><span>أول قرعة</span><b>'+dateLabel(g.first)+'</b></div><div class="cg-line"><span>السهم</span><b>'+money(g.share,g.currency)+' · '+g.installments+' أقساط</b></div></div>'+
+  '<div class="cg-field" style="margin-top:20px"><span class="cg-label">رابط الانضمام</span>'+linkBlock+'</div></div>'+
+  '<div class="cg-actions"><button class="btn primary" data-go="invite">إضافة أعضاء</button><button class="btn outline" data-go="group-detail">فتح الجمعية</button></div></div>';
  shell('تم إنشاء الجمعية','groups',content);
 }
 function groupDetail(){
@@ -2949,6 +2840,7 @@ function addInviteeToSelection(name,phone){
 }
 function renderInviteeSelection(){
  const list=$('#inviteeList');if(!list)return;
+ const searchWrap=$('#inviteeSearchWrap');if(searchWrap)searchWrap.hidden=pendingInvitees.length<=5;
  const search=String($('#inviteeSearch')?.value||'').trim().toLowerCase();
  const visible=pendingInvitees.map((item,index)=>({item,index})).filter(({item})=>
   !search||(item.name+' '+item.phone).toLowerCase().includes(search));
@@ -2973,26 +2865,23 @@ function updateInviteeSelectionBar(){
  const count=pendingInvitees.filter(x=>x.selected&&!x.duplicate).length;
  const countEl=$('#inviteeSelectedCount'),send=$('#sendInviteesButton');
  if(countEl)countEl.textContent=String(count);
- if(send){send.disabled=count<1;send.textContent=count?'دعوة للانضمام ('+count+')':'دعوة للانضمام'}
+ if(send){send.disabled=count<1;send.textContent=count?'دعوة ('+count+')':'دعوة'}
 }
 function invite(){
  const g=currentGroup();
  if(!g||!isManager()){toast('إضافة أعضاء متاحة لمدير الجمعية فقط');go('group-detail');return}
  if(g.locked){toast('أُغلقت العضويات بعد تثبيت أول قرعة');go('group-detail');return}
  pendingInvitees=[];
- shell('إضافة أعضاء','groups',header('إضافة أعضاء',g.name)+
-  '<div class="card"><p>اختر عدة جهات اتصال أو أضف الاسم والرقم يدويًا. لا يحدد المدير أسهم المدعو؛ يختارها المدعو عند تقديم طلب الانضمام.</p>'+
-  '<button class="btn outline full" type="button" data-action="pick-device-contacts">اختيار من جهات اتصال الهاتف</button>'+
-  '<small class="field-hint">لن نقرأ دفتر العناوين كاملًا؛ تُستخدم فقط جهات الاتصال التي تختارها.</small></div>'+
-  '<form id="inviteeManualForm" class="card"><h3>إضافة جهة اتصال يدويًا</h3>'+
-  '<div class="field"><label>الاسم</label><input name="name" maxlength="120" required placeholder="اسم الشخص"></div>'+
-  '<div class="field"><label>رقم الهاتف</label><input name="phone" type="tel" inputmode="tel" required placeholder="+9677XXXXXXXX"></div>'+
-  '<button class="btn soft full" type="submit">إضافة إلى القائمة</button></form>'+
-  '<div class="field"><label>بحث في القائمة المحددة</label><input id="inviteeSearch" type="search" placeholder="ابحث بالاسم أو رقم الهاتف"></div>'+
-  '<div id="inviteeList" class="card"></div>'+
-  '<div class="card invitee-selection-bar" style="position:sticky;bottom:0;z-index:5;background:#fff">'+
-  '<div class="between"><span>جهات الاتصال المحددة</span><b id="inviteeSelectedCount">0</b></div>'+
-  '<button id="sendInviteesButton" class="btn primary full" type="button" data-action="submit-bulk-invites" disabled>دعوة للانضمام</button></div>');
+ shell('إضافة أعضاء','groups','<div class="cg-form"><div class="cg-body">'+
+  '<h2 class="cg-title">'+escapeHtml(g.name)+'</h2><p class="cg-sub">تُستخدم جهات الاتصال التي تختارها فقط، ويحدد المدعو أسهمه بنفسه.</p>'+
+  '<button class="btn primary full" type="button" data-action="pick-device-contacts">اختيار من جهات الهاتف</button>'+
+  '<details class="cg-manual"><summary>إضافة يدوية</summary><form id="inviteeManualForm">'+
+  '<div class="cg-field"><label for="cg-invitee-name">الاسم</label><input id="cg-invitee-name" name="name" maxlength="120" required></div>'+
+  '<div class="cg-field"><label for="cg-invitee-phone">رقم الهاتف</label><input id="cg-invitee-phone" name="phone" type="tel" inputmode="tel" required placeholder="+9677XXXXXXXX"></div>'+
+  '<button class="btn soft full" type="submit">إضافة إلى القائمة</button></form></details>'+
+  '<div class="cg-field" id="inviteeSearchWrap" hidden><input id="inviteeSearch" type="search" placeholder="بحث بالاسم أو الرقم" aria-label="بحث في جهات الاتصال المحددة"></div>'+
+  '<div id="inviteeList" class="cg-list"></div></div>'+
+  '<div class="cg-actions"><button id="sendInviteesButton" class="btn primary" type="button" data-action="submit-bulk-invites" disabled>دعوة</button></div></div>');
  const search=$('#inviteeSearch');
  search?.addEventListener('input',renderInviteeSelection);
  renderInviteeSelection();
@@ -3495,8 +3384,7 @@ async function handleAppAction(action,el){
  }
  if(action==='back'){back();return}if(action==='overlay-close'||action==='close'){closeModal();return}
  if(action==='create-next'){if(validateCreateStep(createWizardStep))setCreateWizardStep(createWizardStep+1);return}
- if(action==='create-prev'){if(createWizardStep>1)setCreateWizardStep(createWizardStep-1);return}
- if(action==='open-group'){go('group-detail',{}, {currentGroupId:el.dataset.id,groupDetailTab:'overview'});return}
+  if(action==='open-group'){go('group-detail',{}, {currentGroupId:el.dataset.id,groupDetailTab:'overview'});return}
  if(action==='home-managed'){go('managed-groups',{}, {groupTab:'manager'});return}if(action==='home-member'){go('joined-groups',{}, {groupTab:'member'});return}
  if(action==='home-slide'){setHomeSlide(Number(el.dataset.index)||0);return}if(action==='group-tab'){groupTab=el.dataset.tab;syncNavigationContext();groups();return}if(action==='detail-tab'){groupDetailTab=el.dataset.tab;syncNavigationContext();groupDetail();return}if(action==='join-request-filter'){joinRequestFilter=el.dataset.filter||'pending';syncNavigationContext();joinRequests();return}
  if(action==='copy-new-invite'){const value=$('#newInviteLink')?.value||'';if(!value){toast('رابط الدعوة غير متاح');return}await copyText(value,'تم نسخ رابط الدعوة');return}
@@ -3851,9 +3739,9 @@ if(form.id==='loginForm'){
  }
  e.preventDefault();
  if(form.id==='createForm'){
-  if(createWizardStep<2){if(validateCreateStep(createWizardStep))setCreateWizardStep(createWizardStep+1);return}
+  if(createWizardStep<CREATE_STEP_COUNT){if(validateCreateStep(createWizardStep))setCreateWizardStep(createWizardStep+1);return}
   if(createGroupBusy)return;
-  if(!validateCreateStep(1)||!validateCreateStep(2))return;
+  if(!validateCreateStep(1)||!validateCreateStep(2)||!validateCreateStep(3))return;
   createGroupBusy=true;
   const submit=$('#create-final-submit'),oldLabel=submit?submit.textContent:'';
   if(submit){submit.disabled=true;submit.textContent='جارٍ إنشاء الجمعية...'}

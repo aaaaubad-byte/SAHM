@@ -421,7 +421,8 @@ test('priority UX fixes keep managed/member routes separate and wire visible sea
   assert.match(html, /if\(route==='audit'&&el\.dataset\.groupId\)context\.currentGroupId=el\.dataset\.groupId/);
 
   const style = html.match(/<style\b[^>]*>([\s\S]*?)<\/style>/i)[1];
-  assert.match(style, /#bottomnav \.navitem\[aria-current="page"\]\s*\{[\s\S]*?background:#edf2ff !important/);
+  assert.match(style, /#bottomnav \.navitem\.active,\s*#bottomnav \.navitem\[aria-current="page"\]\s*\{[^}]*color:\s*var\(--primary\);[^}]*background:\s*transparent/);
+  assert.doesNotMatch(style, /#bottomnav \.navitem[^{}]*\{[^}]*background:\s*#edf2ff/);
   assert.match(html, /'aria-current="page"'/);
 });
 
@@ -443,8 +444,9 @@ test('member reception is the central manager entry point and destructive link c
   const createdStart = html.indexOf('function showCreatedGroup(g){');
   const createdEnd = html.indexOf('function groupDetail(){', createdStart);
   const created = html.slice(createdStart, createdEnd);
-  assert.match(created, /data-go="member-reception"/);
-  assert.doesNotMatch(created, /data-go="invite"|data-go="invites"|data-go="join-requests"/);
+  assert.match(created, /data-go="invite"/);
+  assert.match(created, /data-go="group-detail"/);
+  assert.doesNotMatch(created, /data-go="member-reception"|data-go="invites"|data-go="join-requests"/);
 
   assert.match(html, /action==='confirm-public-link-action'/);
   assert.match(html, /سيصبح الرابط الحالي غير صالح/);
@@ -473,4 +475,27 @@ test('public-link lifecycle is managed in one place rather than duplicated acros
   assert.match(reception, /id="association-link-status"/);
   assert.match(reception, /loadAssociationPublicLinkStatus\(g\.id,canInvite\)/);
   assert.match(html, /if\(currentGroupId!==associationId\|\|screenName!=='member-reception'\)return/);
+});
+
+
+test('create-association flow is three flat steps with one primary action and no stale wizard code', () => {
+  const start = html.indexOf('function setCreateWizardStep(');
+  const end = html.indexOf('function groupDetail(){', start);
+  const flow = html.slice(start, end);
+  assert.match(html, /const CREATE_STEP_COUNT=3;/);
+  assert.equal((html.match(/Math\.min\(2,/g) || []).length, 0, 'step limit is not hard-coded');
+  for (const id of ['create-step-1', 'create-step-2', 'create-step-3']) assert.ok(flow.includes('id="' + id + '"'), id);
+  assert.ok(flow.indexOf('name="name"') < flow.indexOf('name="startDate"'));
+  assert.ok(flow.indexOf('name="startDate"') < flow.indexOf('name="firstDrawOn"'));
+  assert.ok(flow.indexOf('name="firstDrawOn"') < flow.indexOf('name="shareAmount"'));
+  assert.ok(flow.indexOf('name="shareAmount"') < flow.indexOf('name="installmentMode"'));
+  assert.ok(flow.indexOf('name="installmentMode"') < flow.indexOf('name="managerMode"'));
+  for (const field of ['name', 'currency', 'startDate', 'firstDrawOn', 'shareAmount', 'installmentMode', 'installments', 'installmentAmount', 'managerMode', 'managerShares']) {
+    assert.ok(flow.includes('name="' + field + '"'), 'form field kept: ' + field);
+  }
+  assert.doesNotMatch(flow, /create-prev|create-stage-title|create-section|inviteOpensOn|inviteClosesOn|name="rules"/);
+  assert.equal((flow.match(/id="create-next"/g) || []).length, 1);
+  assert.equal((flow.match(/id="create-final-submit"/g) || []).length, 1);
+  assert.match(flow, /SahmCore\.periods\(duration,count\)/);
+  assert.doesNotMatch(html, /create-step-active-|\.create-section|\.create-field|\.create-manager|\.create-rules-grid/);
 });
