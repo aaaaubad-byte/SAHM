@@ -421,6 +421,6 @@ test('priority UX fixes keep managed/member routes separate and wire visible sea
   assert.match(html, /if\(route==='audit'&&el\.dataset\.groupId\)context\.currentGroupId=el\.dataset\.groupId/);
 
   const style = html.match(/<style\b[^>]*>([\s\S]*?)<\/style>/i)[1];
-  assert.ok(style.lastIndexOf('#bottomnav .navitem.active {') > style.indexOf('background:transparent !important'),
-    'the canonical active-state CSS overrides the legacy transparent rule');
+  assert.match(style, /#bottomnav \.navitem\[aria-current="page"\]\s*\{[\s\S]*?background:#edf2ff !important/);
+  assert.match(html, /'aria-current="page"'/);
 });
