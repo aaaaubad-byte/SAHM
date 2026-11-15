@@ -2808,21 +2808,21 @@ body {
 }
 </style>
 <style id="sahm-typography-system-4-sizes">
-/* Four-level typography system: 15 / 13 / 11 / 9.5px. Icons retain their own sizing. */
+/* Four-level typography system: 18 / 16 / 14 / 12px. Icons retain their own sizing. */
 :where(.app,.phone,body) :is(p,li,td,th,label,button,input,select,textarea,a,strong,b,small,em,span):not(.ni):not(.brand-mark):not(.receipt-mark):not(.shortcut-arrow):not(.icon):not(.material-symbols-outlined):not(.manager-action-icon):not(.member-action-icon) {
-  font-size: 11px !important;
+  font-size: 14px !important;
 }
 :where(.app,.phone,body) :is(h1,h2,.topbar-screen-title,.dialog h3,.auth-brand h1,.create-success-card h1) {
-  font-size: 15px !important;
+  font-size: 18px !important;
 }
 :where(.app,.phone,body) :is(h3,.section-head h3,.create-section-head h2,.empty b,.summary-copy strong,.home-shortcut strong,.home-screen .home-action-card strong) {
-  font-size: 13px !important;
+  font-size: 16px !important;
 }
 :where(.app,.phone,body) :is(small,.eyebrow,.pill,.role-chip,.stat span,.listrow small,.manager-action small,.member-action small,.group-card-metrics span,.member-summary span,.progress-caption,.group-card-footer,.summary-index,.activity-copy small,.create-section-head p,.create-manager-choice small,.create-success-card small,.create-rules-grid span,.field-hint,.invitee-link,#bottomnav .navitem > span:last-child) {
-  font-size: 9.5px !important;
+  font-size: 12px !important;
 }
 :where(.app,.phone,body) :is(.hero-num,.stat b,.member-summary b,.summary-copy b) {
-  font-size: 15px !important;
+  font-size: 18px !important;
 }
 </style>
 </head>
@@ -4484,7 +4484,7 @@ if ('serviceWorker' in navigator) {
         if (document.visibilityState === 'visible') {
           registration.update().catch(error => console.warn('Sahm update check failed:', error));
         }
-      }, 30000);
+      }, 10000);
       window.addEventListener('focus', () => registration.update().catch(() => {}));
       document.addEventListener('visibilitychange', () => {
         if (document.visibilityState === 'visible') registration.update().catch(() => {});
