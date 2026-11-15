@@ -3264,9 +3264,9 @@ function createGroup(){
 }
 function createdGroup(){const g=currentGroup();if(!g){go('home');return}showCreatedGroup(g)}
 function showCreatedGroup(g){
- const link=createdGroupLink,linkCard=link&&link.status==='paused'?'<p>الرابط متوقف حاليًا.</p><button class="btn primary full" data-action="resume-group-link">إعادة تشغيل الرابط</button><button class="btn outline full" data-action="rotate-group-link">تجديد الرابط</button>':link&&link.url
-  ? '<div class="field"><input id="createdPublicLink" readonly value="'+escapeHtml(link.url)+'"></div><div class="grid2"><button class="btn primary" data-action="copy-group-link">نسخ الرابط</button><button class="btn outline" data-action="share-group-link">مشاركة الرابط</button></div><div class="grid2" style="margin-top:8px"><button class="btn soft" data-action="pause-group-link">إيقاف الرابط</button><button class="btn soft" data-action="rotate-group-link">تجديد الرابط</button></div>'
-  : '<p>لم يُنشأ الرابط تلقائيًا: '+escapeHtml(createdLinkWarning||'لا يتوفر رابط نشط في الجلسة الحالية')+'</p><button class="btn primary full" data-action="create-group-link">إنشاء رابط انضمام</button>';
+ const link=createdGroupLink,linkCard=link&&link.status==='paused'?'<p>الرابط متوقف حاليًا؛ يمكنك إدارته من شاشة استقبال الأعضاء.</p>':link&&link.url
+  ? '<div class="field"><input id="createdPublicLink" readonly value="'+escapeHtml(link.url)+'"></div><div class="grid2"><button class="btn primary" data-action="copy-group-link">نسخ الرابط</button><button class="btn outline" data-action="share-group-link">مشاركة الرابط</button></div>'
+  : '<p>لم يتم إصدار رابط في هذه الجلسة. يمكنك إنشاؤه من شاشة استقبال الأعضاء.</p>';
  const summary='<div class="create-rules-grid"><div><span>بداية الجمعية</span><b>'+dateLabel(g.start)+'</b></div><div><span>أول قرعة</span><b>'+dateLabel(g.first)+'</b></div><div><span>مدة الدورة</span><b>'+Number(g.cycleDays||0)+' يومًا</b></div><div><span>حصة السهم</span><b>'+money(g.share,g.currency)+'</b></div><div><span>الأقساط</span><b>'+g.installments+'</b></div></div>';
  const content='<div class="create-group-page created-group-page"><section class="create-success-card"><span class="create-success-icon">'+uiIcon('check-circle',30)+'</span><div><h1>تم إنشاء الجمعية بنجاح</h1><strong>'+escapeHtml(g.name)+'</strong></div></section>'+
   '<section class="create-section"><div class="create-section-head"><span class="create-section-icon">'+uiIcon('clipboard-list',20)+'</span><h2>ملخص الجمعية</h2></div>'+summary+'</section>'+
@@ -3299,20 +3299,20 @@ function groupDetail(){
   const channel=(key,label,map)=>'<div class="card"><b>'+label+'</b>'+SahmApp.notifyTypes().map(t=>'<div class="listrow"><div class="grow"><strong>'+escapeHtml(t.label)+'</strong></div><input type="checkbox" data-action="notify-channel-toggle" data-channel="'+key+'" data-type="'+escapeHtml(t.id)+'" '+(map&&map[t.id]?'checked':'')+'></div>').join('')+'</div>';
   const channels=channel('feed','نشر الأحداث في أخبار الجمعية',d.group.notify)+channel('chat','نشر الأحداث في محادثة الجمعية',d.group.notifyChat)+channel('names','السماح بإظهار اسم العضو في الخبر',d.group.notifyNames);
   const canInvite=!!(d.permissions&&d.permissions.canInvite);
-  body='<div class="card manager-panel"><div class="section-head"><h3>إدارة الجمعية</h3></div><button class="btn outline full" data-go="member-reception">إدارة استقبال الأعضاء</button><div class="link-management"><div class="section-head"><h3>رابط الانضمام العام</h3></div><div id="association-link-status" class="field-hint">جارٍ تحميل حالة الرابط...</div></div><button class="btn soft full" data-go="audit">سجل العمليات الإداري</button></div><h3>إعدادات نشر الأحداث</h3>'+channels;
+  body='<div class="card manager-panel"><div class="section-head"><h3>إدارة الجمعية</h3></div><button class="btn outline full" data-go="member-reception">إدارة استقبال الأعضاء</button><button class="btn soft full" data-go="audit">سجل العمليات الإداري</button></div><h3>إعدادات نشر الأحداث</h3>'+channels;
  }else{
   const mute=SahmApp.prefs().mute&&SahmApp.prefs().mute[g.id]||{};
   body='<div class="card"><div class="section-head"><h3>تفضيلات الإشعارات</h3></div><div class="listrow"><div class="grow"><strong>كتم إشعارات المجموعة</strong></div><input type="checkbox" data-action="mute-toggle" data-kind="group" '+(mute.group?'checked':'')+'></div><div class="listrow"><div class="grow"><strong>كتم تذكيرات الأقساط</strong></div><input type="checkbox" data-action="mute-toggle" data-kind="reminders" '+(mute.reminders?'checked':'')+'></div></div>';
  }
  shell(g.name,'groups',lockNotice+top+body);
- if(manager&&groupDetailTab==='tools')loadAssociationPublicLinkStatus(g.id,!!(d.permissions&&d.permissions.canInvite));
+ 
 }
 async function loadAssociationPublicLinkStatus(associationId,canInvite){
  const target=document.getElementById('association-link-status');
  if(!target)return;
  const result=await SahmSupabaseData.getPublicLinkStatus(associationId);
  if(!result||!result.ok){target.textContent=result&&result.message||'تعذر تحميل حالة الرابط';return}
- if(currentGroupId!==associationId||!['group-detail','member-reception'].includes(screenName)||(screenName==='group-detail'&&groupDetailTab!=='tools'))return;
+ if(currentGroupId!==associationId||screenName!=='member-reception')return;
  const link=result.link||{},status=link.status||'none';
  let controls='';
  if(status==='active'){
@@ -3337,7 +3337,7 @@ function members(){
  const lock=detail.agreementLocked?'<div class="card"><b>الاتفاق مقفل</b><small>لا يمكن تعديل الأعضاء أو الأسهم أو إرسال دعوات جديدة بعد بدء الجمعية أو تثبيت أول قرعة.</small></div>':'';
  const memberRows=list.map(m=>'<div class="listrow"><div class="avatar '+(m.isManager?'dark':'')+'">'+escapeHtml(m.name.slice(0,1))+'</div><div class="grow"><strong>'+escapeHtml(m.name)+'</strong><small>'+(m.isManager?'مدير الجمعية':'مشارك')+' · '+m.shares+' أسهم</small></div></div>').join('');
  const empty=list.length?memberRows:'<div class="empty"><b>لا يوجد أعضاء بعد</b></div>';
- shell('الأعضاء','groups',header('إدارة الأعضاء',g.name)+lock+'<div class="member-summary"><div><span>المشاركون</span><b>'+list.length+'</b></div><div><span>الأسهم المسجلة</span><b>'+shareSummary+'</b></div></div><div class="toolbar"><input class="searchbox" placeholder="ابحث عن اسم مشارك..." aria-label="البحث عن مشارك" id="memberSearch">'+(canInvite?'<button class="btn primary small" data-go="invite">دعوة عضو</button>':'')+'</div><div class="card" id="membersList">'+empty+'</div>'+(canInvite?'<button class="btn outline full" data-go="invites">إدارة الدعوات</button>':''));
+ shell('الأعضاء','groups',header('إدارة الأعضاء',g.name)+lock+'<div class="member-summary"><div><span>المشاركون</span><b>'+list.length+'</b></div><div><span>الأسهم المسجلة</span><b>'+shareSummary+'</b></div></div><div class="toolbar"><input class="searchbox" placeholder="ابحث عن اسم مشارك..." aria-label="البحث عن مشارك" id="memberSearch">'+(canInvite?'<button class="btn primary small" data-go="invite">دعوة عضو</button>':'')+'</div><div class="card" id="membersList">'+empty+'</div>'+(canInvite?'<button class="btn outline full" data-go="member-reception">إدارة استقبال الأعضاء</button>':''));
  const search=$('#memberSearch'),container=$('#membersList');
  if(search&&container)search.addEventListener('input',()=>{
   const q=String(search.value||'').trim().toLowerCase();
