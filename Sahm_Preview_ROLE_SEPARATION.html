@@ -875,8 +875,6 @@ button {
   border: 1px solid #e2e8f1;
   align-items: flex-start;
   justify-content: center;
-}
-.member-action {
   background: #fbfcff;
   color: #34465f;
   border-color: #e2e8f1;
@@ -1201,8 +1199,6 @@ html {
 }
 .field textarea {
   padding: 9px 11px;
-}
-.field textarea {
   min-height: 68px;
 }
 .formgrid {
@@ -2478,9 +2474,7 @@ body {
   line-height:1 !important;
   font-weight:700 !important;
 }
-.home-screen .home-shortcuts > .home-shortcut .shortcut-arrow svg {
-  display:none !important;
-}
+
 .home-screen .home-shortcuts > .home-shortcut .shortcut-arrow::before {
   content:">";
   display:block;
@@ -2958,12 +2952,7 @@ body {
   font-size:13px !important;
 }
 @media(max-width:600px) {
-  #topbar.topbar {
-    height:56px !important;
-    min-height:56px !important;
-    flex-basis:56px !important;
-    padding-inline:15px !important;
-  }
+  
 }
 
 
@@ -3041,7 +3030,7 @@ body {
 
 
 /* Final footer sizing authority: preserve the desktop frame and stabilize mobile navigation. */
-#app.phone { min-height:0 !important; display:flex !important; flex-direction:column !important; overflow:hidden !important; }
+
 #screen.screen {
   flex:1 1 0% !important; height:0 !important; min-height:0 !important;
   max-height:none !important; overflow-x:hidden !important; overflow-y:auto !important;
@@ -3076,17 +3065,17 @@ body {
 
 /* New-group setup: same compact cards, typography, blue accent and quiet surfaces as Sahm home. */
 #screen.create-group-screen{background:var(--bg)!important;padding:14px 14px 28px!important}
-.create-group-page{width:100%;max-width:560px;margin:0 auto;color:var(--ink)}
+
 .create-intro{display:flex;align-items:center;gap:12px;padding:14px;margin:0 0 10px;border:1px solid #dfe6f2;border-radius:12px;background:linear-gradient(115deg,#eaf0fc,#fff);box-shadow:0 3px 10px rgba(23,43,79,.035)}
 .create-intro-icon{width:42px;height:42px;display:grid;place-items:center;flex:none;border-radius:10px;background:#3158d6;color:#fff}
-.create-intro-copy{min-width:0}.create-kicker{display:block;font-size:9px;font-weight:800;color:#5272b9;margin-bottom:2px}
+.create-kicker{display:block;font-size:9px;font-weight:800;color:#5272b9;margin-bottom:2px}
 .create-intro h1{font-size:16px;line-height:1.5;margin:0;color:#172338;font-weight:850}
 .create-intro p{font-size:10px;line-height:1.7;color:#748198;margin:2px 0 0}
 .create-form{display:flex;flex-direction:column;gap:9px}
 .create-section{padding:13px!important;margin:0!important;border:1px solid #e2e8f1!important;border-radius:12px!important;background:#fff!important;box-shadow:0 2px 8px rgba(23,35,56,.035)!important;scroll-margin-top:12px}
 .create-section-head{display:flex;align-items:center;gap:9px;margin:0 0 10px!important}
 .create-section-icon{display:grid;place-items:center;width:25px;height:25px;flex:none;color:#3158d6!important}
-.create-section-icon svg{width:20px;height:20px;stroke:currentColor;stroke-width:1.9}
+
 .create-section-head h2{font-size:13px!important;font-weight:850!important;color:#172338!important;margin:0!important}
 .create-section-head p{font-size:9px;color:#7d899c;margin:1px 0 0;line-height:1.5}
 .create-field{margin:8px 0 0!important;min-width:0}
@@ -3155,7 +3144,7 @@ body {
 .invite-remove{width:30px;height:34px;display:grid;place-items:center;flex:none;background:transparent;color:#9a6470;border:0;border-radius:7px}
 .created-invite-footer{margin-top:10px;padding-top:10px;border-top:1px solid #e4eaf3}.created-invite-footer>span{display:block;margin-bottom:8px;color:#64758e;font-size:10px;font-weight:700}
 .created-invite-footer .btn{min-height:46px}.created-invite-footer .btn:disabled{background:#9aa9c8!important;color:#fff!important;opacity:.62}
-@media(max-width:380px){.create-intro{padding:11px}.create-section{padding:12px!important}.create-rules-grid{gap:6px}.create-rules-grid>div{padding:8px}.create-step-actions .btn{font-size:11px}}
+@media(max-width:380px){.create-section{padding:12px!important}.create-rules-grid{gap:6px}.create-rules-grid>div{padding:8px}.create-step-actions .btn{font-size:11px}}
 
 
 /* First step only: compact, legible, balanced form layout */
