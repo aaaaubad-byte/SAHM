@@ -8,9 +8,26 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Arabic:wght@400;500;600;700&family=DM+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
 <style>
-*{box-sizing:border-box}body{margin:0;background:#f5f7fb;color:#1d2939;font-family:"IBM Plex Sans Arabic",sans-serif;font-size:14px;line-height:1.9}
-main{max-width:760px;margin:28px auto;padding:22px}article{background:white;border:1px solid #e3e8ef;border-radius:18px;padding:24px;box-shadow:0 8px 30px #142f3910}
-h1{font-size:18px;margin:0 0 5px}h2{font-size:16px;margin:22px 0 6px;color:#243b53}p,li{font-size:14px}small{font-size:12px;color:#667085}.btn{font-size:14px;display:inline-block;background:#3158d6;color:white;text-decoration:none;padding:10px 18px;border-radius:10px;margin-top:16px}
+:root{
+  --sahm-font-page-title:24px;
+  --sahm-font-section-title:20px;
+  --sahm-font-card-title:18px;
+  --sahm-font-body:16px;
+  --sahm-font-secondary:14px;
+  --sahm-font-helper:12px;
+}
+*{box-sizing:border-box}
+body{margin:0;background:#f5f7fb;color:#1d2939;font-family:"IBM Plex Sans Arabic",sans-serif;font-size:var(--sahm-font-body);line-height:1.9}
+:where(.numeric,[data-numeric],.ltr,[dir="ltr"]){font-family:"DM Sans",sans-serif;font-variant-numeric:tabular-nums}
+main{max-width:760px;margin:28px auto;padding:22px}
+article{background:white;border:1px solid #e3e8ef;border-radius:18px;padding:24px;box-shadow:0 8px 30px #142f3910}
+h1{font-size:var(--sahm-font-page-title);margin:0 0 5px}
+h2{font-size:var(--sahm-font-section-title);margin:22px 0 6px;color:#243b53}
+h3{font-size:var(--sahm-font-card-title)}
+p,li{font-size:var(--sahm-font-body)}
+small{font-size:var(--sahm-font-secondary);color:#667085}
+.fine-print{font-size:var(--sahm-font-helper)}
+.btn{font-size:var(--sahm-font-body);display:inline-block;background:#3158d6;color:white;text-decoration:none;padding:10px 18px;border-radius:10px;margin-top:16px}
 </style>
 </head>
 <body><main><article>

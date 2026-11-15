@@ -1648,7 +1648,7 @@ html {
 
 /* Typography: IBM Plex Sans Arabic for Arabic UI; DM Sans for Latin text and numeric glyphs. */
 :where(.numeric,[data-numeric],.ltr,[dir="ltr"],.amount,.hero-num,.stat b,.member-summary b,.group-card-metrics b,.progress-caption b,.summary-index,.badge,.count,input[type="number"],input[inputmode="numeric"],input[inputmode="decimal"],input[inputmode="tel"]) {
-  font-family: 'DM Sans','IBM Plex Sans Arabic',sans-serif;
+  font-family: 'DM Sans',sans-serif;
   font-variant-numeric: tabular-nums;
 }
 body {
@@ -2354,7 +2354,7 @@ body {
   width:18px !important;
   height:18px !important;
   color:#496b9d !important;
-  font-family:inherit !important;
+  
   
   font-weight:500 !important;
   line-height:1 !important;
@@ -2727,7 +2727,7 @@ body {
   margin: 0!important;
 }
 #create-step-1 .create-field label{display:flex!important;align-items:center!important;gap:6px!important;min-height:18px!important;margin:0!important;color:#35445d!important;line-height:1.55!important;font-weight:800!important}
-#create-step-1 .create-field input,#create-step-1 .create-field select,#create-step-1 .create-field textarea{display:block!important;box-sizing:border-box!important;width:100%!important;min-width:0!important;min-height:43px!important;padding:9px 11px!important;border:1px solid #cbd5e2!important;border-radius:var(--radius-control)!important;background:#f8faff!important;color:var(--ink)!important;font-family:inherit!important;line-height:1.65!important;font-weight:500!important;box-shadow:inset 0 1px 2px rgba(25,45,75,.025)!important;outline:none!important;transition:border-color .18s,box-shadow .18s,background .18s!important}
+#create-step-1 .create-field input,#create-step-1 .create-field select,#create-step-1 .create-field textarea{display:block!important;box-sizing:border-box!important;width:100%!important;min-width:0!important;min-height:43px!important;padding:9px 11px!important;border:1px solid #cbd5e2!important;border-radius:var(--radius-control)!important;background:#f8faff!important;color:var(--ink)!important;line-height:1.65!important;font-weight:500!important;box-shadow:inset 0 1px 2px rgba(25,45,75,.025)!important;outline:none!important;transition:border-color .18s,box-shadow .18s,background .18s!important}
 #create-step-1 .create-field select{appearance:auto!important;-webkit-appearance:menulist!important}
 #create-step-1 .create-field textarea{
   min-height: 72px!important;
@@ -2808,23 +2808,38 @@ body {
 }
 </style>
 <style id="sahm-typography-system-6-sizes">
-/* Canonical text scale: page title 20, section 17, card title 15, body 14, secondary 12, helper 11px. */
+/* Approved typography: IBM Plex Sans Arabic for Arabic; DM Sans for Latin and numerals. */
 #app {
-  --sahm-font-page-title: 20px;
-  --sahm-font-section-title: 17px;
-  --sahm-font-card-title: 15px;
-  --sahm-font-body: 14px;
-  --sahm-font-secondary: 12px;
-  --sahm-font-helper: 11px;
+  --sahm-font-page-title: 24px;
+  --sahm-font-section-title: 20px;
+  --sahm-font-card-title: 18px;
+  --sahm-font-body: 16px;
+  --sahm-font-secondary: 14px;
+  --sahm-font-helper: 12px;
+  font-family: 'IBM Plex Sans Arabic',sans-serif;
   font-size: var(--sahm-font-body) !important;
 }
-#app *:not(.ni):not(.brand-mark):not(.receipt-mark):not(.shortcut-arrow):not(.icon):not(.material-symbols-outlined):not(.manager-action-icon):not(.member-action-icon) { font-size: var(--sahm-font-body) !important; }
-#app :is(h1,h2,.topbar-screen-title,.dialog h3,.auth-brand h1,.create-success-card h1) { font-size: var(--sahm-font-page-title) !important; }
-#app :is(h3,.section-head h3,.create-section-head h2) { font-size: var(--sahm-font-section-title) !important; }
-#app :is(h4,.empty b,.summary-copy strong,.home-shortcut strong,.home-screen .home-action-card strong) { font-size: var(--sahm-font-card-title) !important; }
-#app :is(small,.eyebrow,.pill,.role-chip,.stat span,.listrow small,.manager-action small,.member-action small,.group-card-metrics span,.member-summary span,.progress-caption,.group-card-footer,.summary-index,.activity-copy small,#bottomnav .navitem > span:last-child) { font-size: var(--sahm-font-secondary) !important; }
-#app :is(.field-hint,.create-section-head p,.create-manager-choice small,.create-success-card small,.create-rules-grid span,.invitee-link) { font-size: var(--sahm-font-helper) !important; }
-#app :is(.hero-num,.stat b,.member-summary b,.summary-copy b) { font-size: var(--sahm-font-page-title) !important; }
+#app *:not(.ni):not(.brand-mark):not(.receipt-mark):not(.shortcut-arrow):not(.icon):not(.material-symbols-outlined):not(.manager-action-icon):not(.member-action-icon) {
+  font-size: var(--sahm-font-body) !important;
+}
+#app :is(h1,.topbar-screen-title,.dialog h3,.auth-brand h1,.create-success-card h1) {
+  font-size: var(--sahm-font-page-title) !important;
+}
+#app :is(h2,h3,.section-head h3,.create-section-head h2) {
+  font-size: var(--sahm-font-section-title) !important;
+}
+#app :is(h4,.empty b,.summary-copy strong,.home-shortcut strong,.home-screen .home-action-card strong) {
+  font-size: var(--sahm-font-card-title) !important;
+}
+#app :is(small,.eyebrow,.pill,.role-chip,.stat span,.listrow small,.manager-action small,.member-action small,.group-card-metrics span,.member-summary span,.progress-caption,.group-card-footer,.summary-index,.activity-copy small,#bottomnav .navitem > span:last-child) {
+  font-size: var(--sahm-font-secondary) !important;
+}
+#app :is(.field-hint,.create-section-head p,.create-manager-choice small,.create-success-card small,.create-rules-grid span,.invitee-link) {
+  font-size: var(--sahm-font-helper) !important;
+}
+#app :is(.hero-num,.stat b,.member-summary b,.summary-copy b) {
+  font-size: var(--sahm-font-page-title) !important;
+}
 /* Icon and brand glyph sizing remains independent from the text scale. */
 #app .navitem .ni { font-size: 21px !important; }
 #app .manager-action span, #app .member-action span { font-size: 19px !important; }
