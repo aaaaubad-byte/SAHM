@@ -1,5 +1,5 @@
-/* Sahm PWA — activate new builds immediately; app code is always network-first so old cached copies are never preferred. */
-const CACHE_NAME = 'sahm-pwa-v32';
+/* Sahm PWA v33 — version bump to notify installed clients of the latest app shell. */
+const CACHE_NAME = 'sahm-pwa-v33';
 const APP_SHELL = [
   '/',
   '/Sahm_Preview_ROLE_SEPARATION.html',
