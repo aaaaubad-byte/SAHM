@@ -5,7 +5,9 @@
      - runs inside a transaction (all-or-nothing, rolled back on any failed rule),
      - returns { ok:true, ... } or { ok:false, code, message, ... } and never throws to the caller,
      - persists through save() and reports persisted:false when browser storage is unavailable.
-   The contract is documented in docs/SAHM_ENGINE_DATA_CONTRACT_AR.md. */
+   The contract is documented in docs/SAHM_ENGINE_DATA_CONTRACT_AR.md.
+   Phases 1-5: attendance and quorum are retired; a draw needs its due day, its scheduled time (when one is set)
+   and full payment of every installment up to the round (the database repeats every check). */
 (function (root) {
   'use strict';
   var C = function () { return root.SahmCore; };
@@ -177,7 +179,7 @@
       var g = {
         id: sp.id, name: sp.name, tone: sp.tone, currency: sp.currency, tz: TZ, cycleType: sp.cycleType, cycleDays: sp.cycleDays || null,
         installments: sp.installments, shareAmount: sp.shareAmount, startDate: K.addDays(anchor, sp.startOff), createdOn: K.addDays(anchor, sp.created),
-        maxPerMember: sp.maxPer, targetShares: sp.target, quorum: sp.quorum, rules: sp.rules, notify: {},
+        maxPerMember: sp.maxPer, targetShares: sp.target, rules: sp.rules, notify: {},
         managerUserId: sp.manager === 'me' ? 'me' : null, managerName: sp.manager === 'me' ? 'أحمد محمد' : sp.manager,
         inviteCode: 'SAHM-' + sp.id.toUpperCase() + '-' + (7310 + sp.id.charCodeAt(1)), inviteOpensOn: K.addDays(anchor, sp.created)
       };
@@ -584,7 +586,7 @@
         shareAmount: shareAmount, startDate: input.startDate, createdOn: today,
         maxPerMember: unified ? null : Number(input.maxPerMember),
         targetShares: unified ? null : Number(input.targetShares),
-        quorum: input.quorum ? Number(input.quorum) : 66, rules: String(input.rules || '').trim(), notify: {},
+        rules: String(input.rules || '').trim(), notify: {},
         managerUserId: actor, managerName: actor === me(db) ? db.prefs.user.name : 'المدير',
         managerParticipates: input.managerMode === 'both',
         inviteOpensOn: input.inviteOpensOn || today, inviteClosesOn: input.inviteClosesOn || null, lockedAt: null
@@ -599,7 +601,7 @@
       return { groupId: gid, group: clone(g), plan: K.groupPlan(g, K.groupShares(db, gid).length) };
     });
   }
-  var FREE_FIELDS = ['name', 'rules', 'quorum', 'inviteOpensOn', 'inviteClosesOn', 'tone'];
+  var FREE_FIELDS = ['name', 'rules', 'inviteOpensOn', 'inviteClosesOn', 'tone'];
   var FIN_FIELDS = ['currency', 'cycleType', 'cycleDays', 'installments', 'shareAmount', 'startDate'];
   var COUNT_FIELDS = ['targetShares', 'maxPerMember'];
   function updateGroup(db, actor, gid, patch) {
@@ -617,7 +619,7 @@
       });
       var cand = {
         name: g.name, currency: g.currency, cycleType: g.cycleType, cycleDays: g.cycleDays, installments: g.installments, shareAmount: majorOf(g), startDate: g.startDate,
-        inviteOpensOn: g.inviteOpensOn, inviteClosesOn: g.inviteClosesOn, targetShares: g.targetShares, maxPerMember: g.maxPerMember, quorum: g.quorum, managerMode: 'only', tz: g.tz
+        inviteOpensOn: g.inviteOpensOn, inviteClosesOn: g.inviteClosesOn, targetShares: g.targetShares, maxPerMember: g.maxPerMember, managerMode: 'only', tz: g.tz
       };
       if (g.firstDrawOn) {
         cand.firstDrawOn = g.firstDrawOn; cand.durationDays = g.cycleDays;
@@ -636,7 +638,7 @@
       keys.forEach(function (k) {
         var nv = patch[k];
         if (k === 'shareAmount') nv = K.parseMoney(nv, cand.currency);
-        else if (['installments', 'targetShares', 'maxPerMember', 'quorum', 'cycleDays'].indexOf(k) >= 0) nv = nv === null || nv === '' ? null : Number(nv);
+        else if (['installments', 'targetShares', 'maxPerMember', 'cycleDays'].indexOf(k) >= 0) nv = nv === null || nv === '' ? null : Number(nv);
         else if (k === 'name' || k === 'rules') nv = String(nv == null ? '' : nv).trim();
         if (JSON.stringify(g[k]) !== JSON.stringify(nv)) { before[k] = g[k]; after[k] = nv; g[k] = nv; }
       });
@@ -739,16 +741,9 @@
       return { removedShares: n };
     });
   }
-  function setAttendance(db, actor, memberId, present) {
-    return transact(db, function () {
-      var m = db.members.find(function (x) { return x.id === memberId; });
-      if (!m) throw E('MEMBER_NOT_FOUND', 'العضو غير موجود');
-      var g = mustGroup(db, m.groupId); needManager(g, actor);
-      if (!C().memberShares(db, m.id).length) throw E('NO_SHARES', 'هذا العضو لا يملك أسهمًا');
-      m.present = !!present;
-      logEvent(db, g, 'attendance', (m.present ? 'سُجّل حضور ' : 'أُلغي حضور ') + m.name, { actor: actor, memberId: m.id, vis: 'manager' });
-      return { quorum: C().quorumInfo(db, g) };
-    });
+  /* attendance is retired: it is no longer a draw condition and the database rejects the call */
+  function setAttendance() {
+    return fail('ATTENDANCE_RETIRED', 'تم إيقاف تسجيل الحضور؛ لم يعد شرطًا للقرعة');
   }
 
   /* ---------- invitations ---------- */
@@ -959,6 +954,8 @@
   }
 
   /* ---------- lottery ---------- */
+  /* A draw needs: shares, an unfinished round, the due day, the scheduled time (only when the manager set one)
+     and every installment up to the round fully paid. No attendance, no quorum. The database repeats all of it. */
   function drawStatus(db, gid) {
     var g = group(db, gid); if (!g) return fail('GROUP_NOT_FOUND', 'الجمعية غير موجودة');
     var K = C(), today = todayOf(g), draws = db.draws.filter(function (d) { return d.groupId === gid; }).sort(function (a, b) { return a.round - b.round; });
@@ -967,10 +964,15 @@
     if (!total) blockers.push('NO_SHARES');
     if (complete) blockers.push('DRAW_COMPLETE');
     var sched = complete || !total ? null : K.roundDate(g, round);
-    if (sched && today < sched) blockers.push('DRAW_NOT_DUE');
-    var q = K.quorumInfo(db, g);
+    var due = !!sched && today >= sched;
+    if (sched && !due) blockers.push('DRAW_NOT_DUE');
+    var scheduledAt = !complete && g.drawScheduledAt ? g.drawScheduledAt : null;
+    var timeReached = K.drawTimeReached(scheduledAt);
+    if (due && !timeReached) blockers.push('DRAW_TIME_NOT_REACHED');
+    var readiness = complete || !total ? null : K.drawReadinessLocal(db, g, today, round);
+    if (readiness && !readiness.ready) blockers.push('NOT_READY');
     return { ok: true, groupId: gid, rounds: frozen, drawn: draws.length, locked: draws.length > 0, complete: complete, round: complete ? null : round, scheduledDate: sched,
-      due: !!sched && today >= sched, quorum: q, blockers: blockers, quorumMet: q.met, canDraw: !blockers.length && q.met, canDrawWithoutQuorum: !blockers.length,
+      scheduledAt: scheduledAt, timeReached: timeReached, due: due, readiness: readiness, blockers: blockers, canDraw: !blockers.length,
       eligible: K.eligibleShares(db, gid).map(function (s) { return { shareId: s.id, memberId: s.memberId, label: K.shareLabel(db, s) }; }),
       prize: complete || !total ? null : K.prizeInfo(db, g, round, frozen) };
   }
@@ -981,15 +983,16 @@
       if (st.blockers.indexOf('NO_SHARES') >= 0) throw E('NO_SHARES', 'لا توجد أسهم في الجمعية');
       if (st.blockers.indexOf('DRAW_COMPLETE') >= 0) throw E('DRAW_COMPLETE', 'اكتملت جميع جولات القرعة');
       if (st.blockers.indexOf('DRAW_NOT_DUE') >= 0) throw E('DRAW_NOT_DUE', 'لم يحن موعد قرعة الجولة ' + st.round + ' بعد (' + K.fmtDate(st.scheduledDate) + ')', { scheduledDate: st.scheduledDate });
-      if (!st.quorumMet && !opts.overrideQuorum) throw E('QUORUM_NOT_MET', 'لم يكتمل نصاب الحضور (' + st.quorum.present + ' من ' + st.quorum.people + ' أشخاص)', { quorum: st.quorum });
+      if (st.blockers.indexOf('DRAW_TIME_NOT_REACHED') >= 0) throw E('DRAW_TIME_NOT_REACHED', 'لم يحل الوقت المحدد للقرعة بعد', { scheduledAt: st.scheduledAt });
+      if (st.blockers.indexOf('NOT_READY') >= 0) throw E('NOT_READY', 'لا يمكن إجراء القرعة قبل اكتمال الأقساط: ' + st.readiness.reasons.join('، '), { readiness: st.readiness });
       var elig = K.eligibleShares(db, gid); if (!elig.length) throw E('NO_ELIGIBLE_SHARES', 'لا توجد أسهم مؤهلة');
       var first = !st.locked, at = nowAt(g.tz), win = K.pickWinner(elig, opts.rng), frozen = st.rounds;
       var prize = K.prizeTarget(g, frozen), pi = K.prizeInfo(db, g, st.round, frozen);
       var d = { id: nextId(db, 'dr'), groupId: gid, round: st.round, date: st.scheduledDate, at: at, by: actor, winnerShareId: win.id, winnerMemberId: win.memberId,
-        shareCount: frozen, prize: prize, recordedAtDraw: pi.recorded, eligibleShareIds: elig.map(function (s) { return s.id; }), quorum: st.quorum, overrideQuorum: !st.quorumMet };
+        shareCount: frozen, prize: prize, recordedAtDraw: pi.recorded, eligibleShareIds: elig.map(function (s) { return s.id; }) };
       db.draws.push(d);
       var label = K.shareLabel(db, win), winner = db.members.find(function (m) { return m.id === win.memberId; });
-      logEvent(db, g, 'draw', 'قرعة الجولة ' + st.round + ' — الفائز ' + winner.name + (st.quorumMet ? '' : ' (دون اكتمال النصاب)'), { actor: actor, at: at, data: { drawId: d.id } });
+      logEvent(db, g, 'draw', 'قرعة الجولة ' + st.round + ' — الفائز ' + winner.name, { actor: actor, at: at, data: { drawId: d.id } });
       var info = null;
       if (first) {
         g.lockedAt = at; var di = K.durationInfo(g, frozen); info = { rounds: frozen, endDate: di.endDate, lastDay: di.lastDay };
@@ -1198,16 +1201,18 @@
     var v = guardView(db, viewer, gid); if (v.err) return v.err; var K = C();
     var list = K.groupMembers(db, gid).filter(function (m) { return K.memberShares(db, m.id).length; }).map(function (m) {
       var row = { memberId: m.id, name: m.name, shares: K.memberShares(db, m.id).length, isManager: !!m.isManager, isMe: m.userId === viewer };
-      if (v.role.manager) { row.present = !!m.present; row.joinedAt = m.joinedAt; row.linkedUser = !!m.userId; }
+      if (v.role.manager) { row.joinedAt = m.joinedAt; row.linkedUser = !!m.userId; }
       return row;
     });
-    return { ok: true, groupId: gid, scope: v.role.manager ? 'manager' : 'participant', members: list, quorum: v.role.manager ? K.quorumInfo(db, v.g) : undefined };
+    return { ok: true, groupId: gid, scope: v.role.manager ? 'manager' : 'participant', members: list };
   }
   function drawHistory(db, viewer, gid) {
     var v = guardView(db, viewer, gid); if (v.err) return v.err; var K = C();
     var list = db.draws.filter(function (d) { return d.groupId === gid; }).sort(function (a, b) { return a.round - b.round; }).map(function (d) {
       var s = db.shares.find(function (x) { return x.id === d.winnerShareId; });
-      return { id: d.id, round: d.round, date: d.date, at: d.at, winnerShareId: d.winnerShareId, winnerLabel: s ? K.shareLabel(db, s) : '—', prize: d.prize, recordedAtDraw: d.recordedAtDraw };
+      return { id: d.id, round: d.round, date: d.date, at: d.at, winnerShareId: d.winnerShareId, winnerLabel: s ? K.shareLabel(db, s) : '—', prize: d.prize, recordedAtDraw: d.recordedAtDraw,
+        cycleStatus: d.cycleStatus || null, drawScheduledAt: d.drawScheduledAt || null,
+        presentation: K.presentationState(d.cycleStatus, true) };
     });
     return { ok: true, groupId: gid, draws: list, status: drawStatus(db, gid) };
   }
@@ -1223,15 +1228,17 @@
   function groupDetail(db, viewer, gid) {
     var v = guardView(db, viewer, gid); if (v.err) return v.err;
     var K = C(), g = v.g, today = todayOf(g), sum = groupSummary(db, g, today, viewer), locked = sum.locked;
+    /* the agreement (members, shares, settings) locks at the local start date or at the first draw, whichever is first */
+    var agreementLocked = locked || (K.isValidDate(g.startDate) && today >= g.startDate);
     var hasReceipts = db.receipts.some(function (r) { return r.groupId === gid && !r.voided; });
     var rounds = frozenCount(db, g), pub = clone(g); if (!v.role.manager) delete pub.inviteCode;
     var out = { ok: true, group: pub, role: { manager: v.role.manager, participant: !!v.role.member, label: roleOf(db, g, viewer).label, shares: v.role.member ? K.memberShares(db, v.role.member.id).length : 0 },
-      phase: sum.phase, phaseLabel: sum.phaseLabel, locked: locked, rounds: rounds, provisional: !locked,
+      phase: sum.phase, phaseLabel: sum.phaseLabel, locked: locked, agreementLocked: agreementLocked, rounds: rounds, provisional: !locked,
       shortfall: g.targetShares == null ? null : Math.max(0, g.targetShares - K.groupShares(db, gid).length),
       drawn: sum.drawn, nextDraw: sum.nextDraw, cycle: sum.cycle, plan: K.groupPlan(g, rounds), members: sum.members, previewNote: LOCAL_PREVIEW_NOTE, privacyNote: PRIVACY_NOTE,
-      permissions: { canEdit: v.role.manager, canEditFinancials: v.role.manager && !locked && !hasReceipts, canAddMembers: v.role.manager && !locked, canInvite: v.role.manager && !locked,
+      permissions: { canEdit: v.role.manager, canEditFinancials: v.role.manager && !agreementLocked && !hasReceipts, canAddMembers: v.role.manager && !agreementLocked, canInvite: v.role.manager && !agreementLocked,
         canRecordPaid: v.role.manager, canCorrect: v.role.manager, canRemind: v.role.manager, canDraw: v.role.manager, canSetNotify: v.role.manager, canChat: true, canMute: true } };
-    if (v.role.manager) { out.counts = sum.counts; out.quorum = K.quorumInfo(db, g); out.invites = inviteSummary(db, gid); out.lockedAt = g.lockedAt; }
+    if (v.role.manager) { out.counts = sum.counts; out.invites = inviteSummary(db, gid); out.lockedAt = g.lockedAt; }
     if (v.role.member) { out.myProgress = sum.myProgress; out.myCommitment = K.memberCommitment(g, out.role.shares, rounds); }
     return out;
   }
