@@ -52,13 +52,16 @@ test('invalid period and split dimensions are rejected', () => {
   }
 });
 
-test('splitAmount preserves every minor unit and assigns remainder first', () => {
-  assert.deepEqual(K.splitAmount(100000, 3), [33334, 33333, 33333]);
+test('splitAmount preserves every minor unit and the last installment absorbs the remainder', () => {
+  assert.deepEqual(K.splitAmount(100000, 3), [33333, 33333, 33334]);
   for (let total = 0; total < 100; total++) {
     for (let count = 1; count < 15; count++) {
       const parts = K.splitAmount(total, count);
+      const base = Math.floor(total / count);
+      assert.equal(parts.length, count);
       assert.equal(parts.reduce((sum, value) => sum + value, 0), total);
-      assert.ok(Math.max(...parts) - Math.min(...parts) <= 1);
+      assert.ok(parts.slice(0, -1).every(value => value === base));
+      assert.equal(parts.at(-1), base + (total % count));
     }
   }
 });
@@ -93,32 +96,43 @@ test('late join preview includes only periods ended before joining', () => {
   assert.equal(preview.total, 60000);
 });
 
-test('quorum counts people rather than shares and compares threshold exactly', () => {
-  const db = {
-    members: [
-      { id: 'm1', groupId: 'g', present: true },
-      { id: 'm2', groupId: 'g', present: false },
-      { id: 'm3', groupId: 'g', present: true }
-    ],
-    shares: [
-      { memberId: 'm1', groupId: 'g' }, { memberId: 'm1', groupId: 'g' },
-      { memberId: 'm1', groupId: 'g' }, { memberId: 'm2', groupId: 'g' },
-      { memberId: 'm3', groupId: 'g' }
-    ]
-  };
-  const quorum = K.quorumInfo(db, { id: 'g', quorum: 67 });
-  assert.equal(quorum.people, 3);
-  assert.equal(quorum.present, 2);
-  assert.equal(quorum.required, 3);
-  assert.equal(quorum.met, false);
+test('agreement locks when the local date in the association time zone reaches the start date', () => {
+  assert.equal(K.isAgreementLocked('2026-12-01', 'Asia/Aden', '2026-11-30T20:59:59Z'), false);
+  assert.equal(K.isAgreementLocked('2026-12-01', 'Asia/Aden', '2026-11-30T21:00:00Z'), true);
+  assert.equal(K.isAgreementLocked('2026-12-01', 'America/New_York', '2026-12-01T04:59:59Z'), false);
+  assert.equal(K.isAgreementLocked('2026-12-01', 'America/New_York', '2026-12-01T05:00:00Z'), true);
+  assert.throws(() => K.isAgreementLocked('not-a-date', 'Asia/Aden', '2026-12-01T00:00:00Z'), RangeError);
+  assert.throws(() => K.isAgreementLocked('2026-12-01', 'Not/A_Timezone', '2026-12-01T00:00:00Z'), RangeError);
 });
 
-test('member commitment multiplies each installment by share count', () => {
+test('agreementLock and isFrozen combine the start-date lock with a recorded draw', () => {
+  const lock = K.agreementLock({ startDate: '2026-12-01', tz: 'Asia/Aden' }, '2026-12-01T00:00:00Z');
+  assert.equal(lock.locked, true);
+  assert.equal(lock.localDate, '2026-12-01');
+  assert.equal(lock.startDate, '2026-12-01');
+  const group = { id: 'g', startDate: '2027-01-01', tz: 'Asia/Aden' };
+  const now = '2026-11-01T00:00:00Z';
+  assert.equal(K.isFrozen({ draws: [] }, group, now), false);
+  assert.equal(K.isFrozen({ draws: [{ groupId: 'g' }] }, group, now), true);
+  assert.equal(K.isFrozen({ draws: [{ groupId: 'other' }] }, group, now), false);
+});
+
+test('member commitment multiplies each installment by share count and keeps the remainder last', () => {
   const group = { shareAmount: 100000, installments: 3 };
   assert.deepEqual(K.memberCommitment(group, 3, 10), {
-    shares: 3, perInstallment: [100002, 99999, 99999],
+    shares: 3, perInstallment: [99999, 99999, 100002],
     perCycle: 300000, overall: 3000000
   });
+});
+
+test('group plan lists per-share installments with the remainder in the last one', () => {
+  const plan = K.groupPlan({
+    startDate: '2026-11-01', cycleType: 'monthly', installments: 3, shareAmount: 100000
+  }, 4);
+  assert.deepEqual(plan.installmentsPlan.map(x => x.perShare), [33333, 33333, 33334]);
+  assert.equal(plan.rounds, 4);
+  assert.equal(plan.prizeTarget, 400000);
+  assert.equal(plan.firstDraw, '2026-12-01');
 });
 
 test('pickWinner supports deterministic tests and rejects invalid RNG values', () => {
@@ -218,7 +232,7 @@ test('fixed per-installment plan leaves the exact residual in the final installm
   }), [4000, 4000, 2000]);
   assert.deepEqual(K.installmentAmounts({
     shareAmount: 10000, installments: 3, installmentMode: 'count'
-  }), [3334, 3333, 3333]);
+  }), [3333, 3333, 3334]);
   assert.throws(() => K.installmentAmounts({
     shareAmount: 10000, installments: 2, installmentMode: 'amount', installmentAmountMinor: 4000
   }), /INVALID_FIXED_INSTALLMENT_PLAN/);
@@ -231,7 +245,7 @@ test('explicit first draw date anchors draw rounds while legacy dates retain the
   assert.equal(K.firstDrawDate({ startDate: '2026-01-01', cycleType: 'monthly' }), '2026-01-31');
 });
 
-test('unified association validation accepts date-based fields without target caps', () => {
+test('unified association validation accepts date-based fields without target caps and ignores quorum', () => {
   const valid = {
     name: 'جمعية جديدة', currency: 'YER',
     startDate: '2027-01-01', firstDrawOn: '2027-01-31', durationDays: 30,
@@ -239,6 +253,123 @@ test('unified association validation accepts date-based fields without target ca
     managerMode: 'only', quorum: 66, tz: 'Asia/Aden'
   };
   assert.deepEqual(K.validateGroup(valid), []);
+  assert.deepEqual(K.validateGroup({ ...valid, quorum: 5 }), []);
+  assert.deepEqual(K.validateGroup({ ...valid, quorum: undefined }), []);
   assert.ok(K.validateGroup({ ...valid, durationDays: 29 }).some(x => x.code === 'DURATION_MISMATCH'));
   assert.ok(K.validateGroup({ ...valid, installmentAmountMinor: 100 }).some(x => x.code === 'INSTALLMENTS_EXCEED_DAYS'));
+});
+
+test('draw time is reached immediately without a scheduled time and exactly at the scheduled instant otherwise', () => {
+  assert.equal(K.drawTimeReached(null, '2026-12-01T00:00:00Z'), true);
+  assert.equal(K.drawTimeReached('', '2026-12-01T00:00:00Z'), true);
+  assert.equal(K.drawTimeReached('2026-12-01T10:00:00Z', '2026-12-01T09:59:59Z'), false);
+  assert.equal(K.drawTimeReached('2026-12-01T10:00:00Z', '2026-12-01T10:00:00Z'), true);
+});
+
+test('draw schedule must fall on the due day in the future and be set on the due day', () => {
+  const group = { startDate: '2026-11-01', cycleType: 'monthly', installments: 3, tz: 'Asia/Aden' };
+  const now = '2026-12-01T05:00:00Z';
+  assert.deepEqual(K.checkDrawSchedule(group, 1, '2026-12-01T10:00:00Z', now),
+    { ok: true, code: null, dueDate: '2026-12-01' });
+  assert.equal(K.checkDrawSchedule(group, 1, null, now).code, 'SCHEDULE_INVALID');
+  assert.equal(K.checkDrawSchedule(group, 1, '2026-12-01T10:00:00Z', '2026-11-30T05:00:00Z').code, 'SCHEDULE_NOT_DUE_DAY');
+  assert.equal(K.checkDrawSchedule(group, 1, '2026-12-02T10:00:00Z', now).code, 'SCHEDULE_OUTSIDE_DUE_DAY');
+  assert.equal(K.checkDrawSchedule(group, 1, '2026-12-01T04:00:00Z', now).code, 'SCHEDULE_IN_PAST');
+});
+
+test('draw gate reports due day, exact time and financial readiness blockers separately', () => {
+  const group = { startDate: '2026-11-01', cycleType: 'monthly', installments: 3, tz: 'Asia/Aden' };
+  const scheduled = '2026-12-01T10:00:00Z';
+  assert.deepEqual(K.drawGate(group, 1, null, { ready: true }, '2026-11-30T05:00:00Z'),
+    { canDraw: false, blockers: ['DRAW_NOT_DUE'], dueDate: '2026-12-01' });
+  assert.deepEqual(K.drawGate(group, 1, scheduled, { ready: true }, '2026-12-01T05:00:00Z').blockers,
+    ['DRAW_TIME_NOT_REACHED']);
+  assert.deepEqual(K.drawGate(group, 1, scheduled, { ready: false }, '2026-12-01T10:00:00Z').blockers,
+    ['NOT_READY']);
+  assert.deepEqual(K.drawGate(group, 1, scheduled, { ready: true }, '2026-12-01T10:00:00Z'),
+    { canDraw: true, blockers: [], dueDate: '2026-12-01' });
+});
+
+test('local draw readiness requires every installment up to the round to be fully paid', () => {
+  const group = { id: 'g', startDate: '2026-11-01', cycleType: 'monthly', installments: 2, shareAmount: 100000 };
+  const db = {
+    members: [{ id: 'm1', groupId: 'g', name: 'A', joinedAt: '2026-11-01' }],
+    shares: [{ id: 's1', memberId: 'm1', groupId: 'g' }],
+    receipts: [], draws: []
+  };
+  const open = K.drawReadinessLocal(db, group, '2026-12-01', 1);
+  assert.equal(open.ready, false);
+  assert.equal(open.reasons.length, 1);
+  assert.equal(open.obligationsUnpaid, 2);
+  assert.equal(open.installmentsRemaining, 2);
+  assert.equal(open.remainingMinor, 100000);
+  assert.equal(open.sharesIncomplete, 1);
+  db.receipts = [1, 2].map(no => ({
+    groupId: 'g', memberId: 'm1', cycle: 1, no, voided: false, shareIds: ['s1'], amount: 50000
+  }));
+  const paid = K.drawReadinessLocal(db, group, '2026-12-01', 1);
+  assert.equal(paid.ready, true);
+  assert.deepEqual(paid.reasons, []);
+  assert.equal(paid.remainingMinor, 0);
+  assert.equal(paid.sharesComplete, 1);
+});
+
+test('database readiness rows are normalized to a camelCase view model with safe defaults', () => {
+  const view = K.normalizeReadiness({
+    ready: true, reasons: ['x'], cycle_no: '2', periods_expected: 3,
+    obligations_unpaid: '4', remaining_minor: '500'
+  });
+  assert.equal(view.ready, true);
+  assert.deepEqual(view.reasons, ['x']);
+  assert.equal(view.cycleNo, 2);
+  assert.equal(view.periodsExpected, 3);
+  assert.equal(view.obligationsUnpaid, 4);
+  assert.equal(view.remainingMinor, 500);
+  assert.equal(view.cycleId, null);
+  assert.equal(view.membersTotal, 0);
+  const empty = K.normalizeReadiness(null);
+  assert.equal(empty.ready, false);
+  assert.deepEqual(empty.reasons, []);
+  assert.equal(empty.cycleNo, null);
+});
+
+test('presentation state follows the cycle status once a result is recorded', () => {
+  assert.equal(K.presentationState('scheduled', false), 'pending');
+  assert.equal(K.presentationState('open', false), 'pending');
+  assert.equal(K.presentationState(undefined, false), 'pending');
+  assert.equal(K.presentationState('drawn', true), 'presenting');
+  assert.equal(K.presentationState('completed', true), 'completed');
+  assert.equal(K.presentationState('failed', true), 'failed');
+});
+
+test('wheel layout orders slots by share number so every device draws the same wheel', () => {
+  const wheel = K.wheelLayout([
+    { shareId: 'b', shareNo: 2 },
+    { shareId: 'a', shareNo: 1 },
+    { share_id: 'c', share_no: 3 }
+  ]);
+  assert.equal(wheel.slots.length, 3);
+  assert.equal(wheel.indexOf('a'), 0);
+  assert.equal(wheel.indexOf('b'), 1);
+  assert.equal(wheel.indexOf('c'), 2);
+  assert.equal(wheel.indexOf('missing'), -1);
+});
+
+test('notification channel settings default to publishing everything with names only on the draw result', () => {
+  const defaults = K.normalizeNotifySettings(null);
+  assert.deepEqual(K.notifyTypesOf(defaults.feed), K.NOTIFY_TYPE_IDS.slice());
+  assert.deepEqual(K.notifyTypesOf(defaults.chat), K.NOTIFY_TYPE_IDS.slice());
+  assert.deepEqual(K.notifyTypesOf(defaults.names), ['drawResult']);
+  const custom = K.normalizeNotifySettings({
+    feed_enabled_types: ['received'], chat_enabled_types: [],
+    name_visible_types: ['drawResult', 'joined']
+  });
+  assert.equal(custom.feed.received, true);
+  assert.equal(custom.feed.late, false);
+  assert.deepEqual(K.notifyTypesOf(custom.chat), []);
+  assert.equal(custom.names.joined, true);
+  const legacy = K.normalizeNotifySettings({ enabled_types: ['late'] });
+  assert.equal(legacy.chat.late, true);
+  assert.equal(legacy.chat.received, false);
+  assert.deepEqual(K.notifyTypesOf(legacy.feed), K.NOTIFY_TYPE_IDS.slice());
 });
