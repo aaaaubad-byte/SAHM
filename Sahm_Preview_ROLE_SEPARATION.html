@@ -2979,7 +2979,7 @@ function go(s,p={},context={}){
  if(s==='managed-groups')context.groupTab='manager';if(s==='joined-groups')context.groupTab='member';
  if(!db.session&&!AUTH_SCREEN_NAMES.includes(s)){toast('سجل الدخول أولاً للمتابعة');return false}
  if(s==='create-group'&&screenName!=='create-group'){createWizardStep=1;createFormSnapshot={}}
- const managerOnly=['members','invite','invites','join-requests','join-request-detail','audit'];
+ const managerOnly=['members','member-reception','invite','invites','join-requests','join-request-detail','audit'];
  const targetGroup=context.currentGroupId?db.groups.find(g=>g.id===context.currentGroupId)||null:currentGroup();
  const targetDetail=targetGroup&&SahmApp.groupDetail(targetGroup.id);
  if(managerOnly.includes(s)&&(!targetDetail||!targetDetail.ok||!targetDetail.role.manager)){toast('هذه الوظيفة متاحة لمدير هذه الجمعية فقط');return false}
@@ -3020,7 +3020,7 @@ function renderTopbar(title){
 }
 function syncBottomNavigation(visible=!AUTH_SCREEN_NAMES.includes(screenName)){const bar=$('#bottomnav');if(!bar)return;if(!visible){bar.hidden=true;bar.setAttribute('aria-hidden','true');bar.style.setProperty('display','none','important');return}bar.hidden=false;bar.removeAttribute('hidden');bar.setAttribute('aria-hidden','false');bar.style.setProperty('display','flex','important');bar.style.setProperty('visibility','visible','important');bar.style.setProperty('opacity','1','important')}
 function nav(active){
- const groupScreens=['groups','managed-groups','joined-groups','create-group','created-group','group-detail','members','invite','invites','invite-detail','join-group','join-request-status','join-requests','join-request-detail','installments','draw-room','draw-history','receipts','receipt-detail','news','audit'];
+ const groupScreens=['groups','managed-groups','joined-groups','create-group','created-group','group-detail','members','member-reception','invite','invites','invite-detail','join-group','join-request-status','join-requests','join-request-detail','installments','draw-room','draw-history','receipts','receipt-detail','news','audit'];
  const wallScreens=['wall','chat'];
  const resolvedActive=groupScreens.includes(screenName)||active==='groups'?'groups':wallScreens.includes(screenName)||active==='wall'?'wall':'home';
  const items=[['groups','groups','الجمعيات'],['home','home','الرئيسية'],['wall','messages','الدردشات']];
@@ -3271,8 +3271,7 @@ function showCreatedGroup(g){
  const content='<div class="create-group-page created-group-page"><section class="create-success-card"><span class="create-success-icon">'+uiIcon('check-circle',30)+'</span><div><h1>تم إنشاء الجمعية بنجاح</h1><strong>'+escapeHtml(g.name)+'</strong></div></section>'+
   '<section class="create-section"><div class="create-section-head"><span class="create-section-icon">'+uiIcon('clipboard-list',20)+'</span><h2>ملخص الجمعية</h2></div>'+summary+'</section>'+
   '<section class="create-section"><div class="create-section-head"><span class="create-section-icon">'+uiIcon('link',20)+'</span><h2>رابط الانضمام العام</h2></div><p>يمكن مشاركة الرابط مع أي شخص؛ فتح الرابط ينشئ طلب انضمام ولا يعتمد العضوية تلقائيًا.</p>'+linkCard+'</section>'+
-  '<section class="create-section"><div class="create-section-head"><span class="create-section-icon">'+uiIcon('users',20)+'</span><h2>استقبال الأعضاء</h2></div><button class="btn primary full" data-go="invite">إضافة أعضاء من جهات الاتصال</button><button class="btn outline full" data-go="invites">إدارة الدعوات</button><button class="btn outline full" data-go="join-requests">طلبات الانضمام</button></section>'+
-  '<button class="btn primary full" data-go="group-detail">فتح الجمعية</button></div>';
+  '<button class="btn primary full" data-go="member-reception">إدارة استقبال الأعضاء</button><button class="btn outline full" data-go="group-detail">فتح الجمعية</button></div>';
  shell('تم إنشاء الجمعية','groups',content);
 }
 function groupDetail(){
@@ -3286,7 +3285,7 @@ function groupDetail(){
  if(groupDetailTab==='overview'){
   if(manager){const counts=d.counts||{paid:0,due:0,late:0},pendingRequests=(db.joinRequests||[]).filter(x=>x.groupId===g.id&&x.status==='pending').length;
    body='<div class="grid2"><div class="stat"><span>الأسهم المسجلة</span><b>'+g.shares+(g.total==null?' سهم':' / '+g.total)+'</b></div><div class="stat"><span>الجولات المتبقية</span><b>'+Math.max(0,(d.rounds||0)-(d.drawn||0))+'</b></div><div class="stat"><span>أقساط مدفوعة</span><b>'+counts.paid+'</b></div><div class="stat"><span>أقساط متأخرة</span><b>'+counts.late+'</b></div></div>'+
-   '<div class="card manager-panel"><div class="section-head"><h3>إدارة الجمعية</h3></div><div class="manager-action-grid"><button class="manager-action" data-go="members"><span>'+uiIcon('users',22)+'</span><b>الأعضاء</b></button><button class="manager-action" data-go="join-requests"><span>'+uiIcon('user-check',22)+'</span><b>طلبات الانضمام'+(pendingRequests?' · '+pendingRequests+' جديدة':'')+'</b></button>'+(d.permissions&&d.permissions.canInvite?'<button class="manager-action" data-go="invite"><span>'+uiIcon('user-plus',22)+'</span><b>دعوة عضو</b></button>':'')+'<button class="manager-action" data-go="installments"><span>'+uiIcon('receipt',22)+'</span><b>أقساط الدورة</b></button><button class="manager-action" data-go="draw-room"><span>'+uiIcon('layers',22)+'</span><b>غرفة القرعة</b></button><button class="manager-action" data-go="news"><span>'+uiIcon('wall',22)+'</span><b>أخبار الجمعية</b></button></div></div>'+
+   '<div class="card manager-panel"><div class="section-head"><h3>إدارة الجمعية</h3></div><div class="manager-action-grid"><button class="manager-action" data-go="member-reception"><span>'+uiIcon('users',22)+'</span><b>استقبال الأعضاء'+(pendingRequests?' · '+pendingRequests+' طلبات معلقة':'')+'</b></button><button class="manager-action" data-go="installments"><span>'+uiIcon('receipt',22)+'</span><b>أقساط الدورة</b></button><button class="manager-action" data-go="draw-room"><span>'+uiIcon('layers',22)+'</span><b>غرفة القرعة</b></button><button class="manager-action" data-go="news"><span>'+uiIcon('wall',22)+'</span><b>أخبار الجمعية</b></button></div></div>'+
    '<div class="card"><div class="keyvalue"><span>تاريخ البداية</span><b>'+dateLabel(g.start)+'</b></div><div class="keyvalue"><span>أول قرعة محسوبة</span><b>'+dateLabel(g.first)+'</b></div><div class="keyvalue"><span>حصة السهم في الدورة</span><b>'+money(g.share,g.currency)+'</b></div><div class="keyvalue"><span>الأقساط داخل الدورة</span><b>'+g.installments+'</b></div><div class="keyvalue"><span>المدة المقدرة</span><b>'+((plan.durationDays)||'—')+' يومًا</b></div><div class="keyvalue"><span>جائزة الجولة المستهدفة</span><b>'+minorMoney(plan.prizeTarget||0,g.currency)+'</b></div></div>';
   }else{const progress=d.myProgress||{};
    body='<div class="grid2"><div class="stat"><span>أسهم مشاركتك</span><b>'+shares+'</b></div><div class="stat"><span>مجموع التزامك في الدورة</span><b>'+money(g.share*shares,g.currency)+'</b></div></div>'+
@@ -3300,7 +3299,7 @@ function groupDetail(){
   const channel=(key,label,map)=>'<div class="card"><b>'+label+'</b>'+SahmApp.notifyTypes().map(t=>'<div class="listrow"><div class="grow"><strong>'+escapeHtml(t.label)+'</strong></div><input type="checkbox" data-action="notify-channel-toggle" data-channel="'+key+'" data-type="'+escapeHtml(t.id)+'" '+(map&&map[t.id]?'checked':'')+'></div>').join('')+'</div>';
   const channels=channel('feed','نشر الأحداث في أخبار الجمعية',d.group.notify)+channel('chat','نشر الأحداث في محادثة الجمعية',d.group.notifyChat)+channel('names','السماح بإظهار اسم العضو في الخبر',d.group.notifyNames);
   const canInvite=!!(d.permissions&&d.permissions.canInvite);
-  body='<div class="card manager-panel"><div class="section-head"><h3>إدارة الجمعية</h3></div>'+(canInvite?'<button class="btn outline full" data-go="invite">دعوة عضو</button>':'<div class="listrow"><b>الاتفاق مقفل؛ الدعوات متوقفة</b></div>')+'<button class="btn outline full" data-go="join-requests">طلبات الانضمام</button><div class="link-management"><div class="section-head"><h3>رابط الانضمام العام</h3></div><div id="association-link-status" class="field-hint">جارٍ تحميل حالة الرابط...</div></div>'+'<button class="btn soft full" data-go="members">إدارة الأعضاء</button><button class="btn soft full" data-go="audit">سجل العمليات الإداري</button></div><h3>إعدادات نشر الأحداث</h3>'+channels;
+  body='<div class="card manager-panel"><div class="section-head"><h3>إدارة الجمعية</h3></div><button class="btn outline full" data-go="member-reception">إدارة استقبال الأعضاء</button><div class="link-management"><div class="section-head"><h3>رابط الانضمام العام</h3></div><div id="association-link-status" class="field-hint">جارٍ تحميل حالة الرابط...</div></div><button class="btn soft full" data-go="audit">سجل العمليات الإداري</button></div><h3>إعدادات نشر الأحداث</h3>'+channels;
  }else{
   const mute=SahmApp.prefs().mute&&SahmApp.prefs().mute[g.id]||{};
   body='<div class="card"><div class="section-head"><h3>تفضيلات الإشعارات</h3></div><div class="listrow"><div class="grow"><strong>كتم إشعارات المجموعة</strong></div><input type="checkbox" data-action="mute-toggle" data-kind="group" '+(mute.group?'checked':'')+'></div><div class="listrow"><div class="grow"><strong>كتم تذكيرات الأقساط</strong></div><input type="checkbox" data-action="mute-toggle" data-kind="reminders" '+(mute.reminders?'checked':'')+'></div></div>';
@@ -3313,7 +3312,7 @@ async function loadAssociationPublicLinkStatus(associationId,canInvite){
  if(!target)return;
  const result=await SahmSupabaseData.getPublicLinkStatus(associationId);
  if(!result||!result.ok){target.textContent=result&&result.message||'تعذر تحميل حالة الرابط';return}
- if(currentGroupId!==associationId||screenName!=='group-detail'||groupDetailTab!=='tools')return;
+ if(currentGroupId!==associationId||!['group-detail','member-reception'].includes(screenName)||(screenName==='group-detail'&&groupDetailTab!=='tools'))return;
  const link=result.link||{},status=link.status||'none';
  let controls='';
  if(status==='active'){
@@ -3476,10 +3475,31 @@ function invites(){
  const items=r.invites||[];
  const rows=items.map(i=>{
   const response=({pending_response:'بانتظار رد المدعو',interested:'مهتم بالانضمام',declined:'رفض الدعوة',deferred:'أجّل الرد',legacy_accepted:'دعوة قديمة مقبولة'})[i.responseStatus]||i.responseStatus||'—';
-  const shares=i.isLegacy?'دعوة قديمة · '+i.shares+' سهم مسجل':'يحدد المدعو الأسهم عند تقديم الطلب';
+  const shares=i.isLegacy?'دعوة قديمة · '+i.shares+' سهم مسجل':'يحدد المدعو الأسهم عند تقديم طلب الانضمام';
   return '<div class="listrow"><div class="avatar">'+escapeHtml((i.name||'؟').slice(0,1))+'</div><div class="grow"><strong>'+escapeHtml(i.name||'مدعو')+'</strong><small>'+escapeHtml(i.phone||'لا يوجد رقم محفوظ')+'</small><small>'+shares+'</small><small>'+escapeHtml(response)+' · '+dateLabel(String(i.createdAt||'').slice(0,10))+'</small></div>'+((i.status==='pending'&&i.responseStatus!=='declined')?'<button class="btn outline small" data-action="cancel-invite" data-id="'+i.id+'">إلغاء</button>':'')+'</div>';
  }).join('');
- shell('الدعوات','groups',header('دعوات الجمعية',g.name)+'<div class="card">'+(rows||'<div class="empty"><b>لا توجد دعوات مسجلة</b></div>')+'</div><button class="btn primary full" data-go="invite">دعوة عضو جديد</button><button class="btn outline full" data-go="join-requests">طلبات الانضمام</button>');
+ shell('الدعوات','groups',header('دعوات الجمعية',g.name)+'<div class="card">'+(rows||'<div class="empty"><b>لا توجد دعوات مسجلة</b></div>')+'</div><button class="btn primary full" data-go="invite">دعوة عضو جديد</button><button class="btn outline full" data-go="member-reception">العودة إلى استقبال الأعضاء</button>');
+}
+function memberReception(){
+ const g=currentGroup();if(!g){go('groups');return}
+ const detail=SahmApp.groupDetail(g.id);
+ if(!detail||!detail.ok||!detail.role.manager){toast('استقبال الأعضاء متاح لمدير الجمعية فقط');go('group-detail');return}
+ const memberResult=SahmApp.memberList(g.id),inviteResult=SahmApp.inviteList(g.id);
+ if(!memberResult||!memberResult.ok||!inviteResult||!inviteResult.ok){toast('تعذر تحميل بيانات استقبال الأعضاء');return}
+ const members=memberResult.members||[],invitations=inviteResult.invites||[];
+ const activeInvites=invitations.filter(x=>x.status==='pending'&&!['declined','legacy_accepted'].includes(x.responseStatus));
+ const pendingRequests=(db.joinRequests||[]).filter(x=>x.groupId===g.id&&x.status==='pending');
+ const canInvite=!!(detail.permissions&&detail.permissions.canInvite);
+ const closed=detail.agreementLocked;
+ const content='<div class="grid2"><div class="stat"><span>الأعضاء</span><b>'+members.length+'</b></div><div class="stat"><span>الدعوات النشطة</span><b>'+activeInvites.length+'</b></div><div class="stat"><span>طلبات تنتظر المراجعة</span><b>'+pendingRequests.length+'</b></div><div class="stat"><span>حالة استقبال الأعضاء</span><b>'+(canInvite?'مفتوح':'مغلق')+'</b></div></div>'+
+  '<div class="card manager-panel"><div class="section-head"><h3>إدارة العضوية</h3></div>'+
+  '<button class="btn outline full" data-go="members">عرض الأعضاء والأسهم ('+members.length+')</button>'+
+  (canInvite?'<button class="btn primary full" data-go="invite">دعوة أعضاء جدد</button>':'<div class="field-hint">الاتفاق مقفل؛ لا يمكن إرسال دعوات أو تعديل العضوية والأسهم.</div>')+
+  '<button class="btn outline full" data-go="invites">الدعوات الخاصة ('+invitations.length+')</button>'+
+  '<button class="btn outline full" data-go="join-requests">طلبات الانضمام ('+pendingRequests.length+')</button>'+
+  '</div><div class="card manager-panel"><div class="section-head"><h3>رابط الانضمام العام</h3></div><div id="association-link-status" class="field-hint">جارٍ تحميل حالة الرابط...</div></div>';
+ shell('استقبال الأعضاء','groups',header('استقبال الأعضاء',g.name)+(closed?'<div class="card"><b>الاتفاق مقفل</b><small>يمكنك مراجعة الأعضاء والدعوات والطلبات السابقة وإيقاف الرابط العام أو إبطاله؛ لا يمكن استقبال أعضاء جدد.</small></div>':'')+content);
+ loadAssociationPublicLinkStatus(g.id,canInvite);
 }
 function joinGroup(){
  const q=new URLSearchParams(location.search),code=q.get('invite')||q.get('join')||'';
@@ -3760,7 +3780,7 @@ function logout(){auth(`<div class="auth-brand"><div class="brand-mark">✓</div
 const ALL_SCREEN_REGISTRY={
  welcome:welcome,register:register,'account-login':accountLogin,'profile-setup':profileSetup,'reset-password':resetPasswordScreen,'logged-out':logout,
  home:home,groups:groups,'managed-groups':managedGroups,'joined-groups':joinedGroups,'create-group':createGroup,'created-group':createdGroup,'group-detail':groupDetail,
- members:members,invite:invite,invites:invites,'invite-detail':inviteDetail,'join-group':joinGroup,'join-request-status':joinRequestStatus,'join-requests':joinRequests,'join-request-detail':joinRequestDetail,installments:installments,
+ members:members,'member-reception':memberReception,invite:invite,invites:invites,'invite-detail':inviteDetail,'join-group':joinGroup,'join-request-status':joinRequestStatus,'join-requests':joinRequests,'join-request-detail':joinRequestDetail,installments:installments,
  'draw-room':drawRoom,'draw-history':drawHistory,receipts:receipts,'receipt-detail':receiptDetail,
  chat:chat,wall:wall,news:news,notifications:notifications,audit:audit,profile:profile,'edit-profile':editProfile,settings:settings
 };
@@ -3917,6 +3937,22 @@ async function handleAppAction(action,el){
   }else await copyText(value,'المشاركة غير مدعومة؛ تم نسخ الرابط');
   return;
  }
+ if(action==='confirm-public-link-action'){
+  const pending=$('#modal-root')?.dataset.publicLinkAction||'';
+  closeModal();
+  if(!['rotate-group-link','revoke-group-link'].includes(pending))return;
+  action=pending;
+  el={dataset:{confirmed:'true'}};
+ }
+ if(['rotate-group-link','revoke-group-link'].includes(action)&&!(el&&el.dataset.confirmed==='true')){
+  const title=action==='rotate-group-link'?'تأكيد تجديد الرابط':'تأكيد إبطال رابط الانضمام';
+  const message=action==='rotate-group-link'
+   ?'سيصبح الرابط الحالي غير صالح، وسيصدر رابط جديد. الروابط والرسائل التي تحتوي الرابط القديم لن تعمل بعد التجديد.'
+   :'سيُبطل الرابط العام نهائيًا، ولن يستطيع أحد تقديم طلب انضمام من خلاله.';
+  showModal(title,'<p>'+message+'</p>',[['تأكيد','confirm-public-link-action','danger'],['إلغاء','close','outline']]);
+  $('#modal-root').dataset.publicLinkAction=action;
+  return;
+ }
  if(['create-group-link','rotate-group-link','pause-group-link','resume-group-link','revoke-group-link'].includes(action)){
   if(!g||!isManager())return;
   const op=({'create-group-link':'create','rotate-group-link':'rotate','pause-group-link':'pause','resume-group-link':'resume','revoke-group-link':'revoke'})[action];
@@ -3926,7 +3962,7 @@ async function handleAppAction(action,el){
    createdLinkWarning=result.status==='active'?'':'الرابط '+(result.status==='paused'?'متوقف':'غير نشط');
    if(result.url)showModal('رابط الانضمام العام','<p>انسخ الرابط أو شاركه الآن؛ لن يستطيع النظام استعادة رمزه السري لاحقًا.</p><div class="field"><input id="newInviteLink" readonly value="'+escapeHtml(result.url)+'"></div>',[['نسخ الرابط','copy-new-invite','primary'],['إغلاق','close','outline']]);
    else toast(result.status==='paused'?'تم إيقاف الرابط':'تم تحديث حالة الرابط');
-   if(screenName==='created-group')showCreatedGroup(g);else groupDetail();
+   if(screenName==='created-group')showCreatedGroup(g);else if(screenName==='member-reception')memberReception();else groupDetail();
   }else toast(result&&result.message||'تعذر إدارة الرابط');
   return;
  }
