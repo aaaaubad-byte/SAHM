@@ -451,3 +451,26 @@ test('member reception is the central manager entry point and destructive link c
   assert.match(html, /سيُبطل الرابط العام نهائيًا/);
   assert.ok(html.includes("['rotate-group-link','revoke-group-link'].includes(action)"));
 });
+
+
+test('public-link lifecycle is managed in one place rather than duplicated across success and settings screens', () => {
+  const detailStart = html.indexOf('function groupDetail(){');
+  const detailEnd = html.indexOf('async function loadAssociationPublicLinkStatus', detailStart);
+  const detail = html.slice(detailStart, detailEnd);
+  assert.match(detail, /data-go="member-reception"/);
+  assert.doesNotMatch(detail, /association-link-status/);
+
+  const createdStart = html.indexOf('function showCreatedGroup(g){');
+  const createdEnd = html.indexOf('function groupDetail(){', createdStart);
+  const created = html.slice(createdStart, createdEnd);
+  assert.match(created, /data-action="copy-group-link"/);
+  assert.match(created, /data-action="share-group-link"/);
+  assert.doesNotMatch(created, /data-action="pause-group-link"|data-action="rotate-group-link"|data-action="revoke-group-link"|data-action="create-group-link"/);
+
+  const receptionStart = html.indexOf('function memberReception(){');
+  const receptionEnd = html.indexOf('function joinGroup(){', receptionStart);
+  const reception = html.slice(receptionStart, receptionEnd);
+  assert.match(reception, /id="association-link-status"/);
+  assert.match(reception, /loadAssociationPublicLinkStatus\(g\.id,canInvite\)/);
+  assert.match(html, /if\(currentGroupId!==associationId\|\|screenName!=='member-reception'\)return/);
+});
