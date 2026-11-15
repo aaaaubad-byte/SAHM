@@ -2269,6 +2269,41 @@ body {
 #app :is(.hero-num,.stat b,.member-summary b,.summary-copy b){
   font-size: var(--sahm-font-page-title) !important;
 }
+/* Standard type scale for inner screens and dialogs, applied by element role.
+   Home, top bar and bottom bar keep the approved scale above.
+   Sizes: 20 page title and key figures, 16 section title, 15 card title, 14 body, 12 secondary, 11 helper.
+   Weights: 400 regular, 500 medium, 600 semibold, 700 bold. Families: IBM Plex Sans Arabic, DM Sans for numerals. */
+#screen:not(.home-screen),#modal-root{
+  --sahm-font-page-title: 20px;
+  --sahm-font-section-title: 16px;
+  --sahm-font-card-title: 15px;
+  --sahm-font-body: 14px;
+  --sahm-font-secondary: 12px;
+  --sahm-font-helper: 11px;
+  --sahm-weight-regular: 400;
+  --sahm-weight-medium: 500;
+  --sahm-weight-semibold: 600;
+  --sahm-weight-bold: 700;
+  --sahm-leading-title: 1.35;
+  --sahm-leading-body: 1.6;
+}
+:is(#screen:not(.home-screen),#modal-root) :is(p,small,.field-hint){
+  font-weight: var(--sahm-weight-regular);
+  line-height: var(--sahm-leading-body);
+}
+:is(#screen:not(.home-screen),#modal-root) :is(strong,b,.btn,.tabs button,.segmented button,.pill,.role-chip){
+  font-weight: var(--sahm-weight-semibold);
+}
+:is(#screen:not(.home-screen),#modal-root) :is(.field label,.eyebrow,.keyvalue span,.stat span,.member-summary span,.group-card-metrics span){
+  font-weight: var(--sahm-weight-medium);
+}
+:is(#screen:not(.home-screen),#modal-root) :is(.field input,.field select,.field textarea,.searchbox){
+  font-weight: var(--sahm-weight-regular);
+}
+:is(#screen:not(.home-screen),#modal-root) :is(h1,h2,h3,h4,.hero-num,.stat b,.member-summary b){
+  font-weight: var(--sahm-weight-bold);
+  line-height: var(--sahm-leading-title);
+}
 /* Icon and brand glyph sizing remains independent from the text scale. */
 #app .navitem .ni{ font-size: 21px !important; }
 #app .manager-action span, #app .member-action span{ font-size: 19px !important; }

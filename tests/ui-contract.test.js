@@ -548,3 +548,19 @@ test('line-icon system decorates inner screens only and never draws icon bubbles
   assert.doesNotMatch(style, /\.cg-success-icon\{[^}]*background:/, 'success mark is a bare glyph');
   assert.doesNotMatch(html, /class="cg-sub"/, 'no explanatory sub-lines on the create flow');
 });
+
+
+test('inner screens and dialogs share one standard type scale; home, top bar and bottom bar keep theirs', () => {
+  const marker = 'Standard type scale for inner screens and dialogs';
+  const layer = html.slice(html.indexOf(marker), html.indexOf('Icon and brand glyph sizing'));
+  assert.ok(layer.length > 100, 'standard scale layer exists');
+  const tokens = { 'page-title': 20, 'section-title': 16, 'card-title': 15, body: 14, secondary: 12, helper: 11 };
+  for (const [name, px] of Object.entries(tokens)) {
+    assert.match(layer, new RegExp('--sahm-font-' + name + ':\\s*' + px + 'px'), name + ' = ' + px + 'px');
+  }
+  assert.match(layer, /#screen:not\(\.home-screen\),#modal-root\{/, 'tokens are scoped away from home, top bar and bottom bar');
+  const weights = [...layer.matchAll(/--sahm-weight-\w+:\s*(\d+)/g)].map(m => Number(m[1]));
+  assert.deepEqual(weights, [400, 500, 600, 700], 'only the four loaded font weights are used');
+  assert.doesNotMatch(layer, /font-size:\s*\d/, 'sizes come from tokens, never literals');
+  assert.match(html, /family=IBM\+Plex\+Sans\+Arabic:wght@400;500;600;700/, 'every weight in the scale is loaded');
+});
