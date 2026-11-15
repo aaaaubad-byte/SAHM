@@ -2807,23 +2807,23 @@ body {
   box-shadow:inset 0 0 0 1px rgba(36,79,201,.08) !important;
 }
 </style>
-<style id="sahm-typography-refinement-2026-11">
-/* Gentle one-step typography refinement; keep compact labels and controls legible. */
-.section-head h3 { font-size: 12.5px !important; }
-.hero-num { font-size: 28px !important; }
-.stat b { font-size: 22px !important; }
-.listrow strong { font-size: 11.5px !important; }
-.amount { font-size: 11.5px !important; }
-.field label { font-size: 10.5px !important; }
-.field input, .field select, .field textarea, .searchbox { font-size: 11.5px !important; }
-.btn:not(.small) { font-size: 11.5px !important; }
-.tabs button { font-size: 10.5px !important; }
-.keyvalue { font-size: 10.5px !important; }
-.dialog h3 { font-size: 15px !important; }
-.auth-brand h1 { font-size: 27px !important; }
-.member-summary b { font-size: 17px !important; }
-.group-card-metrics b { font-size: 10.5px !important; }
-.pill { font-size: 9.5px !important; }
+<style id="sahm-typography-system-4-sizes">
+/* Four-level typography system: 15 / 13 / 11 / 9.5px. Icons retain their own sizing. */
+:where(.app,.phone,body) :is(p,li,td,th,label,button,input,select,textarea,a,strong,b,small,em,span):not(.ni):not(.brand-mark):not(.receipt-mark):not(.shortcut-arrow):not(.icon):not(.material-symbols-outlined):not(.manager-action-icon):not(.member-action-icon) {
+  font-size: 11px !important;
+}
+:where(.app,.phone,body) :is(h1,h2,.topbar-screen-title,.dialog h3,.auth-brand h1,.create-success-card h1) {
+  font-size: 15px !important;
+}
+:where(.app,.phone,body) :is(h3,.section-head h3,.create-section-head h2,.empty b,.summary-copy strong,.home-shortcut strong,.home-screen .home-action-card strong) {
+  font-size: 13px !important;
+}
+:where(.app,.phone,body) :is(small,.eyebrow,.pill,.role-chip,.stat span,.listrow small,.manager-action small,.member-action small,.group-card-metrics span,.member-summary span,.progress-caption,.group-card-footer,.summary-index,.activity-copy small,.create-section-head p,.create-manager-choice small,.create-success-card small,.create-rules-grid span,.field-hint,.invitee-link,#bottomnav .navitem > span:last-child) {
+  font-size: 9.5px !important;
+}
+:where(.app,.phone,body) :is(.hero-num,.stat b,.member-summary b,.summary-copy b) {
+  font-size: 15px !important;
+}
 </style>
 </head>
 <body><noscript><main dir="rtl" style="font-family:Arial,sans-serif;padding:24px;color:#142f39"><h1>سهم</h1></main></noscript><div class="workspace"><div class="phone" id="app">
