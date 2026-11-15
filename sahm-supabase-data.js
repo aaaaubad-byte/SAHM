@@ -98,11 +98,7 @@
   function groupCycle(cycles, aid, no) {
     return cycles.find(function(x){return x.association_id===aid && Number(x.cycle_no)===Number(no);}) || null;
   }
-  function profileCompletionRows(p) {
-    return p && p.completed ? p : {id:user.id,fullName:'',avatarKey:'avatar-01',completed:false,phone:'',city:''};
-  }
-
-  async function loadSnapshot(profileValue) {
+    async function loadSnapshot(profileValue) {
     user = await root.SahmSupabase.user();
     profile = profileValue || await root.SahmSupabase.profile(user.id);
     /* cycle_attendance is retired: attendance is no longer a draw condition, so it is not read any more */
@@ -338,11 +334,7 @@
     if(/^\+/.test(v))return v;
     return '+967'+v.replace(/^0+/,'');
   }
-  async function afterMutation(result,extra) {
-    await refresh();
-    return Object.assign({ok:true},extra||{},result && typeof result==='object'?result:{data:result});
-  }
-  async function createGroup(input) {
+    async function createGroup(input) {
     try {
       input=input||{};
       var startDate=String(input.startDate||''),firstDrawOn=String(input.firstDrawOn||'');
