@@ -2839,7 +2839,7 @@ html, body, #app {
   font-weight: 600;
   line-height: 1.4;
 }
-#app :where(h3, .listrow strong, .home-shortcut strong, .home-action-card strong, .create-manager-choice strong, .manager-action b, .member-action b) {
+#app :where(.listrow strong, .home-shortcut strong, .home-action-card strong, .create-manager-choice strong, .manager-action b, .member-action b) {
   font-size: var(--type-card);
   font-weight: 600;
   line-height: 1.5;
@@ -2852,7 +2852,15 @@ html, body, #app {
   font-size: var(--type-meta);
   line-height: 1.5;
 }
-#app :where(.hero-num, .stat b, .member-summary b, .summary-copy b, .group-card-metrics b) {
+#app :where(.hero-num) {
+  font-family: var(--font-latin);
+  font-size: var(--type-display);
+  font-weight: 700;
+  line-height: 1.3;
+  font-variant-numeric: tabular-nums;
+}
+
+#app :where(.stat b, .member-summary b, .summary-copy b, .group-card-metrics b) {
   font-family: var(--font-latin);
   font-size: var(--type-section);
   font-weight: 700;
