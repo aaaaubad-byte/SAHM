@@ -1,9 +1,21 @@
-/* SAHM remote data gateway. All business state is read from Supabase and every mutation is confirmed by a database RPC. */
+/* SAHM remote data gateway. All business state is read from Supabase and every mutation is confirmed by a database RPC.
+   Mirrors database phases 1-5: agreement lock by start date, no attendance/quorum, financial draw readiness,
+   draw time + presentation status, draw room/history, publishing channels (feed/chat/names), member news, audit log. */
 (function (root) {
   'use strict';
   var app = null, client = null, user = null, profile = null, store = null, raw = {}, realtimeChannel = null, realtimeCallback = null;
   var realtimeRefreshTimer = null, pendingRealtimePayloads = [];
   var NOTIFY = ['received','completed','late','drawSoon','drawDue','drawResult','joined','motivate'];
+
+  function typeMap(list) {
+    var o = {}; NOTIFY.forEach(function(t){ o[t] = list.indexOf(t) >= 0; }); return o;
+  }
+  /* array of type ids, or a {type:boolean} map, or null (= keep the database value) */
+  function typesFrom(v) {
+    if (v == null) return null;
+    if (Array.isArray(v)) return v.filter(function(t){ return NOTIFY.indexOf(t) >= 0; });
+    return NOTIFY.filter(function(t){ return !!v[t]; });
+  }
 
   function c() {
     if (!root.SahmSupabase) throw new Error('مكتبة الاتصال غير جاهزة');
@@ -45,7 +57,9 @@
   function mapEventType(type) {
     return ({association_created:'created',association_updated:'settings',member_joined:'join',member_removed:'leave',
       shares_added:'shares',shares_removed:'shares',invitation_created:'invite',invitation_cancelled:'invite',
-      receipt_recorded:'receipt',receipt_corrected:'correction',draw_result:'draw',reminders_sent:'reminder',
+      receipt_recorded:'receipt',installment_received:'receipt',receipt_corrected:'correction',draw_result:'draw',
+      draw_scheduled:'draw',draw_presentation_completed:'draw',draw_presentation_failed:'draw',
+      notification_settings_updated:'settings',reminders_sent:'reminder',
       attendance_marked:'attendance',chat_message:'message',
       join_request_submitted:'join-request',join_request_approved:'join-request',join_request_rejected:'join-request',join_request_cancelled:'join-request',
       invitation_interested:'invite',invitation_declined:'invite',invitation_deferred:'invite',public_link_created:'invite'})[type] || type || 'activity';
@@ -70,8 +84,13 @@
       case 'join_request_cancelled': return 'ألغى مقدم الطلب طلب الانضمام';
       case 'public_link_created': return 'تم إنشاء رابط انضمام عام';
       case 'receipt_recorded': return 'تم تسجيل استلام قسط';
+      case 'installment_received': return 'تم تسجيل استلام قسط';
       case 'receipt_corrected': return 'تم تصحيح سجل استلام';
       case 'draw_result': return 'تم تثبيت نتيجة القرعة';
+      case 'draw_scheduled': return 'تم تحديد وقت القرعة';
+      case 'draw_presentation_completed': return 'اكتمل عرض القرعة';
+      case 'draw_presentation_failed': return 'تعذّر عرض القرعة';
+      case 'notification_settings_updated': return 'تم تعديل إعدادات النشر';
       case 'reminders_sent': return 'تم إرسال '+(a.recipients||0)+' تذكير';
       default: return e.event_type || 'نشاط';
     }
@@ -86,9 +105,10 @@
   async function loadSnapshot(profileValue) {
     user = await root.SahmSupabase.user();
     profile = profileValue || await root.SahmSupabase.profile(user.id);
+    /* cycle_attendance is retired: attendance is no longer a draw condition, so it is not read any more */
     var names = ['associations','profiles','association_memberships','shares','association_cycles',
       'installment_periods','installment_obligations','installment_receipts','receipt_corrections',
-      'draws','draw_eligible_shares','cycle_attendance','chat_messages','chat_read_states',
+      'draws','draw_eligible_shares','chat_messages','chat_read_states',
       'association_events','association_notification_settings','association_user_preferences',
       'invitations','join_requests','notifications','reminders','user_preferences'];
     var inboxPromise=invoke('get_my_invitation_inbox',{});
@@ -130,8 +150,12 @@
     raw.association_notification_settings.forEach(function(x){settingsMap[x.association_id]=x;});
     var associationIds=raw.associations.map(function(a){return a.id;});
     raw.associations.forEach(function(a){
-      var st=settingsMap[a.id], enabled=st ? st.enabled_types : NOTIFY;
-      var notify={}; NOTIFY.forEach(function(t){notify[t]=enabled.indexOf(t)>=0;});
+      var st=settingsMap[a.id], legacy=st&&Array.isArray(st.enabled_types)?st.enabled_types:NOTIFY;
+      var feedTypes=st&&Array.isArray(st.feed_enabled_types)?st.feed_enabled_types:legacy;
+      var chatTypes=st&&Array.isArray(st.chat_enabled_types)?st.chat_enabled_types:legacy;
+      var nameTypes=st&&Array.isArray(st.name_visible_types)?st.name_visible_types:['drawResult'];
+      var drawnCount=raw.draws.filter(function(d){return d.association_id===a.id;}).length;
+      var roundCycle=cycles.find(function(x){return x.association_id===a.id&&Number(x.cycle_no)===drawnCount+1;})||null;
       db.groups.push({
         id:a.id,name:a.name,tone:'blue',currency:a.currency,tz:a.time_zone||'Asia/Aden',
         cycleType:a.cycle_type,cycleDays:Number(a.cycle_days),firstDrawOn:a.first_draw_on||null,
@@ -139,7 +163,9 @@
         installments:Number(a.installments_count),shareAmount:Number(a.share_amount_minor),
         startDate:a.start_date,createdOn:String(a.created_at||'').slice(0,10),
         maxPerMember:a.max_shares_per_member==null?null:Number(a.max_shares_per_member),targetShares:a.target_shares==null?null:Number(a.target_shares),
-        quorum:Number(a.quorum_percent),rules:a.rules||'',notify:notify,
+        rules:a.rules||'',
+        notify:typeMap(feedTypes),notifyChat:typeMap(chatTypes),notifyNames:typeMap(nameTypes),
+        drawRound:drawnCount+1,drawScheduledAt:roundCycle&&roundCycle.draw_scheduled_at||null,cycleStatus:roundCycle&&roundCycle.status||null,
         managerUserId:a.manager_user_id,managerName:profileName(a.manager_user_id,profileMap),
         inviteCode:null,inviteOpensOn:a.invite_opens_on||a.start_date,inviteClosesOn:a.invite_closes_on||null,
         lockedAt:a.locked_at||null,lockedShareCount:a.locked_share_count||null,
@@ -150,15 +176,10 @@
     memberships.forEach(function(m){
       var a=raw.associations.find(function(x){return x.id===m.association_id;});
       if(!a)return;
-      var currentCycle=cycles.filter(function(x){return x.association_id===a.id;})
-        .sort(function(x,y){return Number(y.cycle_no)-Number(x.cycle_no);})[0];
-      var attendance=currentCycle && raw.cycle_attendance.find(function(x){
-        return x.cycle_id===currentCycle.id && x.membership_id===m.id;
-      });
       db.members.push({
         id:m.id,groupId:m.association_id,name:profileName(m.user_id,profileMap),userId:m.user_id,
         isManager:m.user_id===a.manager_user_id,joinedAt:String(m.joined_at||'').slice(0,10),
-        present:!!(attendance&&attendance.present),status:m.status
+        present:false,status:m.status
       });
     });
     activeShares.forEach(function(s){
@@ -187,11 +208,13 @@
     raw.draw_eligible_shares.forEach(function(x){(eligibleMap[x.draw_id]||(eligibleMap[x.draw_id]=[])).push(x.share_id);});
     raw.draws.forEach(function(d){
       var win=shareMap[d.winner_share_id] || raw.shares.find(function(s){return s.id===d.winner_share_id;});
+      var drawCycle=cycleMap[d.cycle_id]||null;
       db.draws.push({
         id:d.id,groupId:d.association_id,round:Number(d.round_no),date:d.scheduled_on,at:d.drawn_at,
         by:null,winnerShareId:d.winner_share_id,winnerMemberId:win&&win.membership_id||null,
         shareCount:Number(d.share_count_at_draw),prize:Number(d.prize_target_minor),
         recordedAtDraw:Number(d.prize_target_minor),eligibleShareIds:eligibleMap[d.id]||[],
+        cycleStatus:drawCycle&&drawCycle.status||null,drawScheduledAt:drawCycle&&drawCycle.draw_scheduled_at||null,
         quorum:{people:Number(d.quorum_people),required:Number(d.quorum_required)},overrideQuorum:false
       });
     });
@@ -203,6 +226,7 @@
         type:m.system_type||null,text:m.body,at:m.created_at
       });
     });
+    /* raw association_events are readable by the manager only (audit record); members read getNews() instead */
     raw.association_events.forEach(function(e){
       db.events.push({
         id:e.id,groupId:e.association_id,at:e.occurred_at,type:mapEventType(e.event_type),
@@ -301,11 +325,6 @@
   function moneyMinor(value,currency) {
     return root.SahmCore.parseMoney(value,currency);
   }
-  function currentCycle(aid) {
-    var list=raw.association_cycles.filter(function(x){return x.association_id===aid;})
-      .sort(function(x,y){return Number(x.cycle_no)-Number(y.cycle_no);});
-    return list.find(function(x){var now=new Date().toISOString().slice(0,10);return x.starts_on<=now && x.ends_on>=now;}) || list[list.length-1] || null;
-  }
   function findObligation(groupId,memberId,cycleNo,installmentNo) {
     var cyc=groupCycle(raw.association_cycles,groupId,cycleNo);
     if(!cyc)return null;
@@ -331,13 +350,14 @@
       var amount=input.shareAmountMinor!==undefined?Number(input.shareAmountMinor):moneyMinor(input.shareAmount,input.currency);
       var mode=input.installmentMode==='amount'?'amount':'count';
       var participates=input.managerMode==='both'||input.managerParticipates===true;
+      /* quorum and time zone are not part of the product input: the database ignores quorum and defaults the zone */
       var payload={name:String(input.name||'').trim(),currency:input.currency,startDate:startDate,firstDrawOn:firstDrawOn,
         inviteOpensOn:input.inviteOpensOn||null,inviteClosesOn:input.inviteClosesOn||null,
-        timeZone:input.timeZone||input.tz||'Asia/Aden',shareAmountMinor:amount,installmentMode:mode,
+        shareAmountMinor:amount,installmentMode:mode,
         installments:mode==='count'?Number(input.installments):undefined,
         installmentAmountMinor:mode==='amount'?(input.installmentAmountMinor!==undefined?Number(input.installmentAmountMinor):moneyMinor(input.installmentAmount,input.currency)):undefined,
         managerParticipates:participates,managerShares:participates?Number(input.managerShares)||0:0,
-        quorum:Number(input.quorum)||66,rules:input.rules||''};
+        rules:input.rules||''};
       var id=await invoke('create_association_unified',{p_payload:payload});
       var link=null,linkWarning=null;
       try{
@@ -355,7 +375,7 @@
       Object.keys(patch).forEach(function(k){
         var map={startDate:'startDate',inviteOpensOn:'inviteOpensOn',inviteClosesOn:'inviteClosesOn',
           cycleType:'cycleType',cycleDays:'cycleDays',installments:'installments',
-          maxPerMember:'maxPerMember',targetShares:'targetShares',quorum:'quorum',
+          maxPerMember:'maxPerMember',targetShares:'targetShares',
           name:'name',currency:'currency',rules:'rules'};
         if(map[k])p[map[k]]=patch[k];
       });
@@ -464,14 +484,9 @@
   async function removeMember(memberId){
     try{await invoke('remove_member',{p_membership_id:memberId});await refresh();return {ok:true};}catch(e){return fail(e);}
   }
-  async function setAttendance(memberId,present){
-    try{
-      var m=store.members.find(function(x){return x.id===memberId;});
-      if(!m)throw new Error('العضو غير موجود');
-      var cyc=currentCycle(m.groupId);if(!cyc)throw new Error('لا توجد دورة نشطة لتسجيل الحضور');
-      await invoke('set_cycle_attendance',{p_cycle_id:cyc.id,p_membership_id:memberId,p_present:!!present});
-      await refresh();return {ok:true};
-    }catch(e){return fail(e);}
+  /* attendance is retired: it is no longer a draw condition and the database rejects the call */
+  async function setAttendance(){
+    return fail({code:'ATTENDANCE_RETIRED',message:'تم إيقاف تسجيل الحضور؛ لم يعد شرطًا للقرعة'});
   }
   async function recordPaid(p){
     try{
@@ -508,17 +523,93 @@
       var d=store.draws.find(function(x){return x.id===data.draw_id;});
       var sh=store.shares.find(function(x){return x.id===data.winner_share_id;});
       var m=sh&&store.members.find(function(x){return x.id===sh.memberId;});
-      return {ok:true,drawId:data.draw_id,round:data.round,winner:{shareId:data.winner_share_id,memberId:m&&m.id,label:m?m.name+' · السهم '+sh.no:'—'},locked:!!data.locked};
+      return {ok:true,drawId:data.draw_id,round:data.round,eligibleCount:data.eligible_count==null?null:Number(data.eligible_count),
+        winner:{shareId:data.winner_share_id,memberId:m&&m.id,label:m?m.name+' · السهم '+sh.no:'—'},locked:!!data.locked};
     }catch(e){return fail(e);}
   }
+
+  /* ---------- draw time, presentation, room, history, readiness (phases 2-3) ---------- */
+  async function setDrawScheduledAt(groupId,when){
+    try{
+      var instant=when instanceof Date?when:new Date(when);
+      if(!Number.isFinite(instant.getTime()))throw new Error('وقت القرعة غير صالح');
+      var d=await invoke('set_draw_scheduled_at',{p_association_id:groupId,p_scheduled_at:instant.toISOString()});
+      await refresh();
+      return {ok:true,cycleId:d&&d.cycle_id||null,roundNo:d&&d.round_no==null?null:Number(d.round_no),drawScheduledAt:d&&d.draw_scheduled_at||null};
+    }catch(e){return fail(e);}
+  }
+  /* status is 'completed' or 'failed' only; the recorded result is never touched */
+  async function setDrawPresentationStatus(groupId,roundNo,status){
+    try{
+      var d=await invoke('set_draw_presentation_status',{p_association_id:groupId,p_round_no:Number(roundNo),p_status:status});
+      await refresh();
+      return {ok:true,roundNo:Number(roundNo),status:d&&d.status||status,changed:!!(d&&d.changed)};
+    }catch(e){return fail(e);}
+  }
+  async function getDrawRoom(groupId,roundNo){
+    try{
+      var room=await invoke('get_draw_room',{p_association_id:groupId,p_round_no:roundNo==null?null:Number(roundNo)});
+      return {ok:true,room:room};
+    }catch(e){return fail(e);}
+  }
+  async function getDrawHistory(groupId){
+    try{return {ok:true,history:(await invoke('get_draw_history',{p_association_id:groupId}))||[]};}catch(e){return fail(e);}
+  }
+  /* the database returns financial_ready (the draw also needs date and time); SahmCore expects ready */
+  async function getDrawReadiness(groupId){
+    try{
+      var d=await invoke('get_draw_readiness',{p_association_id:groupId})||{};
+      var financial=Object.assign({},d,{ready:!!d.financial_ready});
+      var view=root.SahmCore&&root.SahmCore.normalizeReadiness?root.SahmCore.normalizeReadiness(financial):null;
+      return {ok:true,raw:d,readiness:view,financialReady:!!d.financial_ready,canDraw:!!d.can_draw,
+        dateReached:!!d.date_reached,timeReached:!!d.time_reached,roundNo:d.round_no==null?null:Number(d.round_no),
+        dueOn:d.due_on||null,drawScheduledAt:d.draw_scheduled_at||null,cycleStatus:d.cycle_status||null,
+        reasons:Array.isArray(d.reasons)?d.reasons.slice():[]};
+    }catch(e){return fail(e);}
+  }
+  async function getFinancialSummary(groupId){
+    try{return {ok:true,summary:await invoke('get_association_financial_summary',{p_association_id:groupId})};}catch(e){return fail(e);}
+  }
+
+  /* ---------- news (members) and audit log (manager) (phase 4) ---------- */
+  async function getNews(groupId,limit,before){
+    try{
+      var args={p_association_id:groupId,p_limit:limit==null?50:Number(limit)};
+      if(before)args.p_before=before instanceof Date?before.toISOString():before;
+      return {ok:true,news:(await invoke('get_association_news',args))||[]};
+    }catch(e){return fail(e);}
+  }
+  async function getAuditLog(groupId,limit,before){
+    try{
+      var args={p_association_id:groupId,p_limit:limit==null?100:Number(limit)};
+      if(before)args.p_before=before instanceof Date?before.toISOString():before;
+      return {ok:true,log:(await invoke('get_association_audit_log',args))||[]};
+    }catch(e){return fail(e);}
+  }
+
   async function sendMessage(groupId,body){
     try{var id=await invoke('send_chat_message',{p_association_id:groupId,p_body:body});await refresh();return {ok:true,messageId:id};}catch(e){return fail(e);}
   }
+  /* channels: feed (news center + personal notifications), chat (system messages), names (member name shown in news).
+     Each value is an array of type ids or a {type:boolean} map; omitted/null keeps the database value. */
+  async function setNotifySettings(groupId,settings){
+    try{
+      settings=settings||{};
+      var d=await invoke('set_association_notification_settings',{
+        p_association_id:groupId,p_feed_types:typesFrom(settings.feed),
+        p_chat_types:typesFrom(settings.chat),p_name_visible_types:typesFrom(settings.names)
+      });
+      await refresh();return {ok:true,settings:d||null};
+    }catch(e){return fail(e);}
+  }
+  /* legacy single toggle: changes the type on both the feed and the chat channel */
   async function setNotifyType(groupId,type,enabled){
     try{
       var g=store.groups.find(function(x){return x.id===groupId;});if(!g)throw new Error('الجمعية غير موجودة');
-      var types=NOTIFY.filter(function(t){return t===type?!!enabled:!!g.notify[t];});
-      await invoke('set_association_notification_types',{p_association_id:groupId,p_enabled_types:types});
+      function toggled(map){return NOTIFY.filter(function(t){return t===type?!!enabled:!!(map&&map[t]);});}
+      await invoke('set_association_notification_settings',{
+        p_association_id:groupId,p_feed_types:toggled(g.notify),p_chat_types:toggled(g.notifyChat||g.notify),p_name_visible_types:null
+      });
       await refresh();return {ok:true};
     }catch(e){return fail(e);}
   }
@@ -678,8 +769,17 @@
     app.correctReceipt=correctReceipt;
     app.sendReminder=sendReminder;
     app.performDraw=performDraw;
+    app.setDrawScheduledAt=setDrawScheduledAt;
+    app.setDrawPresentationStatus=setDrawPresentationStatus;
+    app.getDrawRoom=getDrawRoom;
+    app.getDrawHistory=getDrawHistory;
+    app.getDrawReadiness=getDrawReadiness;
+    app.getFinancialSummary=getFinancialSummary;
+    app.getNews=getNews;
+    app.getAuditLog=getAuditLog;
     app.sendMessage=sendMessage;
     app.setNotifyType=setNotifyType;
+    app.setNotifySettings=setNotifySettings;
     app.setMute=setMute;
     app.markChatRead=markChatRead;
     app.markNotificationsRead=markNotificationsRead;
@@ -704,6 +804,10 @@
     listMyInvitations:listMyInvitations,getMyInvitationDetails:getMyInvitationDetails,
     acceptLegacyInvitationById:acceptLegacyInvitationById,
     submitJoinRequestByInvitation:submitJoinRequestByInvitation,getPublicLinkStatus:getPublicLinkStatus,
+    setDrawScheduledAt:setDrawScheduledAt,setDrawPresentationStatus:setDrawPresentationStatus,
+    getDrawRoom:getDrawRoom,getDrawHistory:getDrawHistory,getDrawReadiness:getDrawReadiness,
+    getFinancialSummary:getFinancialSummary,getNews:getNews,getAuditLog:getAuditLog,
+    setNotifySettings:setNotifySettings,
     updateMyProfile:updateMyProfile,
     startRealtime:startRealtime,stopRealtime:stopRealtime,install:install,clear:clear,
     isRemote:function(){return !!store;},savePrefs:savePrefs
