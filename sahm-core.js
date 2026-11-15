@@ -1,6 +1,8 @@
 /* SAHM core engine — pure calculation rules from the unified reference v2.
    No DOM access, no storage. Dates are ISO strings (YYYY-MM-DD) in the association time zone.
-   Amounts are integers in minor currency units. Everything here is deterministic except pickWinner. */
+   Amounts are integers in minor currency units. Everything here is deterministic except pickWinner.
+   Mirrors the database contract (phases 1-5): agreement lock at the local start date, no attendance
+   quorum, last-installment rounding, financial draw readiness, draw time, presentation status. */
 (function (root) {
   'use strict';
   var DAY = 86400000;
@@ -61,6 +63,28 @@
     var d = new Date(toDay(iso) * DAY);
     return new Intl.DateTimeFormat('ar-YE', Object.assign({ day: 'numeric', month: 'long', year: 'numeric', timeZone: 'UTC' }, opts || {})).format(d);
   }
+  /* date + time of an absolute instant, shown in the association time zone */
+  function fmtDateTime(instant, tz) {
+    if (!instant) return '—';
+    var d = instant instanceof Date ? instant : new Date(instant);
+    if (!Number.isFinite(d.getTime())) return '—';
+    var zone = isValidTimeZone(tz) ? tz : 'Asia/Aden';
+    return new Intl.DateTimeFormat('ar-YE', { day: 'numeric', month: 'long', year: 'numeric', hour: 'numeric', minute: '2-digit', timeZone: zone }).format(d);
+  }
+  /* calendar date (YYYY-MM-DD) that an absolute instant falls on in a time zone */
+  function localDateIn(tz, now) {
+    var zone = tz || 'Asia/Aden';
+    if (!isValidTimeZone(zone)) throw new RangeError('INVALID_ASSOCIATION_TIME_ZONE');
+    var instant = now === undefined ? new Date() : (now instanceof Date ? now : new Date(now));
+    if (!Number.isFinite(instant.getTime())) throw new RangeError('INVALID_CURRENT_INSTANT');
+    var parts = new Intl.DateTimeFormat('en-CA', {
+      timeZone: zone, calendar: 'gregory', numberingSystem: 'latn',
+      year: 'numeric', month: '2-digit', day: '2-digit'
+    }).formatToParts(instant);
+    var part = {};
+    parts.forEach(function (x) { if (x.type !== 'literal') part[x.type] = x.value; });
+    return part.year + '-' + part.month + '-' + part.day;
+  }
 
   /* ---------- cycle model ---------- */
   function cycleLen(g) {
@@ -85,11 +109,12 @@
   }
   function maxInstallments(g) { return cycleLen(g); }
 
-  /* split T (minor units) across N installments exactly, remainder (one unit each) to the first installments */
+  /* split T (minor units) across N installments exactly; the LAST installment absorbs the whole
+     rounding remainder (same rule as the database: base for 1..N-1, base + remainder for N) */
   function splitAmount(T, N) {
     if (!Number.isInteger(T) || T < 0 || !Number.isInteger(N) || N < 1) throw new RangeError('INVALID_SPLIT');
     var base = Math.floor(T / N), rem = T % N, out = [];
-    for (var i = 0; i < N; i++) out.push(base + (i < rem ? 1 : 0));
+    for (var i = 0; i < N; i++) out.push(base + (i === N - 1 ? rem : 0));
     return out;
   }
   /* Exact per-share installment amounts for both supported plans.
@@ -179,11 +204,26 @@
   }
   var STATUS_LABEL = { paid: 'مدفوع', due: 'مستحق', late: 'متأخر', upcoming: 'لم يحن موعده بعد' };
 
+  /* ---------- agreement lock (database contract, phase 1) ----------
+     The agreement (members, shares, settings) is locked once the association's LOCAL date reaches
+     start_date. A first draw also freezes it. The database repeats every check; this is advisory. */
+  function isAgreementLocked(startDate, timeZone, now) {
+    if (!isValidDate(startDate)) throw new RangeError('INVALID_ASSOCIATION_START_DATE');
+    return localDateIn(timeZone, now) >= startDate;
+  }
+  function agreementLock(g, now) {
+    var local = localDateIn(g && (g.tz || g.timeZone), now);
+    return { locked: isValidDate(g && g.startDate) ? local >= g.startDate : false, localDate: local, startDate: g && g.startDate || null };
+  }
+
   /* ---------- db-based helpers (db = the preview store) ---------- */
   function groupShares(db, gid) { return db.shares.filter(function (s) { return s.groupId === gid; }); }
   function memberShares(db, mid) { return db.shares.filter(function (s) { return s.memberId === mid; }); }
   function groupMembers(db, gid) { return db.members.filter(function (m) { return m.groupId === gid; }); }
+  /* a first draw has been recorded: results freeze membership and the round count */
   function isLocked(db, gid) { return db.draws.some(function (d) { return d.groupId === gid; }); }
+  /* frozen = agreement lock by start date OR a recorded draw */
+  function isFrozen(db, g, now) { return isLocked(db, g.id) || agreementLock(g, now).locked; }
   function shareAmounts(g) { return installmentAmounts(g); }
   function activeReceipts(db, filter) {
     return db.receipts.filter(function (r) {
@@ -223,6 +263,53 @@
     for (var k = 1; k <= total; k++) if (obligation(db, g, member, c, k, today).status === 'paid') paid++;
     return { paid: paid, total: total };
   }
+  /* every unpaid, already-ended installment of one member up to a cycle: a new installment never hides an old one */
+  function memberArrears(db, g, member, today, upToCycle) {
+    var items = [], total = 0, last = Number(upToCycle) || 0;
+    for (var c = 1; c <= last; c++) for (var k = 1; k <= g.installments; k++) {
+      var o = obligation(db, g, member, c, k, today);
+      if (o.status === 'late' && o.remaining > 0) { items.push({ cycle: c, no: k, remaining: o.remaining, periodEnd: o.range.end }); total += o.remaining; }
+    }
+    return { items: items, total: total, count: items.length };
+  }
+  /* cumulative financial position for cycles 1..upToCycle (mirrors get_association_financial_summary) */
+  function cumulativeSummary(db, g, today, upToCycle) {
+    var last = Number(upToCycle) || 0;
+    var out = { due: 0, collected: 0, remaining: 0, overdue: 0, counts: { paid: 0, due: 0, late: 0, upcoming: 0 },
+      shares: { total: 0, complete: 0, incomplete: 0 }, members: [], installmentsRemaining: 0, obligationsUnpaid: 0 };
+    var openSlots = {};
+    groupMembers(db, g.id).forEach(function (m) {
+      var n = memberShares(db, m.id).length; if (!n) return;
+      var row = { memberId: m.id, name: m.name, shares: n, due: 0, collected: 0, remaining: 0, overdue: 0, lateCount: 0, complete: true };
+      for (var c = 1; c <= last; c++) for (var k = 1; k <= g.installments; k++) {
+        var o = obligation(db, g, m, c, k, today), coll = o.total - o.remaining;
+        row.due += o.total; row.collected += coll; row.remaining += o.remaining;
+        out.counts[o.status]++;
+        if (o.remaining > 0) { row.complete = false; out.obligationsUnpaid++; openSlots[c + ':' + k] = 1; }
+        if (o.status === 'late') { row.overdue += o.remaining; row.lateCount++; }
+      }
+      out.due += row.due; out.collected += row.collected; out.remaining += row.remaining; out.overdue += row.overdue;
+      out.shares.total += n; if (row.complete) out.shares.complete += n; else out.shares.incomplete += n;
+      out.members.push(row);
+    });
+    out.installmentsRemaining = Object.keys(openSlots).length;
+    return out;
+  }
+  /* local mirror of the database readiness: a draw needs every installment up to its round fully paid */
+  function drawReadinessLocal(db, g, today, round) {
+    var s = cumulativeSummary(db, g, today, round), reasons = [];
+    if (!s.shares.total) reasons.push('لا توجد أسهم نشطة مؤهلة للدورة');
+    if (s.obligationsUnpaid > 0) reasons.push('أقساط غير مسددة: ' + s.obligationsUnpaid + ' التزام، المتبقي ' + s.remaining);
+    return {
+      ready: reasons.length === 0, reasons: reasons, round: round,
+      membersTotal: s.members.length, sharesTotal: s.shares.total,
+      membersComplete: s.members.filter(function (m) { return m.complete; }).length,
+      membersIncomplete: s.members.filter(function (m) { return !m.complete; }).length,
+      sharesComplete: s.shares.complete, sharesIncomplete: s.shares.incomplete,
+      installmentsRemaining: s.installmentsRemaining, obligationsUnpaid: s.obligationsUnpaid,
+      dueMinor: s.due, collectedMinor: s.collected, remainingMinor: s.remaining
+    };
+  }
 
   /* what a late joiner would owe immediately (preview before confirming, reference §7.2 / §21.4) */
   function lateJoinPreview(g, joinDate, sharesCount, today, totalCycles) {
@@ -258,6 +345,7 @@
     do { cr.getRandomValues(buf); x = buf[0]; } while (x >= lim);
     return list[x % n];
   }
+  /* prize = every active share that owes instalments x share value (not only the eligible ones) */
   function prizeTarget(g, shareCount) { return shareCount * g.shareAmount; }
   /* target prize vs what the manager actually recorded for the funding cycle (reference §6.4, §14.3) */
   function prizeInfo(db, g, round, shareCount) {
@@ -266,15 +354,81 @@
     return { round: round, target: target, recorded: recorded, outstanding: Math.max(0, target - recorded) };
   }
 
-  /* attendance quorum counts people, not shares; threshold compared exactly (no rounding up) */
-  function requiredPeople(g, people) { return Math.ceil(people * g.quorum / 100); }
-  function quorumInfo(db, g) {
-    var people = groupMembers(db, g.id).filter(function (m) { return memberShares(db, m.id).length; });
-    var present = people.filter(function (m) { return m.present; }).length;
-    var pct = people.length ? Math.floor(present / people.length * 100) : 0;
-    return { present: present, people: people.length, pct: pct, required: requiredPeople(g, people.length),
-      met: people.length > 0 && present * 100 >= g.quorum * people.length };
+  /* draw day / exact time (phase 3). The due day is the day after the cycle ends. */
+  function checkDrawSchedule(g, round, scheduledAt, now) {
+    var tz = g.tz || g.timeZone || 'Asia/Aden', due = roundDate(g, round);
+    var inst = scheduledAt instanceof Date ? scheduledAt : new Date(scheduledAt);
+    var cur = now === undefined ? new Date() : (now instanceof Date ? now : new Date(now));
+    if (scheduledAt == null || !Number.isFinite(inst.getTime())) return { ok: false, code: 'SCHEDULE_INVALID', dueDate: due };
+    if (localDateIn(tz, cur) !== due) return { ok: false, code: 'SCHEDULE_NOT_DUE_DAY', dueDate: due };
+    if (localDateIn(tz, inst) !== due) return { ok: false, code: 'SCHEDULE_OUTSIDE_DUE_DAY', dueDate: due };
+    if (inst.getTime() < cur.getTime()) return { ok: false, code: 'SCHEDULE_IN_PAST', dueDate: due };
+    return { ok: true, code: null, dueDate: due };
   }
+  /* no scheduled time = only the day gate applies (same as the database) */
+  function drawTimeReached(scheduledAt, now) {
+    if (scheduledAt == null || scheduledAt === '') return true;
+    var inst = scheduledAt instanceof Date ? scheduledAt : new Date(scheduledAt);
+    var cur = now === undefined ? new Date() : (now instanceof Date ? now : new Date(now));
+    return cur.getTime() >= inst.getTime();
+  }
+  /* everything that must hold before a draw: due day, exact time, complete payments */
+  function drawGate(g, round, scheduledAt, readiness, now) {
+    var tz = g.tz || g.timeZone || 'Asia/Aden', blockers = [], due = roundDate(g, round);
+    if (localDateIn(tz, now) < due) blockers.push('DRAW_NOT_DUE');
+    else if (!drawTimeReached(scheduledAt, now)) blockers.push('DRAW_TIME_NOT_REACHED');
+    if (readiness && readiness.ready === false) blockers.push('NOT_READY');
+    return { canDraw: blockers.length === 0, blockers: blockers, dueDate: due };
+  }
+  /* snake_case database readiness -> camelCase view model */
+  function normalizeReadiness(r) {
+    r = r || {};
+    return {
+      ready: !!r.ready, reasons: Array.isArray(r.reasons) ? r.reasons.slice() : [],
+      cycleNo: r.cycle_no == null ? null : Number(r.cycle_no), cycleId: r.cycle_id || null,
+      periodsExpected: Number(r.periods_expected) || 0, periodsFound: Number(r.periods_found) || 0,
+      membersTotal: Number(r.members_total) || 0, sharesTotal: Number(r.shares_total) || 0,
+      obligationsExpected: Number(r.obligations_expected) || 0, obligationsFound: Number(r.obligations_found) || 0,
+      obligationsPaid: Number(r.obligations_paid) || 0, obligationsUnpaid: Number(r.obligations_unpaid) || 0,
+      membersComplete: Number(r.members_complete) || 0, membersIncomplete: Number(r.members_incomplete) || 0,
+      sharesComplete: Number(r.shares_complete) || 0, sharesIncomplete: Number(r.shares_incomplete) || 0,
+      installmentsRemaining: Number(r.installments_remaining) || 0,
+      dueMinor: Number(r.due_minor) || 0, collectedMinor: Number(r.collected_minor) || 0, remainingMinor: Number(r.remaining_minor) || 0
+    };
+  }
+  /* presentation of a recorded result: the database keeps the result; the cycle status tracks the show */
+  var PRESENTATION_LABEL = { pending: 'بانتظار القرعة', presenting: 'العرض جارٍ', completed: 'اكتمل العرض', failed: 'تعذّر العرض' };
+  function presentationState(cycleStatus, hasDraw) {
+    if (!hasDraw) return cycleStatus === 'scheduled' || cycleStatus === 'open' || !cycleStatus ? 'pending' : cycleStatus;
+    if (cycleStatus === 'completed') return 'completed';
+    if (cycleStatus === 'failed') return 'failed';
+    return 'presenting';
+  }
+  /* the wheel is laid out by share number so every device draws the same slots; index comes from that order */
+  function wheelLayout(eligible) {
+    var slots = (eligible || []).slice().sort(function (a, b) { return Number(a.shareNo != null ? a.shareNo : a.share_no) - Number(b.shareNo != null ? b.shareNo : b.share_no); });
+    return {
+      slots: slots,
+      indexOf: function (shareId) {
+        for (var i = 0; i < slots.length; i++) if ((slots[i].shareId || slots[i].share_id) === shareId) return i;
+        return -1;
+      }
+    };
+  }
+
+  /* ---------- publishing channels (phase 4) ---------- */
+  var NOTIFY_TYPE_IDS = Object.freeze(['received', 'completed', 'late', 'drawSoon', 'drawDue', 'drawResult', 'joined', 'motivate']);
+  /* database defaults: feed and chat publish everything, names are shown only for the draw result */
+  function normalizeNotifySettings(row) {
+    function toMap(arr) { var o = {}; NOTIFY_TYPE_IDS.forEach(function (t) { o[t] = arr.indexOf(t) >= 0; }); return o; }
+    var all = NOTIFY_TYPE_IDS.slice();
+    var feed = row && Array.isArray(row.feed_enabled_types) ? row.feed_enabled_types : all;
+    var chat = row && Array.isArray(row.chat_enabled_types) ? row.chat_enabled_types
+      : (row && Array.isArray(row.enabled_types) ? row.enabled_types : all);
+    var names = row && Array.isArray(row.name_visible_types) ? row.name_visible_types : ['drawResult'];
+    return { feed: toMap(feed), chat: toMap(chat), names: toMap(names) };
+  }
+  function notifyTypesOf(map) { return NOTIFY_TYPE_IDS.filter(function (t) { return !!(map && map[t]); }); }
 
   /* ---------- unified association workflow guards ---------- */
   var JOIN_REQUEST_STATUS = Object.freeze({
@@ -297,18 +451,7 @@
   /* UI advisory only. The database must repeat this check using its own clock and association timezone. */
   function isJoinWindowOpen(startDate, timeZone, now) {
     if (!isValidDate(startDate)) throw new RangeError('INVALID_ASSOCIATION_START_DATE');
-    var zone = timeZone || 'Asia/Aden';
-    if (!isValidTimeZone(zone)) throw new RangeError('INVALID_ASSOCIATION_TIME_ZONE');
-    var instant = now === undefined ? new Date() : (now instanceof Date ? now : new Date(now));
-    if (!Number.isFinite(instant.getTime())) throw new RangeError('INVALID_CURRENT_INSTANT');
-    var parts = new Intl.DateTimeFormat('en-CA', {
-      timeZone: zone, calendar: 'gregory', numberingSystem: 'latn',
-      year: 'numeric', month: '2-digit', day: '2-digit'
-    }).formatToParts(instant);
-    var part = {};
-    parts.forEach(function (x) { if (x.type !== 'literal') part[x.type] = x.value; });
-    var localDate = part.year + '-' + part.month + '-' + part.day;
-    return localDate < startDate;
+    return localDateIn(timeZone, now) < startDate;
   }
 
   function nextInvitationResponseStatus(currentStatus, action) {
@@ -360,6 +503,7 @@
   }
 
   /* ---------- validation ---------- */
+  /* quorum is no longer part of the product: it is ignored if a caller still sends it */
   var LEGACY_FIELDS = ['paymentMethod', 'paymentMethods', 'proofRequired', 'requireProof', 'referenceNo', 'transferRef', 'receiptImage', 'firstDrawDate', 'firstDraw'];
 
   /* Validation for the date-based unified association contract. */
@@ -406,8 +550,6 @@
     if (isValidDate(d.inviteOpensOn) && isValidDate(d.inviteClosesOn) && d.inviteClosesOn < d.inviteOpensOn) {
       bad('inviteClosesOn', 'INVITE_RANGE_INVALID', 'تاريخ إغلاق الانضمام قبل تاريخ فتحه');
     }
-    var quorum = d.quorum === undefined || d.quorum === null || d.quorum === '' ? 66 : Number(d.quorum);
-    if (!Number.isInteger(quorum) || quorum < 1 || quorum > 100) bad('quorum', 'QUORUM_INVALID', 'نسبة النصاب بين 1 و100');
     var managerMode = d.managerMode || 'only';
     if (managerMode !== 'only' && managerMode !== 'both') bad('managerMode', 'MANAGER_MODE_INVALID', 'اختر «مدير فقط» أو «مدير ومشارك»');
     if (managerMode === 'both' && (!Number.isSafeInteger(Number(d.managerShares)) || Number(d.managerShares) < 1)) {
@@ -454,9 +596,6 @@
     if (!Number.isInteger(target) || target < 1 || target > 1000) bad('targetShares', 'TARGET_INVALID', 'أدخل عددًا مستهدفًا صحيحًا من الأسهم');
     if (!Number.isInteger(maxPer) || maxPer < 1) bad('maxPerMember', 'MAX_PER_INVALID', 'أدخل الحد الأقصى لأسهم الفرد');
     else if (Number.isInteger(target) && maxPer > target) bad('maxPerMember', 'MAX_PER_EXCEEDS_TARGET', 'الحد الأقصى لأسهم الفرد يتجاوز العدد المستهدف');
-    if (d.quorum !== undefined && d.quorum !== null && d.quorum !== '') {
-      var q = Number(d.quorum); if (!Number.isInteger(q) || q < 1 || q > 100) bad('quorum', 'QUORUM_INVALID', 'نسبة النصاب بين 1 و100');
-    }
     var mode = d.managerMode || 'only';
     if (mode !== 'only' && mode !== 'both') bad('managerMode', 'MANAGER_MODE_INVALID', 'اختر «مدير فقط» أو «مدير ومشارك»');
     if (mode === 'both') {
@@ -486,16 +625,20 @@
   root.SahmCore = {
     CURRENCIES: CURRENCIES, parseMoney: parseMoney, toMinor: toMinor, fmtMoney: fmtMoney,
     isValidDate: isValidDate, isValidTimeZone: isValidTimeZone,
-    toDay: toDay, fromDay: fromDay, addDays: addDays, diffDays: diffDays, todayIn: todayIn, fmtDate: fmtDate,
+    toDay: toDay, fromDay: fromDay, addDays: addDays, diffDays: diffDays, todayIn: todayIn, fmtDate: fmtDate, fmtDateTime: fmtDateTime, localDateIn: localDateIn,
     cycleLen: cycleLen, cycleLabel: cycleLabel, periods: periods, maxInstallments: maxInstallments, splitAmount: splitAmount,
     cycleStart: cycleStart, instRange: instRange, firstDrawDate: firstDrawDate, roundDate: roundDate, installmentAmounts: installmentAmounts,
     durationInfo: durationInfo, currentCycle: currentCycle, locate: locate, groupPlan: groupPlan, memberCommitment: memberCommitment,
     instStatus: instStatus, STATUS_LABEL: STATUS_LABEL,
-    groupShares: groupShares, memberShares: memberShares, groupMembers: groupMembers, isLocked: isLocked, shareAmounts: shareAmounts,
+    isAgreementLocked: isAgreementLocked, agreementLock: agreementLock,
+    groupShares: groupShares, memberShares: memberShares, groupMembers: groupMembers, isLocked: isLocked, isFrozen: isFrozen, shareAmounts: shareAmounts,
     activeReceipts: activeReceipts,
-    obligation: obligation, cycleObligations: cycleObligations, memberProgress: memberProgress, lateJoinPreview: lateJoinPreview,
+    obligation: obligation, cycleObligations: cycleObligations, memberProgress: memberProgress, memberArrears: memberArrears,
+    cumulativeSummary: cumulativeSummary, drawReadinessLocal: drawReadinessLocal, lateJoinPreview: lateJoinPreview,
     eligibleShares: eligibleShares, shareLabel: shareLabel, pickWinner: pickWinner, prizeTarget: prizeTarget, prizeInfo: prizeInfo,
-    requiredPeople: requiredPeople, quorumInfo: quorumInfo,
+    checkDrawSchedule: checkDrawSchedule, drawTimeReached: drawTimeReached, drawGate: drawGate, normalizeReadiness: normalizeReadiness,
+    PRESENTATION_LABEL: PRESENTATION_LABEL, presentationState: presentationState, wheelLayout: wheelLayout,
+    NOTIFY_TYPE_IDS: NOTIFY_TYPE_IDS, normalizeNotifySettings: normalizeNotifySettings, notifyTypesOf: notifyTypesOf,
     JOIN_REQUEST_STATUS: JOIN_REQUEST_STATUS, INVITATION_RESPONSE_STATUS: INVITATION_RESPONSE_STATUS,
     firstDrawDurationDays: firstDrawDurationDays, isJoinWindowOpen: isJoinWindowOpen,
     nextInvitationResponseStatus: nextInvitationResponseStatus, nextJoinRequestStatus: nextJoinRequestStatus,
