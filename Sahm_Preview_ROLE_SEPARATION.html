@@ -9,7 +9,7 @@
 <link rel="manifest" href="/manifest.webmanifest">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Arabic:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Alexandria:wght@100..900&family=DM+Sans:wght@400..700&display=swap" rel="stylesheet">
 <link rel="icon" href="/icons/sahm.svg" type="image/svg+xml">
 <link rel="apple-touch-icon" href="/icons/sahm.svg">
 <title>سهم | إدارة الجمعيات التساهمية</title>
@@ -1638,8 +1638,17 @@ textarea:focus-visible {
 html {
   background: #e9edf4;
   color: var(--ink);
-  font-family: 'IBM Plex Sans Arabic',system-ui,-apple-system,'Segoe UI',Tahoma,Arial,sans-serif;
+  font-family: 'Alexandria',system-ui,-apple-system,'Segoe UI',Tahoma,Arial,sans-serif;
   width: 100%;
+}
+
+/* Typography: Alexandria for Arabic UI; DM Sans for Latin text and numeric glyphs. */
+:where(.numeric,[data-numeric],.ltr,[dir="ltr"],.amount,.hero-num,.stat b,.member-summary b,.group-card-metrics b,.progress-caption b,.summary-index,.badge,.count,input[type="number"],input[inputmode="numeric"],input[inputmode="decimal"],input[inputmode="tel"]) {
+  font-family: 'DM Sans','Alexandria',system-ui,-apple-system,'Segoe UI',Tahoma,Arial,sans-serif;
+  font-variant-numeric: tabular-nums;
+}
+
+html {
   height: 100%;
   min-height: 100%;
   margin: 0;
