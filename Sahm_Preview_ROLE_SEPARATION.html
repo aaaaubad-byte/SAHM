@@ -17,7 +17,6 @@
 
 
 /* Consolidated Sahm CSS — one current theme and one authoritative layout. */
-/* Consolidated Sahm CSS — one current theme and one authoritative layout. */
 *{
   box-sizing: border-box;
 }
@@ -25,12 +24,6 @@
   display: grid;
   place-items: center;
   font-weight: 800;
-}
-.screen::-webkit-scrollbar{
-  width: 3px;
-}
-.screen::-webkit-scrollbar-thumb{
-  border-radius: var(--radius-small);
 }
 .section-head{
   display: flex;
@@ -200,7 +193,6 @@
 .wheel.spin{
   animation: spin 2s cubic-bezier(.13,.72,.22,1);
 }
-
 @keyframes spin{to{transform:rotate(1440deg)}}
 .receipt{
   border: 1px dashed #afc1bc;
@@ -365,9 +357,6 @@ button{
   color: #fff;
   
   box-shadow: 0 5px 12px #3158d626;
-}
-.screen::-webkit-scrollbar-thumb{
-  background: #cad3e1;
 }
 .navitem.active .ni{
   transform: none;
@@ -1412,7 +1401,6 @@ textarea:focus-visible{
 }
 
 /* Typography: IBM Plex Sans Arabic for Arabic UI; DM Sans for Latin text and numeric glyphs. */
-/* Typography: IBM Plex Sans Arabic for Arabic UI; DM Sans for Latin text and numeric glyphs. */
 :where(.numeric,[data-numeric],.ltr,[dir="ltr"],.amount,.hero-num,.stat b,.member-summary b,.group-card-metrics b,.progress-caption b,.summary-index,.badge,.count,input[type="number"],input[inputmode="numeric"],input[inputmode="decimal"],input[inputmode="tel"]){
   font-family: 'DM Sans',sans-serif;
   font-variant-numeric: tabular-nums;
@@ -1427,11 +1415,6 @@ textarea:focus-visible{
 @media(max-width:600px){
   
 }
-/* Removed obsolete absolute-positioned footer override; footer is a flex child. */
-
-
-
-/* Sahm design refinement: line icons without decorative containers. */
 /* Removed obsolete absolute-positioned footer override; footer is a flex child. */
 
 
@@ -1456,7 +1439,6 @@ textarea:focus-visible{
 .manager-action span, .member-action span{ display:inline-flex;align-items:center;justify-content:center;color:var(--primary);line-height:1; }
 .manager-action span svg, .member-action span svg{ width:23px;height:23px;stroke-width:2; }
 /* One corner scale for all primary surfaces and controls. */
-/* One corner scale for all primary surfaces and controls. */
 .card, .group-card, .manager-panel, .member-panel, .activity-card, .home-shortcut, .summary-slide, .home-carousel, .receipt, .auth-card, .dialog{ border-radius:var(--radius-card); }
 .stat, .manager-action, .member-action, .btn, .field input, .field select, .field textarea, .searchbox, .segmented, .avatar, .brand-mark{ border-radius:var(--radius-control); }
 .pill, .role-chip, .progress{ border-radius:var(--radius-small); }
@@ -1466,7 +1448,6 @@ textarea:focus-visible{
 
 
 /* Home quick actions: integrated, embossed glass controls beneath the group cards. */
-/* Home quick actions: integrated, embossed glass controls beneath the group cards. */
 .home-screen .home-shortcuts{
   order: 0 !important;
   margin: 0 0 12px !important;
@@ -1474,9 +1455,6 @@ textarea:focus-visible{
 .home-screen .latest-activity{ order: 2 !important; }
 
 
-
-
-/* Match create/join actions to the existing white group shortcut cards. */
 
 
 /* Match create/join actions to the existing white group shortcut cards. */
@@ -1521,8 +1499,6 @@ textarea:focus-visible{
 
 /* Home layout refinement: compact chrome, floating complete navigation, equal action cards. */
 
-/* Home layout refinement: compact chrome, floating complete navigation, equal action cards. */
-
 #topbar .brand-mark{
   width:34px !important;
   height:34px !important;
@@ -1562,33 +1538,6 @@ textarea:focus-visible{
 }
 
 
-/* Restore the bottom navigation as a normal, full-width app footer. */
-/* Restore the bottom navigation as a normal, full-width app footer. */
-#bottomnav.bottomnav{
-  position:relative !important;
-  inset:auto !important;
-  align-self:stretch !important;
-  display:flex !important;
-  width:100% !important;
-  height:auto !important;
-  min-height:78px !important;
-  flex:0 0 auto !important;
-  margin:0 !important;
-  padding:8px 8px calc(8px + env(safe-area-inset-bottom)) !important;
-  gap:4px !important;
-  border:0 !important;
-  border-top:1px solid var(--line) !important;
-  border-radius:0 !important;
-  background:#fff !important;
-  box-shadow:0 -8px 22px rgba(24,41,75,.035) !important;
-  overflow:visible !important;
-  z-index:10 !important;
-}
-
-
-
-/* Home shortcut cards: align each icon with its title and point navigation arrows left in RTL. */
-
 
 /* Home shortcut cards: align each icon with its title and point navigation arrows left in RTL. */
 
@@ -1600,8 +1549,6 @@ textarea:focus-visible{
 
 
 
-
-/* Home shortcut cards: centered icon/title with a simple lower marker. */
 
 /* Home shortcut cards: centered icon/title with a simple lower marker. */
 
@@ -1628,9 +1575,6 @@ textarea:focus-visible{
 /* Keep the activity heading fixed while its own list scrolls independently. */
 
 
-/* Keep the activity heading fixed while its own list scrolls independently. */
-
-
 .home-screen .latest-activity .activity-list{
   
   
@@ -1643,8 +1587,6 @@ textarea:focus-visible{
   
 }
 
-
-/* Place the > marker close to the lower-left corner with equal insets. */
 
 /* Place the > marker close to the lower-left corner with equal insets. */
 
@@ -1687,8 +1629,6 @@ textarea:focus-visible{
 }
 
 
-
-/* Home cards: place a real left-pointing chevron in a consistent side rail. */
 
 /* Home cards: place a real left-pointing chevron in a consistent side rail. */
 
@@ -1774,7 +1714,6 @@ textarea:focus-visible{
 
 
 /* Corrected home shortcut alignment: centered content and textual arrow in the fourth quarter. */
-/* Corrected home shortcut alignment: centered content and textual arrow in the fourth quarter. */
 .home-screen .home-shortcuts > .home-shortcut{
   position:relative !important;
   display:flex !important;
@@ -1816,8 +1755,6 @@ textarea:focus-visible{
   transform: none !important;
   display: none !important;
 }
-
-/* SAHM — redesigned create-group screen, aligned with the home visual language. */
 
 /* SAHM — redesigned create-group screen, aligned with the home visual language. */
 
@@ -1891,8 +1828,6 @@ textarea:focus-visible{
 }
 /* Create-group form: compact sections, clear typography, and unframed line icons. */
 
-/* Create-group form: compact sections, clear typography, and unframed line icons. */
-
 .create-form{ gap:10px !important; }
 
 .create-section-head{
@@ -1942,19 +1877,6 @@ textarea:focus-visible{
   box-shadow: 0 0 0 3px rgba(49,88,214,.11) !important;
 }
 
-
-
-
-
-/* Single authoritative app-shell layout: header, scrollable content, persistent footer. */
-/* Single authoritative app-shell layout: header, scrollable content, persistent footer. */
-#app.phone{
-  display:flex !important;
-  flex-direction:column !important;
-  min-height:0 !important;
-  overflow:hidden !important;
-}
-
 @media(max-width:600px){
 }
 @media(max-width:600px){
@@ -1963,7 +1885,6 @@ textarea:focus-visible{
 @media(min-width:601px){
 }
 
-/* New-group setup: same compact cards, typography, blue accent and quiet surfaces as Sahm home. */
 /* New-group setup: same compact cards, typography, blue accent and quiet surfaces as Sahm home. */
 #screen.create-group-screen{
   background: var(--bg)!important;
@@ -1997,7 +1918,6 @@ textarea:focus-visible{
 
 
 
-/* Sahm create wizard and invitation completion */
 /* Sahm create wizard and invitation completion */
 .create-group-page{max-width:520px}
 .create-form{gap:12px}.create-step{display:flex;flex-direction:column;gap:11px}.create-step[hidden], #manual-contact-panel[hidden], .create-step-actions [hidden]{display:none!important}
@@ -2033,7 +1953,6 @@ textarea:focus-visible{
 
 
 /* First step only: compact, legible, balanced form layout */
-/* First step only: compact, legible, balanced form layout */
 #create-step-1{padding-top:2px}
 #create-step-1 .create-section{padding:16px!important;border:1px solid #d9e2ef!important;border-radius:15px!important;box-shadow:0 3px 12px rgba(28,45,76,.055)!important;background:#fff!important}
 
@@ -2059,7 +1978,6 @@ textarea:focus-visible{
 
 
 
-/* First create stage — aligned with Sahm's main card, control and typography tokens. */
 /* First create stage — aligned with Sahm's main card, control and typography tokens. */
 #screen.create-group-screen .create-form.create-step-active-1{display:flex!important;flex-direction:column!important;gap:0!important;padding:15px 14px 13px!important;border:1px solid var(--line)!important;border-radius:var(--radius-card)!important;background:var(--surface)!important;box-shadow:0 3px 10px rgba(23,43,79,.025)!important}
 #create-step-1{gap:0!important;padding:0!important}
@@ -2151,7 +2069,6 @@ textarea:focus-visible{
 @media(max-width:360px){.avatar-picker{grid-template-columns:repeat(4,minmax(0,1fr))}}
 .phone-country-row{display:flex;gap:8px;align-items:stretch;direction:rtl}.phone-country-row select{flex:0 0 43%;min-width:0;padding-inline:8px}.phone-country-row input{flex:1;min-width:0;direction:ltr;text-align:left}
 @media(max-width:360px){.phone-country-row select{flex-basis:46%;}}
-/* Contact multi-select workflow */
 /* Contact multi-select workflow */
 .invitee-row{gap:9px;padding:10px 0;min-width:0}
 .invitee-choice{display:flex;align-items:center;gap:10px;min-width:0;flex:1;cursor:pointer}
@@ -2248,16 +2165,12 @@ body {
   scrollbar-width: thin;
   scrollbar-color: #cad3e1 transparent;
 }
-#screen.screen::-webkit-scrollbar {
-  width: 3px;
-}
+#screen.screen::-webkit-scrollbar { width: 3px; }
 #screen.screen::-webkit-scrollbar-thumb {
   background: #cad3e1;
   border-radius: var(--radius-small);
 }
-#screen.auth-screen {
-  padding: 18px 16px;
-}
+#screen.auth-screen { padding: 18px 16px; }
 #screen.home-screen {
   display: flex;
   flex-direction: column;
@@ -2312,16 +2225,12 @@ body {
   scrollbar-color: #aebbd0 transparent;
   padding: 1px 3px 8px;
 }
-#screen.home-screen .activity-list::-webkit-scrollbar {
-  width: 4px;
-}
+#screen.home-screen .activity-list::-webkit-scrollbar { width: 4px; }
 #screen.home-screen .activity-list::-webkit-scrollbar-thumb {
   background: #aebbd0;
   border-radius: 8px;
 }
-#screen.home-screen .activity-card {
-  flex: 0 0 auto;
-}
+#screen.home-screen .activity-card { flex: 0 0 auto; }
 #bottomnav.bottomnav:not([hidden]) {
   display: flex !important;
   flex: 0 0 auto;
@@ -2348,9 +2257,7 @@ body {
   background: #fff;
   box-shadow: 0 -4px 12px rgba(24,41,75,.035);
 }
-#bottomnav[hidden] {
-  display: none !important;
-}
+#bottomnav[hidden] { display: none !important; }
 #bottomnav .navitem,
 #bottomnav .navitem.active,
 #bottomnav .navitem[aria-current="page"] {
@@ -2416,29 +2323,18 @@ body {
     min-height: calc(56px + env(safe-area-inset-top, 0px));
     padding: env(safe-area-inset-top, 0px) 15px 0;
   }
-  #screen.screen {
-    padding: 14px 14px 16px;
-  }
-  #screen.home-screen {
-    padding: 12px 14px 8px;
-  }
-  #bottomnav.bottomnav:not([hidden]) {
-    padding-inline: 8px;
-  }
+  #screen.screen { padding: 14px 14px 16px; }
+  #screen.home-screen { padding: 12px 14px 8px; }
+  #bottomnav.bottomnav:not([hidden]) { padding-inline: 8px; }
 }
 @media (max-width: 360px) {
-  #screen.home-screen {
-    padding-inline: 12px;
-  }
-  #bottomnav.bottomnav:not([hidden]) {
-    padding-inline: 5px;
-  }
+  #screen.home-screen { padding-inline: 12px; }
+  #bottomnav.bottomnav:not([hidden]) { padding-inline: 5px; }
 }
 
 </style>
 <style id="sahm-typography-system-6-sizes">
 
-/* Approved typography: IBM Plex Sans Arabic for Arabic; DM Sans for Latin and numerals. */
 /* Approved typography: IBM Plex Sans Arabic for Arabic; DM Sans for Latin and numerals. */
 #app{
   --sahm-font-page-title: 22px;
@@ -2471,7 +2367,6 @@ body {
 #app :is(.hero-num,.stat b,.member-summary b,.summary-copy b){
   font-size: var(--sahm-font-page-title) !important;
 }
-/* Icon and brand glyph sizing remains independent from the text scale. */
 /* Icon and brand glyph sizing remains independent from the text scale. */
 #app .navitem .ni{ font-size: 21px !important; }
 #app .manager-action span, #app .member-action span{ font-size: 19px !important; }
