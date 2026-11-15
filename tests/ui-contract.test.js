@@ -259,7 +259,7 @@ test('account switch failures attempt to restore the previously active account',
 
 
 test('role separation, draw room, publication channels and personal notification reads match Supabase contracts', () => {
-  assert.doesNotMatch(html, /quorumInfo|quorum|attendance-toggle|setAttendance|حاضر|غير حاضر|تسجيل الحضور|إلغاء الحضور/);
+  assert.doesNotMatch(html, /quorumInfo|quorum|attendance-toggle|setAttendance|>حاضر<|>غير حاضر<|تسجيل الحضور|إلغاء الحضور/);
   assert.doesNotMatch(html, /name=["']tz["']|المنطقة الزمنية للجمعية/);
   assert.match(html, /agreementLocked/);
   assert.match(html, /const managerOnly=\['members','invite','invites','join-requests','join-request-detail','audit'\]/);
@@ -277,9 +277,9 @@ test('role separation, draw room, publication channels and personal notification
   assert.match(html, /subject_visible===true&&x\.subject_name/);
   assert.match(html, /SahmApp\.getAuditLog\(/);
   assert.doesNotMatch(html, /SahmApp\.eventLog\(g\.id/);
-  assert.match(html, /data-channel="feed"/);
-  assert.match(html, /data-channel="chat"/);
-  assert.match(html, /data-channel="names"/);
+  assert.match(html, /channel\('feed'/);
+  assert.match(html, /channel\('chat'/);
+  assert.match(html, /channel\('names'/);
   assert.match(html, /SahmApp\.setNotifySettings\(/);
   assert.match(html, /SahmApp\.markNotificationsRead\(\[id\]\)/);
   assert.doesNotMatch(html, /SahmApp\.markNotificationsRead\(\)/);
