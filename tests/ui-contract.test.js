@@ -105,6 +105,64 @@ test('obsolete parallel view-model collections and no-op route helpers are absen
 
 
 
+test('the stylesheet is balanced and mobile-only layout rules do not capture global refinements', () => {
+  const styleMatch = html.match(/<style>([\s\S]*?)<\/style>/i);
+  assert.ok(styleMatch, 'application stylesheet exists');
+  const css = styleMatch[1];
+  const marker = '/* Sahm design refinement: line icons without decorative containers. */';
+  const markerIndex = css.indexOf(marker);
+  assert.notEqual(markerIndex, -1, 'global design refinements marker exists');
+
+  let depth = 0;
+  let quote = null;
+  let inComment = false;
+  let escaped = false;
+  let depthAtGlobalStyles = null;
+
+  for (let i = 0; i < css.length; i++) {
+    if (i === markerIndex) depthAtGlobalStyles = depth;
+    const ch = css[i];
+    const next = css[i + 1];
+
+    if (inComment) {
+      if (ch === '*' && next === '/') {
+        inComment = false;
+        i++;
+      }
+      continue;
+    }
+    if (quote) {
+      if (escaped) {
+        escaped = false;
+        continue;
+      }
+      if (ch === '\\') {
+        escaped = true;
+        continue;
+      }
+      if (ch === quote) quote = null;
+      continue;
+    }
+    if (ch === '/' && next === '*') {
+      inComment = true;
+      i++;
+      continue;
+    }
+    if (ch === '"' || ch === "'") {
+      quote = ch;
+      continue;
+    }
+    if (ch === '{') depth++;
+    if (ch === '}') {
+      depth--;
+      assert.ok(depth >= 0, 'CSS closing brace has a matching opener');
+    }
+  }
+
+  assert.equal(depth, 0, 'all CSS blocks are closed');
+  assert.equal(depthAtGlobalStyles, 0, 'global refinements are outside the mobile media query');
+});
+
 test('all page scripts and Supabase modules are syntactically valid JavaScript', () => {
   new vm.Script(auth, { filename: 'sahm-supabase.js' });
   new vm.Script(remote, { filename: 'sahm-supabase-data.js' });
