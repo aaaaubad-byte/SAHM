@@ -2794,6 +2794,19 @@ body {
 .invitee-link{direction:ltr;text-align:left;font-size:10px;min-width:0;overflow:hidden;text-overflow:ellipsis}
 .invitee-selection-bar{box-shadow:0 -5px 18px rgba(18,32,48,.06);border:1px solid var(--line)}
 @media(max-width:370px){.invitee-row{flex-wrap:wrap}.invitee-result-actions{margin-inline-start:auto}}
+/* Canonical active bottom-navigation state: override legacy transparent backgrounds. */
+#bottomnav .navitem.active {
+  color:#244fc9 !important;
+  background:#edf2ff !important;
+  border-radius:12px !important;
+  font-weight:800 !important;
+  box-shadow:inset 0 0 0 1px rgba(36,79,201,.08) !important;
+}
+#bottomnav .navitem.active .ni,
+#bottomnav .navitem.active .ni svg {
+  color:#244fc9 !important;
+  stroke:#244fc9 !important;
+}
 </style></head>
 <body><noscript><main dir="rtl" style="font-family:Arial,sans-serif;padding:24px;color:#142f39"><h1>سهم</h1></main></noscript><div class="workspace"><div class="phone" id="app">
 <div id="topbar" class="topbar" style="display:none"></div><main id="screen" class="auth-screen">
@@ -2970,6 +2983,7 @@ function applyNavigationState(state,fromPop=false){
 }
 function go(s,p={},context={}){
  if(!Object.prototype.hasOwnProperty.call(ALL_SCREEN_REGISTRY,s)){toast('تعذر فتح الشاشة المطلوبة');return false}
+ if(s==='managed-groups')context.groupTab='manager';if(s==='joined-groups')context.groupTab='member';
  if(!db.session&&!AUTH_SCREEN_NAMES.includes(s)){toast('سجل الدخول أولاً للمتابعة');return false}
  if(s==='create-group'&&screenName!=='create-group'){createWizardStep=1;createFormSnapshot={}}
  const managerOnly=['members','invite','invites','join-requests','join-request-detail','audit'];
@@ -3012,7 +3026,14 @@ function renderTopbar(title){
  el.innerHTML=`<div class="topbar-screenbar"><button class="icon-btn topbar-back" type="button" data-action="back" aria-label="رجوع">${uiIcon('back-screen',22)}</button><strong class="topbar-screen-title">${escapeHtml(String(title||'سهم'))}</strong></div>`;
 }
 function syncBottomNavigation(visible=!AUTH_SCREEN_NAMES.includes(screenName)){const bar=$('#bottomnav');if(!bar)return;if(!visible){bar.hidden=true;bar.setAttribute('aria-hidden','true');bar.style.setProperty('display','none','important');return}bar.hidden=false;bar.removeAttribute('hidden');bar.setAttribute('aria-hidden','false');bar.style.setProperty('display','flex','important');bar.style.setProperty('visibility','visible','important');bar.style.setProperty('opacity','1','important')}
-function nav(active){const items=[['groups','groups','الجمعيات'],['home','home','الرئيسية'],['wall','messages','الدردشات']];const bar=$('#bottomnav');syncBottomNavigation(true);bar.innerHTML=items.map(([s,i,t])=>`<button class="navitem ${active===s?'active':''}" data-go="${s}" aria-label="${t}" ${active===s?'aria-current="page"':''}><span class="ni">${uiIcon(i,23)}</span><span>${t}</span></button>`).join('')}
+function nav(active){
+ const groupScreens=['groups','managed-groups','joined-groups','create-group','created-group','group-detail','members','invite','invites','invite-detail','join-group','join-request-status','join-requests','join-request-detail','installments','draw-room','draw-history','receipts','receipt-detail','news','audit'];
+ const wallScreens=['wall','chat'];
+ const resolvedActive=groupScreens.includes(screenName)||active==='groups'?'groups':wallScreens.includes(screenName)||active==='wall'?'wall':'home';
+ const items=[['groups','groups','الجمعيات'],['home','home','الرئيسية'],['wall','messages','الدردشات']];
+ const bar=$('#bottomnav');syncBottomNavigation(true);
+ bar.innerHTML=items.map(([s,i,t])=>`<button class="navitem ${resolvedActive===s?'active':''}" data-go="${s}" aria-label="${t}" ${resolvedActive===s?'aria-current="page"':''}><span class="ni">${uiIcon(i,23)}</span><span>${t}</span></button>`).join('');
+}
 function shell(title,active,html){renderTopbar(title);nav(active);const screen=$('#screen');screen.className='screen'+(active==='home'?' home-screen':'')+(screenName==='create-group'?' create-group-screen':'');screen.innerHTML=html;if(active!=='home'&&homeSlideTimer){clearInterval(homeSlideTimer);homeSlideTimer=null}}function auth(html){
  const authTitles={welcome:'تسجيل الدخول',register:'إنشاء حساب','profile-setup':'بياناتك الشخصية','reset-password':'تعيين كلمة المرور','logged-out':'تم تسجيل الخروج','account-login':'إضافة أو استعادة حساب'};
  renderTopbar(authTitles[screenName]||'سهم');
@@ -3095,7 +3116,21 @@ function homeInvitations(){
  return `<button class="activity-card" data-go="${target}" data-id="${escapeHtml(targetId)}"><span class="activity-icon joined">${uiIcon(request?'user-check':'user-plus',20)}</span><span class="activity-copy"><strong>${escapeHtml(i.groupName||((db.groups.find(g=>g.id===i.groupId)||{}).name)||'دعوة إلى جمعية')}</strong><small>${escapeHtml(request?'طلبك بانتظار موافقة المدير':(i.name||'دعوة واردة'))} · ${dateLabel(String(i.createdAt||'').slice(0,10))}</small></span><span class="activity-arrow">&gt;</span></button>`;
  }).join('')+'</section>';
 }
-function setHomeSlide(index){const ss=document.querySelectorAll('#homeCarousel .summary-slide'),dd=document.querySelectorAll('.home-dots button');if(!ss.length)return;homeSlideIndex=((index%ss.length)+ss.length)%ss.length;ss.forEach((x,i)=>{x.classList.toggle('active',i===homeSlideIndex);x.setAttribute('aria-hidden',i!==homeSlideIndex?'true':'false')});dd.forEach((x,i)=>{x.classList.toggle('active',i===homeSlideIndex);x.setAttribute('aria-pressed',i===homeSlideIndex?'true':'false')})}function groups(){const own=db.groups.filter(g=>groupTab==='all'||g.role===groupTab);const empty=groupTab==='manager'?'لا توجد جمعيات تديرها':groupTab==='member'?'لا توجد جمعيات تشارك فيها':'لا توجد جمعيات حتى الآن';shell('الجمعيات','groups',`<div class="toolbar"><input class="searchbox" id="groupSearch" placeholder="ابحث باسم الجمعية أو رمزها..."><button class="btn primary small" data-go="create-group">${uiIcon('plus',15)} إنشاء</button></div><div id="groupList">${own.length?own.map(groupCard).join(''):`<div class="card empty"><div class="big">${uiIcon('groups',27)}</div><b>${empty}</b><button class="btn primary" data-go="create-group">إنشاء جمعية</button></div>`}</div><button class="btn outline full" data-go="join-group">الانضمام إلى جمعية برمز أو رابط</button>`)}
+function setHomeSlide(index){const ss=document.querySelectorAll('#homeCarousel .summary-slide'),dd=document.querySelectorAll('.home-dots button');if(!ss.length)return;homeSlideIndex=((index%ss.length)+ss.length)%ss.length;ss.forEach((x,i)=>{x.classList.toggle('active',i===homeSlideIndex);x.setAttribute('aria-hidden',i!==homeSlideIndex?'true':'false')});dd.forEach((x,i)=>{x.classList.toggle('active',i===homeSlideIndex);x.setAttribute('aria-pressed',i===homeSlideIndex?'true':'false')})}function groups(){
+ const own=db.groups.filter(g=>groupTab==='all'||g.role===groupTab);
+ const empty=groupTab==='manager'?'لا توجد جمعيات تديرها':groupTab==='member'?'لا توجد جمعيات تشارك فيها':'لا توجد جمعيات حتى الآن';
+ const title=groupTab==='manager'?'جمعيات أديرها':groupTab==='member'?'جمعيات أشارك فيها':'الجمعيات';
+ const initial=own.length?own.map(groupCard).join():'<div class="card empty"><div class="big">'+uiIcon('groups',27)+'</div><b>'+empty+'</b></div>';
+ shell(title,'groups',`<div class="toolbar"><input class="searchbox" id="groupSearch" aria-label="البحث في الجمعيات" placeholder="ابحث باسم الجمعية أو رمزها..."><button class="btn primary small" data-go="create-group">${uiIcon('plus',15)} إنشاء</button></div><div id="groupList">${initial}</div><button class="btn outline full" data-go="join-group">الانضمام إلى جمعية برمز أو رابط</button>`);
+ const search=$('#groupSearch'),list=$('#groupList');
+ if(search&&list)search.addEventListener('input',()=>{
+  const q=String(search.value||'').trim().toLowerCase();
+  const filtered=!q?own:own.filter(g=>(String(g.name||'')+' '+String(g.inviteCode||'')).toLowerCase().includes(q));
+  list.innerHTML=filtered.length?filtered.map(groupCard).join():(q?'<div class="card empty"><b>لا توجد جمعيات تطابق البحث</b><small>جرّب اسماً أو رمزاً مختلفاً</small></div>':'<div class="card empty"><div class="big">'+uiIcon('groups',27)+'</div><b>'+empty+'</b></div>');
+ });
+}
+function managedGroups(){groupTab='manager';syncNavigationContext();groups()}
+function joinedGroups(){groupTab='member';syncNavigationContext();groups()}
 function setCreateWizardStep(step,updateHistory=true){
  const previous=createWizardStep;createWizardStep=Math.max(1,Math.min(2,step));const form=document.getElementById('createForm');
  if(form)createFormSnapshot=Object.fromEntries(new FormData(form));
@@ -3272,30 +3307,35 @@ function groupDetail(){
   const channel=(key,label,map)=>'<div class="card"><b>'+label+'</b>'+SahmApp.notifyTypes().map(t=>'<div class="listrow"><div class="grow"><strong>'+escapeHtml(t.label)+'</strong></div><input type="checkbox" data-action="notify-channel-toggle" data-channel="'+key+'" data-type="'+escapeHtml(t.id)+'" '+(map&&map[t.id]?'checked':'')+'></div>').join('')+'</div>';
   const channels=channel('feed','نشر الأحداث في أخبار الجمعية',d.group.notify)+channel('chat','نشر الأحداث في محادثة الجمعية',d.group.notifyChat)+channel('names','السماح بإظهار اسم العضو في الخبر',d.group.notifyNames);
   const canInvite=!!(d.permissions&&d.permissions.canInvite);
-  body='<div class="card manager-panel"><div class="section-head"><h3>إدارة الجمعية</h3></div>'+(canInvite?'<button class="btn outline full" data-go="invite">دعوة عضو</button>':'<div class="listrow"><b>الاتفاق مقفل؛ الدعوات متوقفة</b></div>')+'<button class="btn outline full" data-go="join-requests">طلبات الانضمام</button>'+(canInvite?'<button class="btn soft full" data-action="rotate-group-link">إدارة رابط الانضمام</button><div id="association-link-status" class="field-hint">جارٍ تحميل حالة الرابط...</div>':'')+'<button class="btn soft full" data-go="members">إدارة الأعضاء</button><button class="btn soft full" data-go="audit">سجل العمليات الإداري</button></div><h3>إعدادات نشر الأحداث</h3>'+channels;
+  body='<div class="card manager-panel"><div class="section-head"><h3>إدارة الجمعية</h3></div>'+(canInvite?'<button class="btn outline full" data-go="invite">دعوة عضو</button>':'<div class="listrow"><b>الاتفاق مقفل؛ الدعوات متوقفة</b></div>')+'<button class="btn outline full" data-go="join-requests">طلبات الانضمام</button><div class="link-management"><div class="section-head"><h3>رابط الانضمام العام</h3></div><div id="association-link-status" class="field-hint">جارٍ تحميل حالة الرابط...</div></div>'+'<button class="btn soft full" data-go="members">إدارة الأعضاء</button><button class="btn soft full" data-go="audit">سجل العمليات الإداري</button></div><h3>إعدادات نشر الأحداث</h3>'+channels;
  }else{
   const mute=SahmApp.prefs().mute&&SahmApp.prefs().mute[g.id]||{};
   body='<div class="card"><div class="section-head"><h3>تفضيلات الإشعارات</h3></div><div class="listrow"><div class="grow"><strong>كتم إشعارات المجموعة</strong></div><input type="checkbox" data-action="mute-toggle" data-kind="group" '+(mute.group?'checked':'')+'></div><div class="listrow"><div class="grow"><strong>كتم تذكيرات الأقساط</strong></div><input type="checkbox" data-action="mute-toggle" data-kind="reminders" '+(mute.reminders?'checked':'')+'></div></div>';
  }
  shell(g.name,'groups',lockNotice+top+body);
- if(manager&&groupDetailTab==='tools')loadAssociationPublicLinkStatus(g.id);
+ if(manager&&groupDetailTab==='tools')loadAssociationPublicLinkStatus(g.id,!!(d.permissions&&d.permissions.canInvite));
 }
-async function loadAssociationPublicLinkStatus(associationId){
+async function loadAssociationPublicLinkStatus(associationId,canInvite){
  const target=document.getElementById('association-link-status');
  if(!target)return;
  const result=await SahmSupabaseData.getPublicLinkStatus(associationId);
  if(!result||!result.ok){target.textContent=result&&result.message||'تعذر تحميل حالة الرابط';return}
  if(currentGroupId!==associationId||screenName!=='group-detail'||groupDetailTab!=='tools')return;
  const link=result.link||{},status=link.status||'none';
- const controls=status==='active'
-  ?'<div class="grid2"><button class="btn outline small" data-action="pause-group-link">إيقاف الرابط</button><button class="btn soft small" data-action="rotate-group-link">تجديد الرابط</button></div><button class="btn danger full" data-action="revoke-group-link">إبطال الرابط نهائيًا</button>'
-  :status==='paused'
-   ?'<div class="grid2"><button class="btn primary small" data-action="resume-group-link">إعادة تشغيل الرابط</button><button class="btn outline small" data-action="rotate-group-link">تجديد الرابط</button></div><button class="btn danger full" data-action="revoke-group-link">إبطال الرابط نهائيًا</button>'
-   :'<button class="btn primary full" data-action="create-group-link">إنشاء رابط انضمام</button>';
+ let controls='';
+ if(status==='active'){
+  controls='<div class="grid2"><button class="btn outline small" data-action="pause-group-link">إيقاف الرابط</button>'+(canInvite?'<button class="btn soft small" data-action="rotate-group-link">تجديد الرابط</button>':'<span class="field-hint">التجديد متوقف بعد إغلاق الانضمام</span>')+'</div><button class="btn danger full" data-action="revoke-group-link">إبطال الرابط نهائيًا</button>';
+ }else if(status==='paused'){
+  controls=(canInvite?'<div class="grid2"><button class="btn primary small" data-action="resume-group-link">إعادة تشغيل الرابط</button><button class="btn outline small" data-action="rotate-group-link">تجديد الرابط</button></div>':'<small>لا يمكن إعادة تشغيل الرابط بعد إغلاق استقبال الأعضاء.</small>')+'<button class="btn danger full" data-action="revoke-group-link">إبطال الرابط نهائيًا</button>';
+ }else if(canInvite){
+  controls='<button class="btn primary full" data-action="create-group-link">إنشاء رابط انضمام</button>';
+ }else{
+  controls='<small>استقبال الأعضاء مغلق؛ لا يمكن إنشاء رابط جديد.</small>';
+ }
  const label=status==='active'?'الرابط نشط':status==='paused'?'الرابط متوقف':status==='revoked'?'الرابط مبطل':'لم يتم إنشاء رابط بعد';
  target.innerHTML='<div class="keyvalue"><span>الحالة</span><b>'+escapeHtml(label)+'</b></div>'+
   (link.createdAt?'<small>تاريخ الإنشاء: '+dateLabel(String(link.createdAt).slice(0,10))+'</small>':'')+
-  (status==='active'?'<small>لا يحتفظ النظام بالرمز القابل للمشاركة بعد مغادرة شاشة الإنشاء. استخدم «تجديد الرابط» لإصدار رمز جديد.</small>':'')+controls;
+  (status==='active'?'<small>الرمز القابل للمشاركة لا يمكن استعادته بعد مغادرة شاشة إصدار الرابط؛ استخدم التجديد فقط عند الحاجة وبعد التأكد من إبطال الرمز السابق.</small>':'')+controls;
 }
 function members(){
  const g=currentGroup();if(!g){go('groups');return}
@@ -3303,7 +3343,15 @@ function members(){
  const r=SahmApp.memberList(g.id);if(!r||!r.ok){toast(r&&r.message||'تعذر تحميل الأعضاء');return}
  const list=r.members||[],shares=list.reduce((n,m)=>n+m.shares,0),shareSummary=g.total==null?shares+' سهم':shares+' / '+g.total,canInvite=!!(detail.permissions&&detail.permissions.canInvite);
  const lock=detail.agreementLocked?'<div class="card"><b>الاتفاق مقفل</b><small>لا يمكن تعديل الأعضاء أو الأسهم أو إرسال دعوات جديدة بعد بدء الجمعية أو تثبيت أول قرعة.</small></div>':'';
- shell('الأعضاء','groups',header('إدارة الأعضاء',g.name)+lock+'<div class="member-summary"><div><span>المشاركون</span><b>'+list.length+'</b></div><div><span>الأسهم المسجلة</span><b>'+shareSummary+'</b></div></div><div class="toolbar"><input class="searchbox" placeholder="ابحث عن اسم مشارك..." id="memberSearch">'+(canInvite?'<button class="btn primary small" data-go="invite">دعوة عضو</button>':'')+'</div><div class="card" id="membersList">'+(list.map(m=>'<div class="listrow"><div class="avatar '+(m.isManager?'dark':'')+'">'+escapeHtml(m.name.slice(0,1))+'</div><div class="grow"><strong>'+escapeHtml(m.name)+'</strong><small>'+(m.isManager?'مدير الجمعية':'مشارك')+' · '+m.shares+' أسهم</small></div></div>').join('')||'<div class="empty"><b>لا يوجد أعضاء بعد</b></div>')+'</div>'+(canInvite?'<button class="btn outline full" data-go="invites">إدارة الدعوات</button>':''));
+ const memberRows=list.map(m=>'<div class="listrow"><div class="avatar '+(m.isManager?'dark':'')+'">'+escapeHtml(m.name.slice(0,1))+'</div><div class="grow"><strong>'+escapeHtml(m.name)+'</strong><small>'+(m.isManager?'مدير الجمعية':'مشارك')+' · '+m.shares+' أسهم</small></div></div>').join('');
+ const empty=list.length?memberRows:'<div class="empty"><b>لا يوجد أعضاء بعد</b></div>';
+ shell('الأعضاء','groups',header('إدارة الأعضاء',g.name)+lock+'<div class="member-summary"><div><span>المشاركون</span><b>'+list.length+'</b></div><div><span>الأسهم المسجلة</span><b>'+shareSummary+'</b></div></div><div class="toolbar"><input class="searchbox" placeholder="ابحث عن اسم مشارك..." aria-label="البحث عن مشارك" id="memberSearch">'+(canInvite?'<button class="btn primary small" data-go="invite">دعوة عضو</button>':'')+'</div><div class="card" id="membersList">'+empty+'</div>'+(canInvite?'<button class="btn outline full" data-go="invites">إدارة الدعوات</button>':''));
+ const search=$('#memberSearch'),container=$('#membersList');
+ if(search&&container)search.addEventListener('input',()=>{
+  const q=String(search.value||'').trim().toLowerCase();
+  const filtered=!q?list:list.filter(m=>String(m.name||'').toLowerCase().includes(q));
+  container.innerHTML=filtered.length?filtered.map(m=>'<div class="listrow"><div class="avatar '+(m.isManager?'dark':'')+'">'+escapeHtml(m.name.slice(0,1))+'</div><div class="grow"><strong>'+escapeHtml(m.name)+'</strong><small>'+(m.isManager?'مدير الجمعية':'مشارك')+' · '+m.shares+' أسهم</small></div></div>').join():(q?'<div class="empty"><b>لا توجد نتائج مطابقة</b></div>':'<div class="empty"><b>لا يوجد أعضاء بعد</b></div>');
+ });
 }
 let pendingInvitees=[];
 function invitePhoneKey(value){
@@ -3643,7 +3691,13 @@ async function audit(){
  const items=rows.map(x=>'<div class="listrow"><div class="avatar">⌁</div><div class="grow"><strong>'+escapeHtml(labels[x.event_type]||x.event_type||'عملية إدارية')+'</strong><small>'+escapeHtml(x.actor_name||'سهم')+' · '+escapeHtml(x.entity_type||'')+'</small><small class="eyebrow">'+escapeHtml(x.occurred_at||'')+'</small></div></div>'+(x.after_data?'<details><summary>تفاصيل العملية</summary><pre class="audit-json">'+escapeHtml(JSON.stringify(x.after_data,null,2))+'</pre></details>':'')).join('');
  shell('سجل العمليات','groups',header('سجل العمليات الإداري',g.name)+'<div class="card">'+(items||'<div class="empty"><b>لا توجد عمليات مسجلة</b></div>')+'</div>');
 }
-function profile(){const avatarIcon=(AVATAR_OPTIONS.find(x=>x[0]===(db.user.avatarKey||'avatar-01'))||AVATAR_OPTIONS[0])[1];const savedAccounts=SahmSupabase.accounts();shell('حسابي','profile',`${header('الملف الشخصي','حسابك في سهم')}<div class="card"><div class="row"><div class="avatar dark" style="width:51px;height:51px;border-radius:17px;font-size:18px">${uiIcon(avatarIcon,25)}</div><div class="grow"><b style="font-size:13px">${escapeHtml(db.user.name)}</b><div class="eyebrow">${escapeHtml(db.user.email||'')}</div><div class="eyebrow">${escapeHtml(db.user.phone||'')}</div><div class="eyebrow">${escapeHtml(db.user.city||'')}</div></div><span class="pill green">الحساب الحالي</span></div></div><div class="card"><div class="between"><strong>الحسابات المحفوظة على هذا الجهاز</strong><button class="btn outline small" data-action="add-account">إضافة حساب</button></div>${savedAccounts.map(a=>`<div class="listrow"><div class="avatar">♙</div><div class="grow"><strong>${escapeHtml(a.label||a.email)}</strong><small>${escapeHtml(a.email)}</small></div>${a.id===db.user.id?'<span class="pill green">نشط</span>':`<button class="btn outline small" data-action="switch-account" data-user-id="${escapeHtml(a.id)}">تبديل</button>`}</div>`).join('')||'<small class="field-hint">لا توجد حسابات محفوظة أخرى.</small>'}</div><div class="card"><div class="listrow"><div class="avatar">♙</div><div class="grow"><strong>بيانات الملف الشخصي</strong></div><button class="btn outline small" data-go="edit-profile">تعديل</button></div><div class="listrow"><div class="avatar">▤</div><div class="grow"><strong>جمعياتي</strong></div><button class="btn outline small" data-go="groups">عرض</button></div><div class="listrow"><div class="avatar">⚙</div><div class="grow"><strong>إعدادات الحساب</strong></div><button class="btn outline small" data-go="settings">فتح</button></div><div class="listrow"><div class="avatar">⌁</div><div class="grow"><strong>سجل العمليات</strong></div><button class="btn outline small" data-go="audit">عرض</button></div></div><button class="btn danger full" data-action="logout-confirm">تسجيل الخروج من هذا الحساب</button>`)}
+function profile(){
+ const avatarIcon=(AVATAR_OPTIONS.find(x=>x[0]===(db.user.avatarKey||'avatar-01'))||AVATAR_OPTIONS[0])[1];
+ const savedAccounts=SahmSupabase.accounts();
+ const managedGroup=db.groups.find(g=>g.role==='manager');
+ const auditLink=managedGroup?'<div class="listrow"><div class="avatar">⌁</div><div class="grow"><strong>سجل العمليات الإداري</strong></div><button class="btn outline small" data-go="audit" data-group-id="'+escapeHtml(managedGroup.id)+'">عرض</button></div>':'';
+ shell('حسابي','profile',`${header('الملف الشخصي','حسابك في سهم')}<div class="card"><div class="row"><div class="avatar dark" style="width:51px;height:51px;border-radius:17px;font-size:18px">${uiIcon(avatarIcon,25)}</div><div class="grow"><b style="font-size:13px">${escapeHtml(db.user.name)}</b><div class="eyebrow">${escapeHtml(db.user.email||'')}</div><div class="eyebrow">${escapeHtml(db.user.phone||'')}</div><div class="eyebrow">${escapeHtml(db.user.city||'')}</div></div><span class="pill green">الحساب الحالي</span></div></div><div class="card"><div class="between"><strong>الحسابات المحفوظة على هذا الجهاز</strong><button class="btn outline small" data-action="add-account">إضافة حساب</button></div>${savedAccounts.map(a=>`<div class="listrow"><div class="avatar">♙</div><div class="grow"><strong>${escapeHtml(a.label||a.email)}</strong><small>${escapeHtml(a.email)}</small></div>${a.id===db.user.id?'<span class="pill green">نشط</span>':`<button class="btn outline small" data-action="switch-account" data-user-id="${escapeHtml(a.id)}">تبديل</button>`}</div>`).join('')||'<small class="field-hint">لا توجد حسابات محفوظة أخرى.</small>'}</div><div class="card"><div class="listrow"><div class="avatar">♙</div><div class="grow"><strong>بيانات الملف الشخصي</strong></div><button class="btn outline small" data-go="edit-profile">تعديل</button></div><div class="listrow"><div class="avatar">▤</div><div class="grow"><strong>جمعياتي</strong></div><button class="btn outline small" data-go="groups">عرض</button></div><div class="listrow"><div class="avatar">⚙</div><div class="grow"><strong>إعدادات الحساب</strong></div><button class="btn outline small" data-go="settings">فتح</button></div>${auditLink}</div><button class="btn danger full" data-action="logout-confirm">تسجيل الخروج من هذا الحساب</button>`);
+}
 function editProfile(){shell('تعديل الملف','profile',`${header('تعديل بياناتك','الملف الشخصي')}<form id="profileForm"><div class="field"><label>الاسم</label><input name="name" value="${escapeHtml(db.user.name)}" required></div><div class="field"><label>رقم الهاتف</label><input value="${db.user.phone}" disabled></div><div class="field"><label>المدينة</label><input name="city" value="${escapeHtml(db.user.city)}"></div><button class="btn primary full" type="submit">حفظ التعديلات</button></form>`)}
 function settings(){shell('الإعدادات','profile',`${header('الإعدادات','تفضيلات الحساب')}<div class="card"><div class="between"><div><b style="font-size:11px">التنبيهات</b><small class="field-hint">تفعيل أو إيقاف إشعارات الحساب</small></div><input type="checkbox" id="notifToggle" ${db.user.notifications?'checked':''} style="width:20px;height:20px;accent-color:var(--teal)"></div><div class="listrow"><div class="avatar">🔒</div><div class="grow"><strong>حماية الجلسة</strong><small>غير متاحة في معاينة الويب الحالية</small></div><span class="pill">غير متاح</span></div><div class="listrow"><div class="avatar">☎</div><div class="grow"><strong>رقم الهاتف</strong><small>${db.user.phone}</small></div><span class="pill">مسجل</span></div></div><button class="btn danger full" data-action="logout-confirm">إنهاء الجلسة وتسجيل الخروج</button>`)}
 function welcome(){
@@ -3712,7 +3766,7 @@ function profileSetup(){
 function logout(){auth(`<div class="auth-brand"><div class="brand-mark">✓</div><h1>تم تسجيل الخروج</h1></div><div class="auth-card"><button class="btn primary full" data-go="welcome">العودة لتسجيل الدخول</button></div>`)}
 const ALL_SCREEN_REGISTRY={
  welcome:welcome,register:register,'account-login':accountLogin,'profile-setup':profileSetup,'reset-password':resetPasswordScreen,'logged-out':logout,
- home:home,groups:groups,'create-group':createGroup,'created-group':createdGroup,'group-detail':groupDetail,
+ home:home,groups:groups,'managed-groups':managedGroups,'joined-groups':joinedGroups,'create-group':createGroup,'created-group':createdGroup,'group-detail':groupDetail,
  members:members,invite:invite,invites:invites,'invite-detail':inviteDetail,'join-group':joinGroup,'join-request-status':joinRequestStatus,'join-requests':joinRequests,'join-request-detail':joinRequestDetail,installments:installments,
  'draw-room':drawRoom,'draw-history':drawHistory,receipts:receipts,'receipt-detail':receiptDetail,
  chat:chat,wall:wall,news:news,notifications:notifications,audit:audit,profile:profile,'edit-profile':editProfile,settings:settings
@@ -3853,7 +3907,7 @@ async function handleAppAction(action,el){
  if(action==='create-next'){if(validateCreateStep(createWizardStep))setCreateWizardStep(createWizardStep+1);return}
  if(action==='create-prev'){if(createWizardStep>1)setCreateWizardStep(createWizardStep-1);return}
  if(action==='open-group'){go('group-detail',{}, {currentGroupId:el.dataset.id,groupDetailTab:'overview'});return}
- if(action==='home-managed'){go('groups',{}, {groupTab:'manager'});return}if(action==='home-member'){go('groups',{}, {groupTab:'member'});return}
+ if(action==='home-managed'){go('managed-groups',{}, {groupTab:'manager'});return}if(action==='home-member'){go('joined-groups',{}, {groupTab:'member'});return}
  if(action==='home-slide'){setHomeSlide(Number(el.dataset.index)||0);return}if(action==='group-tab'){groupTab=el.dataset.tab;syncNavigationContext();groups();return}if(action==='detail-tab'){groupDetailTab=el.dataset.tab;syncNavigationContext();groupDetail();return}if(action==='join-request-filter'){joinRequestFilter=el.dataset.filter||'pending';syncNavigationContext();joinRequests();return}
  if(action==='copy-new-invite'){const value=$('#newInviteLink')?.value||'';if(!value){toast('رابط الدعوة غير متاح');return}await copyText(value,'تم نسخ رابط الدعوة');return}
  if(action==='copy-created-link'||action==='copy-group-link'){
@@ -4064,6 +4118,7 @@ document.addEventListener('click',async e=>{
   if(route==='invite-detail'&&el.dataset.id){go(route,{id:el.dataset.id},context);return}
   if(route==='join-request-detail'&&el.dataset.id){if(el.dataset.groupId)context.currentGroupId=el.dataset.groupId;go(route,{id:el.dataset.id},context);return}
   if(route==='join-request-status'&&el.dataset.id){go(route,{id:el.dataset.id},context);return}
+  if(route==='audit'&&el.dataset.groupId)context.currentGroupId=el.dataset.groupId;
   if(route==='groups')context.groupTab='all';go(route,{},context);return;
  }
  await handleAppAction(action,el);
