@@ -1079,7 +1079,7 @@ textarea:focus-visible {
   font-size: 9px;
   color: #7b899d;
 }
-.draw-quorum .draw-percent {
+.draw-card .draw-percent {
   font-size: 34px;
   font-weight: 900;
   color: #253653;
@@ -4021,12 +4021,13 @@ async function drawRoom(){
  const index=draw&&Number.isInteger(Number(draw.winner_index))?Number(draw.winner_index):0;
  const rotation=draw?(360*5+(360-((index+.5)*360/count))):0;
  const spin=draw&&drawAnimationPending;drawAnimationPending=false;
- const wheel='<div class="draw-wheel-wrap"><div class="draw-pointer"></div><div class="draw-wheel" style="background:'+gradient+';transform:rotate('+rotation+'deg);'+(spin?'transition:transform 4.2s cubic-bezier(.12,.72,.12,1);':'transition:none;')+'"><span>سهم</span></div></div>';
+ const wheel='<div class="draw-wheel-wrap"><div class="draw-pointer"></div><div class="draw-wheel" style="background:'+gradient+';transform:rotate('+(spin?0:rotation)+'deg);'+(spin?'transition:transform 4.2s cubic-bezier(.12,.72,.12,1);':'transition:none;')+'"><span>سهم</span></div></div>';
  const eligibleRows=eligible.map(x=>'<div class="listrow"><div class="avatar">'+escapeHtml(String(x.share_no||'—'))+'</div><div class="grow"><strong>السهم '+escapeHtml(String(x.share_no||'—'))+'</strong><small>'+escapeHtml(x.owner_name||'مشارك')+'</small></div></div>').join('');
  const schedule=manager&&!draw?'<div class="card"><b>موعد القرعة · توقيت اليمن Asia/Aden</b><div class="field"><input id="drawScheduledAt" type="datetime-local" value="'+escapeHtml(utcToAdenDateTime(cycle.draw_scheduled_at))+'"></div><button class="btn outline full" data-action="schedule-draw">حفظ موعد القرعة</button></div>':'';
  const admin=manager?'<div class="card"><b>أدوات المدير</b><div class="keyvalue"><span>الجاهزية المالية</span><b>'+(readiness.financialReady?'مكتملة':'غير مكتملة')+'</b></div><div class="keyvalue"><span>جاهزية التنفيذ</span><b>'+(readiness.canDraw?'جاهزة':'غير جاهزة')+'</b></div><div class="keyvalue"><span>حالة العرض</span><b>'+escapeHtml(stateLabels[room.state]||room.state||'—')+'</b></div>'+(draw?'<div class="grid2"><button class="btn primary" data-action="draw-presentation-completed">تسجيل اكتمال العرض</button><button class="btn outline" data-action="draw-presentation-failed">تسجيل فشل العرض</button></div>':'<button class="btn primary full" data-action="run-draw" '+(!readiness.canDraw?'disabled':'')+'>تنفيذ القرعة وتثبيت النتيجة</button>')+'</div>':'';
  const financialCard=manager&&financial?'<div class="card"><b>التفاصيل المالية</b><pre class="audit-json">'+escapeHtml(JSON.stringify(financial,null,2))+'</pre></div>':'';
  shell('غرفة القرعة','groups',header('غرفة القرعة',g.name)+'<div class="card draw-card"><div class="between"><b>الجولة '+(room.round_no||'—')+' من '+(room.rounds_total||'—')+'</b><span class="pill">'+escapeHtml(stateLabels[room.state]||room.state||'—')+'</span></div><div class="keyvalue"><span>تاريخ الاستحقاق</span><b>'+dateLabel(cycle.due_on)+'</b></div><div class="keyvalue"><span>موعد القرعة</span><b>'+escapeHtml(cycle.draw_scheduled_at?SahmCore.fmtDateTime(cycle.draw_scheduled_at,'Asia/Aden'):'غير محدد')+'</b></div><div class="keyvalue"><span>الأسهم المؤهلة</span><b>'+eligible.length+'</b></div><div class="keyvalue"><span>النتيجة</span><b>'+(draw?'مثبتة ومحفوظة':'لم تثبت بعد')+'</b></div></div>'+schedule+wheel+(draw?'<div class="card draw-winner"><span class="pill green">النتيجة المثبتة</span><h3>'+escapeHtml(winner)+'</h3><small>رقم القرعة: '+escapeHtml(String(draw.round_no||room.round_no))+'</small></div>':'')+'<div class="card"><b>الأسهم المؤهلة</b>'+(eligibleRows||'<div class="empty">لا توجد أسهم مؤهلة حاليًا.</div>')+'</div>'+(manager&&reasons.length?'<div class="card"><b>متطلبات الجاهزية</b>'+reasons.map(x=>'<div class="listrow">'+escapeHtml(x)+'</div>').join('')+'</div>':'')+admin+financialCard+'<button class="btn outline full" data-go="draw-history">سجل نتائج القرعة</button>');
+ if(spin){const wheelElement=document.querySelector('.draw-wheel');if(wheelElement)requestAnimationFrame(()=>{wheelElement.style.transform='rotate('+rotation+'deg)';});}
 }
 function drawHistory(){
  const g=currentGroup();if(!g){go('groups');return}const r=SahmApp.getDrawHistory(g.id),rows=r&&r.ok?r.history:[];
@@ -4381,7 +4382,6 @@ async function handleAppAction(action,el){
   finally{joinDecisionBusy=false;if(el.isConnected)el.disabled=false;}
   return;
  }
- if(action==='attendance-toggle'){const r=await SahmApp.setAttendance(el.dataset.id,el.dataset.present==='true');if(r&&r.ok){refreshData();members()}return}
  if(action==='record-paid'){
   const list=SahmApp.memberList(g.id),member=(list&&list.ok?list.members:[]).find(m=>m.memberId===el.dataset.member);
   showModal('تأكيد تسجيل الاستلام','هل استلم المدير خارج التطبيق قيمة القسط رقم '+el.dataset.no+' من '+(member?escapeHtml(member.name):'المشارك')+'؟ يسجل هذا الإجراء إقرار الاستلام، ولا ينفذ أي تحويل مالي.',[['تسجيل مدفوع','record-paid-confirm','primary'],['إلغاء','close','outline']]);
