@@ -7,7 +7,9 @@
      - persists through save() and reports persisted:false when browser storage is unavailable.
    The contract is documented in docs/SAHM_ENGINE_DATA_CONTRACT_AR.md.
    Phases 1-5: attendance and quorum are retired; a draw needs its due day, its scheduled time (when one is set)
-   and full payment of every installment up to the round (the database repeats every check). */
+   and full payment of every installment up to the round (the database repeats every check).
+   The agreement (members, shares, invitations, settings) locks when the association's local date reaches its start
+   date, or at the first draw, whichever comes first (the database repeats this check too). */
 (function (root) {
   'use strict';
   var C = function () { return root.SahmCore; };
@@ -110,64 +112,64 @@
 
     var specs = [
       { id: 'g1', name: 'جمعية الأهل', tone: 'blue', manager: 'me', cycleType: 'monthly', installments: 2, shareAmount: 6000000, currency: 'YER',
-        startOff: -54, maxPer: 3, target: 10, quorum: 66, created: -62,
+        startOff: -54, maxPer: 3, target: 10, created: -62,
         rules: 'الالتزام بسداد القسط خلال فترته، وتبليغ المدير عند أي ظرف، وحضور القرعة أو توكيل من ينوب.',
         notify: { received: 1, completed: 1, late: 1, drawSoon: 1, drawDue: 1, drawResult: 1, joined: 0, motivate: 1 },
         members: [
-          { name: 'أحمد محمد', me: 1, shares: 2, join: -60, present: 1 },
-          { name: 'سارة أحمد', shares: 2, join: -60, present: 1 },
-          { name: 'خالد عبدالله', shares: 1, join: -59, present: 1 },
-          { name: 'مروان علي', shares: 2, join: -58, present: 1 },
-          { name: 'ريم صالح', shares: 1, join: -58, present: 1 },
-          { name: 'نبيل سالم', shares: 1, join: -57, present: 0 },
-          { name: 'هدى ياسين', shares: 1, join: -57, present: 0 }
+          { name: 'أحمد محمد', me: 1, shares: 2, join: -60 },
+          { name: 'سارة أحمد', shares: 2, join: -60 },
+          { name: 'خالد عبدالله', shares: 1, join: -59 },
+          { name: 'مروان علي', shares: 2, join: -58 },
+          { name: 'ريم صالح', shares: 1, join: -58 },
+          { name: 'نبيل سالم', shares: 1, join: -57 },
+          { name: 'هدى ياسين', shares: 1, join: -57 }
         ],
         unpaid: { 'ريم صالح': [[1, 2], [2, 2]], 'نبيل سالم': [[2, 1], [2, 2]], 'هدى ياسين': [[2, 1], [2, 2]], 'مروان علي': [[2, 2]] },
         draws: [{ round: 1, member: 'خالد عبدالله', no: 1 }],
         talk: [[-40, '19:10', 'سارة أحمد', 'مبارك للفائز بالجولة الأولى'], [-3, '20:25', 'خالد عبدالله', 'جزاكم الله خيرًا على التنظيم'], [-2, '09:40', 'me', 'من لديه ظرف فليبلغني قبل نهاية الفترة'], [-1, '21:05', 'مروان علي', 'سأسدد القسط غدًا إن شاء الله']],
         reads: 2 },
       { id: 'g2', name: 'زملاء العمل', tone: 'gold', manager: 'ياسر الحداد', cycleType: 'weekly', installments: 1, shareAmount: 30000, currency: 'SAR',
-        startOff: -19, maxPer: 2, target: 8, quorum: 60, created: -26,
+        startOff: -19, maxPer: 2, target: 8, created: -26,
         rules: 'القسط أسبوعي ويسدَّد خلال الأسبوع، ولا يحق لمن تأخر المطالبة بتأجيل القرعة.',
         notify: { received: 1, completed: 0, late: 1, drawSoon: 1, drawDue: 1, drawResult: 1, joined: 0, motivate: 0 },
         members: [
-          { name: 'أحمد محمد', me: 1, shares: 1, join: -25, present: 1 },
-          { name: 'عمر الشامي', shares: 1, join: -25, present: 1 },
-          { name: 'لينا القاضي', shares: 2, join: -24, present: 1 },
-          { name: 'فيصل النهاري', shares: 1, join: -24, present: 0 },
-          { name: 'منى العريقي', shares: 1, join: -23, present: 1 },
-          { name: 'بسام الوصابي', shares: 1, join: -23, present: 1 },
-          { name: 'رنا الأهدل', shares: 1, join: -22, present: 1 }
+          { name: 'أحمد محمد', me: 1, shares: 1, join: -25 },
+          { name: 'عمر الشامي', shares: 1, join: -25 },
+          { name: 'لينا القاضي', shares: 2, join: -24 },
+          { name: 'فيصل النهاري', shares: 1, join: -24 },
+          { name: 'منى العريقي', shares: 1, join: -23 },
+          { name: 'بسام الوصابي', shares: 1, join: -23 },
+          { name: 'رنا الأهدل', shares: 1, join: -22 }
         ],
         unpaid: { 'أحمد محمد': [[3, 1]], 'عمر الشامي': [[3, 1]], 'بسام الوصابي': [[3, 1]], 'فيصل النهاري': [[2, 1], [3, 1]] },
         draws: [{ round: 1, member: 'لينا القاضي', no: 2 }, { round: 2, member: 'عمر الشامي', no: 1 }],
         talk: [[-6, '18:30', 'لينا القاضي', 'الحمد لله، شكرًا للجميع'], [-2, '12:15', 'عمر الشامي', 'تذكير: القرعة يوم السبت']],
         reads: 1 },
       { id: 'g3', name: 'جمعية الجيران', tone: 'dark', manager: 'me', cycleType: 'custom', cycleDays: 15, installments: 3, shareAmount: 9000, currency: 'USD',
-        startOff: 7, maxPer: 2, target: 8, quorum: 66, created: -9,
+        startOff: 7, maxPer: 2, target: 8, created: -9,
         rules: 'الدورة خمسة عشر يومًا بثلاثة أقساط، ويُغلق باب الانضمام عند أول قرعة.',
         notify: { received: 1, completed: 1, late: 1, drawSoon: 1, drawDue: 1, drawResult: 1, joined: 1, motivate: 0 },
         members: [
-          { name: 'رشاد الصلوي', shares: 1, join: -8, present: 0 },
-          { name: 'نجلاء الحميري', shares: 2, join: -7, present: 0 },
-          { name: 'وليد القدسي', shares: 1, join: -6, present: 0 },
-          { name: 'ابتسام الصبري', shares: 1, join: -4, present: 0 },
-          { name: 'زيد المخلافي', shares: 1, join: -2, present: 0 }
+          { name: 'رشاد الصلوي', shares: 1, join: -8 },
+          { name: 'نجلاء الحميري', shares: 2, join: -7 },
+          { name: 'وليد القدسي', shares: 1, join: -6 },
+          { name: 'ابتسام الصبري', shares: 1, join: -4 },
+          { name: 'زيد المخلافي', shares: 1, join: -2 }
         ],
         unpaid: {}, draws: [],
         talk: [[-5, '17:20', 'رشاد الصلوي', 'متى تبدأ الجمعية رسميًا؟'], [-5, '17:45', 'me', 'تبدأ بإذن الله بعد أسبوع']],
         reads: 0 },
       { id: 'g4', name: 'جمعية الأصدقاء', tone: 'blue', manager: 'me', cycleType: 'weekly', installments: 2, shareAmount: 4000000, currency: 'YER',
-        startOff: -4, maxPer: 2, target: 6, quorum: 66, created: -12,
+        startOff: -4, maxPer: 2, target: 6, created: -12,
         rules: 'القسط الأول خلال الأيام الثلاثة الأولى من الأسبوع، والثاني في بقية الأسبوع.',
         notify: { received: 1, completed: 1, late: 1, drawSoon: 1, drawDue: 1, drawResult: 1, joined: 1, motivate: 1 },
         members: [
-          { name: 'أحمد محمد', me: 1, shares: 1, join: -11, present: 1 },
-          { name: 'مها الأكوع', shares: 1, join: -10, present: 1 },
-          { name: 'فهد البعداني', shares: 1, join: -9, present: 1 },
-          { name: 'جلال المقطري', shares: 1, join: -1, present: 0 },
-          { name: 'ريما العديني', shares: 1, join: -8, present: 1 },
-          { name: 'سامي الشرعبي', shares: 1, join: -8, present: 0 }
+          { name: 'أحمد محمد', me: 1, shares: 1, join: -11 },
+          { name: 'مها الأكوع', shares: 1, join: -10 },
+          { name: 'فهد البعداني', shares: 1, join: -9 },
+          { name: 'جلال المقطري', shares: 1, join: -1 },
+          { name: 'ريما العديني', shares: 1, join: -8 },
+          { name: 'سامي الشرعبي', shares: 1, join: -8 }
         ],
         unpaid: { 'جلال المقطري': [[1, 1], [1, 2]], 'مها الأكوع': [[1, 1], [1, 2]], 'فهد البعداني': [[1, 2]], 'أحمد محمد': [[1, 2]] },
         draws: [],
@@ -188,7 +190,7 @@
       var byName = {};
       sp.members.forEach(function (ms, i) {
         var m = { id: 'm-' + sp.id + '-' + (i + 1), groupId: g.id, name: ms.name, userId: ms.me ? 'me' : null, isManager: !!(ms.me && g.managerUserId === 'me'),
-          joinedAt: K.addDays(anchor, ms.join), present: !!ms.present };
+          joinedAt: K.addDays(anchor, ms.join) };
         db.members.push(m); byName[ms.name] = m;
         for (var n = 1; n <= ms.shares; n++) db.shares.push({ id: 's-' + sp.id + '-' + (i + 1) + '-' + n, groupId: g.id, memberId: m.id, no: n });
         db.events.push({ id: nextId(db, 'ev'), groupId: g.id, at: K.addDays(anchor, ms.join) + 'T08:30', type: 'join', text: 'انضم ' + ms.name + ' بـ ' + ms.shares + ' ' + (ms.shares === 1 ? 'سهم' : 'أسهم') });
@@ -496,7 +498,14 @@
     var m = memberOf(db, g, viewer);
     return { manager: !!viewer && g.managerUserId === viewer, member: m && C().memberShares(db, m.id).length ? m : null };
   }
-  function needLocked(db, g, what) { if (C().isLocked(db, g.id)) throw E('GROUP_LOCKED', 'أُقفلت العضويات والأسهم بعد تثبيت أول قرعة، ولا يمكن ' + what); }
+  /* the association's local date has reached its start date (uses the replaceable clock, like every other rule here) */
+  function startReached(g) { return C().isValidDate(g.startDate) && todayOf(g) >= g.startDate; }
+  /* The agreement is open only before the start date and before the first draw. skipStart is for the creation of the
+     association itself (the manager's own shares), which the database performs inside the create call. */
+  function needLocked(db, g, what, skipStart) {
+    if (C().isLocked(db, g.id)) throw E('GROUP_LOCKED', 'أُقفلت العضويات والأسهم بعد تثبيت أول قرعة، ولا يمكن ' + what);
+    if (!skipStart && startReached(g)) throw E('AGREEMENT_LOCKED', 'أُقفل الاتفاق بحلول تاريخ بداية الجمعية، ولا يمكن ' + what);
+  }
   function frozenCount(db, g) {
     var first = db.draws.filter(function (d) { return d.groupId === g.id; }).sort(function (a, b) { return a.round - b.round; })[0];
     return first ? first.shareCount : C().groupShares(db, g.id).length;
@@ -596,7 +605,7 @@
       db.groups.push(g);
       logEvent(db, g, 'created', 'أُنشئت الجمعية «' + g.name + '»', { actor: actor, at: nowAt(g.tz) });
       if (input.managerMode === 'both') {
-        addMemberCore(db, g, { name: g.managerName, userId: actor, shares: Number(input.managerShares), joinedAt: today, isManager: true, confirmLateImpact: true, silent: true });
+        addMemberCore(db, g, { name: g.managerName, userId: actor, shares: Number(input.managerShares), joinedAt: today, isManager: true, confirmLateImpact: true, silent: true, creating: true });
       }
       return { groupId: gid, group: clone(g), plan: K.groupPlan(g, K.groupShares(db, gid).length) };
     });
@@ -607,6 +616,8 @@
   function updateGroup(db, actor, gid, patch) {
     return transact(db, function () {
       var K = C(), g = mustGroup(db, gid); needManager(g, actor); patch = patch || {};
+      /* the database rejects every association update once the local date reaches the start date */
+      if (startReached(g)) throw E('AGREEMENT_LOCKED', 'أُقفل الاتفاق بحلول تاريخ بداية الجمعية، ولا يمكن تعديل بيانات الجمعية');
       var keys = Object.keys(patch), locked = K.isLocked(db, g.id), hasReceipts = db.receipts.some(function (r) { return r.groupId === g.id && !r.voided; });
       keys.forEach(function (k) {
         if (FREE_FIELDS.indexOf(k) >= 0) return;
@@ -660,7 +671,7 @@
       remaining: g.targetShares == null ? null : Math.max(0, g.targetShares - assigned), locked: K.isLocked(db, gid) };
   }
   function addMemberCore(db, g, o) {
-    var K = C(); needLocked(db, g, 'إضافة أعضاء أو أسهم');
+    var K = C(); needLocked(db, g, 'إضافة أعضاء أو أسهم', o.creating);
     var name = String(o.name == null ? '' : o.name).trim();
     if (!name) throw E('NAME_REQUIRED', 'أدخل اسم العضو'); if (name.length > 60) throw E('NAME_TOO_LONG', 'اسم العضو طويل');
     var n = Number(o.shares);
@@ -675,7 +686,7 @@
     var lp = K.lateJoinPreview(g, joinedAt, n, today, 0);
     if (lp.items.length && !o.confirmLateImpact) throw E('LATE_IMPACT_CONFIRM_REQUIRED', 'الانضمام بعد بداية الجمعية ينشئ أقساطًا متأخرة، ويلزم تأكيدها قبل الإضافة', { preview: lp });
     var at = nowAt(g.tz);
-    var m = { id: nextId(db, 'm'), groupId: g.id, name: name, userId: o.userId || null, isManager: !!o.isManager, joinedAt: joinedAt, present: false };
+    var m = { id: nextId(db, 'm'), groupId: g.id, name: name, userId: o.userId || null, isManager: !!o.isManager, joinedAt: joinedAt };
     if (o.phone) m.phone = String(o.phone);
     db.members.push(m);
     var ids = [];
@@ -1229,14 +1240,14 @@
     var v = guardView(db, viewer, gid); if (v.err) return v.err;
     var K = C(), g = v.g, today = todayOf(g), sum = groupSummary(db, g, today, viewer), locked = sum.locked;
     /* the agreement (members, shares, settings) locks at the local start date or at the first draw, whichever is first */
-    var agreementLocked = locked || (K.isValidDate(g.startDate) && today >= g.startDate);
+    var agreementLocked = locked || startReached(g);
     var hasReceipts = db.receipts.some(function (r) { return r.groupId === gid && !r.voided; });
     var rounds = frozenCount(db, g), pub = clone(g); if (!v.role.manager) delete pub.inviteCode;
     var out = { ok: true, group: pub, role: { manager: v.role.manager, participant: !!v.role.member, label: roleOf(db, g, viewer).label, shares: v.role.member ? K.memberShares(db, v.role.member.id).length : 0 },
       phase: sum.phase, phaseLabel: sum.phaseLabel, locked: locked, agreementLocked: agreementLocked, rounds: rounds, provisional: !locked,
       shortfall: g.targetShares == null ? null : Math.max(0, g.targetShares - K.groupShares(db, gid).length),
       drawn: sum.drawn, nextDraw: sum.nextDraw, cycle: sum.cycle, plan: K.groupPlan(g, rounds), members: sum.members, previewNote: LOCAL_PREVIEW_NOTE, privacyNote: PRIVACY_NOTE,
-      permissions: { canEdit: v.role.manager, canEditFinancials: v.role.manager && !agreementLocked && !hasReceipts, canAddMembers: v.role.manager && !agreementLocked, canInvite: v.role.manager && !agreementLocked,
+      permissions: { canEdit: v.role.manager && !agreementLocked, canEditFinancials: v.role.manager && !agreementLocked && !hasReceipts, canAddMembers: v.role.manager && !agreementLocked, canInvite: v.role.manager && !agreementLocked,
         canRecordPaid: v.role.manager, canCorrect: v.role.manager, canRemind: v.role.manager, canDraw: v.role.manager, canSetNotify: v.role.manager, canChat: true, canMute: true } };
     if (v.role.manager) { out.counts = sum.counts; out.invites = inviteSummary(db, gid); out.lockedAt = g.lockedAt; }
     if (v.role.member) { out.myProgress = sum.myProgress; out.myCommitment = K.memberCommitment(g, out.role.shares, rounds); }
