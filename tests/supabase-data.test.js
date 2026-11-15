@@ -4,10 +4,11 @@ const fs = require('node:fs');
 const path = require('node:path');
 const vm = require('node:vm');
 
+/* cycle_attendance is no longer read: attendance is retired and is not a draw condition */
 const EXPECTED_TABLES = [
   'associations','profiles','association_memberships','shares','association_cycles',
   'installment_periods','installment_obligations','installment_receipts','receipt_corrections',
-  'draws','draw_eligible_shares','cycle_attendance','chat_messages','chat_read_states',
+  'draws','draw_eligible_shares','chat_messages','chat_read_states',
   'association_events','association_notification_settings','association_user_preferences',
   'invitations','join_requests','notifications','reminders','user_preferences'
 ];
@@ -42,6 +43,7 @@ function loadRemoteGateway(options = {}) {
     rpc: async (name,args) => {
       calls.rpc.push({ name,args });
       if(options.rpcErrors&&options.rpcErrors[name])return {data:null,error:options.rpcErrors[name]};
+      if(options.rpcData&&Object.prototype.hasOwnProperty.call(options.rpcData,name))return {data:options.rpcData[name],error:null};
       if(name==='send_installment_reminders')return {data:1,error:null};
       if(name==='create_association')return { data:'association-1', error:null };
       if(name==='create_association_unified')return { data:'association-1', error:null };
@@ -73,7 +75,7 @@ function loadRemoteGateway(options = {}) {
       friendlyError:e=>String(e&&e.message||e||'error')
     },
     SahmData:{ VERSION:'test-v1', normalizeDb:db=>db },
-    SahmCore:{ parseMoney:(value)=>Number(value)||0 },
+    SahmCore:{ parseMoney:(value)=>Number(value)||0, normalizeReadiness:(r)=>({ ready:!!r.ready, reasons:r.reasons||[] }) },
     SahmApp:{
       useRemoteStore(db){storeRef.value=db;},
       clearStore(){storeRef.value=null;},
@@ -85,6 +87,17 @@ function loadRemoteGateway(options = {}) {
   return { gateway:window.SahmSupabaseData, window, calls, storeRef, profile };
 }
 
+function associationRow(id, extra) {
+  return Object.assign({
+    id, manager_user_id:'user-1', name:'جمعية '+id, currency:'YER',
+    start_date:'2026-12-01', invite_opens_on:null, invite_closes_on:null,
+    time_zone:'Asia/Aden', cycle_type:'weekly', cycle_days:7,
+    share_amount_minor:100, installments_count:1, target_shares:10,
+    max_shares_per_member:2, manager_participates:false, quorum_percent:66,
+    rules:'', locked_at:null, locked_share_count:null, status:'active', created_at:'2026-11-14T00:00:00Z'
+  }, extra || {});
+}
+
 test('remote gateway loads the full RLS-scoped table snapshot into SahmApp', async()=>{
   const {gateway,calls,storeRef,profile}=loadRemoteGateway();
   const db=await gateway.init(profile);
@@ -93,6 +106,7 @@ test('remote gateway loads the full RLS-scoped table snapshot into SahmApp', asy
   assert.equal(calls.ranges.length,EXPECTED_TABLES.length);
   assert.equal(calls.orders.length,EXPECTED_TABLES.length);
   assert.ok(calls.orders.every(x=>x.opts.ascending===true));
+  assert.equal(calls.tables.includes('cycle_attendance'),false);
   assert.equal(db.prefs.user.id,'user-1');
   assert.equal(db.prefs.user.email,'person@example.com');
   assert.equal(db.prefs.user.name,'أحمد محمد علي');
@@ -123,17 +137,23 @@ test('remote mutation layer creates the date-based unified association through R
   assert.match(result.publicLink.url,/\\?join=public-token$/);
 });
 
+test('association creation payload carries neither quorum nor time zone', async()=>{
+  const {gateway,window,calls}=loadRemoteGateway();
+  await gateway.init();
+  gateway.install();
+  await window.SahmApp.createGroup({
+    name:'جمعية',currency:'YER',startDate:'2026-12-01',firstDrawOn:'2026-12-31',
+    shareAmountMinor:10000,installmentMode:'count',installments:3,managerMode:'only',quorum:66,tz:'Asia/Aden'
+  });
+  const payload=calls.rpc.find(x=>x.name==='create_association_unified').args.p_payload;
+  assert.equal(Object.prototype.hasOwnProperty.call(payload,'quorum'),false);
+  assert.equal(Object.prototype.hasOwnProperty.call(payload,'timeZone'),false);
+  assert.equal(payload.installments,3);
+});
+
 
 test('remote gateway paginates association records beyond a single page',async()=>{
-  const association=(n)=>({
-    id:'g-'+n,manager_user_id:'user-1',name:'جمعية '+n,currency:'YER',
-    start_date:'2026-12-01',invite_opens_on:null,invite_closes_on:null,
-    time_zone:'Asia/Aden',cycle_type:'weekly',cycle_days:7,
-    share_amount_minor:100,installments_count:1,target_shares:10,
-    max_shares_per_member:2,manager_participates:false,quorum_percent:66,
-    rules:'',locked_at:null,locked_share_count:null,status:'active',created_at:'2026-11-14T00:00:00Z'
-  });
-  const groups=Array.from({length:501},(_,i)=>association(i+1));
+  const groups=Array.from({length:501},(_,i)=>associationRow('g-'+(i+1)));
   const {gateway,calls}=loadRemoteGateway({tableData:{associations:groups}});
   const db=await gateway.init();
   assert.equal(db.groups.length,501);
@@ -141,6 +161,140 @@ test('remote gateway paginates association records beyond a single page',async()
   assert.equal(pages.length,2);
   assert.deepEqual(pages.map(x=>[x.from,x.to]),[[0,499],[500,999]]);
   assert.equal(calls.orders.find(x=>x.table==='associations').column,'id');
+});
+
+test('snapshot maps publishing channels, draw time and cycle status and drops the quorum field', async()=>{
+  const {gateway}=loadRemoteGateway({tableData:{
+    associations:[associationRow('g-1')],
+    association_cycles:[{id:'c1',association_id:'g-1',cycle_no:1,status:'open',draw_scheduled_at:'2026-12-01T10:00:00Z'}],
+    association_notification_settings:[{
+      association_id:'g-1',enabled_types:['received'],feed_enabled_types:['received','late'],
+      chat_enabled_types:['joined'],name_visible_types:['drawResult','joined']
+    }]
+  }});
+  const db=await gateway.init();
+  const group=db.groups[0];
+  assert.equal(group.notify.received,true);
+  assert.equal(group.notify.late,true);
+  assert.equal(group.notify.joined,false);
+  assert.equal(group.notifyChat.joined,true);
+  assert.equal(group.notifyChat.received,false);
+  assert.equal(group.notifyNames.joined,true);
+  assert.equal(group.notifyNames.received,false);
+  assert.equal(group.drawRound,1);
+  assert.equal(group.drawScheduledAt,'2026-12-01T10:00:00Z');
+  assert.equal(group.cycleStatus,'open');
+  assert.equal(Object.prototype.hasOwnProperty.call(group,'quorum'),false);
+});
+
+test('groups without a settings row publish everything to feed and chat and show names only for the draw result', async()=>{
+  const {gateway}=loadRemoteGateway({tableData:{associations:[associationRow('g-1')]}});
+  const db=await gateway.init();
+  const group=db.groups[0];
+  assert.ok(Object.keys(group.notify).every(t=>group.notify[t]===true));
+  assert.ok(Object.keys(group.notifyChat).every(t=>group.notifyChat[t]===true));
+  assert.equal(group.notifyNames.drawResult,true);
+  assert.equal(group.notifyNames.received,false);
+});
+
+test('attendance is retired: the gateway refuses locally and never calls the database', async()=>{
+  const {gateway,window,calls}=loadRemoteGateway();
+  await gateway.init();
+  gateway.install();
+  const result=await window.SahmApp.setAttendance('membership-1',true);
+  assert.equal(result.ok,false);
+  assert.equal(result.code,'ATTENDANCE_RETIRED');
+  assert.equal(calls.rpc.some(x=>x.name==='set_cycle_attendance'),false);
+});
+
+test('draw time and presentation status go through their dedicated RPCs', async()=>{
+  const {gateway,window,calls}=loadRemoteGateway({rpcData:{
+    set_draw_scheduled_at:{cycle_id:'c1',round_no:1,draw_scheduled_at:'2026-12-01T10:00:00Z'},
+    set_draw_presentation_status:{round_no:1,status:'completed',changed:true}
+  }});
+  await gateway.init();
+  gateway.install();
+  const scheduled=await window.SahmApp.setDrawScheduledAt('association-1','2026-12-01T10:00:00Z');
+  assert.equal(scheduled.ok,true);
+  assert.equal(scheduled.roundNo,1);
+  const sched=calls.rpc.find(x=>x.name==='set_draw_scheduled_at');
+  assert.equal(sched.args.p_association_id,'association-1');
+  assert.equal(sched.args.p_scheduled_at,'2026-12-01T10:00:00.000Z');
+  const invalid=await window.SahmApp.setDrawScheduledAt('association-1','not-a-time');
+  assert.equal(invalid.ok,false);
+  assert.equal(calls.rpc.filter(x=>x.name==='set_draw_scheduled_at').length,1);
+  const shown=await window.SahmApp.setDrawPresentationStatus('association-1',1,'completed');
+  assert.equal(shown.ok,true);
+  assert.equal(shown.status,'completed');
+  assert.equal(shown.changed,true);
+  const pres=calls.rpc.find(x=>x.name==='set_draw_presentation_status');
+  assert.equal(pres.args.p_round_no,1);
+  assert.equal(pres.args.p_status,'completed');
+});
+
+test('draw readiness maps the database financial_ready flag to the core view model', async()=>{
+  const {gateway,window,calls}=loadRemoteGateway({rpcData:{get_draw_readiness:{
+    financial_ready:true,can_draw:false,date_reached:true,time_reached:false,
+    round_no:'2',due_on:'2026-12-01',draw_scheduled_at:'2026-12-01T10:00:00Z',cycle_status:'open',reasons:[]
+  }}});
+  await gateway.init();
+  gateway.install();
+  const result=await window.SahmApp.getDrawReadiness('association-1');
+  assert.equal(result.ok,true);
+  assert.equal(result.readiness.ready,true);
+  assert.equal(result.financialReady,true);
+  assert.equal(result.canDraw,false);
+  assert.equal(result.dateReached,true);
+  assert.equal(result.timeReached,false);
+  assert.equal(result.roundNo,2);
+  assert.equal(result.dueOn,'2026-12-01');
+  assert.equal(calls.rpc.find(x=>x.name==='get_draw_readiness').args.p_association_id,'association-1');
+});
+
+test('draw room, history, financial summary, news and audit log use the new read RPCs', async()=>{
+  const {gateway,window,calls}=loadRemoteGateway({rpcData:{
+    get_draw_room:{state:'pending',eligible_shares:[]},
+    get_draw_history:[{round_no:1}],
+    get_association_financial_summary:{totals:{due_minor:10}},
+    get_association_news:[{event_id:'e1'}],
+    get_association_audit_log:[{event_id:'e1'},{event_id:'e2'}]
+  }});
+  await gateway.init();
+  gateway.install();
+  const room=await window.SahmApp.getDrawRoom('association-1');
+  assert.equal(room.ok,true);
+  assert.equal(room.room.state,'pending');
+  const roomCall=calls.rpc.find(x=>x.name==='get_draw_room');
+  assert.equal(roomCall.args.p_round_no,null);
+  await window.SahmApp.getDrawRoom('association-1',3);
+  assert.equal(calls.rpc.filter(x=>x.name==='get_draw_room')[1].args.p_round_no,3);
+  const history=await window.SahmApp.getDrawHistory('association-1');
+  assert.equal(history.history.length,1);
+  const summary=await window.SahmApp.getFinancialSummary('association-1');
+  assert.equal(summary.summary.totals.due_minor,10);
+  const news=await window.SahmApp.getNews('association-1',20);
+  assert.equal(news.news.length,1);
+  const newsCall=calls.rpc.find(x=>x.name==='get_association_news');
+  assert.equal(newsCall.args.p_limit,20);
+  assert.equal(Object.prototype.hasOwnProperty.call(newsCall.args,'p_before'),false);
+  const audit=await window.SahmApp.getAuditLog('association-1');
+  assert.equal(audit.log.length,2);
+  assert.equal(calls.rpc.find(x=>x.name==='get_association_audit_log').args.p_limit,100);
+});
+
+test('notification settings send channels as type lists and keep omitted channels untouched', async()=>{
+  const {gateway,window,calls}=loadRemoteGateway();
+  await gateway.init();
+  gateway.install();
+  const result=await window.SahmApp.setNotifySettings('association-1',{
+    feed:{received:true,late:true,joined:false},chat:['joined','unknown'],names:null
+  });
+  assert.equal(result.ok,true);
+  const call=calls.rpc.find(x=>x.name==='set_association_notification_settings');
+  assert.equal(call.args.p_association_id,'association-1');
+  assert.deepEqual([...call.args.p_feed_types],['received','late']);
+  assert.deepEqual([...call.args.p_chat_types],['joined']);
+  assert.equal(call.args.p_name_visible_types,null);
 });
 
 test('remote gateway subscribes only to chat and notifications and clears channel state', async()=>{
