@@ -359,3 +359,17 @@ test('confirmed unused stylesheet components and Supabase data helpers stay remo
   assert.doesNotMatch(remote, /\bprofileCompletionRows\b/);
   assert.doesNotMatch(remote, /\bafterMutation\b/);
 });
+
+
+test('all navigation and topbar auth visibility use the canonical auth screen registry', () => {
+  const authMatch = html.match(/const AUTH_SCREEN_NAMES=\[([^\]]+)\]/);
+  assert.ok(authMatch, 'canonical auth screen registry exists');
+  const authScreens = [...authMatch[1].matchAll(/'([^']+)'/g)].map(item => item[1]);
+  for (const screen of ['welcome', 'register', 'account-login', 'profile-setup', 'reset-password', 'logged-out']) {
+    assert.ok(authScreens.includes(screen), 'auth screen is registered: ' + screen);
+  }
+  assert.match(html, /const authScreens=AUTH_SCREEN_NAMES;/);
+  assert.match(html, /function syncBottomNavigation\(visible=!AUTH_SCREEN_NAMES\.includes\(screenName\)\)/);
+  assert.match(html, /syncBottomNavigation\(!AUTH_SCREEN_NAMES\.includes\(screenName\)\)/);
+  assert.doesNotMatch(html, /\\['welcome','phone','otp','profile-setup','logged-out'\\]/);
+});
