@@ -46,7 +46,7 @@ function day(K, base, off) { return K.addDays(base, off); }
 function makeGroup(w, over) {
   const input = Object.assign({
     name: 'جمعية الاختبار', currency: 'YER', cycleType: 'monthly', shareAmount: '90000', installments: 3, startDate: '2026-11-01',
-    targetShares: 10, maxPerMember: 3, quorum: 60, rules: 'قواعد'
+    targetShares: 10, maxPerMember: 3, rules: 'قواعد'
   }, over || {});
   const r = w.D.createGroup(w.db, 'me', input);
   if (!r.ok) throw new Error('makeGroup failed: ' + JSON.stringify(r));
