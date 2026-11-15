@@ -224,7 +224,7 @@ test('every rendered button, route, form, and modal action is connected to a han
   const actionCases = new Set([...html.matchAll(/action===["']([^"']+)["']/g)].map(x => x[1]));
   const groupedActions = new Set([...html.matchAll(/\[([^\]]+)\]\.includes\(action\)/g)]
     .flatMap(x => [...x[1].matchAll(/["']([^"']+)["']/g)].map(y => y[1])));
-  const changeActions = new Set(['mute-toggle', 'notify-toggle']);
+  const changeActions = new Set(['mute-toggle', 'notify-channel-toggle']);
   for (const action of actions) {
     assert.ok(actionCases.has(action) || groupedActions.has(action) || changeActions.has(action),
       'data-action is handled by click or change logic: ' + action);
@@ -256,3 +256,33 @@ test('account switch failures attempt to restore the previously active account',
   assert.match(html, /startRemoteRealtime\(\)/);
 });
 
+
+
+test('role separation, draw room, publication channels and personal notification reads match Supabase contracts', () => {
+  assert.doesNotMatch(html, /quorumInfo|quorum|attendance-toggle|setAttendance|حاضر|غير حاضر|تسجيل الحضور|إلغاء الحضور/);
+  assert.doesNotMatch(html, /name=["']tz["']|المنطقة الزمنية للجمعية/);
+  assert.match(html, /agreementLocked/);
+  assert.match(html, /const managerOnly=\['members','invite','invites','join-requests','join-request-detail','audit'\]/);
+  assert.match(html, /s==='draw-room'[\s\S]*?targetDetail\.role\.manager\|\|targetDetail\.role\.participant/);
+  assert.match(html, /SahmApp\.getDrawRoom\(/);
+  assert.match(html, /SahmApp\.getDrawHistory\(/);
+  assert.match(html, /SahmApp\.getDrawReadiness\(/);
+  assert.match(html, /SahmApp\.setDrawScheduledAt\(/);
+  assert.match(html, /SahmApp\.setDrawPresentationStatus\(/);
+  assert.match(html, /SahmApp\.performDraw\(/);
+  assert.match(html, /adenDateTimeToUtc/);
+  assert.match(html, /Asia\/Aden/);
+  assert.match(html, /requestAnimationFrame\(\(\)=>\{wheelElement\.style\.transform/);
+  assert.match(html, /SahmApp\.getNews\(/);
+  assert.match(html, /subject_visible===true&&x\.subject_name/);
+  assert.match(html, /SahmApp\.getAuditLog\(/);
+  assert.doesNotMatch(html, /SahmApp\.eventLog\(g\.id/);
+  assert.match(html, /data-channel="feed"/);
+  assert.match(html, /data-channel="chat"/);
+  assert.match(html, /data-channel="names"/);
+  assert.match(html, /SahmApp\.setNotifySettings\(/);
+  assert.match(html, /SahmApp\.markNotificationsRead\(\[id\]\)/);
+  assert.doesNotMatch(html, /SahmApp\.markNotificationsRead\(\)/);
+  assert.match(html, /function news\(\)/);
+  assert.match(html, /news:news/);
+});
