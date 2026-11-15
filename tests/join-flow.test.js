@@ -200,8 +200,9 @@ test('applicant approval and rejection notifications open the related request st
   };
   const render = vm.runInNewContext('(' + source + ')', context);
   render();
-  assert.match(state.markup, /data-go="join-request-status" data-id="request-1"/);
-  assert.match(state.markup, /data-go="join-request-status" data-id="request-2"/);
+  assert.match(state.markup, /data-action="notification-open"[^>]*data-related-id="request-1"[^>]*data-decision="true"/);
+  assert.match(state.markup, /data-action="notification-open"[^>]*data-related-id="request-2"[^>]*data-decision="true"/);
+  assert.match(html, /if\(action==='notification-open'\)\{[\s\S]*?if\(el\.dataset\.decision==='true'&&el\.dataset\.relatedId\)go\('join-request-status',\{id:el\.dataset\.relatedId\}\)/);
   assert.match(state.markup, /الموافقة على طلب انضمامك/);
   assert.match(state.markup, /رفض طلب انضمامك/);
   assert.match(state.markup, /تذكير بقسط/);
