@@ -182,7 +182,7 @@ test('applicant request outcomes appear in latest activity without manager-only 
 });
 
 test('applicant approval and rejection notifications open the related request status', () => {
-  const source = extractFunction('notifications', 'audit');
+  const source = extractFunction('notifications', 'news');
   const state = { markup: '' };
   const context = {
     SahmApp: {
