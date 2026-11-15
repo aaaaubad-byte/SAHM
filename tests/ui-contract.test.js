@@ -371,5 +371,5 @@ test('all navigation and topbar auth visibility use the canonical auth screen re
   assert.match(html, /const authScreens=AUTH_SCREEN_NAMES;/);
   assert.match(html, /function syncBottomNavigation\(visible=!AUTH_SCREEN_NAMES\.includes\(screenName\)\)/);
   assert.match(html, /syncBottomNavigation\(!AUTH_SCREEN_NAMES\.includes\(screenName\)\)/);
-  assert.doesNotMatch(html, /\\['welcome','phone','otp','profile-setup','logged-out'\\]/);
+  assert.doesNotMatch(html, /\['welcome','phone','otp','profile-setup','logged-out'\]/);
 });
