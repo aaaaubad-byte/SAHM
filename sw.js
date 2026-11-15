@@ -1,5 +1,6 @@
-/* Sahm PWA v33 — version bump to notify installed clients of the latest app shell. */
-const CACHE_NAME = 'sahm-pwa-v33';
+/* Sahm PWA worker. BUILD_ID is refreshed automatically for every source commit. */
+const BUILD_ID = 'manual-v34';
+const CACHE_NAME = `sahm-pwa-${BUILD_ID}`;
 const APP_SHELL = [
   '/',
   '/Sahm_Preview_ROLE_SEPARATION.html',
