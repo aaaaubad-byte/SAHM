@@ -444,9 +444,25 @@ test('member reception is the central manager entry point and destructive link c
   const createdStart = html.indexOf('function showCreatedGroup(g){');
   const createdEnd = html.indexOf('function groupDetail(){', createdStart);
   const created = html.slice(createdStart, createdEnd);
-  assert.match(created, /data-go="invite"/);
+  // The result screen merges success + invitations: no separate invite step after creation.
+  assert.doesNotMatch(created, /data-go="invite"/);
   assert.match(created, /data-go="group-detail"/);
+  assert.match(created, /data-action="copy-group-link"/);
+  assert.match(created, /data-action="share-group-link"/);
+  for (const helper of ['inviteePickerHtml()', 'inviteeListHtml()', 'inviteeBarHtml(', 'bindInviteePicker()']) {
+    assert.ok(created.includes(helper), 'result screen uses ' + helper);
+  }
+  assert.ok(created.indexOf('inviteePickerHtml()') < created.indexOf('inviteeBarHtml('), 'contacts picker comes before the invite bar');
   assert.doesNotMatch(created, /data-go="member-reception"|data-go="invites"|data-go="join-requests"/);
+
+  const pickerStart = html.indexOf('function inviteePickerHtml(){');
+  const pickerEnd = html.indexOf('function inviteDetail(){', pickerStart);
+  const picker = html.slice(pickerStart, pickerEnd);
+  assert.ok(picker.indexOf('data-action="pick-device-contacts"') < picker.indexOf('<details class="cg-manual">'), 'contacts button precedes the folded manual entry');
+  assert.match(picker, /id="inviteeManualForm"/);
+  assert.match(picker, /id="sendInviteesButton"[^>]*data-action="submit-bulk-invites"/);
+  const inviteStart = picker.indexOf('function invite(){');
+  assert.ok(inviteStart > -1 && picker.slice(inviteStart).includes('inviteePickerHtml()'), 'invite from group details reuses the same picker');
 
   assert.match(html, /action==='confirm-public-link-action'/);
   assert.match(html, /سيصبح الرابط الحالي غير صالح/);
@@ -478,13 +494,24 @@ test('public-link lifecycle is managed in one place rather than duplicated acros
 });
 
 
-test('create-association flow is three flat steps with one primary action and no stale wizard code', () => {
+test('create-association flow is two flat steps with one primary action and no stale wizard code', () => {
   const start = html.indexOf('function setCreateWizardStep(');
   const end = html.indexOf('function groupDetail(){', start);
   const flow = html.slice(start, end);
-  assert.match(html, /const CREATE_STEP_COUNT=3;/);
+  assert.match(html, /const CREATE_STEP_COUNT=2;/);
   assert.equal((html.match(/Math\.min\(2,/g) || []).length, 0, 'step limit is not hard-coded');
-  for (const id of ['create-step-1', 'create-step-2', 'create-step-3']) assert.ok(flow.includes('id="' + id + '"'), id);
+  for (const id of ['create-step-1', 'create-step-2']) assert.ok(flow.includes('id="' + id + '"'), id);
+  assert.ok(!flow.includes('id="create-step-3"'), 'no third step');
+  assert.ok(flow.includes("'+CREATE_STEP_COUNT+'"), 'step counter follows CREATE_STEP_COUNT');
+  const step1 = flow.slice(flow.indexOf('id="create-step-1"'), flow.indexOf('id="create-step-2"'));
+  const step2 = flow.slice(flow.indexOf('id="create-step-2"'), flow.indexOf('id="create-next"'));
+  for (const field of ['name', 'startDate', 'firstDrawOn', 'shareAmount', 'currency']) assert.ok(step1.includes('name="' + field + '"'), 'screen 1 field: ' + field);
+  for (const field of ['installmentMode', 'installments', 'installmentAmount', 'managerMode', 'managerShares']) assert.ok(step2.includes('name="' + field + '"'), 'screen 2 field: ' + field);
+  assert.match(step1, /<div class="grid2"><div class="field"><label for="cg-start">[\s\S]*?name="startDate"[\s\S]*?name="firstDrawOn"/, 'start date and first draw share one row');
+  assert.ok(step1.indexOf('id="cg-result"') > step1.indexOf('name="firstDrawOn"') && step1.indexOf('id="cg-result"') < step1.indexOf('name="shareAmount"'), 'computed duration line sits between the dates and the share row');
+  assert.match(step1, /<div class="cg-row">[\s\S]*name="shareAmount"[\s\S]*name="currency"/, 'share amount and currency share one row');
+  assert.ok(step2.indexOf('id="cg-installment-preview"') > step2.indexOf('name="installmentMode"') && step2.indexOf('id="cg-installment-preview"') < step2.indexOf('name="managerMode"'), 'actual installments list sits between payment method and manager');
+  assert.ok(step2.indexOf('name="managerMode"') < flow.indexOf('id="create-final-submit"'));
   assert.ok(flow.indexOf('name="name"') < flow.indexOf('name="startDate"'));
   assert.ok(flow.indexOf('name="startDate"') < flow.indexOf('name="firstDrawOn"'));
   assert.ok(flow.indexOf('name="firstDrawOn"') < flow.indexOf('name="shareAmount"'));

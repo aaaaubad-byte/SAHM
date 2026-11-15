@@ -2584,7 +2584,7 @@ function setHomeSlide(index){const ss=document.querySelectorAll('#homeCarousel .
 }
 function managedGroups(){groupTab='manager';syncNavigationContext();groups()}
 function joinedGroups(){groupTab='member';syncNavigationContext();groups()}
-const CREATE_STEP_COUNT=3;
+const CREATE_STEP_COUNT=2;
 function setCreateWizardStep(step,updateHistory=true){
  const previous=createWizardStep;createWizardStep=Math.max(1,Math.min(CREATE_STEP_COUNT,step));const form=document.getElementById('createForm');
  if(form)createFormSnapshot=Object.fromEntries(new FormData(form));
@@ -2623,18 +2623,18 @@ function validateCreateStep(step){
   if(!SahmCore.isValidDate(d.firstDrawOn)){toast('حدد موعد أول قرعة');return false}
   if(d.firstDrawOn<=d.startDate){toast('موعد أول قرعة يجب أن يكون بعد تاريخ البداية');return false}
   if(d.durationDays<1||d.durationDays>3650){toast('مدة الدورة بين يوم واحد و3650 يومًا');return false}
- }
- if(step===2){
   if(!SahmCore.CURRENCIES[d.currency]){toast('اختر العملة');return false}
   if(!d.shareAmountMinor||d.shareAmountMinor<1){toast('أدخل قيمة حصة السهم');return false}
+ }
+ if(step===2){
   if(d.installmentMode==='count'){
    if(!Number.isInteger(d.installments)||d.installments<1||d.installments>d.durationDays){toast('عدد الأقساط غير صالح أو يتجاوز مدة الدورة');return false}
   }else if(d.installmentMode==='amount'){
    if(!d.installmentAmountMinor||d.installmentAmountMinor<1||d.installmentAmountMinor>d.shareAmountMinor){toast('قيمة القسط يجب أن تكون موجبة ولا تتجاوز حصة السهم');return false}
    if(Math.ceil(d.shareAmountMinor/d.installmentAmountMinor)>d.durationDays){toast('عدد الأقساط الناتج يتجاوز مدة الدورة');return false}
   }else{toast('اختر طريقة السداد');return false}
+  if(d.managerMode==='both'&&(!Number.isInteger(d.managerShares)||d.managerShares<1)){toast('أدخل عدد أسهم المدير');return false}
  }
- if(step===3&&d.managerMode==='both'&&(!Number.isInteger(d.managerShares)||d.managerShares<1)){toast('أدخل عدد أسهم المدير');return false}
  return true;
 }
 function createPreview(form){
@@ -2653,10 +2653,6 @@ function createPreview(form){
  const put=(id,value)=>{const node=document.getElementById(id);if(node)node.textContent=value};
  const result=document.getElementById('cg-result');if(result)result.hidden=!duration;
  put('cg-duration',duration?duration+' يومًا':'—');
- put('cs-name',d.name||'—');
- put('cs-period',duration?dateLabel(d.startDate)+' ← '+dateLabel(d.firstDrawOn):'—');
- put('cs-share',minor?minorMoney(minor,currency)+(count?' · '+count+' أقساط':''):'—');
- put('cs-manager',d.managerMode==='both'?'مدير ومشارك · '+(d.managerShares||0)+' أسهم':'مدير فقط');
  const list=document.getElementById('cg-installment-preview');
  if(list)list.innerHTML=periods.map(p=>'<div class="keyvalue"><span>القسط '+p.no+' · '+dateLabel(p.start)+' إلى '+dateLabel(p.end)+'</span><b>'+minorMoney(p.amount,currency)+'</b></div>').join('');
 }
@@ -2670,22 +2666,20 @@ function setCreateFormValues(form){
 function createGroup(){
  const html=[
  '<form id="createForm" class="cg-form" novalidate><div class="card cg-card">',
- '<div class="cg-step" id="create-step-1"><div class="cg-head"><h3>الجمعية</h3><span class="eyebrow">الخطوة 1 من 3</span></div><p class="cg-sub">الاسم وموعدا البداية وأول قرعة.</p>',
+ '<div class="cg-step" id="create-step-1"><div class="cg-head"><h3>الجمعية</h3><span class="eyebrow">الخطوة 1 من '+CREATE_STEP_COUNT+'</span></div><p class="cg-sub">الاسم والموعدان وقيمة السهم.</p>',
  '<div class="field"><label for="cg-name">اسم الجمعية</label><input id="cg-name" name="name" maxlength="120" autocomplete="off" required></div>',
- '<div class="field"><label for="cg-start">تاريخ بداية الجمعية</label><input id="cg-start" name="startDate" type="date" required></div>',
- '<div class="field"><label for="cg-first">تاريخ أول قرعة</label><input id="cg-first" name="firstDrawOn" type="date" required></div>',
- '<div class="cg-result" id="cg-result" role="status" hidden><b>مدة الدورة: <span id="cg-duration">—</span></b><small>تنتهي الدورة الأولى قبل القرعة بيوم.</small></div></div>',
- '<div class="cg-step" id="create-step-2" hidden><div class="cg-head"><h3>المبلغ والأقساط</h3><span class="eyebrow">الخطوة 2 من 3</span></div><p class="cg-sub">التزام السهم الواحد في الدورة وطريقة سداده.</p>',
+ '<div class="grid2"><div class="field"><label for="cg-start">تاريخ البداية</label><input id="cg-start" name="startDate" type="date" required></div>',
+ '<div class="field"><label for="cg-first">تاريخ أول قرعة</label><input id="cg-first" name="firstDrawOn" type="date" required></div></div>',
+ '<div class="cg-result" id="cg-result" role="status" hidden><b>مدة الدورة: <span id="cg-duration">—</span></b><small>تنتهي الدورة الأولى قبل القرعة بيوم.</small></div>',
  '<div class="cg-row"><div class="field"><label for="cg-share">قيمة السهم في الدورة</label><input id="cg-share" name="shareAmount" type="number" min="0.01" step="0.01" inputmode="decimal" required></div>',
- '<div class="field"><label for="cg-currency">العملة</label><select id="cg-currency" name="currency" required><option value="">اختر</option><option value="YER">ريال يمني</option><option value="SAR">ريال سعودي</option><option value="USD">دولار</option></select></div></div>',
+ '<div class="field"><label for="cg-currency">العملة</label><select id="cg-currency" name="currency" required><option value="">اختر</option><option value="YER">ريال يمني</option><option value="SAR">ريال سعودي</option><option value="USD">دولار</option></select></div></div></div>',
+ '<div class="cg-step" id="create-step-2" hidden><div class="cg-head"><h3>السداد والمدير</h3><span class="eyebrow">الخطوة 2 من '+CREATE_STEP_COUNT+'</span></div><p class="cg-sub">طريقة سداد السهم، ثم دورك في الجمعية.</p>',
  '<div class="field"><label>طريقة السداد</label><div class="cg-seg" role="radiogroup" aria-label="طريقة السداد"><label><input type="radio" name="installmentMode" value="count" checked><span>عدد الأقساط</span></label><label><input type="radio" name="installmentMode" value="amount"><span>قيمة القسط</span></label></div></div>',
  '<div class="field" id="installments-count-field"><label for="cg-count">عدد الأقساط</label><input id="cg-count" name="installments" type="number" min="1" step="1" value="1" required></div>',
  '<div class="field" id="installment-amount-field" hidden><label for="cg-amount">قيمة القسط الواحد</label><input id="cg-amount" name="installmentAmount" type="number" min="0.01" step="0.01" inputmode="decimal"></div>',
- '<div id="cg-installment-preview"></div></div>',
- '<div class="cg-step" id="create-step-3" hidden><div class="cg-head"><h3>المدير</h3><span class="eyebrow">الخطوة 3 من 3</span></div><p class="cg-sub">هل تشارك بأسهم في الجمعية أم تديرها فقط؟</p>',
- '<div class="cg-seg" role="radiogroup" aria-label="مشاركة المدير"><label><input type="radio" name="managerMode" value="only" checked><span>مدير فقط</span></label><label><input type="radio" name="managerMode" value="both"><span>مدير ومشارك</span></label></div>',
- '<div class="field" id="manager-shares-field" hidden><label for="cg-manager-shares">عدد أسهم المدير</label><input id="cg-manager-shares" name="managerShares" type="number" min="1" step="1"></div>',
- '<div class="section-head"><h3>ملخص</h3></div><div class="keyvalue"><span>الجمعية</span><b id="cs-name">—</b></div><div class="keyvalue"><span>من البداية إلى أول قرعة</span><b id="cs-period">—</b></div><div class="keyvalue"><span>السهم</span><b id="cs-share">—</b></div><div class="keyvalue"><span>المدير</span><b id="cs-manager">—</b></div></div>',
+ '<div id="cg-installment-preview"></div>',
+ '<div class="section-head"><h3>المدير</h3></div><div class="cg-seg" role="radiogroup" aria-label="مشاركة المدير"><label><input type="radio" name="managerMode" value="only" checked><span>مدير فقط</span></label><label><input type="radio" name="managerMode" value="both"><span>مدير ومشارك</span></label></div>',
+ '<div class="field" id="manager-shares-field" hidden><label for="cg-manager-shares">عدد أسهم المدير</label><input id="cg-manager-shares" name="managerShares" type="number" min="1" step="1"></div></div>',
  '<button class="btn primary full" id="create-next" type="button" data-action="create-next">متابعة</button><button class="btn primary full" id="create-final-submit" type="submit" hidden>إنشاء الجمعية</button></div></form>'
  ].join('');
  shell('إنشاء جمعية جديدة',null,html);
@@ -2708,17 +2702,21 @@ function createGroup(){
  form.addEventListener('input',update);form.addEventListener('change',update);
  setCreateWizardStep(createWizardStep,false);update();
 }
-function createdGroup(){const g=currentGroup();if(!g){go('home');return}showCreatedGroup(g)}
+function createdGroup(){const g=currentGroup();if(!g){go('home');return}pendingInvitees=[];showCreatedGroup(g)}
 function showCreatedGroup(g){
- const link=createdGroupLink;
+ const link=createdGroupLink,canInvite=isManager()&&!g.locked;
  const linkBlock=link&&link.status==='paused'?'<small>الرابط متوقف حاليًا؛ يمكنك إدارته من شاشة استقبال الأعضاء.</small>':link&&link.url
   ? '<div class="field"><label for="createdPublicLink">رابط الانضمام</label><input id="createdPublicLink" readonly value="'+escapeHtml(link.url)+'"></div><div class="grid2"><button class="btn outline" type="button" data-action="copy-group-link">نسخ الرابط</button><button class="btn outline" type="button" data-action="share-group-link">مشاركة الرابط</button></div>'
   : '<small>لم يتم إصدار رابط في هذه الجلسة. يمكنك إنشاؤه من شاشة استقبال الأعضاء.</small>';
+ const open='<button class="btn outline" data-go="group-detail">فتح الجمعية</button>';
  const content='<div class="card cg-card"><div class="cg-success"><span class="cg-success-icon">'+uiIcon('check-circle',28)+'</span><h1>تم إنشاء الجمعية</h1><strong>'+escapeHtml(g.name)+'</strong></div>'+
   '<div class="keyvalue"><span>بداية الجمعية</span><b>'+dateLabel(g.start)+'</b></div><div class="keyvalue"><span>أول قرعة</span><b>'+dateLabel(g.first)+'</b></div><div class="keyvalue"><span>السهم</span><b>'+money(g.share,g.currency)+' · '+g.installments+' أقساط</b></div>'+
   '<div style="margin-top:14px">'+linkBlock+'</div></div>'+
-  '<button class="btn primary full" data-go="invite">إضافة أعضاء</button><button class="btn outline full" data-go="group-detail">فتح الجمعية</button>';
+  (canInvite
+   ? '<div class="card cg-card">'+inviteePickerHtml()+'</div>'+inviteeListHtml()+inviteeBarHtml(open)
+   : '<button class="btn outline full" data-go="group-detail">فتح الجمعية</button>');
  shell('تم إنشاء الجمعية','groups',content);
+ if(canInvite)bindInviteePicker();
 }
 function groupDetail(){
  const g=currentGroup();if(!g){shell('الجمعية','groups','<div class="card empty"><b>لا توجد جمعية محددة</b><button class="btn primary" data-go="groups">عرض الجمعيات</button></div>');return}
@@ -2845,23 +2843,33 @@ function updateInviteeSelectionBar(){
  if(countEl)countEl.textContent=String(count);
  if(send){send.disabled=count<1;send.textContent=count?'دعوة ('+count+')':'دعوة'}
 }
+function inviteePickerHtml(){
+ return '<button class="btn primary full" type="button" data-action="pick-device-contacts">اختيار من جهات الهاتف</button>'+
+  '<details class="cg-manual"><summary class="section-head"><h3>إضافة يدوية</h3></summary><form id="inviteeManualForm">'+
+  '<div class="field"><label for="cg-invitee-name">الاسم</label><input id="cg-invitee-name" name="name" maxlength="120" required></div>'+
+  '<div class="field"><label for="cg-invitee-phone">رقم الهاتف</label><input id="cg-invitee-phone" name="phone" type="tel" inputmode="tel" required placeholder="+9677XXXXXXXX"></div>'+
+  '<button class="btn soft full" type="submit">إضافة إلى القائمة</button></form></details>';
+}
+function inviteeListHtml(){
+ return '<div class="field" id="inviteeSearchWrap" hidden><input id="inviteeSearch" type="search" placeholder="بحث بالاسم أو الرقم" aria-label="بحث في جهات الاتصال المحددة"></div>'+
+  '<div id="inviteeList" class="card"></div>';
+}
+function inviteeBarHtml(extra){
+ const send='<button id="sendInviteesButton" class="btn primary'+(extra?'':' full')+'" type="button" data-action="submit-bulk-invites" disabled>دعوة</button>';
+ return '<div class="card invitee-selection-bar">'+(extra?'<div class="grid2">'+send+extra+'</div>':send)+'</div>';
+}
+function bindInviteePicker(){
+ $('#inviteeSearch')?.addEventListener('input',renderInviteeSelection);
+ renderInviteeSelection();
+}
 function invite(){
  const g=currentGroup();
  if(!g||!isManager()){toast('إضافة أعضاء متاحة لمدير الجمعية فقط');go('group-detail');return}
  if(g.locked){toast('أُغلقت العضويات بعد تثبيت أول قرعة');go('group-detail');return}
  pendingInvitees=[];
  shell('إضافة أعضاء','groups','<div class="card cg-card"><div class="cg-head"><h3>'+escapeHtml(g.name)+'</h3></div><p class="cg-sub">تُستخدم جهات الاتصال التي تختارها فقط، ويحدد المدعو أسهمه بنفسه.</p>'+
-  '<button class="btn primary full" type="button" data-action="pick-device-contacts">اختيار من جهات الهاتف</button>'+
-  '<details class="cg-manual"><summary class="section-head"><h3>إضافة يدوية</h3></summary><form id="inviteeManualForm">'+
-  '<div class="field"><label for="cg-invitee-name">الاسم</label><input id="cg-invitee-name" name="name" maxlength="120" required></div>'+
-  '<div class="field"><label for="cg-invitee-phone">رقم الهاتف</label><input id="cg-invitee-phone" name="phone" type="tel" inputmode="tel" required placeholder="+9677XXXXXXXX"></div>'+
-  '<button class="btn soft full" type="submit">إضافة إلى القائمة</button></form></details></div>'+
-  '<div class="field" id="inviteeSearchWrap" hidden><input id="inviteeSearch" type="search" placeholder="بحث بالاسم أو الرقم" aria-label="بحث في جهات الاتصال المحددة"></div>'+
-  '<div id="inviteeList" class="card"></div>'+
-  '<div class="card invitee-selection-bar"><button id="sendInviteesButton" class="btn primary full" type="button" data-action="submit-bulk-invites" disabled>دعوة</button></div>');
- const search=$('#inviteeSearch');
- search?.addEventListener('input',renderInviteeSelection);
- renderInviteeSelection();
+  inviteePickerHtml()+'</div>'+inviteeListHtml()+inviteeBarHtml());
+ bindInviteePicker();
 }
 function inviteDetail(){
  const id=String(params.id||'').trim();
@@ -3718,7 +3726,7 @@ if(form.id==='loginForm'){
  if(form.id==='createForm'){
   if(createWizardStep<CREATE_STEP_COUNT){if(validateCreateStep(createWizardStep))setCreateWizardStep(createWizardStep+1);return}
   if(createGroupBusy)return;
-  if(!validateCreateStep(1)||!validateCreateStep(2)||!validateCreateStep(3))return;
+  if(!validateCreateStep(1)||!validateCreateStep(2))return;
   createGroupBusy=true;
   const submit=$('#create-final-submit'),oldLabel=submit?submit.textContent:'';
   if(submit){submit.disabled=true;submit.textContent='جارٍ إنشاء الجمعية...'}
