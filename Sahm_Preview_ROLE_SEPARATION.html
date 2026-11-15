@@ -3338,10 +3338,10 @@ function load(){
    start:g.startDate,first:detail.plan&&detail.plan.firstDraw||SahmCore.firstDrawDate(g),
    period:SahmCore.cycleLabel(g)+' · '+g.installments+' '+(g.installments===1?'قسط':'أقساط'),
    cycleType:g.cycleType,cycleDays:g.cycleDays,installments:g.installments,shareAmountMinor:g.shareAmount,
-   quorum:g.quorum,role:detail.role.manager?'manager':'member',myShares:detail.role.shares,status:phaseStatus[detail.phase]||'PENDING_MEMBERS',
+   role:detail.role.manager?'manager':'member',myShares:detail.role.shares,status:phaseStatus[detail.phase]||'PENDING_MEMBERS',
    members:memberRows.length,shares:actualShares,paid:detail.counts?detail.counts.paid:0,cycle:detail.cycle||1,
    admin:g.managerName,contrib:g.shareAmount/minor,publicLink:null,
-   inviteCode:g.inviteCode,rules:g.rules,locked:detail.locked,detail:detail,counts:detail.counts||null
+   inviteCode:g.inviteCode,rules:g.rules,locked:!!detail.agreementLocked,detail:detail,counts:detail.counts||null
   });
  });
  const notifResult=SahmApp.notificationList();
@@ -3431,8 +3431,12 @@ function go(s,p={},context={}){
  if(!Object.prototype.hasOwnProperty.call(ALL_SCREEN_REGISTRY,s)){toast('تعذر فتح الشاشة المطلوبة');return false}
  if(!db.session&&!AUTH_SCREEN_NAMES.includes(s)){toast('سجل الدخول أولاً للمتابعة');return false}
  if(s==='create-group'&&screenName!=='create-group'){createWizardStep=1;createFormSnapshot={}}
- const managerOnly=['members','invite','invites','join-requests','join-request-detail','draw-room','audit'];
- if(managerOnly.includes(s)&&!isManager(context.currentGroupId?db.groups.find(g=>g.id===context.currentGroupId)||null:currentGroup())){toast('هذه الوظيفة متاحة لمدير هذه الجمعية فقط');return false}
+ const managerOnly=['members','invite','invites','join-requests','join-request-detail','audit'];
+ const targetGroup=context.currentGroupId?db.groups.find(g=>g.id===context.currentGroupId)||null:currentGroup();
+ const targetDetail=targetGroup&&SahmApp.groupDetail(targetGroup.id);
+ if(managerOnly.includes(s)&&(!targetDetail||!targetDetail.ok||!targetDetail.role.manager)){toast('هذه الوظيفة متاحة لمدير هذه الجمعية فقط');return false}
+ if(s==='draw-room'&&(!targetDetail||!targetDetail.ok||!(targetDetail.role.manager||targetDetail.role.participant))){toast('غرفة القرعة متاحة لأعضاء الجمعية فقط');return false}
+ if(s==='invite'&&targetDetail&&targetDetail.permissions&&!targetDetail.permissions.canInvite){toast('الاتفاق مقفل؛ لا يمكن إرسال دعوات جديدة');return false}
  const next=navigation.navigate(routeSnapshot(s,p,context));
  if(sameRouteSnapshot(routeSnapshot(),next))return true;
  applyNavigationState(next);return true;
@@ -3575,7 +3579,7 @@ function createDraft(form){
   installmentAmountMinor:mode==='amount'&&SahmCore.CURRENCIES[currency]?SahmCore.parseMoney(createInput(form,'installmentAmount'),currency):null,
   managerMode:createInput(form,'managerMode')==='both'?'both':'only',
   managerShares:createInput(form,'managerMode')==='both'?Number(createInput(form,'managerShares')):0,
-  quorum:Number(createInput(form,'quorum')||66),tz:createInput(form,'tz')||'Asia/Aden',
+  
   inviteOpensOn:createInput(form,'inviteOpensOn')||undefined,
   inviteClosesOn:createInput(form,'inviteClosesOn')||undefined,
   rules:createInput(form,'rules')
@@ -3592,7 +3596,7 @@ function validateCreateStep(step){
   if(!SahmCore.isValidDate(d.firstDrawOn)){toast('حدد موعد أول قرعة');return false}
   if(d.firstDrawOn<=d.startDate){toast('موعد أول قرعة يجب أن يكون بعد تاريخ البداية');return false}
   if(d.durationDays<1||d.durationDays>3650){toast('مدة الدورة بين يوم واحد و3650 يومًا');return false}
-  if(!SahmCore.isValidTimeZone(d.tz)){toast('المنطقة الزمنية غير صحيحة');return false}
+
  }
  if(step===2){
   if(!d.name||d.name.length<2||d.name.length>120){toast('أدخل اسم الجمعية');return false}
@@ -3605,7 +3609,7 @@ function validateCreateStep(step){
    if(Math.ceil(d.shareAmountMinor/d.installmentAmountMinor)>d.durationDays){toast('عدد الأقساط الناتج يتجاوز مدة الدورة');return false}
   }else{toast('اختر طريقة السداد');return false}
   if(d.managerMode==='both'&&(!Number.isInteger(d.managerShares)||d.managerShares<1)){toast('أدخل عدد أسهم المدير');return false}
-  if(!Number.isInteger(d.quorum)||d.quorum<1||d.quorum>100){toast('نصاب الحضور بين 1 و100');return false}
+
   if(d.inviteOpensOn&&!SahmCore.isValidDate(d.inviteOpensOn)){toast('تاريخ فتح الانضمام غير صحيح');return false}
   if(d.inviteClosesOn&&!SahmCore.isValidDate(d.inviteClosesOn)){toast('تاريخ إغلاق الانضمام غير صحيح');return false}
   if(d.inviteOpensOn&&d.inviteClosesOn&&d.inviteClosesOn<d.inviteOpensOn){toast('تاريخ إغلاق الانضمام يسبق تاريخ فتحه');return false}
@@ -3651,7 +3655,7 @@ function createGroup(){
  '<div class="field create-field"><label>تاريخ بداية الجمعية</label><input name="startDate" type="date" required></div>',
  '<div class="field create-field"><label>تاريخ أول قرعة</label><input name="firstDrawOn" type="date" required><small>اختر التاريخ، وسيحسب سهم مدة الدورة تلقائيًا.</small></div>',
  '<div class="card"><div class="keyvalue"><span>مدة الدورة الواحدة</span><b id="cg-duration-preview">—</b></div><div class="keyvalue"><span>أول قرعة</span><b id="cg-first-draw-preview">—</b></div></div>',
- '<div class="field create-field"><label>المنطقة الزمنية للجمعية</label><input name="tz" value="'+escapeHtml(SahmApp.timeZone())+'" required placeholder="مثل Asia/Aden"></div>',
+
  '<div class="create-note"><span>'+uiIcon('info',16)+'</span><p>المدة هي عدد الأيام بين تاريخ البداية وتاريخ أول قرعة، وتنتهي الدورة الأولى في اليوم السابق لموعد القرعة.</p></div></section></div>',
  '<div class="create-step" id="create-step-2" hidden><section class="create-section"><div class="create-section-head"><span class="create-section-icon">'+uiIcon('landmark',20)+'</span><h2>بيانات الجمعية والمساهمات</h2></div>',
  '<div class="field create-field"><label>اسم الجمعية</label><input name="name" maxlength="120" required></div>',
@@ -3662,7 +3666,7 @@ function createGroup(){
  '<div class="field create-field" id="installment-amount-field" hidden><label>قيمة القسط الواحد</label><input name="installmentAmount" type="number" min="0.01" step="0.01" inputmode="decimal"><small>يحسب النظام عدد الأقساط، ويجعل القسط الأخير بالقيمة المتبقية عند الحاجة.</small></div>',
  '<div class="create-manager-choice"><div><strong>مشاركة المدير</strong><small>المدير يشارك في الأسهم فقط عند اختيار ذلك.</small></div><div class="create-manager-options"><label><input type="radio" name="managerMode" value="only" checked><span>مدير فقط</span></label><label><input type="radio" name="managerMode" value="both"><span>مدير ومشارك</span></label></div></div>',
  '<div class="field create-field" id="manager-shares-field" hidden><label>عدد أسهم المدير</label><input name="managerShares" type="number" min="1" step="1"></div>',
- '<details class="card"><summary><b>إعدادات إضافية</b></summary><div class="field create-field"><label>نصاب الحضور (%)</label><input name="quorum" type="number" min="1" max="100" value="66" step="1" required></div>',
+ '<details class="card"><summary><b>إعدادات إضافية</b></summary>',
  '<div class="field create-field"><label>فتح الانضمام من تاريخ · اختياري</label><input name="inviteOpensOn" type="date"></div><div class="field create-field"><label>إغلاق الانضمام في تاريخ · اختياري</label><input name="inviteClosesOn" type="date"></div>',
  '<div class="field create-field"><label>قواعد الجمعية · اختياري</label><textarea name="rules" rows="3" maxlength="4000"></textarea></div></details>',
  '<section class="create-section create-live-summary"><div class="create-section-head"><span class="create-section-icon">'+uiIcon('calculator',20)+'</span><h2>مراجعة مختصرة</h2></div>',
