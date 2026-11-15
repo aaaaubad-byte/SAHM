@@ -4029,8 +4029,8 @@ async function drawRoom(){
  shell('غرفة القرعة','groups',header('غرفة القرعة',g.name)+'<div class="card draw-card"><div class="between"><b>الجولة '+(room.round_no||'—')+' من '+(room.rounds_total||'—')+'</b><span class="pill">'+escapeHtml(stateLabels[room.state]||room.state||'—')+'</span></div><div class="keyvalue"><span>تاريخ الاستحقاق</span><b>'+dateLabel(cycle.due_on)+'</b></div><div class="keyvalue"><span>موعد القرعة</span><b>'+escapeHtml(cycle.draw_scheduled_at?SahmCore.fmtDateTime(cycle.draw_scheduled_at,'Asia/Aden'):'غير محدد')+'</b></div><div class="keyvalue"><span>الأسهم المؤهلة</span><b>'+eligible.length+'</b></div><div class="keyvalue"><span>النتيجة</span><b>'+(draw?'مثبتة ومحفوظة':'لم تثبت بعد')+'</b></div></div>'+schedule+wheel+(draw?'<div class="card draw-winner"><span class="pill green">النتيجة المثبتة</span><h3>'+escapeHtml(winner)+'</h3><small>رقم القرعة: '+escapeHtml(String(draw.round_no||room.round_no))+'</small></div>':'')+'<div class="card"><b>الأسهم المؤهلة</b>'+(eligibleRows||'<div class="empty">لا توجد أسهم مؤهلة حاليًا.</div>')+'</div>'+(manager&&reasons.length?'<div class="card"><b>متطلبات الجاهزية</b>'+reasons.map(x=>'<div class="listrow">'+escapeHtml(x)+'</div>').join('')+'</div>':'')+admin+financialCard+'<button class="btn outline full" data-go="draw-history">سجل نتائج القرعة</button>');
  if(spin){const wheelElement=document.querySelector('.draw-wheel');if(wheelElement)requestAnimationFrame(()=>{wheelElement.style.transform='rotate('+rotation+'deg)';});}
 }
-function drawHistory(){
- const g=currentGroup();if(!g){go('groups');return}const r=SahmApp.getDrawHistory(g.id),rows=r&&r.ok?r.history:[];
+async function drawHistory(){
+ const g=currentGroup();if(!g){go('groups');return}const r=await SahmApp.getDrawHistory(g.id),rows=r&&r.ok?r.history:[];
  shell('سجل القرعة','groups',header('محاضر ونتائج القرعة',g.name)+'<div class="card">'+(rows.map(x=>'<div class="listrow"><div class="avatar gold">'+x.round_no+'</div><div class="grow"><strong>الجولة '+x.round_no+' · '+escapeHtml(x.winner_owner_name||'—')+' · السهم '+escapeHtml(String(x.winner_share_no||'—'))+'</strong><small>موعد الجولة: '+dateLabel(x.scheduled_on)+'</small><small>الجائزة المستهدفة: '+minorMoney(x.prize_target_minor||0,x.currency||g.currency)+'</small><small>حالة العرض: '+escapeHtml(x.presentation_status||'—')+'</small></div><span class="pill green">مثبتة</span></div>').join('')||'<div class="empty"><b>لا توجد محاضر مسجلة</b></div>')+'</div>');
 }
 function receipts(){
@@ -4085,17 +4085,17 @@ function notifications(){
  const rows=(r.notifications||[]).map(x=>'<button type="button" class="listrow" data-action="notification-open" data-id="'+escapeHtml(x.id)+'" data-related-id="'+escapeHtml(x.relatedEntityId||'')+'" data-decision="'+(['join_approved','join_rejected'].includes(x.type)?'true':'false')+'"><div class="avatar">'+(x.type==='drawResult'?'★':['join_approved','join_rejected'].includes(x.type)?'✓':'♧')+'</div><div class="grow"><strong>'+escapeHtml(labels[x.type]||'إشعار سهم')+'</strong><small>'+escapeHtml(x.text)+'</small><small>'+escapeHtml(x.at||'')+'</small></div>'+(!x.read?'<span class="pill gold">جديد</span>':'<span class="pill">مقروء</span>')+'</button>').join('');
  shell('الإشعارات','notifications',header('الإشعارات','تنبيهات حسابك')+'<div class="card">'+(rows||'<div class="empty"><b>لا توجد إشعارات</b></div>')+'</div>');
 }
-function news(){
+async function news(){
  const g=currentGroup();if(!g){go('groups');return}
- const result=SahmApp.getNews(g.id,50);if(!result||!result.ok){toast(result&&result.message||'تعذر تحميل أخبار الجمعية');return}
+ const result=await SahmApp.getNews(g.id,50);if(!result||!result.ok){toast(result&&result.message||'تعذر تحميل أخبار الجمعية');return}
  const labels={received:'استلام قسط',completed:'اكتمال الأقساط',late:'تأخر قسط',drawSoon:'اقتراب القرعة',drawDue:'موعد القرعة',drawResult:'نتيجة القرعة',joined:'انضمام عضو',motivate:'خبر الجمعية'};
  const rows=(result.news||[]).map(x=>'<div class="listrow"><div class="avatar">'+(x.type==='drawResult'?'★':'⌁')+'</div><div class="grow"><strong>'+escapeHtml(x.title||labels[x.type]||'خبر الجمعية')+'</strong><small>'+escapeHtml(x.body||'')+'</small>'+(x.subject_visible===true&&x.subject_name?'<small>'+escapeHtml(x.subject_name)+'</small>':'')+'<small class="eyebrow">'+escapeHtml(x.occurred_at||'')+'</small></div></div>').join('');
  shell('أخبار الجمعية','groups',header('أخبار الجمعية',g.name)+'<div class="card">'+(rows||'<div class="empty"><b>لا توجد أخبار منشورة</b></div>')+'</div>');
 }
-function audit(){
+async function audit(){
  const g=currentGroup();if(!g){go('groups');return}
  const detail=SahmApp.groupDetail(g.id);if(!detail||!detail.ok||!detail.role.manager){toast('سجل العمليات متاح لمدير الجمعية فقط');go('group-detail');return}
- const result=SahmApp.getAuditLog(g.id,100),rows=result&&result.ok?result.log:[];
+ const result=await SahmApp.getAuditLog(g.id,100),rows=result&&result.ok?result.log:[];
  const labels={association_created:'إنشاء الجمعية',association_updated:'تعديل الجمعية',member_joined:'انضمام عضو',member_removed:'إزالة عضو',shares_added:'إضافة أسهم',shares_removed:'إزالة أسهم',invitation_created:'إنشاء دعوة',invitation_cancelled:'إلغاء دعوة',receipt_recorded:'تسجيل استلام',installment_received:'استلام قسط',receipt_corrected:'تصحيح استلام',draw_result:'تثبيت نتيجة القرعة',draw_scheduled:'تحديد موعد القرعة',draw_presentation_completed:'اكتمال عرض القرعة',draw_presentation_failed:'فشل عرض القرعة',notification_settings_updated:'تعديل إعدادات النشر',reminders_sent:'إرسال تذكيرات'};
  const items=rows.map(x=>'<div class="listrow"><div class="avatar">⌁</div><div class="grow"><strong>'+escapeHtml(labels[x.event_type]||x.event_type||'عملية إدارية')+'</strong><small>'+escapeHtml(x.actor_name||'سهم')+' · '+escapeHtml(x.entity_type||'')+'</small><small class="eyebrow">'+escapeHtml(x.occurred_at||'')+'</small></div></div>'+(x.after_data?'<details><summary>تفاصيل العملية</summary><pre class="audit-json">'+escapeHtml(JSON.stringify(x.after_data,null,2))+'</pre></details>':'')).join('');
  shell('سجل العمليات','groups',header('سجل العمليات الإداري',g.name)+'<div class="card">'+(items||'<div class="empty"><b>لا توجد عمليات مسجلة</b></div>')+'</div>');
