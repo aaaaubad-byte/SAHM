@@ -3000,7 +3000,7 @@ function header(title,sub=''){
 }
 function renderTopbar(title){
  const el=$('#topbar');
- const authScreens=['welcome','phone','otp','profile-setup','logged-out'];
+ const authScreens=AUTH_SCREEN_NAMES;
  if(authScreens.includes(screenName)){
   el.hidden=true;el.style.display='none';el.innerHTML='';el.removeAttribute('aria-label');return;
  }
@@ -3011,7 +3011,7 @@ function renderTopbar(title){
  }
  el.innerHTML=`<div class="topbar-screenbar"><button class="icon-btn topbar-back" type="button" data-action="back" aria-label="رجوع">${uiIcon('back-screen',22)}</button><strong class="topbar-screen-title">${escapeHtml(String(title||'سهم'))}</strong></div>`;
 }
-function syncBottomNavigation(visible=!['welcome','phone','otp','profile-setup','logged-out'].includes(screenName)){const bar=$('#bottomnav');if(!bar)return;if(!visible){bar.hidden=true;bar.setAttribute('aria-hidden','true');bar.style.setProperty('display','none','important');return}bar.hidden=false;bar.removeAttribute('hidden');bar.setAttribute('aria-hidden','false');bar.style.setProperty('display','flex','important');bar.style.setProperty('visibility','visible','important');bar.style.setProperty('opacity','1','important')}
+function syncBottomNavigation(visible=!AUTH_SCREEN_NAMES.includes(screenName)){const bar=$('#bottomnav');if(!bar)return;if(!visible){bar.hidden=true;bar.setAttribute('aria-hidden','true');bar.style.setProperty('display','none','important');return}bar.hidden=false;bar.removeAttribute('hidden');bar.setAttribute('aria-hidden','false');bar.style.setProperty('display','flex','important');bar.style.setProperty('visibility','visible','important');bar.style.setProperty('opacity','1','important')}
 function nav(active){const items=[['groups','groups','الجمعيات'],['home','home','الرئيسية'],['wall','messages','الدردشات']];const bar=$('#bottomnav');syncBottomNavigation(true);bar.innerHTML=items.map(([s,i,t])=>`<button class="navitem ${active===s?'active':''}" data-go="${s}" aria-label="${t}" ${active===s?'aria-current="page"':''}><span class="ni">${uiIcon(i,23)}</span><span>${t}</span></button>`).join('')}
 function shell(title,active,html){renderTopbar(title);nav(active);const screen=$('#screen');screen.className='screen'+(active==='home'?' home-screen':'')+(screenName==='create-group'?' create-group-screen':'');screen.innerHTML=html;if(active!=='home'&&homeSlideTimer){clearInterval(homeSlideTimer);homeSlideTimer=null}}function auth(html){
  const authTitles={welcome:'تسجيل الدخول',register:'إنشاء حساب','profile-setup':'بياناتك الشخصية','reset-password':'تعيين كلمة المرور','logged-out':'تم تسجيل الخروج','account-login':'إضافة أو استعادة حساب'};
@@ -3721,7 +3721,7 @@ function render(){
  const screen=ALL_SCREEN_REGISTRY[screenName];
  if(typeof screen!=='function'){toast('الشاشة المطلوبة غير مسجلة في التطبيق');resetNavigation(db.session?'home':'welcome');return}
  screen();
- syncBottomNavigation(!['welcome','register','account-login','profile-setup','reset-password','logged-out'].includes(screenName));
+ syncBottomNavigation(!AUTH_SCREEN_NAMES.includes(screenName));
 }
 let modalReturnFocus=null;
 function showModal(title,body,buttons=[['إغلاق','close','outline']]){
