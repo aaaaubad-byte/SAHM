@@ -3961,7 +3961,8 @@ function joinRequestDetail(){
  const g=currentGroup(),request=(db.joinRequests||[]).find(x=>x.id===params.id&&x.groupId===(g||{}).id);
  if(!g||!isManager()||!request){toast('طلب الانضمام غير موجود أو لا تملك صلاحية عرضه');go('join-requests');return}
  const status=({pending:'بانتظار الموافقة',approved:'مقبول',rejected:'مرفوض',cancelled:'ملغى'})[request.status]||request.status;
- const actions=request.status==='pending'?'<div class="grid2"><button class="btn primary" data-action="approve-join-request" data-id="'+request.id+'">الموافقة على الطلب</button><button class="btn danger" data-action="reject-join-request" data-id="'+request.id+'">رفض الطلب</button></div>':'';
+ const agreement=SahmApp.groupDetail(g.id),canApprove=!!(agreement&&agreement.ok&&agreement.permissions&&agreement.permissions.canInvite);
+ const actions=request.status==='pending'?(canApprove?'<div class="grid2"><button class="btn primary" data-action="approve-join-request" data-id="'+request.id+'">الموافقة على الطلب</button><button class="btn danger" data-action="reject-join-request" data-id="'+request.id+'">رفض الطلب</button></div>':'<div class="card"><b>الاتفاق مقفل</b><small>لا يمكن اعتماد طلبات انضمام جديدة بعد بدء الجمعية أو تثبيت أول قرعة.</small><button class="btn danger full" data-action="reject-join-request" data-id="'+request.id+'">رفض الطلب</button></div>'):'';
  shell('تفاصيل طلب الانضمام','groups',header('تفاصيل طلب الانضمام',request.applicantName)+'<div class="card"><div class="between"><h3>'+escapeHtml(request.applicantName)+'</h3>'+pill(request.status)+'</div>'+
   '<div class="keyvalue"><span>الحالة</span><b>'+escapeHtml(status)+'</b></div><div class="keyvalue"><span>مصدر الطلب</span><b>'+(request.sourceType==='invitation'?'دعوة شخصية':'رابط عام')+'</b></div>'+
   '<div class="keyvalue"><span>الأسهم المطلوبة</span><b>'+request.requestedShares+'</b></div><div class="keyvalue"><span>التزام الدورة التقديري</span><b>'+minorMoney(request.estimatedAmountMinor,request.currency)+'</b></div>'+
@@ -4389,6 +4390,7 @@ async function handleAppAction(action,el){
   return;
  }
  if(action==='approve-join-request'){
+  const detail=g&&SahmApp.groupDetail(g.id);if(!detail||!detail.ok||!detail.permissions||!detail.permissions.canInvite){toast('الاتفاق مقفل؛ لا يمكن اعتماد طلب انضمام جديد');return}
   const request=(db.joinRequests||[]).find(x=>x.id===el.dataset.id);
   showModal('تأكيد الموافقة','سيُعتمد عدد الأسهم المطلوب كاملًا ('+Number(request&&request.requestedShares||0)+') وتُنشأ العضوية والأسهم والالتزامات في عملية واحدة.',[['تأكيد الموافقة','approve-join-request-confirm','primary'],['إلغاء','close','outline']]);
   $('#modal-root').dataset.requestId=el.dataset.id;return;
