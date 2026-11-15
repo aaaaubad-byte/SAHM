@@ -3,11 +3,13 @@ const test = require('node:test');
 const assert = require('node:assert/strict');
 const { fresh } = require('./helpers');
 
+/* The fresh world's clock is 2026-11-13T10:00. Groups start in the future by default because the agreement
+   (members, shares, invitations, settings) locks when the local date reaches the start date. */
 function createGroup(w, overrides = {}) {
   const config = Object.assign({
     name: 'جمعية اختبار الدفعة الأولى', currency: 'YER', cycleType: 'monthly',
-    shareAmount: '90000', installments: 3, startDate: '2026-11-13',
-    targetShares: 3, maxPerMember: 2, quorum: 60, rules: ''
+    shareAmount: '90000', installments: 3, startDate: '2026-11-20',
+    targetShares: 3, maxPerMember: 2, rules: ''
   }, overrides);
   config.maxPerMember = Math.min(config.maxPerMember, config.targetShares);
   const result = w.D.createGroup(w.db, 'me', config);
@@ -43,32 +45,57 @@ test('invalid group creation is rejected without adding a group', () => {
   const before = w.db.groups.length;
   const result = w.D.createGroup(w.db, 'me', {
     name: '', currency: 'EUR', cycleType: 'monthly', shareAmount: '0',
-    installments: 0, startDate: '2026-02-30', targetShares: 0, maxPerMember: 0, quorum: 101
+    installments: 0, startDate: '2026-02-30', targetShares: 0, maxPerMember: 0
   });
   assert.equal(result.ok, false);
   assert.equal(w.db.groups.length, before);
 });
 
-test('late member addition requires confirmation and reports expired periods', () => {
+test('agreement locks at the local start date: members, shares, invitations and settings', () => {
   const w = fresh();
-  const { group } = createGroup(w, { startDate: '2026-11-01', targetShares: 2 });
-  w.clock.now = '2026-11-21T10:00';
-  const denied = w.D.addMember(w.db, 'me', group.id, {
-    name: 'عضو متأخر', userId: 'late-user', shares: 1, joinedAt: '2026-11-21'
+  const { group } = createGroup(w, { startDate: '2026-11-20', targetShares: 4, maxPerMember: 2 });
+  const first = w.D.addMember(w.db, 'me', group.id, {
+    name: 'الأول', userId: 'lock-1', shares: 2, joinedAt: '2026-11-13'
   });
-  assert.equal(denied.code, 'LATE_IMPACT_CONFIRM_REQUIRED');
-  const accepted = w.D.addMember(w.db, 'me', group.id, {
-    name: 'عضو متأخر', userId: 'late-user', shares: 1,
-    joinedAt: '2026-11-21', confirmLateImpact: true
+  assert.equal(first.ok, true, JSON.stringify(first));
+  /* the day before the start date the agreement is still open */
+  w.clock.now = '2026-11-19T23:59';
+  const second = w.D.addMember(w.db, 'me', group.id, {
+    name: 'الثاني', userId: 'lock-2', shares: 1, joinedAt: '2026-11-19'
   });
-  assert.equal(accepted.ok, true);
-  assert.deepEqual(accepted.lateImpact.items.map(x => x.no), [1, 2]);
-  const member = accepted.member;
-  const first = w.K.obligation(w.db, group, member, 1, 1, '2026-11-21');
-  const third = w.K.obligation(w.db, group, member, 1, 3, '2026-11-21');
-  assert.equal(first.status, 'late');
-  assert.equal(first.lateByJoin, true);
-  assert.equal(third.status, 'due');
+  assert.equal(second.ok, true, JSON.stringify(second));
+  assert.equal(w.D.groupDetail(w.db, 'me', group.id).agreementLocked, false);
+  /* on the start date everything that shapes the agreement is rejected */
+  w.clock.now = '2026-11-20T00:00';
+  const members = w.db.members.length, shares = w.db.shares.length;
+  assert.equal(w.D.addMember(w.db, 'me', group.id, {
+    name: 'متأخر', userId: 'lock-3', shares: 1, joinedAt: '2026-11-20', confirmLateImpact: true
+  }).code, 'AGREEMENT_LOCKED');
+  assert.equal(w.D.addShares(w.db, 'me', second.member.id, 1).code, 'AGREEMENT_LOCKED');
+  assert.equal(w.D.removeShares(w.db, 'me', first.member.id, 1).code, 'AGREEMENT_LOCKED');
+  assert.equal(w.D.removeMember(w.db, 'me', second.member.id).code, 'AGREEMENT_LOCKED');
+  assert.equal(w.D.updateGroup(w.db, 'me', group.id, { name: 'اسم جديد' }).code, 'AGREEMENT_LOCKED');
+  assert.equal(w.D.createInvite(w.db, 'me', group.id, { name: 'مدعو', phone: '777123456', shares: 1 }).code, 'AGREEMENT_LOCKED');
+  assert.equal(w.D.joinByCode(w.db, 'lock-4', group.inviteCode, { name: 'منضم', phone: '777654321' }).code, 'AGREEMENT_LOCKED');
+  assert.equal(w.db.members.length, members);
+  assert.equal(w.db.shares.length, shares);
+  const detail = w.D.groupDetail(w.db, 'me', group.id);
+  assert.equal(detail.agreementLocked, true);
+  assert.equal(detail.locked, false, 'no draw has been recorded yet');
+  assert.equal(detail.permissions.canAddMembers, false);
+  assert.equal(detail.permissions.canInvite, false);
+  assert.equal(detail.permissions.canEdit, false);
+  assert.equal(detail.permissions.canRecordPaid, true);
+});
+
+test('the manager shares can be created on the start day itself', () => {
+  const w = fresh();
+  const { group } = createGroup(w, { startDate: '2026-11-13', targetShares: 3, managerMode: 'both', managerShares: 1 });
+  assert.equal(w.K.groupShares(w.db, group.id).length, 1);
+  assert.equal(w.D.groupDetail(w.db, 'me', group.id).agreementLocked, true);
+  assert.equal(w.D.addMember(w.db, 'me', group.id, {
+    name: 'بعد البداية', userId: 'start-day-user', shares: 1, joinedAt: '2026-11-13'
+  }).code, 'AGREEMENT_LOCKED');
 });
 
 test('member and share limits are enforced', () => {
@@ -98,6 +125,7 @@ test('manager and participant views enforce role separation', () => {
   const list = w.D.memberList(w.db, 'participant-1', group.id);
   assert.equal(list.scope, 'participant');
   assert.ok(list.members.every(x => !('present' in x) && !('joinedAt' in x) && !('linkedUser' in x)));
+  assert.equal(w.D.memberList(w.db, 'me', group.id).members.every(x => !('present' in x)), true);
   assert.equal(member.userId, 'participant-1');
 });
 
@@ -107,6 +135,7 @@ test('only manager can record receipts; self-receipt is explicitly marked', () =
   const member = w.D.addMember(w.db, 'me', group.id, {
     name: 'مشارك', userId: 'participant-2', shares: 1, joinedAt: '2026-11-13'
   }).member;
+  w.clock.now = '2026-11-20T10:00';
   const denied = w.D.recordPaid(w.db, 'participant-2', {
     groupId: group.id, memberId: member.id, cycle: 1, no: 1
   });
@@ -134,6 +163,7 @@ test('receipt correction is manager-only, reasoned and auditable', () => {
   const member = w.D.addMember(w.db, 'me', group.id, {
     name: 'عضو', userId: 'receipt-user', shares: 1, joinedAt: '2026-11-13'
   }).member;
+  w.clock.now = '2026-11-20T10:00';
   const receipt = w.D.recordPaid(w.db, 'me', {
     groupId: group.id, memberId: member.id, cycle: 1, no: 1
   }).receipt;
@@ -149,10 +179,11 @@ test('receipt correction is manager-only, reasoned and auditable', () => {
 
 test('reminder repeat asks for confirmation and paid members are excluded', () => {
   const w = fresh();
-  const { group } = createGroup(w, { startDate: '2026-11-01', targetShares: 1 });
+  const { group } = createGroup(w, { startDate: '2026-11-20', targetShares: 1 });
   const member = w.D.addMember(w.db, 'me', group.id, {
-    name: 'عضو', userId: 'reminder-user', shares: 1, joinedAt: '2026-11-01'
+    name: 'عضو', userId: 'reminder-user', shares: 1, joinedAt: '2026-11-13'
   }).member;
+  w.clock.now = '2026-11-21T10:00';
   assert.equal(w.D.sendReminder(w.db, 'me', {
     groupId: group.id, cycle: 1, no: 1, memberId: member.id
   }).ok, true);
@@ -182,23 +213,38 @@ test('member messages are limited to 50 characters and require membership', () =
   assert.equal(member.userId, 'chat-user');
 });
 
-test('first draw waits for its date and quorum, then locks membership', () => {
+test('first draw waits for its date and full payment, then locks membership; attendance is retired', () => {
   const w = fresh();
-  const { group } = createGroup(w, { targetShares: 2, managerMode: 'both', managerShares: 1 });
+  const { group } = createGroup(w, { startDate: '2026-11-20', targetShares: 2, managerMode: 'both', managerShares: 1 });
   const member = w.D.addMember(w.db, 'me', group.id, {
     name: 'مشارك', userId: 'draw-user', shares: 1, joinedAt: '2026-11-13'
   }).member;
   const manager = w.db.members.find(m => m.groupId === group.id && m.userId === 'me');
-  w.D.setAttendance(w.db, 'me', manager.id, true);
-  w.clock.now = '2026-12-13T10:00';
-  assert.equal(w.D.performDraw(w.db, 'me', group.id, { rng: () => 0 }).code, 'QUORUM_NOT_MET');
-  w.D.setAttendance(w.db, 'me', member.id, true);
+  const retired = w.D.setAttendance(w.db, 'me', manager.id, true);
+  assert.equal(retired.ok, false);
+  assert.equal(retired.code, 'ATTENDANCE_RETIRED');
+  /* the day before the first draw day (start + 30 days) */
+  w.clock.now = '2026-12-19T10:00';
+  assert.equal(w.D.performDraw(w.db, 'me', group.id, { rng: () => 0 }).code, 'DRAW_NOT_DUE');
+  /* the draw day, but nothing is paid yet */
+  w.clock.now = '2026-12-20T10:00';
+  const blocked = w.D.performDraw(w.db, 'me', group.id, { rng: () => 0 });
+  assert.equal(blocked.code, 'NOT_READY');
+  assert.equal(w.D.drawStatus(w.db, group.id).canDraw, false);
+  assert.ok(w.D.drawStatus(w.db, group.id).blockers.includes('NOT_READY'));
+  for (const m of [manager, member]) {
+    for (const no of [1, 2, 3]) {
+      const paid = w.D.recordPaid(w.db, 'me', { groupId: group.id, memberId: m.id, cycle: 1, no });
+      assert.equal(paid.ok, true, JSON.stringify(paid));
+    }
+  }
+  assert.equal(w.D.drawStatus(w.db, group.id).canDraw, true);
   const draw = w.D.performDraw(w.db, 'me', group.id, { rng: () => 0 });
-  assert.equal(draw.ok, true);
+  assert.equal(draw.ok, true, JSON.stringify(draw));
   assert.equal(draw.firstDraw, true);
   assert.equal(w.D.drawStatus(w.db, group.id).locked, true);
   assert.equal(w.D.addMember(w.db, 'me', group.id, {
-    name: 'بعد القفل', userId: 'late-after-draw', shares: 1, joinedAt: '2026-12-13', confirmLateImpact: true
+    name: 'بعد القفل', userId: 'late-after-draw', shares: 1, joinedAt: '2026-12-20', confirmLateImpact: true
   }).code, 'GROUP_LOCKED');
   assert.equal(w.K.eligibleShares(w.db, group.id).length, 1);
 });
@@ -329,13 +375,13 @@ test('unified local association creation stores a nullable target and accepts me
   w.clock.now = '2026-12-01T10:00';
   const result = w.D.createGroup(w.db, 'me', {
     name: 'جمعية جديدة', currency: 'YER',
-    startDate: '2026-12-01', firstDrawOn: '2026-12-31', durationDays: 30,
+    startDate: '2026-12-05', firstDrawOn: '2027-01-04', durationDays: 30,
     shareAmountMinor: 10000, installmentMode: 'amount', installmentAmountMinor: 4000,
-    managerMode: 'only', quorum: 66, tz: 'Asia/Aden'
+    managerMode: 'only', tz: 'Asia/Aden'
   });
   assert.equal(result.ok, true, JSON.stringify(result));
   const group = w.db.groups.find(x => x.id === result.groupId);
-  assert.equal(group.firstDrawOn, '2026-12-31');
+  assert.equal(group.firstDrawOn, '2027-01-04');
   assert.equal(group.cycleDays, 30);
   assert.equal(group.targetShares, null);
   assert.equal(group.maxPerMember, null);
