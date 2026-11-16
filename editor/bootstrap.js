@@ -27,7 +27,7 @@
     if(state.previewFit)w.removeEventListener('resize',state.previewFit);
     if(root&&stage.parentElement)stage.parentElement.insertBefore(root,stage);
     if(stage.parentElement)stage.parentElement.removeChild(stage);
-    if(root){root.style.removeProperty('--se-preview-scale');delete root.dataset.sePreviewScale;root.style.removeProperty('transform');root.style.removeProperty('width');root.style.removeProperty('height');}
+    if(root){root.style.removeProperty('--se-preview-scale');delete root.dataset.sePreviewScale;}
     state.previewStage=null;state.previewFit=null;
   }
   function getById(id) {
