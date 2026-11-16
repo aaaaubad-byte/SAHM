@@ -1,39 +1,59 @@
-#sahm-editor-toggle{position:fixed;z-index:100001;left:14px;top:14px;border:1px solid #ccd5e5;border-radius:10px;padding:10px 14px;background:#182b4d;color:#fff;font:700 13px "IBM Plex Sans Arabic",sans-serif;box-shadow:0 5px 18px #14213d33;cursor:pointer}
+/* SAHM-LAB visual editor: device preview + contextual bottom dock. */
+#sahm-editor-toggle{position:fixed;z-index:100001;left:14px;top:14px;border:1px solid #ccd5e5;border-radius:12px;padding:11px 15px;background:#182b4d;color:#fff;font:700 13px "IBM Plex Sans Arabic",sans-serif;box-shadow:0 5px 18px #14213d33;cursor:pointer}
 #sahm-editor-toggle[hidden],#sahm-editor-panel[hidden]{display:none!important}
-#sahm-editor-panel{position:fixed;z-index:100000;left:14px;top:62px;bottom:16px;width:350px;max-width:calc(100vw - 28px);display:flex;flex-direction:column;direction:rtl;text-align:right;background:#fff;color:#172338;border:1px solid #d8dfeb;border-radius:15px;box-shadow:0 14px 44px #12213d30;font-family:"IBM Plex Sans Arabic",sans-serif;overflow:hidden}
-.se-panel-head{display:flex;align-items:center;justify-content:space-between;padding:13px 15px;background:#f5f7fb;border-bottom:1px solid #e4e9f1}
-.se-panel-head b{display:block;font-size:14px}.se-panel-head small{display:block;margin-top:3px;color:#697890;font-size:11px}
-.se-panel-head button{border:0;background:#e7ecf5;border-radius:8px;width:30px;height:30px;font-size:21px;color:#33435e;cursor:pointer}
-.se-toolbar{display:grid;grid-template-columns:repeat(4,1fr);gap:6px;padding:9px 10px;border-bottom:1px solid #edf0f5}
-.se-toolbar button,.se-add-row button,.se-save-row button,.se-session-item button{border:1px solid #dce3ee;background:#f8faff;color:#243652;border-radius:8px;padding:8px 5px;font:600 11px "IBM Plex Sans Arabic",sans-serif;cursor:pointer}
-.se-toolbar button:disabled,.se-save-row button:disabled{opacity:.4;cursor:not-allowed}
-.se-add-row{display:flex;gap:7px;padding:8px 10px;border-bottom:1px solid #edf0f5}
-.se-add-row select{flex:1;min-width:0;border:1px solid #dce3ee;border-radius:8px;padding:7px;background:#fff;color:#243652;font:12px "IBM Plex Sans Arabic",sans-serif}
-.se-add-row button{background:#234e9b;color:#fff;border-color:#234e9b;padding-inline:12px}
-.se-tabs{display:grid;grid-template-columns:repeat(3,1fr);padding:7px 10px 0;gap:4px}
-.se-tabs button{border:0;border-bottom:2px solid transparent;background:#fff;color:#64748b;padding:8px 3px;font:600 12px "IBM Plex Sans Arabic",sans-serif;cursor:pointer}
-.se-tabs button.active{border-color:#3158d6;color:#2345a8}
-.se-content{overflow:auto;min-height:0;flex:1;padding:8px 10px}.se-content [hidden]{display:none!important}
+body.sahm-editor-active{overflow:hidden!important}
+body.sahm-editor-active .workspace{position:fixed!important;inset:0 0 104px!important;display:flex!important;align-items:center!important;justify-content:center!important;min-width:0!important;min-height:0!important;overflow:hidden!important;background:#172235!important;padding:12px!important}
+body.sahm-editor-active #app.phone{position:relative!important;display:flex!important;flex:0 1 auto!important;flex-direction:column!important;width:min(430px,100%)!important;height:min(calc(100dvh - 128px),900px)!important;max-width:430px!important;max-height:900px!important;min-width:0!important;min-height:0!important;aspect-ratio:9/19.5!important;overflow:hidden!important;border:5px solid #0a1220!important;border-radius:30px!important;background:#fff!important;box-shadow:0 18px 55px #0008!important}
+body.sahm-editor-active #app #screen{min-height:0!important;overflow-y:auto!important;overscroll-behavior:contain}
+body.sahm-editor-active #app #bottomnav{flex-shrink:0!important}
+#sahm-editor-panel{position:fixed;z-index:100002;inset:0;display:flex;flex-direction:column;justify-content:space-between;direction:rtl;text-align:right;pointer-events:none;color:#172338;font-family:"IBM Plex Sans Arabic",sans-serif}
+#sahm-editor-panel[hidden]{display:none!important}
+.se-topbar{height:54px;flex:0 0 54px;display:flex;align-items:center;justify-content:space-between;padding:0 14px;background:#101a2aee;color:#fff;pointer-events:auto;backdrop-filter:blur(12px)}
+.se-brand{display:flex;align-items:center;gap:9px}.se-brand b{font-size:15px}.se-brand small{font-size:11px;color:#b7c4d7}
+.se-top-actions{display:flex;align-items:center;gap:7px}.se-top-actions button{display:grid;place-items:center;width:36px;height:36px;border:1px solid #ffffff25;border-radius:10px;background:#ffffff12;color:#fff;cursor:pointer}.se-top-actions button:disabled{opacity:.35}
+.se-dock-wrap{flex:0 0 auto;display:flex;flex-direction:column;gap:0;background:#101a2af5;color:#fff;pointer-events:auto;box-shadow:0 -8px 28px #0003;padding-bottom:max(5px,env(safe-area-inset-bottom));backdrop-filter:blur(16px)}
+.se-context-label{height:25px;display:flex;align-items:center;padding:0 13px;color:#b9c7d9;font-size:10px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.se-dock{display:flex;align-items:stretch;gap:5px;overflow-x:auto;overflow-y:hidden;padding:5px 9px 8px;scrollbar-width:none;overscroll-behavior-x:contain;-webkit-overflow-scrolling:touch}
+.se-dock::-webkit-scrollbar{display:none}
+.se-tool{position:relative;flex:0 0 58px;min-width:58px;height:54px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;border:1px solid transparent;border-radius:11px;background:transparent;color:#d6dfec;font-family:inherit;cursor:pointer;touch-action:pan-x}
+.se-tool svg{width:20px;height:20px}.se-tool span{font-size:10px;line-height:1.2;white-space:nowrap}
+.se-tool.active,.se-tool:active{background:#3158d633;border-color:#6688e5;color:#fff}
+.se-status{min-height:25px;padding:4px 12px;color:#aebbd0;background:#0c1523;font-size:10px;line-height:1.6;white-space:normal}
+.se-status.success{color:#a5e5bd}.se-status.error{color:#ffb0a9}
+.se-tool-panel{position:absolute;left:10px;right:10px;bottom:calc(100px + env(safe-area-inset-bottom));max-height:min(42dvh,390px);display:flex;flex-direction:column;overflow:hidden;border:1px solid #dce3ed;border-radius:16px;background:#fff;color:#172338;box-shadow:0 12px 38px #0004;pointer-events:auto}
+.se-tool-panel-head{height:43px;flex:0 0 43px;display:flex;align-items:center;justify-content:space-between;padding:0 12px;border-bottom:1px solid #e9edf4;background:#f7f9fc}
+.se-tool-panel-head b{font-size:12px}.se-tool-panel-head button{width:30px;height:30px;display:grid;place-items:center;border:0;border-radius:8px;background:#e9eef6;color:#34445d}
+.se-tool-panel-head button svg{width:17px;height:17px}
+.se-tool-panel-body{overflow:auto;min-height:0;padding:11px 12px 14px;overscroll-behavior:contain}
+.se-add-row{display:flex;gap:7px}.se-add-row select,.se-field input,.se-field textarea,.se-field select{width:100%;min-width:0;border:1px solid #dce3ee;border-radius:8px;padding:9px;background:#fff;color:#182b47;font:12px "IBM Plex Sans Arabic",sans-serif;direction:auto}
+.se-add-row select{flex:1}.se-add-row button,.se-more-actions button{border:1px solid #3158d6;border-radius:8px;padding:8px 13px;background:#3158d6;color:#fff;font:600 12px "IBM Plex Sans Arabic",sans-serif}
+.se-fields{display:grid;grid-template-columns:1fr 1fr;gap:7px}
+.se-field{display:flex;flex-direction:column;gap:5px;min-width:0;margin-bottom:8px}.se-field span{font-size:11px;color:#5c6b82}
+.se-field input[type=color]{height:39px;padding:3px}.se-field textarea{resize:vertical;line-height:1.7}
+.se-check{display:flex;align-items:center;gap:7px;font-size:10px;color:#6b7890;padding:5px 1px}
+.se-axis{display:grid;gap:8px;padding:7px 2px 12px}.se-axis label{display:flex;align-items:center;justify-content:space-between;font-size:12px;color:#52627a}.se-axis label b{font:600 11px "DM Sans",sans-serif;color:#2345a8}.se-axis input{width:100%;accent-color:#3158d6}
+.se-hint{padding:9px;border-radius:9px;background:#f2f5fa;color:#64748b;font-size:10px;line-height:1.7}
+.se-more-actions{display:flex;flex-wrap:wrap;gap:7px}.se-more-actions button{display:flex;align-items:center;gap:6px;background:#f5f7fb;color:#243652;border-color:#dce3ee}.se-more-actions button svg{width:16px;height:16px}
+.se-empty{padding:13px 8px;text-align:center;color:#8190a6;font-size:11px;line-height:1.8}
 .se-layer-tree,.se-layer-tree ul{list-style:none;margin:0;padding:0 13px 0 0}.se-layer-tree{padding:0}.se-layer{margin:2px 0}
-.se-layer-pick{width:100%;display:flex;align-items:center;gap:7px;border:1px solid transparent;border-radius:7px;background:transparent;padding:6px 7px;text-align:right;color:#263750;font:12px "IBM Plex Sans Arabic",sans-serif;cursor:pointer}
+.se-layer-pick{width:100%;display:flex;align-items:center;gap:7px;border:1px solid transparent;border-radius:7px;background:transparent;padding:7px;text-align:right;color:#263750;font:12px "IBM Plex Sans Arabic",sans-serif;cursor:pointer}
 .se-layer-pick:hover{background:#f2f5fb}.se-layer.is-selected>.se-layer-pick{background:#eaf0ff;border-color:#b8c9f3;color:#1c438c}
 .se-layer-tag{font:10px ui-monospace,monospace;color:#74839c;background:#f1f3f8;border-radius:4px;padding:3px 5px;min-width:42px;text-align:center}
 .se-layer-name{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.se-layer-count{font-size:10px;color:#8995a8}
-.se-target{display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid #edf0f5;padding:6px 2px 10px;margin-bottom:8px}.se-target strong{font-size:12px}.se-target small{font:10px ui-monospace,monospace;color:#8190a6}
-.se-fields{display:grid;grid-template-columns:1fr 1fr;gap:7px}.se-field{display:flex;flex-direction:column;gap:4px;min-width:0;margin-bottom:8px}.se-field span{font-size:11px;color:#5c6b82}
-.se-field input,.se-field textarea{width:100%;min-width:0;border:1px solid #dce3ee;border-radius:7px;padding:8px;background:#fff;color:#182b47;font:11px "IBM Plex Sans Arabic",sans-serif;direction:auto}
-.se-field textarea{resize:vertical;line-height:1.7}.se-text-field{margin-top:6px}.se-field small{font-size:10px;line-height:1.6;color:#8995a8}
-.se-source{display:grid;gap:4px;margin-top:12px;padding:10px;border-radius:8px;background:#f6f8fc}.se-source span{font-size:10px;color:#718096}
-.se-source code{font-size:10px;white-space:normal;overflow-wrap:anywhere;color:#334967;direction:ltr;text-align:left}
-.se-empty{padding:16px 10px;text-align:center;color:#8190a6;font-size:12px;line-height:1.8}
-.se-save-row{display:grid;grid-template-columns:1fr 1fr;gap:6px;padding:9px 10px;border-top:1px solid #e9edf4;background:#fafbfd}
-.se-save-row label{grid-column:1/-1;font-size:10px;color:#78859a;display:flex;align-items:center;gap:6px}
-.se-save-row button:first-of-type{background:#234e9b;color:#fff;border-color:#234e9b}
-.se-status{min-height:32px;padding:7px 11px;background:#f5f7fb;color:#687890;font-size:10px;line-height:1.6}
-.se-status.success{background:#edf8f1;color:#286b47}.se-status.error{background:#fff1f0;color:#9c3932}
 .se-session-item{display:flex;align-items:center;justify-content:space-between;gap:8px;padding:8px 2px;border-bottom:1px solid #edf0f5}
-.se-session-item b,.se-session-item small{display:block}.se-session-item b{font-size:10px}.se-session-item small{font-size:9px;color:#8491a5}.se-session-item button{white-space:nowrap}
+.se-session-item b,.se-session-item small{display:block}.se-session-item b{font-size:10px}.se-session-item small{font-size:9px;color:#8491a5}.se-session-item button{border:1px solid #dce3ee;border-radius:7px;background:#f8faff;padding:7px 10px;color:#243652;font:600 11px "IBM Plex Sans Arabic",sans-serif}
 .sahm-editor-active #app .se-hover{outline:2px dashed #d88d21!important;outline-offset:2px!important;cursor:crosshair!important}
-.sahm-editor-active #app .se-selected{outline:2px solid #3158d6!important;outline-offset:3px!important}
+.sahm-editor-active #app .se-selected{outline:2px solid #3158d6!important;outline-offset:2px!important}
 .sahm-editor-active #app{user-select:none}
-@media(max-width:640px){#sahm-editor-panel{left:0;right:0;top:auto;bottom:0;width:100%;max-width:none;height:min(64vh,620px);border-radius:16px 16px 0 0}#sahm-editor-toggle{top:10px;left:10px}.se-content{padding:7px 9px}}
+@media(max-width:640px){
+ body.sahm-editor-active .workspace{inset:0 0 104px!important;padding:5px!important}
+ body.sahm-editor-active #app.phone{width:min(100%,430px)!important;height:calc(100dvh - 164px)!important;max-height:none!important;border-radius:22px!important}
+ .se-topbar{height:48px;flex-basis:48px}.se-tool-panel{bottom:calc(99px + env(safe-area-inset-bottom));max-height:min(40dvh,340px)}
+ .se-dock{gap:3px;padding-inline:6px}.se-tool{flex-basis:55px;min-width:55px}
+}
+@media(max-height:600px){
+ body.sahm-editor-active .workspace{inset:0 0 92px!important}
+ body.sahm-editor-active #app.phone{height:calc(100dvh - 108px)!important}
+ .se-tool-panel{max-height:35dvh;bottom:88px}
+ .se-tool{height:46px}
+}
