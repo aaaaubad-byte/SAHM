@@ -1,7 +1,7 @@
 /* Embedded editor controller. Only the SAHM-LAB branch loads this module. */
 (function (w) {
   'use strict';
-  var state = { enabled: false, selected: null, before: null, history: null, hover: null, saved: false, lastSession: null, activeTool: null, dragging: null, panelPosition: null, panelDragging: null };
+  var state = { enabled: false, selected: null, before: null, history: null, hover: null, saved: false, lastSession: null, activeTool: null, dragging: null, panelPosition: null, panelDragging: null, frameDragging: null, frameRaf: 0, selectionObserver: null, suppressClickUntil: 0 };
   function esc(s) { return String(s == null ? '' : s).replace(/[&<>"']/g, function (c) { return ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]); }); }
   function app() { return document.getElementById('app'); }
   function preparePreview() {
@@ -36,9 +36,158 @@
     return null;
   }
   function status(message, type) { var el = document.getElementById('sahm-editor-status'); if (el) { el.textContent = message; el.className = 'se-status' + (type ? ' ' + type : ''); } }
+  function scheduleSelectionFrame() {
+    if (state.frameRaf || !w.requestAnimationFrame) { updateSelectionFrame(); return; }
+    state.frameRaf = w.requestAnimationFrame(function () { state.frameRaf = 0; updateSelectionFrame(); });
+  }
+  function selectionFrameMarkup() {
+    var handles = ['nw','n','ne','e','se','s','sw','w'];
+    return '<div class="se-selection-frame" data-se-selection-frame hidden>' +
+      handles.map(function (name) { return '<button type="button" class="se-selection-handle se-handle-' + name + '" data-se-handle="' + name + '" aria-label="تغيير الحجم"></button>'; }).join('') +
+      '<button type="button" class="se-selection-handle se-handle-rotate" data-se-handle="rotate" aria-label="تدوير العنصر"></button></div>';
+  }
+  function selectionBreadcrumb(el) {
+    var path = [], node = el;
+    while (node && node !== app()) { path.unshift(node); node = node.parentElement; }
+    path = path.slice(-4);
+    return '<div class="se-breadcrumbs">' + path.map(function (item, index) {
+      var id = w.SahmEditorCore.identify(item).id;
+      var label = item.id ? '#' + item.id : item.tagName.toLowerCase();
+      return (index ? '<span class="se-crumb-sep">›</span>' : '') +
+        '<button type="button" data-se-select-id="' + esc(id) + '"' + (item === el ? ' aria-current="true"' : '') + '>' + esc(label) + '</button>';
+    }).join('') + '</div>';
+  }
+  function updateTransformControls() {
+    var el = state.selected, panel = document.getElementById('sahm-editor-panel');
+    if (!el || !panel) return;
+    var width = panel.querySelector('[data-style="width"]'), height = panel.querySelector('[data-style="height"]');
+    var rotate = panel.querySelector('[data-style="rotate"]');
+    var posX = panel.querySelector('[data-position-axis="x"]'), posY = panel.querySelector('[data-position-axis="y"]');
+    if (width && width.type === 'number') width.value = Math.round(el.offsetWidth || 0);
+    if (height && height.type === 'number') height.value = Math.round(el.offsetHeight || 0);
+    if (rotate) {
+      var angle = parseFloat(el.style.rotate) || 0;
+      rotate.value = angle;
+      var readout = rotate.parentElement && rotate.parentElement.querySelector('[data-rotate-value]');
+      if (readout) readout.textContent = angle + '°';
+    }
+    var parts = String(el.style.translate || '0px 0px').trim().split(/\s+/);
+    var x = parseFloat(parts[0]) || 0, y = parseFloat(parts[1]) || 0;
+    if (posX) posX.value = x;
+    if (posY) posY.value = y;
+  }
+  function updateSelectionFrame() {
+    var frame = document.querySelector('#sahm-editor-panel [data-se-selection-frame]');
+    var el = state.selected;
+    if (!frame) return;
+    if (!state.enabled || !el || !el.isConnected) { frame.hidden = true; return; }
+    var rect = el.getBoundingClientRect();
+    if (!rect.width || !rect.height) { frame.hidden = true; return; }
+    frame.hidden = false;
+    frame.style.left = Math.round(rect.left) + 'px';
+    frame.style.top = Math.round(rect.top) + 'px';
+    frame.style.width = Math.max(1, Math.round(rect.width)) + 'px';
+    frame.style.height = Math.max(1, Math.round(rect.height)) + 'px';
+    updateTransformControls();
+  }
+  function transformSnapshot(el) {
+    return { width: el.style.width, height: el.style.height, translate: el.style.translate, rotate: el.style.rotate };
+  }
+  function applyTransformSnapshot(el, snapshot) {
+    ['width','height','translate','rotate'].forEach(function (key) {
+      if (snapshot[key]) el.style.setProperty(key, snapshot[key]);
+      else el.style.removeProperty(key);
+    });
+    scheduleSelectionFrame();
+  }
+  function liveEdit(input) {
+    var el = state.selected;
+    if (!el) return;
+    if (input.matches('[data-style]')) {
+      var prop = input.getAttribute('data-style');
+      if (!Object.prototype.hasOwnProperty.call(input, '_seBefore')) {
+        input._seBefore = el.style.getPropertyValue(prop);
+        input._seEditKind = 'style'; input._seEditProp = prop;
+      }
+      var value = input.value;
+      if ((prop === 'width' || prop === 'height') && input.type === 'number' && value !== '') value += 'px';
+      if (prop === 'rotate' && value !== '') value += 'deg';
+      if (value) el.style.setProperty(prop, value); else el.style.removeProperty(prop);
+      input._seAfter = el.style.getPropertyValue(prop);
+      if (prop === 'rotate') {
+        var readout = input.parentElement && input.parentElement.querySelector('[data-rotate-value]');
+        if (readout) readout.textContent = (parseFloat(input.value) || 0) + '°';
+      }
+    } else if (input.matches('[data-position-axis]')) {
+      if (!Object.prototype.hasOwnProperty.call(input, '_seBefore')) {
+        input._seBefore = el.style.translate || '';
+        input._seEditKind = 'position';
+      }
+      var parts = String(el.style.translate || '0px 0px').trim().split(/\s+/);
+      var x = parseFloat(parts[0]) || 0, y = parseFloat(parts[1]) || 0;
+      if (input.getAttribute('data-position-axis') === 'x') x = Number(input.value) || 0;
+      else y = Number(input.value) || 0;
+      el.style.translate = x + 'px ' + y + 'px';
+      input._seAfter = el.style.translate;
+      var readout = input.parentElement && input.parentElement.querySelector('b');
+      if (readout && input.type === 'range') readout.textContent = input.getAttribute('data-position-axis') === 'x' ? x + ' px' : y + ' px';
+    } else if (input.matches('[data-attr]')) {
+      var attr = input.getAttribute('data-attr');
+      if (!Object.prototype.hasOwnProperty.call(input, '_seBefore')) {
+        input._seBefore = el.hasAttribute(attr) ? el.getAttribute(attr) : null;
+        input._seEditKind = 'attribute'; input._seEditProp = attr;
+      }
+      if (input.value === '') el.removeAttribute(attr); else el.setAttribute(attr, input.value);
+      input._seAfter = el.hasAttribute(attr) ? el.getAttribute(attr) : null;
+    } else if (input.matches('[data-text-edit]')) {
+      var confirm = document.getElementById('se-confirm-static-text');
+      if (!confirm || !confirm.checked) {
+        status('أكد أولاً أن النص ثابت وليس بيانات مستخدم.', 'error');
+        input.value = el.textContent || '';
+        return;
+      }
+      if (!Object.prototype.hasOwnProperty.call(input, '_seBefore')) {
+        input._seBefore = el.textContent || '';
+        input._seEditKind = 'text';
+      }
+      el.textContent = input.value;
+      input._seAfter = el.textContent;
+    }
+    scheduleSelectionFrame();
+  }
+  function commitLiveEdit(input) {
+    var el = state.selected;
+    if (!el || !Object.prototype.hasOwnProperty.call(input, '_seBefore')) return;
+    var kind = input._seEditKind, prop = input._seEditProp, before = input._seBefore, after;
+    if (kind === 'style') {
+      after = el.style.getPropertyValue(prop);
+      delete input._seBefore; delete input._seEditKind; delete input._seEditProp;
+      if (before === after) return;
+      function apply(value) { if (value) el.style.setProperty(prop, value); else el.style.removeProperty(prop); }
+      record('style.set', el, { property: prop, before: before, after: after }, function () { apply(before); }, function () { apply(after); });
+    } else if (kind === 'position') {
+      after = el.style.translate || '';
+      delete input._seBefore; delete input._seEditKind;
+      if (before === after) return;
+      function apply(value) { if (value) el.style.translate = value; else el.style.removeProperty('translate'); }
+      record('style.set', el, { property: 'translate', before: before, after: after }, function () { apply(before); }, function () { apply(after); });
+    } else if (kind === 'attribute') {
+      after = el.hasAttribute(prop) ? el.getAttribute(prop) : null;
+      delete input._seBefore; delete input._seEditKind; delete input._seEditProp;
+      if (before === after) return;
+      function apply(value) { if (value === null || value === '') el.removeAttribute(prop); else el.setAttribute(prop, value); }
+      record('attribute.set', el, { attribute: prop, before: before, after: after }, function () { apply(before); }, function () { apply(after); });
+    } else if (kind === 'text') {
+      after = el.textContent || '';
+      delete input._seBefore; delete input._seEditKind;
+      if (before === after) return;
+      function apply(value) { el.textContent = value; }
+      record('text.set', el, { before: before, after: after }, function () { apply(before); }, function () { apply(after); });
+    }
+  }
   function record(type, el, details, undo, redo) {
     var meta = w.SahmEditorCore.identify(el), op = Object.assign({ type: type, elementId: meta.id, screen: meta.screen, source: meta, timestamp: new Date().toISOString() }, details || {});
-    state.history.push(op, undo, redo); state.saved = false; render();
+    state.history.push(op, undo, redo); state.saved = false;
   }
   function renderSessions(items) {
     var box = document.getElementById('se-session-list'); if (!box) return;
@@ -114,7 +263,7 @@
       h+='<label class="se-field"><span>الإطار</span><input data-style="border" placeholder="1px solid #ddd" value="'+esc(el.style.border||'')+'"></label><label class="se-field"><span>استدارة الزوايا</span><input data-style="border-radius" value="'+esc(valueOf(el,'border-radius','8px'))+'"></label><label class="se-field"><span>الحشوة الداخلية</span><input data-style="padding" value="'+esc(valueOf(el,'padding','0px'))+'"></label>';
     } else if (t==='transform') {
       var tr=String(el.style.translate||'0px 0px').split(/\\s+/),tx=parseFloat(tr[0])||0,ty=parseFloat(tr[1])||0,box=el.getBoundingClientRect(),scale=Number(app().dataset.sePreviewScale)||1,ew=Math.round(el.offsetWidth||box.width/scale),eh=Math.round(el.offsetHeight||box.height/scale),rot=parseFloat(el.style.rotate)||0;
-      h+='<div class="se-transform-grid"><label class="se-field"><span>العرض (px)</span><input type="number" min="1" max="430" data-style="width" value="'+ew+'"></label><label class="se-field"><span>الارتفاع (px)</span><input type="number" min="1" max="900" data-style="height" value="'+eh+'"></label></div><div class="se-axis"><label><span>التدوير</span><b>'+rot+'°</b></label><input type="range" min="-180" max="180" step="1" data-style="rotate" value="'+rot+'"></div><div class="se-transform-grid"><label class="se-field"><span>أفقي X (px)</span><input type="number" data-position-axis="x" value="'+tx+'"></label><label class="se-field"><span>عمودي Y (px)</span><input type="number" data-position-axis="y" value="'+ty+'"></label></div><div class="se-hint">اسحب العنصر مباشرة داخل المعاينة، أو أدخل الأبعاد والتدوير بدقة.</div>';
+      h+='<div class="se-transform-grid"><label class="se-field"><span>العرض (px)</span><input type="number" min="1" max="430" data-style="width" value="'+ew+'"></label><label class="se-field"><span>الارتفاع (px)</span><input type="number" min="1" max="900" data-style="height" value="'+eh+'"></label></div><div class="se-axis"><label><span>التدوير</span><b data-rotate-value>'+rot+'°</b></label><input type="range" min="-180" max="180" step="1" data-style="rotate" value="'+rot+'"></div><div class="se-transform-grid"><label class="se-field"><span>أفقي X (px)</span><input type="number" data-position-axis="x" value="'+tx+'"></label><label class="se-field"><span>عمودي Y (px)</span><input type="number" data-position-axis="y" value="'+ty+'"></label></div><div class="se-hint">اسحب العنصر مباشرة داخل المعاينة، أو أدخل الأبعاد والتدوير بدقة.</div>';
     } else if (t==='position') {
       var tr=String(el.style.translate||'0px 0px').split(/\s+/),tx=parseFloat(tr[0])||0,ty=parseFloat(tr[1])||0;
       h+='<div class="se-axis"><label><span>أفقي X</span><b>'+tx+' px</b></label><input type="range" min="-180" max="180" step="1" data-position-axis="x" value="'+tx+'"></div><div class="se-axis"><label><span>عمودي Y</span><b>'+ty+' px</b></label><input type="range" min="-240" max="240" step="1" data-position-axis="y" value="'+ty+'"></div><div class="se-hint">يمكنك أيضاً سحب العنصر مباشرة داخل شاشة الهاتف بعد تفعيل أداة الموقع.</div>';
@@ -143,10 +292,12 @@
       actionButton('undo','تراجع')+actionButton('redo','إعادة')+toolButton('history','الجلسات')+actionButton('save','حفظ')
     );
     var html='<div class="se-topbar"><div class="se-brand"><b>سهم</b><small>محرر الواجهة</small></div><div class="se-top-actions"><button data-se-action="undo" '+(!history.canUndo()?'disabled':'')+' title="تراجع">'+icon('undo')+'</button><button data-se-action="redo" '+(!history.canRedo()?'disabled':'')+' title="إعادة">'+icon('redo')+'</button><button data-se-action="save" title="حفظ الجلسة">'+icon('save')+'</button><button data-se-action="exit" title="إغلاق المحرر">'+icon('close')+'</button></div></div>';
+    html += selectionFrameMarkup();
     html+=toolPanel();
-    html+='<div class="se-dock-wrap"><div class="se-context-label">'+(selected?'العنصر المحدد: '+esc(selected.tagName.toLowerCase()):'أدوات المحرر')+'</div><nav class="se-dock" aria-label="أدوات التحرير">'+tools+'</nav><div id="sahm-editor-status" class="se-status">حدد عنصراً من المعاينة لعرض أدواته الخاصة.</div></div>';
+    html+='<div class="se-dock-wrap"><div class="se-context-label">'+(selected?selectionBreadcrumb(selected):'<span>أدوات المحرر</span>')+'</div><nav class="se-dock" aria-label="أدوات التحرير">'+tools+'</nav><div id="sahm-editor-status" class="se-status">حدد عنصراً من المعاينة لعرض أدواته الخاصة.</div></div>';
     document.getElementById('sahm-editor-panel').innerHTML=html;
     applyPanelPosition();
+    scheduleSelectionFrame();
     if(state.activeTool==='sessions') w.SahmEditorCore.listSessions().then(renderSessions);
   }
   function applyPanelPosition() {
@@ -176,7 +327,10 @@
   function select(el) {
     if (!el || el === app() || w.SahmEditorCore.isEditorNode(el)) return;
     if (state.selected) state.selected.classList.remove('se-selected');
-    state.selected = el; state.activeTool = 'transform'; w.SahmEditorCore.identify(el); el.classList.add('se-selected'); render();
+    if (state.selectionObserver) { state.selectionObserver.disconnect(); state.selectionObserver = null; }
+    state.selected = el; state.activeTool = 'transform'; w.SahmEditorCore.identify(el); el.classList.add('se-selected');
+    if (w.ResizeObserver) { state.selectionObserver = new ResizeObserver(scheduleSelectionFrame); state.selectionObserver.observe(el); }
+    render();
   }
   function setStyle(el, prop, value) {
     var before = el.style.getPropertyValue(prop), after = String(value || '').trim();
@@ -266,6 +420,7 @@
   }
   function bindPanel() {
     var panel = document.getElementById('sahm-editor-panel');
+    panel.addEventListener('pointerdown', beginSelectionFrameDrag);
     panel.addEventListener('pointerdown', beginPanelDrag);
     document.addEventListener('pointermove', movePanelDrag, true);
     document.addEventListener('pointerup', endPanelDrag, true);
@@ -288,6 +443,8 @@
         else if (name === 'exit') toggle(false);
         return;
       }
+      var crumb = event.target.closest('[data-se-select-id]');
+      if (crumb) { var crumbEl = getById(crumb.getAttribute('data-se-select-id')); if (crumbEl) select(crumbEl); return; }
       var pick = event.target.closest('[data-layer-pick]');
       if (pick) { var el = getById(pick.getAttribute('data-layer-pick')); if (el) select(el); return; }
       var tab = event.target.closest('[data-se-tab]');
@@ -300,15 +457,15 @@
       var exp = event.target.closest('[data-session-export]');
       if (exp) w.SahmEditorCore.listSessions().then(function (a) { var s = a.find(function (x) { return x.id === exp.getAttribute('data-session-export'); }); if (s) w.SahmEditorCore.download(s); });
     });
+    panel.addEventListener('input', function (event) {
+      var input = event.target;
+      if (input.matches('[data-style],[data-text-edit],[data-attr],[data-position-axis]')) liveEdit(input);
+    });
     panel.addEventListener('change', function (event) {
       var input = event.target;
-      if (input.matches('[data-style]') && state.selected) { var prop=input.getAttribute('data-style'),val=input.value; if ((prop==='width'||prop==='height') && input.type==='number') val=val+'px'; if (prop==='rotate') val=val+'deg'; setStyle(state.selected,prop,val); }
-      else if (input.matches('[data-text-edit]') && state.selected) {
-        var confirm = document.getElementById('se-confirm-static-text');
-        if (!confirm || !confirm.checked) { status('أكد أولاً أن النص ثابت وليس بيانات مستخدم.', 'error'); input.value = state.selected.textContent || ''; return; }
-        setText(state.selected, input.value);
-      } else if (input.matches('[data-attr]') && state.selected) setAttribute(state.selected, input.getAttribute('data-attr'), input.value);
-      else if (input.matches('[data-position-axis]') && state.selected) { var parts=String(state.selected.style.translate||'0px 0px').split(/\s+/),x=parseFloat(parts[0])||0,y=parseFloat(parts[1])||0; if(input.getAttribute('data-position-axis')==='x')x=Number(input.value);else y=Number(input.value); setStyle(state.selected,'translate',x+'px '+y+'px'); }
+      if (!input.matches('[data-style],[data-text-edit],[data-attr],[data-position-axis]')) return;
+      liveEdit(input);
+      commitLiveEdit(input);
     });
     panel.addEventListener('dragstart', function (event) { var li = event.target.closest('[data-layer-id]'); if (li) { event.dataTransfer.setData('text/plain', li.getAttribute('data-layer-id')); event.dataTransfer.effectAllowed = 'move'; } });
     panel.addEventListener('dragover', function (event) { if (event.target.closest('[data-layer-id]')) event.preventDefault(); });
@@ -321,14 +478,78 @@
   }
   function appClick(event) {
     if (!state.enabled || w.SahmEditorCore.isEditorNode(event.target)) return;
-    var el = event.target.closest('#app *'); if (!el) return;
-    event.preventDefault(); event.stopPropagation(); event.stopImmediatePropagation(); select(el);
+    var now = w.performance ? w.performance.now() : Date.now();
+    if (state.suppressClickUntil && now < state.suppressClickUntil) { state.suppressClickUntil = 0; event.preventDefault(); event.stopPropagation(); return; }
+    var hit = document.elementFromPoint ? document.elementFromPoint(event.clientX, event.clientY) : event.target;
+    var el = hit && hit.closest ? hit.closest('#app *') : null;
+    if (!el) return;
+    event.preventDefault(); event.stopPropagation(); event.stopImmediatePropagation();
+    if (event.altKey && el.parentElement && el.parentElement !== app()) el = el.parentElement;
+    select(el);
   }
   function hover(event) {
     if (!state.enabled || w.SahmEditorCore.isEditorNode(event.target)) return;
     var el = event.target.closest('#app *'); if (!el) return;
     if (state.hover && state.hover !== state.selected) state.hover.classList.remove('se-hover');
     state.hover = el; if (el !== state.selected) el.classList.add('se-hover');
+  }
+  function beginSelectionFrameDrag(event) {
+    var handle = event.target.closest('[data-se-handle]'), el = state.selected;
+    if (!handle || !el || !el.isConnected) return;
+    var rect = el.getBoundingClientRect(), scale = Number(app().dataset.sePreviewScale) || 1;
+    var parts = String(el.style.translate || '0px 0px').trim().split(/\s+/);
+    var pointerAngle = Math.atan2(event.clientY - (rect.top + rect.height / 2), event.clientX - (rect.left + rect.width / 2));
+    state.frameDragging = {
+      el: el, pointerId: event.pointerId, handle: handle.getAttribute('data-se-handle'),
+      mode: handle.getAttribute('data-se-handle') === 'rotate' ? 'rotate' : 'resize',
+      startX: event.clientX, startY: event.clientY, scale: scale,
+      startWidth: el.offsetWidth || rect.width / scale, startHeight: el.offsetHeight || rect.height / scale,
+      startTranslate: { x: parseFloat(parts[0]) || 0, y: parseFloat(parts[1]) || 0 },
+      startRotate: parseFloat(el.style.rotate) || 0, centerX: rect.left + rect.width / 2,
+      centerY: rect.top + rect.height / 2, pointerAngle: pointerAngle, before: transformSnapshot(el)
+    };
+    if (handle.setPointerCapture) try { handle.setPointerCapture(event.pointerId); } catch (_) {}
+    event.preventDefault(); event.stopPropagation();
+  }
+  function moveSelectionFrameDrag(event) {
+    var d = state.frameDragging;
+    if (!d || d.pointerId !== event.pointerId) return;
+    if (d.mode === 'rotate') {
+      var angle = Math.atan2(event.clientY - d.centerY, event.clientX - d.centerX);
+      var degrees = d.startRotate + (angle - d.pointerAngle) * 180 / Math.PI;
+      degrees = ((degrees + 180) % 360 + 360) % 360 - 180;
+      d.el.style.rotate = Math.round(degrees) + 'deg';
+    } else {
+      var dx = (event.clientX - d.startX) / d.scale, dy = (event.clientY - d.startY) / d.scale;
+      var west = d.handle.indexOf('w') !== -1, east = d.handle.indexOf('e') !== -1;
+      var north = d.handle.indexOf('n') !== -1, south = d.handle.indexOf('s') !== -1;
+      if (west || east) {
+        var width = Math.max(12, Math.round(d.startWidth + (east ? dx : -dx)));
+        d.el.style.width = width + 'px';
+        if (west) d.el.style.translate = (d.startTranslate.x - (width - d.startWidth)) + 'px ' + d.startTranslate.y + 'px';
+      }
+      if (north || south) {
+        var height = Math.max(12, Math.round(d.startHeight + (south ? dy : -dy)));
+        d.el.style.height = height + 'px';
+        if (north) {
+          var current = String(d.el.style.translate || '0px 0px').trim().split(/\s+/);
+          var x = parseFloat(current[0]) || 0;
+          d.el.style.translate = x + 'px ' + (d.startTranslate.y - (height - d.startHeight)) + 'px';
+        }
+      }
+    }
+    scheduleSelectionFrame(); event.preventDefault();
+  }
+  function endSelectionFrameDrag(event) {
+    var d = state.frameDragging;
+    if (!d || d.pointerId !== event.pointerId) return;
+    state.frameDragging = null;
+    var after = transformSnapshot(d.el), before = d.before;
+    if (before.width !== after.width || before.height !== after.height || before.translate !== after.translate || before.rotate !== after.rotate) {
+      record('element.transform', d.el, { before: before, after: after },
+        function () { applyTransformSnapshot(d.el, before); },
+        function () { applyTransformSnapshot(d.el, after); });
+    } else scheduleSelectionFrame();
   }
   function beginDrag(event) {
     if (!state.enabled || state.activeTool !== 'position' && state.activeTool !== 'transform' || !state.selected || !state.selected.contains(event.target)) return;
@@ -341,11 +562,12 @@
   function moveDrag(event) {
     var d=state.dragging;if(!d||d.pointerId!==event.pointerId)return;
     var scale=Number(app().dataset.sePreviewScale)||1;var x=Math.round(d.x+(event.clientX-d.startX)/scale),y=Math.round(d.y+(event.clientY-d.startY)/scale);
-    d.el.style.translate=x+'px '+y+'px';event.preventDefault();
+    d.el.style.translate=x+'px '+y+'px';scheduleSelectionFrame();event.preventDefault();
   }
   function endDrag(event) {
     var d=state.dragging;if(!d||d.pointerId!==event.pointerId)return;
     state.dragging=null;var after=d.el.style.translate;
+    if (after !== d.before) state.suppressClickUntil = (w.performance ? w.performance.now() : Date.now()) + 300;
     if(after!==d.before)record('style.set',d.el,{property:'translate',before:d.before,after:after},
       function(){if(d.before)d.el.style.translate=d.before;else d.el.style.removeProperty('translate');},
       function(){d.el.style.translate=after;});
@@ -367,9 +589,11 @@
       state.before = w.SahmEditorCore.capture(); state.history = w.SahmEditorCore.history(render);
       state.selected = null; state.activeTool = null; state.saved = false; document.body.classList.add('sahm-editor-active'); preparePreview();
       panel.hidden = false; button.hidden = true; render();
-      document.addEventListener('click', appClick, true); document.addEventListener('pointerover', hover, true); document.addEventListener('pointerdown', beginDrag, true); document.addEventListener('pointermove', moveDrag, true); document.addEventListener('pointerup', endDrag, true); document.addEventListener('pointercancel', endDrag, true); document.addEventListener('keydown', keys, true);
+      document.addEventListener('click', appClick, true); document.addEventListener('pointerover', hover, true); document.addEventListener('pointerdown', beginDrag, true); document.addEventListener('pointermove', moveDrag, true); document.addEventListener('pointermove', moveSelectionFrameDrag, true); document.addEventListener('pointerup', endDrag, true); document.addEventListener('pointerup', endSelectionFrameDrag, true); document.addEventListener('pointercancel', endDrag, true); document.addEventListener('pointercancel', endSelectionFrameDrag, true); document.addEventListener('scroll', scheduleSelectionFrame, true); document.addEventListener('keydown', keys, true);
     } else {
-      document.removeEventListener('click', appClick, true); document.removeEventListener('pointerover', hover, true); document.removeEventListener('pointerdown', beginDrag, true); document.removeEventListener('pointermove', moveDrag, true); document.removeEventListener('pointerup', endDrag, true); document.removeEventListener('pointercancel', endDrag, true); document.removeEventListener('keydown', keys, true);
+      document.removeEventListener('click', appClick, true); document.removeEventListener('pointerover', hover, true); document.removeEventListener('pointerdown', beginDrag, true); document.removeEventListener('pointermove', moveDrag, true); document.removeEventListener('pointermove', moveSelectionFrameDrag, true); document.removeEventListener('pointerup', endDrag, true); document.removeEventListener('pointerup', endSelectionFrameDrag, true); document.removeEventListener('pointercancel', endDrag, true); document.removeEventListener('pointercancel', endSelectionFrameDrag, true); document.removeEventListener('scroll', scheduleSelectionFrame, true); document.removeEventListener('keydown', keys, true);
+      if (state.selectionObserver) { state.selectionObserver.disconnect(); state.selectionObserver = null; }
+      state.frameDragging = null; state.dragging = null; state.frameRaf = 0;
       restorePreview(); document.body.classList.remove('sahm-editor-active'); panel.hidden = true; button.hidden = !canShow();
       if (state.selected) state.selected.classList.remove('se-selected'); if (state.hover) state.hover.classList.remove('se-hover');
       state.selected = null; state.hover = null; state.activeTool = null;
