@@ -72,8 +72,10 @@
     };
     return '<svg viewBox="0 0 24 24" width="21" height="21" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">'+(paths[name]||paths.more)+'</svg>';
   }
+  function normalizeTool(name) { return ({palette:'color',type:'text',move:'position',plus:'add',history:'sessions'}[name]||name); }
   function toolButton(name,label,active,action) {
-    return '<button type="button" class="se-tool'+(active?' active':'')+'" data-se-tool="'+esc(name)+'" aria-label="'+esc(label)+'" title="'+esc(label)+'">'+icon(name)+'<span>'+esc(label)+'</span></button>';
+    var isActive=active===true||normalizeTool(name)===state.activeTool;
+    return '<button type="button" class="se-tool'+(isActive?' active':'')+'" data-se-tool="'+esc(name)+'" aria-label="'+esc(label)+'" title="'+esc(label)+'">'+icon(name)+'<span>'+esc(label)+'</span></button>';
   }
   function actionButton(name,label) { return '<button type="button" class="se-tool" data-se-action="'+esc(name)+'" aria-label="'+esc(label)+'" title="'+esc(label)+'">'+icon(name)+'<span>'+esc(label)+'</span></button>'; }
   function kindOf(el) {
@@ -89,11 +91,11 @@
     return v && v !== 'none' ? v : fallback;
   }
   function toolPanel() {
-    var el=state.selected, kind=kindOf(el), t=state.activeTool;
+    var el=state.selected, kind=kindOf(el), t=normalizeTool(state.activeTool);
     if (!t || t==='select') return '';
     var h='<section class="se-tool-panel"><div class="se-tool-panel-head"><b>'+esc(({add:'إضافة عنصر',layers:'طبقات العناصر',sessions:'جلسات التحرير',text:'تحرير النص',color:'الألوان',font:'الخطوط',shadow:'الظلال',border:'الإطار والمسافات',position:'موقع العنصر',size:'الحجم والأبعاد',image:'إعدادات الصورة',click:'إعدادات العنصر',more:'أدوات إضافية'})[t]||'أداة التحرير')+'</b><button type="button" data-se-tool="select" aria-label="إغلاق">'+icon('close')+'</button></div><div class="se-tool-panel-body">';
     if (t==='add') {
-      h+='<div class="se-add-row"><select id="se-add-kind"><option value="text">نص</option><option value="heading">عنوان</option><option value="button">زر</option><option value="card">بطاقة</option><option value="image">صورة</option><option value="divider">فاصل</option></select><button data-se-action="add">إضافة</button></div>';
+      h+='<div class="se-element-grid">'+[['text','نص','type'],['heading','عنوان','type'],['button','زر','click'],['card','بطاقة','layers'],['image','صورة','image'],['divider','فاصل','border']].map(function(x){return '<button type="button" class="se-element-choice" data-add-kind="'+x[0]+'">'+icon(x[2])+'<span>'+x[1]+'</span></button>';}).join('')+'</div><div class="se-add-note">سيُضاف العنصر إلى الشاشة الحالية ويمكنك تعديله مباشرة.</div>';
     } else if (t==='layers') {
       h+=w.SahmEditorLayers.render(app(),el);
     } else if (t==='sessions') {
@@ -128,13 +130,13 @@
     if (!state.enabled) return;
     var selected=state.selected, history=state.history, kind=kindOf(selected);
     var tools=selected ? (
-      (kind==='text' ? toolButton('type','النص') : '')+
+      toolButton('plus','العناصر')+(kind==='text' ? toolButton('type','النص') : '')+
       toolButton('palette','اللون')+toolButton('font','الخط')+toolButton('shadow','الظلال')+
-      toolButton('border','الإطار')+toolButton('position','الموقع')+toolButton('size','الحجم')+
+      toolButton('border','الإطار')+toolButton('move','الموقع')+toolButton('size','الحجم')+
       (kind==='image'?toolButton('image','الصورة'):'')+
       (kind==='button'?toolButton('click','السلوك'):'')+toolButton('more','المزيد')
     ) : (
-      toolButton('cursor','تحديد')+toolButton('plus','إضافة')+toolButton('layers','الطبقات')+
+      toolButton('cursor','تحديد')+toolButton('plus','العناصر')+toolButton('layers','الطبقات')+
       actionButton('undo','تراجع')+actionButton('redo','إعادة')+toolButton('history','الجلسات')+actionButton('save','حفظ')
     );
     var html='<div class="se-topbar"><div class="se-brand"><b>سهم</b><small>محرر الواجهة</small></div><div class="se-top-actions"><button data-se-action="undo" '+(!history.canUndo()?'disabled':'')+' title="تراجع">'+icon('undo')+'</button><button data-se-action="redo" '+(!history.canRedo()?'disabled':'')+' title="إعادة">'+icon('redo')+'</button><button data-se-action="save" title="حفظ الجلسة">'+icon('save')+'</button><button data-se-action="exit" title="إغلاق المحرر">'+icon('close')+'</button></div></div>';
@@ -237,8 +239,10 @@
   function bindPanel() {
     var panel = document.getElementById('sahm-editor-panel');
     panel.addEventListener('click', function (event) {
+      var choice=event.target.closest('[data-add-kind]');
+      if(choice){addElement(choice.getAttribute('data-add-kind'));state.activeTool=null;render();return;}
       var tool = event.target.closest('[data-se-tool]');
-      if (tool) { var tn=tool.getAttribute('data-se-tool'); if(tn==='history')tn='sessions'; state.activeTool=(tn==='select'||tn==='cursor'?null:tn); render(); return; }
+      if (tool) { var tn=normalizeTool(tool.getAttribute('data-se-tool')); state.activeTool=(tn==='select'||tn==='cursor'?null:tn); render(); return; }
       var action = event.target.closest('[data-se-action]');
       if (action) {
         var name = action.getAttribute('data-se-action');
