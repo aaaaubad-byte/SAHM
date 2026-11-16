@@ -221,7 +221,7 @@
     };
     return '<svg viewBox="0 0 24 24" width="21" height="21" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">'+(paths[name]||paths.more)+'</svg>';
   }
-  function normalizeTool(name) { return ({palette:'color',type:'text',move:'position',plus:'add',history:'sessions'}[name]||name); }
+  function normalizeTool(name) { return ({palette:'color',type:'text',move:'position',plus:'add',history:'sessions',maximize:'transform'}[name]||name); }
   function toolButton(name,label,active,action) {
     var isActive=active===true||normalizeTool(name)===state.activeTool;
     return '<button type="button" class="se-tool'+(isActive?' active':'')+'" data-se-tool="'+esc(name)+'" aria-label="'+esc(label)+'" title="'+esc(label)+'">'+icon(name)+'<span>'+esc(label)+'</span></button>';
