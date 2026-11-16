@@ -44,6 +44,7 @@
     var handles = ['nw','n','ne','e','se','s','sw','w'];
     return '<div class="se-selection-frame" data-se-selection-frame hidden>' +
       handles.map(function (name) { return '<button type="button" class="se-selection-handle se-handle-' + name + '" data-se-handle="' + name + '" aria-label="تغيير الحجم"></button>'; }).join('') +
+      '<button type="button" class="se-selection-handle se-handle-move" data-se-handle="move" aria-label="تحريك العنصر">••</button>' +
       '<button type="button" class="se-selection-handle se-handle-rotate" data-se-handle="rotate" aria-label="تدوير العنصر"></button></div>';
   }
   function selectionBreadcrumb(el) {
@@ -486,7 +487,7 @@
   function appClick(event) {
     if (!state.enabled || w.SahmEditorCore.isEditorNode(event.target)) return;
     var now = w.performance ? w.performance.now() : Date.now();
-    if (state.suppressClickUntil && now < state.suppressClickUntil) { state.suppressClickUntil = 0; event.preventDefault(); event.stopPropagation(); return; }
+    if (state.suppressClickUntil && now < state.suppressClickUntil) { state.suppressClickUntil = 0; event.preventDefault(); event.stopPropagation(); event.stopImmediatePropagation(); return; }
     var hit = document.elementFromPoint ? document.elementFromPoint(event.clientX, event.clientY) : event.target;
     var el = hit && hit.closest ? hit.closest('#app *') : null;
     if (!el) return;
@@ -508,7 +509,7 @@
     var pointerAngle = Math.atan2(event.clientY - (rect.top + rect.height / 2), event.clientX - (rect.left + rect.width / 2));
     state.frameDragging = {
       el: el, pointerId: event.pointerId, handle: handle.getAttribute('data-se-handle'),
-      mode: handle.getAttribute('data-se-handle') === 'rotate' ? 'rotate' : 'resize',
+      mode: handle.getAttribute('data-se-handle') === 'rotate' ? 'rotate' : (handle.getAttribute('data-se-handle') === 'move' ? 'move' : 'resize'),
       startX: event.clientX, startY: event.clientY, scale: scale,
       startWidth: el.offsetWidth || rect.width / scale, startHeight: el.offsetHeight || rect.height / scale,
       startTranslate: { x: parseFloat(parts[0]) || 0, y: parseFloat(parts[1]) || 0 },
@@ -526,6 +527,10 @@
       var degrees = d.startRotate + (angle - d.pointerAngle) * 180 / Math.PI;
       degrees = ((degrees + 180) % 360 + 360) % 360 - 180;
       d.el.style.rotate = Math.round(degrees) + 'deg';
+    } else if (d.mode === 'move') {
+      var moveX = d.startTranslate.x + (event.clientX - d.startX) / d.scale;
+      var moveY = d.startTranslate.y + (event.clientY - d.startY) / d.scale;
+      d.el.style.translate = Math.round(moveX) + 'px ' + Math.round(moveY) + 'px';
     } else {
       var dx = (event.clientX - d.startX) / d.scale, dy = (event.clientY - d.startY) / d.scale;
       var west = d.handle.indexOf('w') !== -1, east = d.handle.indexOf('e') !== -1;
@@ -570,8 +575,8 @@
     } else scheduleSelectionFrame();
   }
   function beginDrag(event) {
-    if (!state.enabled || state.activeTool !== 'position' && state.activeTool !== 'transform' || !state.selected || !state.selected.contains(event.target)) return;
-    if (event.target.closest('input,button,textarea,select')) return;
+    if (!state.enabled || state.activeTool !== 'position' && state.activeTool !== 'transform' || !state.selected || event.target !== state.selected) return;
+    if (event.target.closest('input,textarea,select')) return;
     var el=state.selected, parts=String(el.style.translate||'0px 0px').split(/\s+/);
     state.dragging={el:el,pointerId:event.pointerId,startX:event.clientX,startY:event.clientY,x:parseFloat(parts[0])||0,y:parseFloat(parts[1])||0,before:el.style.translate||''};
     if(el.setPointerCapture) try{el.setPointerCapture(event.pointerId);}catch(_){}
