@@ -24,6 +24,7 @@ test('GitHub writer keeps credentials server-side and restricts access', () => {
   const server = fs.readFileSync(path.join(root, 'editor/server.js'), 'utf8');
   assert.ok(server.includes('process.env.GITHUB_TOKEN'));
   assert.ok(server.includes('SAHM_EDITOR_ADMIN_IDS'));
+  assert.ok(server.includes('SAHM_EDITOR_ADMIN_EMAILS'));
   assert.ok(server.includes('EDITOR_FORBIDDEN'));
   assert.ok(!server.includes('service_role'));
 });
