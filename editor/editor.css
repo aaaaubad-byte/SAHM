@@ -90,3 +90,6 @@ body.sahm-editor-active #app #bottomnav{flex-shrink:0!important}
  .se-handle-sw{left:-6px;bottom:-6px}.se-handle-w{left:-6px}
  .se-handle-rotate{top:-29px}
 }
+
+.se-handle-move{left:calc(50% - 27px);top:-27px;width:28px;height:14px;min-width:28px;min-height:14px;border-radius:5px;border:1px solid #3158d6;color:#3158d6;background:#fff;font:700 10px/10px "DM Sans",sans-serif;letter-spacing:1px;cursor:move}
+@media(max-width:640px){.se-handle-move{top:-31px;height:16px;min-height:16px}}
