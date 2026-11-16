@@ -111,10 +111,15 @@
         input._seEditKind = 'style'; input._seEditProp = prop;
       }
       var value = input.value;
-      if ((prop === 'width' || prop === 'height') && input.type === 'number' && value !== '') value += 'px';
-      if (prop === 'rotate' && value !== '') value += 'deg';
+      if (input.hasAttribute('data-shadow-level')) { var level=Number(value)||0; value=level?'0 4px '+level+'px rgba(0,0,0,'+(Math.min(.28,.08+level/150).toFixed(2))+')':''; }
+      else if (input.hasAttribute('data-unit-scale')) value=String((Number(value)||0)*Number(input.getAttribute('data-unit-scale')));
+      else if (input.getAttribute('data-unit') && value !== '') value += input.getAttribute('data-unit');
+      else if ((prop === 'width' || prop === 'height') && input.type === 'number' && value !== '') value += 'px';
+      if (prop === 'rotate' && value !== '' && !/deg$/.test(value)) value += 'deg';
       if (value) el.style.setProperty(prop, value); else el.style.removeProperty(prop);
       input._seAfter = el.style.getPropertyValue(prop);
+      var rangeWrap=input.closest('.se-slider-control'), rangeValue=rangeWrap&&rangeWrap.querySelector('[data-range-value]');
+      if (rangeValue) rangeValue.textContent=input.value+(input.getAttribute('data-unit')||'');
       if (prop === 'rotate') {
         var readout = input.parentElement && input.parentElement.querySelector('[data-rotate-value]');
         if (readout) readout.textContent = (parseFloat(input.value) || 0) + '°';
@@ -213,6 +218,7 @@
       image:'<rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><path d="m21 15-5-5L5 21"/>',
       crop:'<path d="M6 3v12a3 3 0 0 0 3 3h12M18 21V9a3 3 0 0 0-3-3H3"/>',
       maximize:'<path d="M8 3H5a2 2 0 0 0-2 2v3M16 3h3a2 2 0 0 1 2 2v3M21 16v3a2 2 0 0 1-2 2h-3M3 16v3a2 2 0 0 0 2 2h3"/>',
+      rotate:'<path d="M20 7v5h-5"/><path d="M20 12a8 8 0 1 1-2.3-5.7L20 8"/>',
       click:'<path d="m9 9 5 12 2-5 5-2z"/><path d="M4 4 2 2M10 3V1M3 10H1"/>',
       copy:'<rect x="8" y="8" width="13" height="13" rx="2"/><path d="M16 8V5a2 2 0 0 0-2-2H5a2 2 0 0 0-2 2v9a2 2 0 0 0 2 2h3"/>',
       trash:'<path d="M3 6h18M8 6V4h8v2m3 0-1 15H6L5 6m4 4v7m6-7v7"/>',
@@ -222,7 +228,7 @@
     };
     return '<svg viewBox="0 0 24 24" width="21" height="21" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">'+(paths[name]||paths.more)+'</svg>';
   }
-  function normalizeTool(name) { return ({palette:'color',type:'text',move:'position',plus:'add',history:'sessions',maximize:'transform'}[name]||name); }
+  function normalizeTool(name) { return ({palette:'color',type:'text',move:'position',plus:'add',history:'sessions',maximize:'size',transform:'size'}[name]||name); }
   function toolButton(name,label,active,action) {
     var isActive=active===true||normalizeTool(name)===state.activeTool;
     return '<button type="button" class="se-tool'+(isActive?' active':'')+'" data-se-tool="'+esc(name)+'" aria-label="'+esc(label)+'" title="'+esc(label)+'">'+icon(name)+'<span>'+esc(label)+'</span></button>';
@@ -239,6 +245,10 @@
   function valueOf(el, prop, fallback) {
     var v = el ? w.getComputedStyle(el).getPropertyValue(prop) : '';
     return v && v !== 'none' ? v : fallback;
+  }
+  function sliderControl(label, key, prop, value, min, max, step, unit, extra) {
+    var id='se-range-'+key, numeric=Math.max(Number(min),Math.min(Number(max),Number(value)||0));
+    return '<div class="se-slider-control"><div class="se-slider-title"><span>'+esc(label)+'</span><b data-range-value="'+id+'">'+numeric+esc(unit||'')+'</b></div><div class="se-slider-row"><button type="button" class="se-step-button" data-range-step="-1" data-range-target="'+id+'" aria-label="تقليل '+esc(label)+'">−</button><input id="'+id+'" type="range" min="'+min+'" max="'+max+'" step="'+step+'" value="'+numeric+'" data-style="'+esc(prop||'')+'"'+(unit?' data-unit="'+esc(unit)+'"':'')+(extra||'')+'><button type="button" class="se-step-button" data-range-step="1" data-range-target="'+id+'" aria-label="زيادة '+esc(label)+'">+</button></div></div>';
   }
   function toolPanel() {
     var el=state.selected, kind=kindOf(el), t=normalizeTool(state.activeTool);
@@ -257,19 +267,25 @@
     } else if (t==='color') {
       h+='<label class="se-field"><span>لون النص</span><input type="color" data-style="color" value="#182b4d"></label><label class="se-field"><span>لون الخلفية</span><input type="color" data-style="background-color" value="#ffffff"></label>';
     } else if (t==='font') {
-      h+='<label class="se-field"><span>عائلة الخط</span><input data-style="font-family" value="'+esc(valueOf(el,'font-family','IBM Plex Sans Arabic'))+'"></label><label class="se-field"><span>حجم الخط</span><input data-style="font-size" value="'+esc(valueOf(el,'font-size','14px'))+'"></label><label class="se-field"><span>سماكة الخط</span><select data-style="font-weight"><option value="400">عادي</option><option value="500">متوسط</option><option value="600">شبه عريض</option><option value="700">عريض</option></select></label><label class="se-field"><span>محاذاة النص</span><select data-style="text-align"><option value="right">يمين</option><option value="center">وسط</option><option value="left">يسار</option></select></label>';
+      var fontSize=parseInt(valueOf(el,'font-size','14px'),10)||14;
+      h+='<label class="se-field"><span>عائلة الخط</span><input data-style="font-family" value="'+esc(valueOf(el,'font-family','IBM Plex Sans Arabic'))+'"></label>'+sliderControl('حجم الخط','font-size','font-size',fontSize,10,36,1,'px')+'<label class="se-field"><span>سماكة الخط</span><select data-style="font-weight"><option value="400">عادي</option><option value="500">متوسط</option><option value="600">شبه عريض</option><option value="700">عريض</option></select></label><label class="se-field"><span>محاذاة النص</span><select data-style="text-align"><option value="right">يمين</option><option value="center">وسط</option><option value="left">يسار</option></select></label>';
     } else if (t==='shadow') {
-      h+='<label class="se-field"><span>ظل العنصر</span><input data-style="box-shadow" placeholder="0 4px 12px #0002" value="'+esc(el.style.boxShadow||'')+'"></label><label class="se-field"><span>ظل النص</span><input data-style="text-shadow" placeholder="0 1px 2px #0003" value="'+esc(el.style.textShadow||'')+'"></label>';
+      var shadowMatch=(el.style.boxShadow||'').match(/0 4px (\d+)px/), shadowLevel=shadowMatch?Number(shadowMatch[1]):(el.style.boxShadow?8:0);
+      h+=sliderControl('قوة الظل','shadow-level','box-shadow',shadowLevel,0,30,1,'',' data-shadow-level');
     } else if (t==='border') {
-      h+='<label class="se-field"><span>الإطار</span><input data-style="border" placeholder="1px solid #ddd" value="'+esc(el.style.border||'')+'"></label><label class="se-field"><span>استدارة الزوايا</span><input data-style="border-radius" value="'+esc(valueOf(el,'border-radius','8px'))+'"></label><label class="se-field"><span>الحشوة الداخلية</span><input data-style="padding" value="'+esc(valueOf(el,'padding','0px'))+'"></label>';
-    } else if (t==='transform') {
-      var tr=String(el.style.translate||'0px 0px').split(/\\s+/),tx=parseFloat(tr[0])||0,ty=parseFloat(tr[1])||0,box=el.getBoundingClientRect(),scale=Number(app().dataset.sePreviewScale)||1,ew=Math.round(el.offsetWidth||box.width/scale),eh=Math.round(el.offsetHeight||box.height/scale),rot=parseFloat(el.style.rotate)||0;
-      h+='<div class="se-transform-grid"><label class="se-field"><span>العرض (px)</span><input type="number" min="1" max="430" data-style="width" value="'+ew+'"></label><label class="se-field"><span>الارتفاع (px)</span><input type="number" min="1" max="900" data-style="height" value="'+eh+'"></label></div><div class="se-axis"><label><span>التدوير</span><b data-rotate-value>'+rot+'°</b></label><input type="range" min="-180" max="180" step="1" data-style="rotate" value="'+rot+'"></div><div class="se-transform-grid"><label class="se-field"><span>أفقي X (px)</span><input type="number" data-position-axis="x" value="'+tx+'"></label><label class="se-field"><span>عمودي Y (px)</span><input type="number" data-position-axis="y" value="'+ty+'"></label></div><div class="se-hint">اسحب العنصر مباشرة داخل المعاينة، أو أدخل الأبعاد والتدوير بدقة.</div>';
+      var radius=parseInt(valueOf(el,'border-radius','8px'),10)||0, padding=parseInt(valueOf(el,'padding','0px'),10)||0;
+      h+=sliderControl('استدارة الزوايا','radius','border-radius',radius,0,40,1,'px')+sliderControl('المسافة الداخلية','padding','padding',padding,0,40,1,'px');
+    } else if (t==='transform' || t==='size') {
+      var box=el.getBoundingClientRect(),scale=Number(app().dataset.sePreviewScale)||1;
+      var ew=Math.round(el.offsetWidth||box.width/scale),eh=Math.round(el.offsetHeight||box.height/scale);
+      var opacity=parseFloat(valueOf(el,'opacity','1')); opacity=Math.max(0,Math.min(1,opacity));
+      h+=sliderControl('العرض','width','width',ew,20,430,1,'px')+sliderControl('الارتفاع','height','height',eh,20,900,1,'px')+sliderControl('الشفافية','opacity','opacity',Math.round(opacity*100),0,100,1,'%',' data-unit-scale="0.01"');
+    } else if (t==='rotate') {
+      var rot=parseFloat(el.style.rotate)||0;
+      h+=sliderControl('زاوية الدوران','rotate','rotate',rot,-180,180,1,'°');
     } else if (t==='position') {
       var tr=String(el.style.translate||'0px 0px').split(/\s+/),tx=parseFloat(tr[0])||0,ty=parseFloat(tr[1])||0;
-      h+='<div class="se-axis"><label><span>أفقي X</span><b>'+tx+' px</b></label><input type="range" min="-180" max="180" step="1" data-position-axis="x" value="'+tx+'"></div><div class="se-axis"><label><span>عمودي Y</span><b>'+ty+' px</b></label><input type="range" min="-240" max="240" step="1" data-position-axis="y" value="'+ty+'"></div><div class="se-hint">يمكنك أيضاً سحب العنصر مباشرة داخل شاشة الهاتف بعد تفعيل أداة الموقع.</div>';
-    } else if (t==='size') {
-      h+='<label class="se-field"><span>العرض</span><input data-style="width" value="'+esc(el.style.width||'')+'" placeholder="auto أو 100%"></label><label class="se-field"><span>الارتفاع</span><input data-style="height" value="'+esc(el.style.height||'')+'" placeholder="auto"></label><label class="se-field"><span>الشفافية</span><input data-style="opacity" value="'+esc(valueOf(el,'opacity','1'))+'"></label>';
+      h+=sliderControl('الموقع الأفقي','position-x','translate',tx,-180,180,1,'px',' data-position-axis="x"')+sliderControl('الموقع العمودي','position-y','translate',ty,-240,240,1,'px',' data-position-axis="y"')+'<div class="se-hint">يمكنك أيضاً تحريك العنصر من مقبض التحريك في المعاينة.</div>';
     } else if (t==='image' && kind==='image') {
       h+='<label class="se-field"><span>مصدر الصورة</span><input type="url" data-attr="src" value="'+esc(el.getAttribute('src')||'')+'"></label><label class="se-field"><span>النص البديل</span><input data-attr="alt" value="'+esc(el.getAttribute('alt')||'')+'"></label><label class="se-field"><span>طريقة الملاءمة</span><select data-style="object-fit"><option>contain</option><option>cover</option><option>fill</option><option>none</option></select></label>';
     } else if (t==='click') {
@@ -292,7 +308,7 @@
     var tools=selected ? (
       toolButton('plus','العناصر')+(kind==='text' ? toolButton('type','النص') : '')+
       toolButton('palette','اللون')+toolButton('font','الخط')+toolButton('shadow','الظلال')+
-      toolButton('border','الإطار')+toolButton('maximize','تحويل',false)+toolButton('move','الموقع')+toolButton('size','الحجم')+
+      toolButton('border','الإطار')+toolButton('maximize','الحجم')+toolButton('move','الموقع')+toolButton('rotate','الدوران')+
       (kind==='image'?toolButton('image','الصورة'):'')+
       (kind==='button'?toolButton('click','السلوك'):'')+toolButton('more','المزيد')
     ) : (
@@ -434,6 +450,8 @@
     document.addEventListener('pointerup', endPanelDrag, true);
     document.addEventListener('pointercancel', endPanelDrag, true);
     panel.addEventListener('click', function (event) {
+      var stepper=event.target.closest('[data-range-step]');
+      if(stepper){var target=panel.querySelector('#'+stepper.getAttribute('data-range-target'));if(target){var min=Number(target.min)||0,max=Number(target.max)||100,step=Number(target.step)||1,next=Math.max(min,Math.min(max,Number(target.value)+Number(stepper.getAttribute('data-range-step'))*step));target.value=next;target.dispatchEvent(new Event('input',{bubbles:true}));target.dispatchEvent(new Event('change',{bubbles:true}));}return;}
       var choice=event.target.closest('[data-add-kind]');
       if(choice){addElement(choice.getAttribute('data-add-kind'));state.activeTool=null;render();return;}
       var tool = event.target.closest('[data-se-tool]');
