@@ -170,7 +170,7 @@
     apply(after); record('attribute.set', el, { attribute: name, before: before, after: after }, function () { apply(before); }, function () { apply(after); });
   }
   function addElement(kind) {
-    var parent = state.selected && state.selected.isConnected ? state.selected : document.getElementById('screen'), el;
+    var parent = state.selected && state.selected.isConnected ? (kindOf(state.selected)==='container' ? state.selected : state.selected.parentElement) : document.getElementById('screen'), el;
     if (kind === 'heading') { el = document.createElement('h3'); el.textContent = 'عنوان جديد'; }
     else if (kind === 'button') { el = document.createElement('button'); el.type = 'button'; el.className = 'btn outline'; el.textContent = 'زر جديد'; el.setAttribute('data-editor-pending-action','true'); }
     else if (kind === 'card') { el = document.createElement('section'); el.className = 'card'; el.textContent = 'بطاقة جديدة'; }
