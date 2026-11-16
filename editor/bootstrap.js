@@ -376,6 +376,7 @@
     }
   }
   function init() {
+    w.addEventListener('resize', applyPanelPosition);
     if (!app() || document.getElementById('sahm-editor-toggle')) return;
     var button = document.createElement('button'); button.id = 'sahm-editor-toggle'; button.type = 'button'; button.textContent = 'تحرير الواجهة';
     button.setAttribute('data-sahm-editor-ui','true'); button.setAttribute('aria-pressed','false');
