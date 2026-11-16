@@ -4,6 +4,32 @@
   var state = { enabled: false, selected: null, before: null, history: null, hover: null, saved: false, lastSession: null, activeTool: null, dragging: null };
   function esc(s) { return String(s == null ? '' : s).replace(/[&<>"']/g, function (c) { return ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]); }); }
   function app() { return document.getElementById('app'); }
+  function preparePreview() {
+    var root=app(), parent=root&&root.parentElement;
+    if(!root||!parent||state.previewStage)return;
+    var stage=document.createElement('div');stage.className='se-preview-stage';
+    parent.insertBefore(stage,root);stage.appendChild(root);state.previewStage=stage;
+    function fit(){
+      if(!stage.isConnected)return;
+      var scale=Math.min((stage.parentElement.clientWidth-24)/430,(stage.parentElement.clientHeight-24)/932,1);
+      scale=Math.max(.25,scale||.25);
+      stage.style.width=(430*scale)+'px';stage.style.height=(932*scale)+'px';
+      root.style.setProperty('--se-preview-scale',String(scale));
+      root.dataset.sePreviewScale=String(scale);
+    }
+    state.previewFit=fit;fit();
+    if(w.ResizeObserver){state.previewObserver=new ResizeObserver(fit);state.previewObserver.observe(parent);}
+    w.addEventListener('resize',fit);
+  }
+  function restorePreview() {
+    var root=app(),stage=state.previewStage;if(!stage)return;
+    if(state.previewObserver){state.previewObserver.disconnect();state.previewObserver=null;}
+    if(state.previewFit)w.removeEventListener('resize',state.previewFit);
+    if(root&&stage.parentElement)stage.parentElement.insertBefore(root,stage);
+    if(stage.parentElement)stage.parentElement.removeChild(stage);
+    if(root){root.style.removeProperty('--se-preview-scale');delete root.dataset.sePreviewScale;root.style.removeProperty('transform');root.style.removeProperty('width');root.style.removeProperty('height');}
+    state.previewStage=null;state.previewFit=null;
+  }
   function getById(id) {
     var nodes = app().querySelectorAll('[data-sahm-editor-id]');
     for (var i = 0; i < nodes.length; i++) if (nodes[i].getAttribute('data-sahm-editor-id') === id) return nodes[i];
@@ -278,7 +304,7 @@
   }
   function moveDrag(event) {
     var d=state.dragging;if(!d||d.pointerId!==event.pointerId)return;
-    var x=Math.round(d.x+(event.clientX-d.startX)),y=Math.round(d.y+(event.clientY-d.startY));
+    var scale=Number(app().dataset.sePreviewScale)||1;var x=Math.round(d.x+(event.clientX-d.startX)/scale),y=Math.round(d.y+(event.clientY-d.startY)/scale);
     d.el.style.translate=x+'px '+y+'px';event.preventDefault();
   }
   function endDrag(event) {
@@ -303,12 +329,12 @@
     var panel = document.getElementById('sahm-editor-panel'), button = document.getElementById('sahm-editor-toggle');
     if (state.enabled) {
       state.before = w.SahmEditorCore.capture(); state.history = w.SahmEditorCore.history(render);
-      state.selected = null; state.activeTool = null; state.saved = false; document.body.classList.add('sahm-editor-active');
+      state.selected = null; state.activeTool = null; state.saved = false; document.body.classList.add('sahm-editor-active'); preparePreview();
       panel.hidden = false; button.hidden = true; render();
       document.addEventListener('click', appClick, true); document.addEventListener('pointerover', hover, true); document.addEventListener('pointerdown', beginDrag, true); document.addEventListener('pointermove', moveDrag, true); document.addEventListener('pointerup', endDrag, true); document.addEventListener('pointercancel', endDrag, true); document.addEventListener('keydown', keys, true);
     } else {
       document.removeEventListener('click', appClick, true); document.removeEventListener('pointerover', hover, true); document.removeEventListener('pointerdown', beginDrag, true); document.removeEventListener('pointermove', moveDrag, true); document.removeEventListener('pointerup', endDrag, true); document.removeEventListener('pointercancel', endDrag, true); document.removeEventListener('keydown', keys, true);
-      document.body.classList.remove('sahm-editor-active'); panel.hidden = true; button.hidden = !canShow();
+      restorePreview(); document.body.classList.remove('sahm-editor-active'); panel.hidden = true; button.hidden = !canShow();
       if (state.selected) state.selected.classList.remove('se-selected'); if (state.hover) state.hover.classList.remove('se-hover');
       state.selected = null; state.hover = null; state.activeTool = null;
     }
