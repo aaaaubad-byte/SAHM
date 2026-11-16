@@ -63,18 +63,18 @@
     var width = panel.querySelector('[data-style="width"]'), height = panel.querySelector('[data-style="height"]');
     var rotate = panel.querySelector('[data-style="rotate"]');
     var posX = panel.querySelector('[data-position-axis="x"]'), posY = panel.querySelector('[data-position-axis="y"]');
-    if (width && width.type === 'number') width.value = Math.round(el.offsetWidth || 0);
-    if (height && height.type === 'number') height.value = Math.round(el.offsetHeight || 0);
+    if (width && width.type === 'number' && document.activeElement !== width) width.value = Math.round(el.offsetWidth || 0);
+    if (height && height.type === 'number' && document.activeElement !== height) height.value = Math.round(el.offsetHeight || 0);
     if (rotate) {
       var angle = parseFloat(el.style.rotate) || 0;
-      rotate.value = angle;
+      if (document.activeElement !== rotate) rotate.value = angle;
       var readout = rotate.parentElement && rotate.parentElement.querySelector('[data-rotate-value]');
       if (readout) readout.textContent = angle + '°';
     }
     var parts = String(el.style.translate || '0px 0px').trim().split(/\s+/);
     var x = parseFloat(parts[0]) || 0, y = parseFloat(parts[1]) || 0;
-    if (posX) posX.value = x;
-    if (posY) posY.value = y;
+    if (posX && document.activeElement !== posX) posX.value = x;
+    if (posY && document.activeElement !== posY) posY.value = y;
   }
   function updateSelectionFrame() {
     var frame = document.querySelector('#sahm-editor-panel [data-se-selection-frame]');
