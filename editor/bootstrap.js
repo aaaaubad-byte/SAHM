@@ -93,7 +93,7 @@
   function toolPanel() {
     var el=state.selected, kind=kindOf(el), t=normalizeTool(state.activeTool);
     if (!t || t==='select') return '';
-    var h='<section class="se-tool-panel"><div class="se-tool-panel-head"><b>'+esc(({add:'إضافة عنصر',layers:'طبقات العناصر',sessions:'جلسات التحرير',text:'تحرير النص',color:'الألوان',font:'الخطوط',shadow:'الظلال',border:'الإطار والمسافات',position:'موقع العنصر',size:'الحجم والأبعاد',image:'إعدادات الصورة',click:'إعدادات العنصر',more:'أدوات إضافية'})[t]||'أداة التحرير')+'</b><button type="button" data-se-tool="select" aria-label="إغلاق">'+icon('close')+'</button></div><div class="se-tool-panel-body">';
+    var h='<section class="se-tool-panel"><div class="se-tool-panel-head"><b>'+esc(({add:'إضافة عنصر',layers:'طبقات العناصر',sessions:'جلسات التحرير',text:'تحرير النص',color:'الألوان',font:'الخطوط',shadow:'الظلال',border:'الإطار والمسافات',position:'موقع العنصر',size:'الحجم والأبعاد',transform:'تحريك وحجم وتدوير',image:'إعدادات الصورة',click:'إعدادات العنصر',more:'أدوات إضافية'})[t]||'أداة التحرير')+'</b><button type="button" data-se-tool="select" aria-label="إغلاق">'+icon('close')+'</button></div><div class="se-tool-panel-body">';
     if (t==='add') {
       h+='<div class="se-element-grid">'+[['text','نص','type'],['heading','عنوان','type'],['button','زر','click'],['card','بطاقة','layers'],['image','صورة','image'],['divider','فاصل','border']].map(function(x){return '<button type="button" class="se-element-choice" data-add-kind="'+x[0]+'">'+icon(x[2])+'<span>'+x[1]+'</span></button>';}).join('')+'</div><div class="se-add-note">سيُضاف العنصر إلى الشاشة الحالية ويمكنك تعديله مباشرة.</div>';
     } else if (t==='layers') {
@@ -112,6 +112,9 @@
       h+='<label class="se-field"><span>ظل العنصر</span><input data-style="box-shadow" placeholder="0 4px 12px #0002" value="'+esc(el.style.boxShadow||'')+'"></label><label class="se-field"><span>ظل النص</span><input data-style="text-shadow" placeholder="0 1px 2px #0003" value="'+esc(el.style.textShadow||'')+'"></label>';
     } else if (t==='border') {
       h+='<label class="se-field"><span>الإطار</span><input data-style="border" placeholder="1px solid #ddd" value="'+esc(el.style.border||'')+'"></label><label class="se-field"><span>استدارة الزوايا</span><input data-style="border-radius" value="'+esc(valueOf(el,'border-radius','8px'))+'"></label><label class="se-field"><span>الحشوة الداخلية</span><input data-style="padding" value="'+esc(valueOf(el,'padding','0px'))+'"></label>';
+    } else if (t==='transform') {
+      var tr=String(el.style.translate||'0px 0px').split(/\\s+/),tx=parseFloat(tr[0])||0,ty=parseFloat(tr[1])||0,box=el.getBoundingClientRect(),scale=Number(app().dataset.sePreviewScale)||1,ew=Math.round(el.offsetWidth||box.width/scale),eh=Math.round(el.offsetHeight||box.height/scale),rot=parseFloat(el.style.rotate)||0;
+      h+='<div class="se-transform-grid"><label class="se-field"><span>العرض (px)</span><input type="number" min="1" max="430" data-style="width" value="'+ew+'"></label><label class="se-field"><span>الارتفاع (px)</span><input type="number" min="1" max="900" data-style="height" value="'+eh+'"></label></div><div class="se-axis"><label><span>التدوير</span><b>'+rot+'°</b></label><input type="range" min="-180" max="180" step="1" data-style="rotate" value="'+rot+'"></div><div class="se-transform-grid"><label class="se-field"><span>أفقي X (px)</span><input type="number" data-position-axis="x" value="'+tx+'"></label><label class="se-field"><span>عمودي Y (px)</span><input type="number" data-position-axis="y" value="'+ty+'"></label></div><div class="se-hint">اسحب العنصر مباشرة داخل المعاينة، أو أدخل الأبعاد والتدوير بدقة.</div>';
     } else if (t==='position') {
       var tr=String(el.style.translate||'0px 0px').split(/\s+/),tx=parseFloat(tr[0])||0,ty=parseFloat(tr[1])||0;
       h+='<div class="se-axis"><label><span>أفقي X</span><b>'+tx+' px</b></label><input type="range" min="-180" max="180" step="1" data-position-axis="x" value="'+tx+'"></div><div class="se-axis"><label><span>عمودي Y</span><b>'+ty+' px</b></label><input type="range" min="-240" max="240" step="1" data-position-axis="y" value="'+ty+'"></div><div class="se-hint">يمكنك أيضاً سحب العنصر مباشرة داخل شاشة الهاتف بعد تفعيل أداة الموقع.</div>';
@@ -132,7 +135,7 @@
     var tools=selected ? (
       toolButton('plus','العناصر')+(kind==='text' ? toolButton('type','النص') : '')+
       toolButton('palette','اللون')+toolButton('font','الخط')+toolButton('shadow','الظلال')+
-      toolButton('border','الإطار')+toolButton('move','الموقع')+toolButton('size','الحجم')+
+      toolButton('border','الإطار')+toolButton('maximize','تحويل',false)+toolButton('move','الموقع')+toolButton('size','الحجم')+
       (kind==='image'?toolButton('image','الصورة'):'')+
       (kind==='button'?toolButton('click','السلوك'):'')+toolButton('more','المزيد')
     ) : (
@@ -148,7 +151,7 @@
   function select(el) {
     if (!el || el === app() || w.SahmEditorCore.isEditorNode(el)) return;
     if (state.selected) state.selected.classList.remove('se-selected');
-    state.selected = el; state.activeTool = null; w.SahmEditorCore.identify(el); el.classList.add('se-selected'); render();
+    state.selected = el; state.activeTool = 'transform'; w.SahmEditorCore.identify(el); el.classList.add('se-selected'); render();
   }
   function setStyle(el, prop, value) {
     var before = el.style.getPropertyValue(prop), after = String(value || '').trim();
@@ -299,7 +302,7 @@
     state.hover = el; if (el !== state.selected) el.classList.add('se-hover');
   }
   function beginDrag(event) {
-    if (!state.enabled || state.activeTool !== 'position' || !state.selected || !state.selected.contains(event.target)) return;
+    if (!state.enabled || state.activeTool !== 'position' && state.activeTool !== 'transform' || !state.selected || !state.selected.contains(event.target)) return;
     if (event.target.closest('input,button,textarea,select')) return;
     var el=state.selected, parts=String(el.style.translate||'0px 0px').split(/\s+/);
     state.dragging={el:el,pointerId:event.pointerId,startX:event.clientX,startY:event.clientY,x:parseFloat(parts[0])||0,y:parseFloat(parts[1])||0,before:el.style.translate||''};
