@@ -115,7 +115,7 @@
       else if (input.hasAttribute('data-unit-scale')) value=String((Number(value)||0)*Number(input.getAttribute('data-unit-scale')));
       else if (input.getAttribute('data-unit') && value !== '') value += input.getAttribute('data-unit');
       else if ((prop === 'width' || prop === 'height') && input.type === 'number' && value !== '') value += 'px';
-      if (prop === 'rotate' && value !== '' && !/deg$/.test(value)) value += 'deg';
+      if (prop === 'rotate' && value !== '') value = String(parseFloat(value)||0) + 'deg';
       if (value) el.style.setProperty(prop, value); else el.style.removeProperty(prop);
       input._seAfter = el.style.getPropertyValue(prop);
       var rangeWrap=input.closest('.se-slider-control'), rangeValue=rangeWrap&&rangeWrap.querySelector('[data-range-value]');
@@ -135,8 +135,8 @@
       else y = Number(input.value) || 0;
       el.style.translate = x + 'px ' + y + 'px';
       input._seAfter = el.style.translate;
-      var readout = input.parentElement && input.parentElement.querySelector('b');
-      if (readout && input.type === 'range') readout.textContent = input.getAttribute('data-position-axis') === 'x' ? x + ' px' : y + ' px';
+      var rangeWrap=input.closest('.se-slider-control'), rangeReadout=rangeWrap&&rangeWrap.querySelector('[data-range-value]');
+      if (rangeReadout) rangeReadout.textContent=(input.getAttribute('data-position-axis')==='x'?x:y)+' px';
     } else if (input.matches('[data-attr]')) {
       var attr = input.getAttribute('data-attr');
       if (!Object.prototype.hasOwnProperty.call(input, '_seBefore')) {
@@ -248,12 +248,12 @@
   }
   function sliderControl(label, key, prop, value, min, max, step, unit, extra) {
     var id='se-range-'+key, numeric=Math.max(Number(min),Math.min(Number(max),Number(value)||0));
-    return '<div class="se-slider-control"><div class="se-slider-title"><span>'+esc(label)+'</span><b data-range-value="'+id+'">'+numeric+esc(unit||'')+'</b></div><div class="se-slider-row"><button type="button" class="se-step-button" data-range-step="-1" data-range-target="'+id+'" aria-label="تقليل '+esc(label)+'">−</button><input id="'+id+'" type="range" min="'+min+'" max="'+max+'" step="'+step+'" value="'+numeric+'" data-style="'+esc(prop||'')+'"'+(unit?' data-unit="'+esc(unit)+'"':'')+(extra||'')+'><button type="button" class="se-step-button" data-range-step="1" data-range-target="'+id+'" aria-label="زيادة '+esc(label)+'">+</button></div></div>';
+    return '<div class="se-slider-control"><div class="se-slider-title"><span>'+esc(label)+'</span><b data-range-value="'+id+'">'+numeric+esc(unit||'')+'</b></div><div class="se-slider-row"><button type="button" class="se-step-button" data-range-step="-1" data-range-target="'+id+'" aria-label="تقليل '+esc(label)+'">−</button><input id="'+id+'" type="range" min="'+min+'" max="'+max+'" step="'+step+'" value="'+numeric+'"'+(prop?' data-style="'+esc(prop)+'"':'')+(unit?' data-unit="'+esc(unit)+'"':'')+(extra||'')+'><button type="button" class="se-step-button" data-range-step="1" data-range-target="'+id+'" aria-label="زيادة '+esc(label)+'">+</button></div></div>';
   }
   function toolPanel() {
     var el=state.selected, kind=kindOf(el), t=normalizeTool(state.activeTool);
     if (!t || t==='select') return '';
-    var h='<section class="se-tool-panel"><div class="se-tool-panel-head"><b>'+esc(({add:'إضافة عنصر',layers:'طبقات العناصر',sessions:'جلسات التحرير',text:'تحرير النص',color:'الألوان',font:'الخطوط',shadow:'الظلال',border:'الإطار والمسافات',position:'موقع العنصر',size:'الحجم والأبعاد',transform:'تحريك وحجم وتدوير',image:'إعدادات الصورة',click:'إعدادات العنصر',more:'أدوات إضافية'})[t]||'أداة التحرير')+'</b><button type="button" data-se-tool="select" aria-label="إغلاق">'+icon('close')+'</button></div><div class="se-tool-panel-body">';
+    var h='<section class="se-tool-panel"><div class="se-tool-panel-head"><b>'+esc(({add:'إضافة عنصر',layers:'طبقات العناصر',sessions:'جلسات التحرير',text:'تحرير النص',color:'الألوان',font:'الخطوط',shadow:'الظلال',border:'الإطار والمسافات',position:'موقع العنصر',size:'الحجم والأبعاد',transform:'تحريك وحجم وتدوير',rotate:'الدوران',image:'إعدادات الصورة',click:'إعدادات العنصر',more:'أدوات إضافية'})[t]||'أداة التحرير')+'</b><button type="button" data-se-tool="select" aria-label="إغلاق">'+icon('close')+'</button></div><div class="se-tool-panel-body">';
     if (t==='add') {
       h+='<div class="se-element-grid">'+[['text','نص','type'],['heading','عنوان','type'],['button','زر','click'],['card','بطاقة','layers'],['image','صورة','image'],['divider','فاصل','border']].map(function(x){return '<button type="button" class="se-element-choice" data-add-kind="'+x[0]+'">'+icon(x[2])+'<span>'+x[1]+'</span></button>';}).join('')+'</div><div class="se-add-note">سيُضاف العنصر إلى الشاشة الحالية ويمكنك تعديله مباشرة.</div>';
     } else if (t==='layers') {
@@ -285,7 +285,7 @@
       h+=sliderControl('زاوية الدوران','rotate','rotate',rot,-180,180,1,'°');
     } else if (t==='position') {
       var tr=String(el.style.translate||'0px 0px').split(/\s+/),tx=parseFloat(tr[0])||0,ty=parseFloat(tr[1])||0;
-      h+=sliderControl('الموقع الأفقي','position-x','translate',tx,-180,180,1,'px',' data-position-axis="x"')+sliderControl('الموقع العمودي','position-y','translate',ty,-240,240,1,'px',' data-position-axis="y"')+'<div class="se-hint">يمكنك أيضاً تحريك العنصر من مقبض التحريك في المعاينة.</div>';
+      h+=sliderControl('الموقع الأفقي','position-x','',tx,-180,180,1,'px',' data-position-axis="x"')+sliderControl('الموقع العمودي','position-y','',ty,-240,240,1,'px',' data-position-axis="y"')+'<div class="se-hint">يمكنك أيضاً تحريك العنصر من مقبض التحريك في المعاينة.</div>';
     } else if (t==='image' && kind==='image') {
       h+='<label class="se-field"><span>مصدر الصورة</span><input type="url" data-attr="src" value="'+esc(el.getAttribute('src')||'')+'"></label><label class="se-field"><span>النص البديل</span><input data-attr="alt" value="'+esc(el.getAttribute('alt')||'')+'"></label><label class="se-field"><span>طريقة الملاءمة</span><select data-style="object-fit"><option>contain</option><option>cover</option><option>fill</option><option>none</option></select></label>';
     } else if (t==='click') {
