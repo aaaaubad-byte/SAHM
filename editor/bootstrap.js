@@ -253,7 +253,9 @@
   function toolPanel() {
     var el=state.selected, kind=kindOf(el), t=normalizeTool(state.activeTool);
     if (!t || t==='select') return '';
-    var h='<section class="se-tool-panel"><div class="se-tool-panel-head"><b>'+esc(({add:'إضافة عنصر',layers:'طبقات العناصر',sessions:'جلسات التحرير',text:'تحرير النص',color:'الألوان',font:'الخطوط',shadow:'الظلال',border:'الإطار والمسافات',position:'موقع العنصر',size:'الحجم والأبعاد',transform:'تحريك وحجم وتدوير',rotate:'الدوران',image:'إعدادات الصورة',click:'إعدادات العنصر',more:'أدوات إضافية'})[t]||'أداة التحرير')+'</b><button type="button" data-se-tool="select" aria-label="إغلاق">'+icon('close')+'</button></div><div class="se-tool-panel-body">';
+    var panelTitles={add:'إضافة عنصر',layers:'طبقات العناصر',sessions:'جلسات التحرير',text:'تحرير النص',color:'الألوان',font:'الخطوط',shadow:'الظلال',border:'الإطار والمسافات',position:'موقع العنصر',size:'الحجم',transform:'الحجم',rotate:'الدوران',image:'إعدادات الصورة',click:'إعدادات العنصر',more:'أدوات إضافية'};
+    var panelIcon=t==='size'?'maximize':t;
+    var h='<section class="se-tool-panel"><div class="se-tool-panel-head"><div class="se-tool-panel-title">'+icon(panelIcon)+'<b>'+esc(panelTitles[t]||'أداة التحرير')+'</b></div><button type="button" data-se-tool="select" aria-label="إغلاق">'+icon('close')+'</button></div><div class="se-tool-panel-body">';
     if (t==='add') {
       h+='<div class="se-element-grid">'+[['text','نص','type'],['heading','عنوان','type'],['button','زر','click'],['card','بطاقة','layers'],['image','صورة','image'],['divider','فاصل','border']].map(function(x){return '<button type="button" class="se-element-choice" data-add-kind="'+x[0]+'">'+icon(x[2])+'<span>'+x[1]+'</span></button>';}).join('')+'</div><div class="se-add-note">سيُضاف العنصر إلى الشاشة الحالية ويمكنك تعديله مباشرة.</div>';
     } else if (t==='layers') {
@@ -352,7 +354,7 @@
     if (!el || el === app() || w.SahmEditorCore.isEditorNode(el)) return;
     if (state.selected) state.selected.classList.remove('se-selected');
     if (state.selectionObserver) { state.selectionObserver.disconnect(); state.selectionObserver = null; }
-    state.selected = el; state.activeTool = 'transform'; w.SahmEditorCore.identify(el); el.classList.add('se-selected');
+    state.selected = el; state.activeTool = 'size'; w.SahmEditorCore.identify(el); el.classList.add('se-selected');
     if (w.ResizeObserver) { state.selectionObserver = new ResizeObserver(scheduleSelectionFrame); state.selectionObserver.observe(el); }
     render();
   }
