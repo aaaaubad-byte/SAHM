@@ -15,6 +15,7 @@ const APP_SHELL = [
   '/icons/sahm.svg',
   '/editor/editor.css',
   '/editor/core.js',
+  '/editor/sync.js',
   '/editor/ui/inspector.js',
   '/editor/ui/layers.js',
   '/editor/bootstrap.js'

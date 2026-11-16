@@ -99,9 +99,26 @@
   }
   function save() {
     var ops = state.history.serialize(), session = w.SahmEditorCore.createSession(state.before, ops);
-    w.SahmEditorCore.saveSession(session).then(function (result) {
+    w.SahmEditorCore.saveSession(session).then(async function (result) {
       state.saved = true; state.lastSession = session; render();
-      status('حُفظت الجلسة محلياً في ' + result.storage + '. مزامنة GitHub غير مفعلة في هذه النسخة.', 'success');
+      var message = 'حُفظت الجلسة محلياً في ' + result.storage + '.';
+      try {
+        if (w.SahmEditorSync) {
+          var syncState = await w.SahmEditorSync.status();
+          if (syncState.sessionSyncConfigured) {
+            var remote = await w.SahmEditorSync.save(session);
+            state.lastSession = Object.assign({}, session, { status: 'synced', server: { branch: remote.branch, path: remote.path, commit: remote.commit } });
+            message = 'حُفظت الجلسة محلياً ومزامنتها إلى ' + remote.branch + ' (' + String(remote.commit || '').slice(0, 7) + ').';
+          } else {
+            message += ' المزامنة إلى GitHub تنتظر إعداد أسرار الخادم وقائمة المحررين المصرح لهم.';
+          }
+        } else {
+          message += ' لم يتم نشر وسيط GitHub بعد.';
+        }
+      } catch (error) {
+        message += ' تعذرت المزامنة إلى الفرع: ' + error.message + '؛ بقيت النسخة المحلية محفوظة.';
+      }
+      render(); status(message, state.lastSession.status === 'synced' ? 'success' : '');
       w.SahmEditorCore.listSessions().then(renderSessions);
     }).catch(function (e) { status('تعذر حفظ الجلسة: ' + e.message, 'error'); });
   }

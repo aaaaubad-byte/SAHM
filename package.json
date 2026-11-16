@@ -1,0 +1,12 @@
+{
+  "name": "sahm-lab-visual-editor",
+  "version": "1.0.0",
+  "private": true,
+  "description": "SAHM-LAB PWA host and protected visual editor session writer",
+  "engines": {
+    "node": ">=20"
+  },
+  "scripts": {
+    "start": "node editor/server.js"
+  }
+}
