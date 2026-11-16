@@ -49,6 +49,7 @@
   function toolButton(name,label,active,action) {
     return '<button type="button" class="se-tool'+(active?' active':'')+'" data-se-tool="'+esc(name)+'" aria-label="'+esc(label)+'" title="'+esc(label)+'">'+icon(name)+'<span>'+esc(label)+'</span></button>';
   }
+  function actionButton(name,label) { return '<button type="button" class="se-tool" data-se-action="'+esc(name)+'" aria-label="'+esc(label)+'" title="'+esc(label)+'">'+icon(name)+'<span>'+esc(label)+'</span></button>'; }
   function kindOf(el) {
     if (!el) return 'none';
     if (el.tagName === 'IMG') return 'image';
@@ -108,7 +109,7 @@
       (kind==='button'?toolButton('click','السلوك'):'')+toolButton('more','المزيد')
     ) : (
       toolButton('cursor','تحديد')+toolButton('plus','إضافة')+toolButton('layers','الطبقات')+
-      toolButton('undo','تراجع')+toolButton('redo','إعادة')+toolButton('history','الجلسات')+toolButton('save','حفظ')
+      actionButton('undo','تراجع')+actionButton('redo','إعادة')+toolButton('history','الجلسات')+actionButton('save','حفظ')
     );
     var html='<div class="se-topbar"><div class="se-brand"><b>سهم</b><small>محرر الواجهة</small></div><div class="se-top-actions"><button data-se-action="undo" '+(!history.canUndo()?'disabled':'')+' title="تراجع">'+icon('undo')+'</button><button data-se-action="redo" '+(!history.canRedo()?'disabled':'')+' title="إعادة">'+icon('redo')+'</button><button data-se-action="save" title="حفظ الجلسة">'+icon('save')+'</button><button data-se-action="exit" title="إغلاق المحرر">'+icon('close')+'</button></div></div>';
     html+=toolPanel();
@@ -211,7 +212,7 @@
     var panel = document.getElementById('sahm-editor-panel');
     panel.addEventListener('click', function (event) {
       var tool = event.target.closest('[data-se-tool]');
-      if (tool) { var tn=tool.getAttribute('data-se-tool'); state.activeTool=(tn==='select'||tn==='cursor'?null:tn); render(); return; }
+      if (tool) { var tn=tool.getAttribute('data-se-tool'); if(tn==='history')tn='sessions'; state.activeTool=(tn==='select'||tn==='cursor'?null:tn); render(); return; }
       var action = event.target.closest('[data-se-action]');
       if (action) {
         var name = action.getAttribute('data-se-action');
