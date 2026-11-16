@@ -21,20 +21,21 @@ body.sahm-editor-active #app #bottomnav{flex-shrink:0!important}
 .se-tool.active,.se-tool:active{background:#3158d633;border-color:#6688e5;color:#fff}
 .se-status{min-height:25px;padding:4px 12px;color:#aebbd0;background:#0c1523;font-size:10px;line-height:1.6;white-space:normal}
 .se-status.success{color:#a5e5bd}.se-status.error{color:#ffb0a9}
-.se-tool-panel{position:absolute;left:10px;right:10px;bottom:calc(100px + env(safe-area-inset-bottom));max-height:min(42dvh,390px);display:flex;flex-direction:column;overflow:hidden;border:1px solid #dce3ed;border-radius:16px;background:#fff;color:#172338;box-shadow:0 12px 38px #0004;pointer-events:auto}
-.se-tool-panel-head{height:43px;flex:0 0 43px;display:flex;align-items:center;justify-content:space-between;padding:0 12px;border-bottom:1px solid #e9edf4;background:#f7f9fc}
-.se-tool-panel-head b{font-size:12px}.se-tool-panel-head button{width:30px;height:30px;display:grid;place-items:center;border:0;border-radius:8px;background:#e9eef6;color:#34445d}
+.se-tool-panel{position:absolute;left:10px;right:10px;bottom:calc(91px + env(safe-area-inset-bottom));max-height:min(25dvh,210px);display:flex;flex-direction:column;overflow:hidden;border:1px solid #34445d;border-radius:13px;background:#172338;color:#f5f7fb;box-shadow:0 8px 24px #0005;pointer-events:auto}
+.se-tool-panel-head{height:31px;flex:0 0 31px;display:flex;align-items:center;justify-content:space-between;padding:0 10px;border-bottom:1px solid #ffffff16;background:#1d2c43}
+.se-tool-panel-head b{font-size:11px;font-weight:600;color:#e8edf6}.se-tool-panel-head button{width:25px;height:25px;display:grid;place-items:center;border:0;border-radius:7px;background:#ffffff12;color:#dce5f2}
 .se-tool-panel-head button svg{width:17px;height:17px}
-.se-tool-panel-body{overflow:auto;min-height:0;padding:11px 12px 14px;overscroll-behavior:contain}
-.se-add-row{display:flex;gap:7px}.se-add-row select,.se-field input,.se-field textarea,.se-field select{width:100%;min-width:0;border:1px solid #dce3ee;border-radius:8px;padding:9px;background:#fff;color:#182b47;font:12px "IBM Plex Sans Arabic",sans-serif;direction:auto}
-.se-add-row select{flex:1}.se-add-row button,.se-more-actions button{border:1px solid #3158d6;border-radius:8px;padding:8px 13px;background:#3158d6;color:#fff;font:600 12px "IBM Plex Sans Arabic",sans-serif}
+.se-tool-panel-body{overflow:auto;min-height:0;padding:8px 10px 9px;overscroll-behavior:contain}
+.se-add-row{display:flex;gap:7px}.se-add-row select,.se-field input,.se-field textarea,.se-field select{width:100%;min-width:0;border:1px solid #42536c;border-radius:7px;padding:7px;background:#22334b;color:#f5f7fb;font:11px "IBM Plex Sans Arabic",sans-serif;direction:auto}
+.se-add-row select{flex:1}.se-add-row button,.se-more-actions button{border:1px solid #526a8d;border-radius:7px;padding:7px 11px;background:#3158d6;color:#fff;font:600 11px "IBM Plex Sans Arabic",sans-serif}
+.se-element-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:6px}.se-element-choice{min-width:0;height:37px;display:flex;align-items:center;justify-content:flex-start;gap:8px;padding:0 9px;border:1px solid #3a4b64;border-radius:8px;background:#22334b;color:#edf2fa;font:11px "IBM Plex Sans Arabic",sans-serif;cursor:pointer}.se-element-choice svg{width:16px;height:16px;color:#a9bee5}.se-element-choice:active{background:#3158d6;border-color:#7895df}.se-add-note{padding:6px 2px 0;color:#aebbd0;font-size:9px}
 .se-fields{display:grid;grid-template-columns:1fr 1fr;gap:7px}
-.se-field{display:flex;flex-direction:column;gap:5px;min-width:0;margin-bottom:8px}.se-field span{font-size:11px;color:#5c6b82}
+.se-field{display:flex;flex-direction:column;gap:4px;min-width:0;margin-bottom:6px}.se-field span{font-size:10px;color:#c0ccdc}
 .se-field input[type=color]{height:39px;padding:3px}.se-field textarea{resize:vertical;line-height:1.7}
 .se-check{display:flex;align-items:center;gap:7px;font-size:10px;color:#6b7890;padding:5px 1px}
-.se-axis{display:grid;gap:8px;padding:7px 2px 12px}.se-axis label{display:flex;align-items:center;justify-content:space-between;font-size:12px;color:#52627a}.se-axis label b{font:600 11px "DM Sans",sans-serif;color:#2345a8}.se-axis input{width:100%;accent-color:#3158d6}
-.se-hint{padding:9px;border-radius:9px;background:#f2f5fa;color:#64748b;font-size:10px;line-height:1.7}
-.se-more-actions{display:flex;flex-wrap:wrap;gap:7px}.se-more-actions button{display:flex;align-items:center;gap:6px;background:#f5f7fb;color:#243652;border-color:#dce3ee}.se-more-actions button svg{width:16px;height:16px}
+.se-axis{display:grid;gap:5px;padding:4px 2px 7px}.se-axis label{display:flex;align-items:center;justify-content:space-between;font-size:10px;color:#c0ccdc}.se-axis label b{font:600 11px "DM Sans",sans-serif;color:#2345a8}.se-axis input{width:100%;accent-color:#3158d6}
+.se-hint{padding:7px;border-radius:7px;background:#22334b;color:#b9c7d9;font-size:9px;line-height:1.5}
+.se-more-actions{display:flex;flex-wrap:wrap;gap:7px}.se-more-actions button{display:flex;align-items:center;gap:6px;background:#22334b;color:#e7edf7;border-color:#42536c}.se-more-actions button svg{width:16px;height:16px}
 .se-empty{padding:13px 8px;text-align:center;color:#8190a6;font-size:11px;line-height:1.8}
 .se-layer-tree,.se-layer-tree ul{list-style:none;margin:0;padding:0 13px 0 0}.se-layer-tree{padding:0}.se-layer{margin:2px 0}
 .se-layer-pick{width:100%;display:flex;align-items:center;gap:7px;border:1px solid transparent;border-radius:7px;background:transparent;padding:7px;text-align:right;color:#263750;font:12px "IBM Plex Sans Arabic",sans-serif;cursor:pointer}
@@ -49,12 +50,12 @@ body.sahm-editor-active #app #bottomnav{flex-shrink:0!important}
 @media(max-width:640px){
  body.sahm-editor-active .workspace{inset:48px 0 104px!important;padding:5px!important}
  body.sahm-editor-active #app.phone{border-radius:22px!important}
- .se-topbar{height:48px;flex-basis:48px}.se-tool-panel{bottom:calc(99px + env(safe-area-inset-bottom));max-height:min(40dvh,340px)}
+ .se-topbar{height:48px;flex-basis:48px}.se-tool-panel{bottom:calc(91px + env(safe-area-inset-bottom));max-height:min(25dvh,190px)}
  .se-dock{gap:3px;padding-inline:6px}.se-tool{flex-basis:55px;min-width:55px}
 }
 @media(max-height:600px){
  body.sahm-editor-active .workspace{inset:48px 0 92px!important}
  body.sahm-editor-active #app.phone{height:932px!important;width:430px!important}
- .se-tool-panel{max-height:35dvh;bottom:88px}
+ .se-tool-panel{max-height:30dvh;bottom:84px}
  .se-tool{height:46px}
 }
