@@ -546,9 +546,20 @@
     state.frameDragging = null;
     var after = transformSnapshot(d.el), before = d.before;
     if (before.width !== after.width || before.height !== after.height || before.translate !== after.translate || before.rotate !== after.rotate) {
-      record('element.transform', d.el, { before: before, after: after },
-        function () { applyTransformSnapshot(d.el, before); },
-        function () { applyTransformSnapshot(d.el, after); });
+      var meta = w.SahmEditorCore.identify(d.el), timestamp = new Date().toISOString(), operations = [];
+      ['width','height','translate','rotate'].forEach(function (property) {
+        if (before[property] === after[property]) return;
+        operations.push({
+          type: 'style.set', elementId: meta.id, screen: meta.screen, source: meta, timestamp: timestamp,
+          property: property, before: before[property] || '', after: after[property] || ''
+        });
+      });
+      if (operations.length) {
+        state.history.pushGroup(operations,
+          function () { applyTransformSnapshot(d.el, before); },
+          function () { applyTransformSnapshot(d.el, after); });
+        state.saved = false;
+      }
     } else scheduleSelectionFrame();
   }
   function beginDrag(event) {
