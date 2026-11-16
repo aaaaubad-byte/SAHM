@@ -59,3 +59,5 @@ body.sahm-editor-active #app #bottomnav{flex-shrink:0!important}
  .se-tool-panel{max-height:30dvh;bottom:118px}
  .se-tool{height:46px}
 }
+/* Compact transform controls for the selected element. */
+.se-transform-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px}.se-transform-grid .se-field{margin:0}.se-tool-panel-body input[type=number]{font-family:"DM Sans","IBM Plex Sans Arabic",sans-serif;font-variant-numeric:tabular-nums}.se-tool-panel-body input[type=range]{accent-color:#6688e5;touch-action:pan-x}
