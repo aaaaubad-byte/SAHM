@@ -273,7 +273,7 @@
     });
     panel.addEventListener('change', function (event) {
       var input = event.target;
-      if (input.matches('[data-style]') && state.selected) setStyle(state.selected, input.getAttribute('data-style'), input.value);
+      if (input.matches('[data-style]') && state.selected) { var prop=input.getAttribute('data-style'),val=input.value; if ((prop==='width'||prop==='height') && input.type==='number') val=val+'px'; if (prop==='rotate') val=val+'deg'; setStyle(state.selected,prop,val); }
       else if (input.matches('[data-text-edit]') && state.selected) {
         var confirm = document.getElementById('se-confirm-static-text');
         if (!confirm || !confirm.checked) { status('أكد أولاً أن النص ثابت وليس بيانات مستخدم.', 'error'); input.value = state.selected.textContent || ''; return; }
