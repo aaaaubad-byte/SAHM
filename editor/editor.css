@@ -21,7 +21,7 @@ body.sahm-editor-active #app #bottomnav{flex-shrink:0!important}
 .se-tool.active,.se-tool:active{background:#3158d633;border-color:#6688e5;color:#fff}
 .se-status{min-height:25px;padding:4px 12px;color:#aebbd0;background:#0c1523;font-size:10px;line-height:1.6;white-space:normal}
 .se-status.success{color:#a5e5bd}.se-status.error{color:#ffb0a9}
-.se-tool-panel{position:absolute;left:10px;right:10px;bottom:calc(91px + env(safe-area-inset-bottom));max-height:min(25dvh,210px);display:flex;flex-direction:column;overflow:hidden;border:1px solid #34445d;border-radius:13px;background:#172338;color:#f5f7fb;box-shadow:0 8px 24px #0005;pointer-events:auto}
+.se-tool-panel{position:absolute;left:10px;right:10px;bottom:calc(132px + env(safe-area-inset-bottom));max-height:min(25dvh,210px);display:flex;flex-direction:column;overflow:hidden;border:1px solid #34445d;border-radius:13px;background:#172338;color:#f5f7fb;box-shadow:0 8px 24px #0005;pointer-events:auto}
 .se-tool-panel-head{height:31px;flex:0 0 31px;display:flex;align-items:center;justify-content:space-between;padding:0 10px;border-bottom:1px solid #ffffff16;background:#1d2c43}
 .se-tool-panel-head b{font-size:11px;font-weight:600;color:#e8edf6}.se-tool-panel-head button{width:25px;height:25px;display:grid;place-items:center;border:0;border-radius:7px;background:#ffffff12;color:#dce5f2}
 .se-tool-panel-head button svg{width:17px;height:17px}
@@ -50,12 +50,12 @@ body.sahm-editor-active #app #bottomnav{flex-shrink:0!important}
 @media(max-width:640px){
  body.sahm-editor-active .workspace{inset:48px 0 104px!important;padding:5px!important}
  body.sahm-editor-active #app.phone{border-radius:22px!important}
- .se-topbar{height:48px;flex-basis:48px}.se-tool-panel{bottom:calc(91px + env(safe-area-inset-bottom));max-height:min(25dvh,190px)}
+ .se-topbar{height:48px;flex-basis:48px}.se-tool-panel{bottom:calc(132px + env(safe-area-inset-bottom));max-height:min(25dvh,190px)}
  .se-dock{gap:3px;padding-inline:6px}.se-tool{flex-basis:55px;min-width:55px}
 }
 @media(max-height:600px){
  body.sahm-editor-active .workspace{inset:48px 0 92px!important}
  body.sahm-editor-active #app.phone{height:932px!important;width:430px!important}
- .se-tool-panel{max-height:30dvh;bottom:84px}
+ .se-tool-panel{max-height:30dvh;bottom:118px}
  .se-tool{height:46px}
 }
