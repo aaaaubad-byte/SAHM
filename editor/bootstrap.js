@@ -1,7 +1,7 @@
 /* Embedded editor controller. Only the SAHM-LAB branch loads this module. */
 (function (w) {
   'use strict';
-  var state = { enabled: false, selected: null, before: null, history: null, hover: null, saved: false, lastSession: null, activeTool: null, dragging: null };
+  var state = { enabled: false, selected: null, before: null, history: null, hover: null, saved: false, lastSession: null, activeTool: null, dragging: null, panelPosition: null, panelDragging: null };
   function esc(s) { return String(s == null ? '' : s).replace(/[&<>"']/g, function (c) { return ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]); }); }
   function app() { return document.getElementById('app'); }
   function preparePreview() {
@@ -146,7 +146,32 @@
     html+=toolPanel();
     html+='<div class="se-dock-wrap"><div class="se-context-label">'+(selected?'العنصر المحدد: '+esc(selected.tagName.toLowerCase()):'أدوات المحرر')+'</div><nav class="se-dock" aria-label="أدوات التحرير">'+tools+'</nav><div id="sahm-editor-status" class="se-status">حدد عنصراً من المعاينة لعرض أدواته الخاصة.</div></div>';
     document.getElementById('sahm-editor-panel').innerHTML=html;
+    applyPanelPosition();
     if(state.activeTool==='sessions') w.SahmEditorCore.listSessions().then(renderSessions);
+  }
+  function applyPanelPosition() {
+    var panel=document.querySelector('#sahm-editor-panel .se-tool-panel'),p=state.panelPosition;
+    if(!panel||!p)return;
+    var maxX=Math.max(8,w.innerWidth-panel.offsetWidth-8),maxY=Math.max(8,w.innerHeight-panel.offsetHeight-8);
+    p.x=Math.max(8,Math.min(p.x,maxX));p.y=Math.max(8,Math.min(p.y,maxY));
+    panel.style.left=p.x+'px';panel.style.top=p.y+'px';panel.style.right='auto';panel.style.bottom='auto';
+  }
+  function beginPanelDrag(event) {
+    var head=event.target.closest('.se-tool-panel-head'),panel=event.target.closest('.se-tool-panel');
+    if(!head||!panel||event.target.closest('button'))return;
+    var r=panel.getBoundingClientRect();
+    state.panelPosition=state.panelPosition||{x:r.left,y:r.top};
+    state.panelDragging={pointerId:event.pointerId,startX:event.clientX,startY:event.clientY,x:state.panelPosition.x,y:state.panelPosition.y};
+    if(head.setPointerCapture)try{head.setPointerCapture(event.pointerId);}catch(_){}
+    event.preventDefault();event.stopPropagation();
+  }
+  function movePanelDrag(event) {
+    var d=state.panelDragging;if(!d||d.pointerId!==event.pointerId)return;
+    state.panelPosition={x:d.x+event.clientX-d.startX,y:d.y+event.clientY-d.startY};
+    applyPanelPosition();event.preventDefault();
+  }
+  function endPanelDrag(event) {
+    if(state.panelDragging&&state.panelDragging.pointerId===event.pointerId)state.panelDragging=null;
   }
   function select(el) {
     if (!el || el === app() || w.SahmEditorCore.isEditorNode(el)) return;
@@ -241,6 +266,10 @@
   }
   function bindPanel() {
     var panel = document.getElementById('sahm-editor-panel');
+    panel.addEventListener('pointerdown', beginPanelDrag);
+    document.addEventListener('pointermove', movePanelDrag, true);
+    document.addEventListener('pointerup', endPanelDrag, true);
+    document.addEventListener('pointercancel', endPanelDrag, true);
     panel.addEventListener('click', function (event) {
       var choice=event.target.closest('[data-add-kind]');
       if(choice){addElement(choice.getAttribute('data-add-kind'));state.activeTool=null;render();return;}
