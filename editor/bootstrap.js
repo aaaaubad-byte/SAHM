@@ -30,7 +30,6 @@
     html += '<div class="se-content"><section id="se-layers">' + w.SahmEditorLayers.render(app(), selected) + '</section><section id="se-inspector" hidden>' + w.SahmEditorInspector.render(selected) + '</section><section id="se-sessions" hidden><div class="se-empty">الجلسات محفوظة على هذا الجهاز. صدّر ملف JSON لاستيراده وتحليل عملياته لاحقاً.</div><div id="se-session-list"></div></section></div>';
     html += '<div class="se-save-row"><label><input id="se-confirm-static-text" type="checkbox"> أؤكد أن النص الذي أحرره ثابت وليس بيانات مستخدم</label><button data-se-action="save">حفظ الجلسة</button><button data-se-action="export" ' + (!state.saved ? 'disabled' : '') + '>تصدير JSON</button></div><div id="sahm-editor-status" class="se-status">حدد أي عنصر لبدء التحرير.</div>';
     document.getElementById('sahm-editor-panel').innerHTML = html;
-    bindPanel();
   }
   function select(el) {
     if (!el || el === app() || w.SahmEditorCore.isEditorNode(el)) return;
@@ -83,7 +82,7 @@
     select(clone); status('نُسخت البنية. تحقق من عدم تكرار المعرفات والوظائف قبل الاستيراد.', 'success');
   }
   function removeSelected() {
-    var el = state.selected; if (!el || !el.parentNode || el.id === 'screen' || el.id === 'app') return;
+    var el = state.selected; if (!el || !el.parentNode || ['app','screen','topbar','bottomnav','modal-root','toast'].includes(el.id)) return;
     var parent = el.parentNode, next = el.nextSibling, meta = w.SahmEditorCore.identify(el), html = el.outerHTML;
     parent.removeChild(el); state.selected = null;
     state.history.push({ type: 'element.remove', elementId: meta.id, screen: meta.screen, source: meta, html: html, timestamp: new Date().toISOString() },
@@ -195,6 +194,7 @@
     button.addEventListener('click', function () { toggle(!state.enabled); });
     var panel = document.createElement('aside'); panel.id = 'sahm-editor-panel'; panel.setAttribute('data-sahm-editor-ui','true'); panel.hidden = true;
     document.body.append(button, panel);
+    bindPanel();
     function visibility() { button.hidden = !canShow() || state.enabled; if (!canShow() && state.enabled) toggle(false); }
     visibility(); w.addEventListener('popstate', visibility);
     var screen = document.getElementById('screen'); if (screen && w.MutationObserver) new MutationObserver(visibility).observe(screen, { childList: true });

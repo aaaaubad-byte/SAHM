@@ -4,6 +4,7 @@ on:
   push:
     branches:
       - SAHM-SUPABASE
+      - SAHM-LAB
     paths:
       - "supabase/migrations/**"
       - "supabase/SAHM_DATABASE_BASELINE.sql"
@@ -22,7 +23,7 @@ jobs:
       - name: Checkout target branch
         uses: actions/checkout@v4
         with:
-          ref: SAHM-SUPABASE
+          ref: ${{ github.ref_name }}
 
       - name: Install pinned Supabase CLI
         uses: supabase/setup-cli@v3

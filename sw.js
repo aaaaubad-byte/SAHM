@@ -12,7 +12,12 @@ const APP_SHELL = [
   '/sahm-data.js',
   '/sahm-navigation.js',
   '/manifest.webmanifest',
-  '/icons/sahm.svg'
+  '/icons/sahm.svg',
+  '/editor/editor.css',
+  '/editor/core.js',
+  '/editor/ui/inspector.js',
+  '/editor/ui/layers.js',
+  '/editor/bootstrap.js'
 ];
 /* files that define app behaviour: fetched fresh whenever the network is available */
 const APP_CODE = /\.(?:js|html|css|webmanifest)$/i;

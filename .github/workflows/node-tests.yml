@@ -5,10 +5,12 @@ on:
     branches:
       - main
       - SAHM-SUPABASE
+      - SAHM-LAB
   pull_request:
     branches:
       - main
       - SAHM-SUPABASE
+      - SAHM-LAB
   workflow_dispatch:
 
 permissions:

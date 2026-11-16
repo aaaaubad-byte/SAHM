@@ -35,5 +35,5 @@
 .se-session-item b,.se-session-item small{display:block}.se-session-item b{font-size:10px}.se-session-item small{font-size:9px;color:#8491a5}.se-session-item button{white-space:nowrap}
 .sahm-editor-active #app .se-hover{outline:2px dashed #d88d21!important;outline-offset:2px!important;cursor:crosshair!important}
 .sahm-editor-active #app .se-selected{outline:2px solid #3158d6!important;outline-offset:3px!important}
-.sahm_editor_active #app{user-select:none}
+.sahm-editor-active #app{user-select:none}
 @media(max-width:640px){#sahm-editor-panel{left:0;right:0;top:auto;bottom:0;width:100%;max-width:none;height:min(64vh,620px);border-radius:16px 16px 0 0}#sahm-editor-toggle{top:10px;left:10px}.se-content{padding:7px 9px}}

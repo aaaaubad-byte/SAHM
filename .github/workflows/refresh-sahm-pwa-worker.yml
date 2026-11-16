@@ -4,6 +4,7 @@ on:
   push:
     branches:
       - SAHM-SUPABASE
+      - SAHM-LAB
     paths-ignore:
       - sw.js
   workflow_dispatch:
@@ -22,7 +23,7 @@ jobs:
       - name: Check out source commit
         uses: actions/checkout@v4
         with:
-          ref: SAHM-SUPABASE
+          ref: ${{ github.ref_name }}
           fetch-depth: 0
 
       - name: Stamp worker with source commit
@@ -59,4 +60,4 @@ jobs:
             exit 0
           fi
           git commit -m "chore(pwa): stamp worker for ${GITHUB_SHA::12}"
-          git push origin HEAD:SAHM-SUPABASE
+          git push origin HEAD:$GITHUB_REF_NAME
