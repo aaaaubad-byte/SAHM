@@ -211,7 +211,7 @@
     var panel = document.getElementById('sahm-editor-panel');
     panel.addEventListener('click', function (event) {
       var tool = event.target.closest('[data-se-tool]');
-      if (tool) { var tn=tool.getAttribute('data-se-tool'); state.activeTool=(tn==='select'?null:tn); render(); return; }
+      if (tool) { var tn=tool.getAttribute('data-se-tool'); state.activeTool=(tn==='select'||tn==='cursor'?null:tn); render(); return; }
       var action = event.target.closest('[data-se-action]');
       if (action) {
         var name = action.getAttribute('data-se-action');
@@ -245,7 +245,7 @@
         if (!confirm || !confirm.checked) { status('أكد أولاً أن النص ثابت وليس بيانات مستخدم.', 'error'); input.value = state.selected.textContent || ''; return; }
         setText(state.selected, input.value);
       } else if (input.matches('[data-attr]') && state.selected) setAttribute(state.selected, input.getAttribute('data-attr'), input.value);
-      else if (input.matches('[data-position-axis]') && state.selected) { var parts=String(state.selected.style.translate||'0px 0px').split(/\\s+/),x=parseFloat(parts[0])||0,y=parseFloat(parts[1])||0; if(input.getAttribute('data-position-axis')==='x')x=Number(input.value);else y=Number(input.value); setStyle(state.selected,'translate',x+'px '+y+'px'); }
+      else if (input.matches('[data-position-axis]') && state.selected) { var parts=String(state.selected.style.translate||'0px 0px').split(/\s+/),x=parseFloat(parts[0])||0,y=parseFloat(parts[1])||0; if(input.getAttribute('data-position-axis')==='x')x=Number(input.value);else y=Number(input.value); setStyle(state.selected,'translate',x+'px '+y+'px'); }
     });
     panel.addEventListener('dragstart', function (event) { var li = event.target.closest('[data-layer-id]'); if (li) { event.dataTransfer.setData('text/plain', li.getAttribute('data-layer-id')); event.dataTransfer.effectAllowed = 'move'; } });
     panel.addEventListener('dragover', function (event) { if (event.target.closest('[data-layer-id]')) event.preventDefault(); });
@@ -267,6 +267,26 @@
     if (state.hover && state.hover !== state.selected) state.hover.classList.remove('se-hover');
     state.hover = el; if (el !== state.selected) el.classList.add('se-hover');
   }
+  function beginDrag(event) {
+    if (!state.enabled || state.activeTool !== 'position' || !state.selected || !state.selected.contains(event.target)) return;
+    if (event.target.closest('input,button,textarea,select')) return;
+    var el=state.selected, parts=String(el.style.translate||'0px 0px').split(/\s+/);
+    state.dragging={el:el,pointerId:event.pointerId,startX:event.clientX,startY:event.clientY,x:parseFloat(parts[0])||0,y:parseFloat(parts[1])||0,before:el.style.translate||''};
+    if(el.setPointerCapture) try{el.setPointerCapture(event.pointerId);}catch(_){}
+    event.preventDefault();
+  }
+  function moveDrag(event) {
+    var d=state.dragging;if(!d||d.pointerId!==event.pointerId)return;
+    var x=Math.round(d.x+(event.clientX-d.startX)),y=Math.round(d.y+(event.clientY-d.startY));
+    d.el.style.translate=x+'px '+y+'px';event.preventDefault();
+  }
+  function endDrag(event) {
+    var d=state.dragging;if(!d||d.pointerId!==event.pointerId)return;
+    state.dragging=null;var after=d.el.style.translate;
+    if(after!==d.before)record('style.set',d.el,{property:'translate',before:d.before,after:after},
+      function(){if(d.before)d.el.style.translate=d.before;else d.el.style.removeProperty('translate');},
+      function(){d.el.style.translate=after;});
+  }
   function keys(event) {
     if (!state.enabled) return;
     if (event.key === 'Escape') { toggle(false); event.preventDefault(); return; }
@@ -284,9 +304,9 @@
       state.before = w.SahmEditorCore.capture(); state.history = w.SahmEditorCore.history(render);
       state.selected = null; state.activeTool = null; state.saved = false; document.body.classList.add('sahm-editor-active');
       panel.hidden = false; button.hidden = true; render();
-      document.addEventListener('click', appClick, true); document.addEventListener('pointerover', hover, true); document.addEventListener('keydown', keys, true);
+      document.addEventListener('click', appClick, true); document.addEventListener('pointerover', hover, true); document.addEventListener('pointerdown', beginDrag, true); document.addEventListener('pointermove', moveDrag, true); document.addEventListener('pointerup', endDrag, true); document.addEventListener('pointercancel', endDrag, true); document.addEventListener('keydown', keys, true);
     } else {
-      document.removeEventListener('click', appClick, true); document.removeEventListener('pointerover', hover, true); document.removeEventListener('keydown', keys, true);
+      document.removeEventListener('click', appClick, true); document.removeEventListener('pointerover', hover, true); document.removeEventListener('pointerdown', beginDrag, true); document.removeEventListener('pointermove', moveDrag, true); document.removeEventListener('pointerup', endDrag, true); document.removeEventListener('pointercancel', endDrag, true); document.removeEventListener('keydown', keys, true);
       document.body.classList.remove('sahm-editor-active'); panel.hidden = true; button.hidden = !canShow();
       if (state.selected) state.selected.classList.remove('se-selected'); if (state.hover) state.hover.classList.remove('se-hover');
       state.selected = null; state.hover = null; state.activeTool = null;
