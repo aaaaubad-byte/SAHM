@@ -278,6 +278,13 @@
     }
     h+='</div></section>'; return h;
   }
+  function refreshHistoryControls() {
+    if (!state.history) return;
+    var undo = document.querySelectorAll('#sahm-editor-panel [data-se-action="undo"]');
+    var redo = document.querySelectorAll('#sahm-editor-panel [data-se-action="redo"]');
+    Array.prototype.forEach.call(undo, function (button) { button.disabled = !state.history.canUndo(); });
+    Array.prototype.forEach.call(redo, function (button) { button.disabled = !state.history.canRedo(); });
+  }
   function render() {
     if (!state.enabled) return;
     var selected=state.selected, history=state.history, kind=kindOf(selected);
@@ -597,7 +604,7 @@
     state.enabled = !!on;
     var panel = document.getElementById('sahm-editor-panel'), button = document.getElementById('sahm-editor-toggle');
     if (state.enabled) {
-      state.before = w.SahmEditorCore.capture(); state.history = w.SahmEditorCore.history(render);
+      state.before = w.SahmEditorCore.capture(); state.history = w.SahmEditorCore.history(function (action) { if (action === 'push') refreshHistoryControls(); else render(); });
       state.selected = null; state.activeTool = null; state.saved = false; document.body.classList.add('sahm-editor-active'); preparePreview();
       panel.hidden = false; button.hidden = true; render();
       document.addEventListener('click', appClick, true); document.addEventListener('pointerover', hover, true); document.addEventListener('pointerdown', beginDrag, true); document.addEventListener('pointermove', moveDrag, true); document.addEventListener('pointermove', moveSelectionFrameDrag, true); document.addEventListener('pointerup', endDrag, true); document.addEventListener('pointerup', endSelectionFrameDrag, true); document.addEventListener('pointercancel', endDrag, true); document.addEventListener('pointercancel', endSelectionFrameDrag, true); document.addEventListener('scroll', scheduleSelectionFrame, true); w.addEventListener('resize', scheduleSelectionFrame); document.addEventListener('keydown', keys, true);
