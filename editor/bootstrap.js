@@ -1,7 +1,7 @@
 /* Embedded editor controller. Only the SAHM-LAB branch loads this module. */
 (function (w) {
   'use strict';
-  var state = { enabled: false, selected: null, before: null, history: null, hover: null, saved: false, lastSession: null };
+  var state = { enabled: false, selected: null, before: null, history: null, hover: null, saved: false, lastSession: null, activeTool: null, dragging: null };
   function esc(s) { return String(s == null ? '' : s).replace(/[&<>"']/g, function (c) { return ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]); }); }
   function app() { return document.getElementById('app'); }
   function getById(id) {
@@ -20,21 +20,106 @@
       return '<div class="se-session-item"><span><b>' + esc(item.id) + '</b><small>' + esc(item.createdAt) + '</small></span><button type="button" data-session-export="' + esc(item.id) + '">تصدير</button></div>';
     }).join('') || '<div class="se-empty">لا توجد جلسات محفوظة بعد.</div>';
   }
+  function icon(name) {
+    var paths = {
+      cursor:'<path d="m5 3 14 12-7 1-3 5z"/>', plus:'<path d="M12 5v14M5 12h14"/>',
+      layers:'<path d="m12 3 9 5-9 5-9-5 9-5z"/><path d="m3 12 9 5 9-5M3 16l9 5 9-5"/>',
+      undo:'<path d="M9 14 4 9l5-5"/><path d="M4 9h10a6 6 0 0 1 0 12h-2"/>',
+      redo:'<path d="m15 14 5-5-5-5"/><path d="M20 9H10a6 6 0 0 0 0 12h2"/>',
+      save:'<path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><path d="M17 21v-8H7v8M7 3v5h8"/>',
+      history:'<path d="M3 12a9 9 0 1 0 3-6.7L3 8"/><path d="M3 3v5h5M12 7v5l3 2"/>',
+      type:'<path d="M4 7V4h16v3M9 20h6M12 4v16"/>',
+      palette:'<path d="M12 3a9 9 0 1 0 0 18h1a2 2 0 0 0 1.5-3.3 2 2 0 0 1 1.5-3.3H18a3 3 0 0 0 3-3c0-4.6-4-8.4-9-8.4z"/><path d="M7.5 11h.01M10 7.5h.01M15 8h.01M17 11h.01"/>',
+      font:'<path d="M4 20 10 4h4l6 16M7 13h10"/>',
+      shadow:'<rect x="4" y="3" width="13" height="13" rx="2"/><path d="M8 20h11a2 2 0 0 0 2-2V8"/>',
+      border:'<rect x="3" y="3" width="18" height="18" rx="3"/><path d="M8 3v18M3 8h18"/>',
+      move:'<path d="M12 2v20M2 12h20M8 6l4-4 4 4M8 18l4 4 4-4M6 8l-4 4 4 4M18 8l4 4-4 4"/>',
+      image:'<rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><path d="m21 15-5-5L5 21"/>',
+      crop:'<path d="M6 3v12a3 3 0 0 0 3 3h12M18 21V9a3 3 0 0 0-3-3H3"/>',
+      maximize:'<path d="M8 3H5a2 2 0 0 0-2 2v3M16 3h3a2 2 0 0 1 2 2v3M21 16v3a2 2 0 0 1-2 2h-3M3 16v3a2 2 0 0 0 2 2h3"/>',
+      click:'<path d="m9 9 5 12 2-5 5-2z"/><path d="M4 4 2 2M10 3V1M3 10H1"/>',
+      copy:'<rect x="8" y="8" width="13" height="13" rx="2"/><path d="M16 8V5a2 2 0 0 0-2-2H5a2 2 0 0 0-2 2v9a2 2 0 0 0 2 2h3"/>',
+      trash:'<path d="M3 6h18M8 6V4h8v2m3 0-1 15H6L5 6m4 4v7m6-7v7"/>',
+      more:'<circle cx="5" cy="12" r="1"/><circle cx="12" cy="12" r="1"/><circle cx="19" cy="12" r="1"/>',
+      close:'<path d="m18 6-12 12M6 6l12 12"/>',
+      check:'<path d="m5 12 4 4L19 6"/>'
+    };
+    return '<svg viewBox="0 0 24 24" width="21" height="21" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">'+(paths[name]||paths.more)+'</svg>';
+  }
+  function toolButton(name,label,active,action) {
+    return '<button type="button" class="se-tool'+(active?' active':'')+'" data-se-tool="'+esc(name)+'" aria-label="'+esc(label)+'" title="'+esc(label)+'">'+icon(name)+'<span>'+esc(label)+'</span></button>';
+  }
+  function kindOf(el) {
+    if (!el) return 'none';
+    if (el.tagName === 'IMG') return 'image';
+    if (el.tagName === 'BUTTON' || el.getAttribute('role') === 'button') return 'button';
+    if (/^(H1|H2|H3|H4|P|SPAN|LABEL|SMALL|STRONG|B|EM)$/.test(el.tagName)) return 'text';
+    if (el.tagName === 'SVG' || el.querySelector('svg')) return 'icon';
+    return 'container';
+  }
+  function valueOf(el, prop, fallback) {
+    var v = el ? w.getComputedStyle(el).getPropertyValue(prop) : '';
+    return v && v !== 'none' ? v : fallback;
+  }
+  function toolPanel() {
+    var el=state.selected, kind=kindOf(el), t=state.activeTool;
+    if (!t || t==='select') return '';
+    var h='<section class="se-tool-panel"><div class="se-tool-panel-head"><b>'+esc(({add:'إضافة عنصر',layers:'طبقات العناصر',sessions:'جلسات التحرير',text:'تحرير النص',color:'الألوان',font:'الخطوط',shadow:'الظلال',border:'الإطار والمسافات',position:'موقع العنصر',size:'الحجم والأبعاد',image:'إعدادات الصورة',click:'إعدادات العنصر',more:'أدوات إضافية'})[t]||'أداة التحرير')+'</b><button type="button" data-se-tool="select" aria-label="إغلاق">'+icon('close')+'</button></div><div class="se-tool-panel-body">';
+    if (t==='add') {
+      h+='<div class="se-add-row"><select id="se-add-kind"><option value="text">نص</option><option value="heading">عنوان</option><option value="button">زر</option><option value="card">بطاقة</option><option value="image">صورة</option><option value="divider">فاصل</option></select><button data-se-action="add">إضافة</button></div>';
+    } else if (t==='layers') {
+      h+=w.SahmEditorLayers.render(app(),el);
+    } else if (t==='sessions') {
+      h+='<div class="se-empty">الجلسات المحفوظة محلياً والمتزامنة مع الفرع.</div><div id="se-session-list"></div>';
+    } else if (!el) {
+      h+='<div class="se-empty">حدد عنصراً من شاشة المعاينة أولاً.</div>';
+    } else if (t==='text') {
+      h+='<label class="se-field"><span>النص الظاهر</span><textarea data-text-edit rows="3">'+esc(el.textContent||'')+'</textarea></label><label class="se-check"><input id="se-confirm-static-text" type="checkbox"> أؤكد أن النص ثابت وليس بيانات مستخدم</label>';
+    } else if (t==='color') {
+      h+='<label class="se-field"><span>لون النص</span><input type="color" data-style="color" value="#182b4d"></label><label class="se-field"><span>لون الخلفية</span><input type="color" data-style="background-color" value="#ffffff"></label>';
+    } else if (t==='font') {
+      h+='<label class="se-field"><span>عائلة الخط</span><input data-style="font-family" value="'+esc(valueOf(el,'font-family','IBM Plex Sans Arabic'))+'"></label><label class="se-field"><span>حجم الخط</span><input data-style="font-size" value="'+esc(valueOf(el,'font-size','14px'))+'"></label><label class="se-field"><span>سماكة الخط</span><select data-style="font-weight"><option value="400">عادي</option><option value="500">متوسط</option><option value="600">شبه عريض</option><option value="700">عريض</option></select></label><label class="se-field"><span>محاذاة النص</span><select data-style="text-align"><option value="right">يمين</option><option value="center">وسط</option><option value="left">يسار</option></select></label>';
+    } else if (t==='shadow') {
+      h+='<label class="se-field"><span>ظل العنصر</span><input data-style="box-shadow" placeholder="0 4px 12px #0002" value="'+esc(el.style.boxShadow||'')+'"></label><label class="se-field"><span>ظل النص</span><input data-style="text-shadow" placeholder="0 1px 2px #0003" value="'+esc(el.style.textShadow||'')+'"></label>';
+    } else if (t==='border') {
+      h+='<label class="se-field"><span>الإطار</span><input data-style="border" placeholder="1px solid #ddd" value="'+esc(el.style.border||'')+'"></label><label class="se-field"><span>استدارة الزوايا</span><input data-style="border-radius" value="'+esc(valueOf(el,'border-radius','8px'))+'"></label><label class="se-field"><span>الحشوة الداخلية</span><input data-style="padding" value="'+esc(valueOf(el,'padding','0px'))+'"></label>';
+    } else if (t==='position') {
+      var tr=String(el.style.translate||'0px 0px').split(/\s+/),tx=parseFloat(tr[0])||0,ty=parseFloat(tr[1])||0;
+      h+='<div class="se-axis"><label><span>أفقي X</span><b>'+tx+' px</b></label><input type="range" min="-180" max="180" step="1" data-position-axis="x" value="'+tx+'"></div><div class="se-axis"><label><span>عمودي Y</span><b>'+ty+' px</b></label><input type="range" min="-240" max="240" step="1" data-position-axis="y" value="'+ty+'"></div><div class="se-hint">يمكنك أيضاً سحب العنصر مباشرة داخل شاشة الهاتف بعد تفعيل أداة الموقع.</div>';
+    } else if (t==='size') {
+      h+='<label class="se-field"><span>العرض</span><input data-style="width" value="'+esc(el.style.width||'')+'" placeholder="auto أو 100%"></label><label class="se-field"><span>الارتفاع</span><input data-style="height" value="'+esc(el.style.height||'')+'" placeholder="auto"></label><label class="se-field"><span>الشفافية</span><input data-style="opacity" value="'+esc(valueOf(el,'opacity','1'))+'"></label>';
+    } else if (t==='image' && kind==='image') {
+      h+='<label class="se-field"><span>مصدر الصورة</span><input type="url" data-attr="src" value="'+esc(el.getAttribute('src')||'')+'"></label><label class="se-field"><span>النص البديل</span><input data-attr="alt" value="'+esc(el.getAttribute('alt')||'')+'"></label><label class="se-field"><span>طريقة الملاءمة</span><select data-style="object-fit"><option>contain</option><option>cover</option><option>fill</option><option>none</option></select></label>';
+    } else if (t==='click') {
+      h+='<div class="se-hint">هذا العنصر يحتفظ بسلوكه الأصلي. لا يتم إنشاء إجراء جديد أو تغيير ربطه الوظيفي من المحرر المرئي.</div>';
+    } else if (t==='more') {
+      h+='<div class="se-more-actions"><button data-se-action="duplicate">'+icon('copy')+' نسخ العنصر</button><button data-se-action="delete">'+icon('trash')+' حذف العنصر</button><button data-se-tool="layers">'+icon('layers')+' ترتيب الطبقات</button></div>';
+    }
+    h+='</div></section>'; return h;
+  }
   function render() {
     if (!state.enabled) return;
-    var selected = state.selected, history = state.history;
-    var html = '<div class="se-panel-head"><div><b>محرر سهم المرئي</b><small>بيئة العمل المستقلة · SAHM-LAB</small></div><button type="button" data-se-action="exit" aria-label="إغلاق">×</button></div>';
-    html += '<div class="se-toolbar"><button data-se-action="undo" ' + (!history.canUndo() ? 'disabled' : '') + '>تراجع</button><button data-se-action="redo" ' + (!history.canRedo() ? 'disabled' : '') + '>إعادة</button><button data-se-action="duplicate" ' + (!selected ? 'disabled' : '') + '>نسخ</button><button data-se-action="delete" ' + (!selected ? 'disabled' : '') + '>حذف</button></div>';
-    html += '<div class="se-add-row"><select id="se-add-kind"><option value="text">نص</option><option value="heading">عنوان</option><option value="button">زر</option><option value="card">بطاقة</option><option value="image">صورة</option><option value="divider">فاصل</option></select><button data-se-action="add">إضافة عنصر</button></div>';
-    html += '<div class="se-tabs"><button class="active" data-se-tab="layers">العناصر</button><button data-se-tab="inspector">الخصائص</button><button data-se-tab="sessions">الجلسات</button></div>';
-    html += '<div class="se-content"><section id="se-layers">' + w.SahmEditorLayers.render(app(), selected) + '</section><section id="se-inspector" hidden>' + w.SahmEditorInspector.render(selected) + '</section><section id="se-sessions" hidden><div class="se-empty">الجلسات محفوظة على هذا الجهاز. صدّر ملف JSON لاستيراده وتحليل عملياته لاحقاً.</div><div id="se-session-list"></div></section></div>';
-    html += '<div class="se-save-row"><label><input id="se-confirm-static-text" type="checkbox"> أؤكد أن النص الذي أحرره ثابت وليس بيانات مستخدم</label><button data-se-action="save">حفظ الجلسة</button><button data-se-action="export" ' + (!state.saved ? 'disabled' : '') + '>تصدير JSON</button></div><div id="sahm-editor-status" class="se-status">حدد أي عنصر لبدء التحرير.</div>';
-    document.getElementById('sahm-editor-panel').innerHTML = html;
+    var selected=state.selected, history=state.history, kind=kindOf(selected);
+    var tools=selected ? (
+      (kind==='text' ? toolButton('type','النص') : '')+
+      toolButton('palette','اللون')+toolButton('font','الخط')+toolButton('shadow','الظلال')+
+      toolButton('border','الإطار')+toolButton('position','الموقع')+toolButton('size','الحجم')+
+      (kind==='image'?toolButton('image','الصورة'):'')+
+      (kind==='button'?toolButton('click','السلوك'):'')+toolButton('more','المزيد')
+    ) : (
+      toolButton('cursor','تحديد')+toolButton('plus','إضافة')+toolButton('layers','الطبقات')+
+      toolButton('undo','تراجع')+toolButton('redo','إعادة')+toolButton('history','الجلسات')+toolButton('save','حفظ')
+    );
+    var html='<div class="se-topbar"><div class="se-brand"><b>سهم</b><small>محرر الواجهة</small></div><div class="se-top-actions"><button data-se-action="undo" '+(!history.canUndo()?'disabled':'')+' title="تراجع">'+icon('undo')+'</button><button data-se-action="redo" '+(!history.canRedo()?'disabled':'')+' title="إعادة">'+icon('redo')+'</button><button data-se-action="save" title="حفظ الجلسة">'+icon('save')+'</button><button data-se-action="exit" title="إغلاق المحرر">'+icon('close')+'</button></div></div>';
+    html+=toolPanel();
+    html+='<div class="se-dock-wrap"><div class="se-context-label">'+(selected?'العنصر المحدد: '+esc(selected.tagName.toLowerCase()):'أدوات المحرر')+'</div><nav class="se-dock" aria-label="أدوات التحرير">'+tools+'</nav><div id="sahm-editor-status" class="se-status">حدد عنصراً من المعاينة لعرض أدواته الخاصة.</div></div>';
+    document.getElementById('sahm-editor-panel').innerHTML=html;
+    if(state.activeTool==='sessions') w.SahmEditorCore.listSessions().then(renderSessions);
   }
   function select(el) {
     if (!el || el === app() || w.SahmEditorCore.isEditorNode(el)) return;
     if (state.selected) state.selected.classList.remove('se-selected');
-    state.selected = el; w.SahmEditorCore.identify(el); el.classList.add('se-selected'); render();
+    state.selected = el; state.activeTool = null; w.SahmEditorCore.identify(el); el.classList.add('se-selected'); render();
   }
   function setStyle(el, prop, value) {
     var before = el.style.getPropertyValue(prop), after = String(value || '').trim();
@@ -125,6 +210,8 @@
   function bindPanel() {
     var panel = document.getElementById('sahm-editor-panel');
     panel.addEventListener('click', function (event) {
+      var tool = event.target.closest('[data-se-tool]');
+      if (tool) { var tn=tool.getAttribute('data-se-tool'); state.activeTool=(tn==='select'?null:tn); render(); return; }
       var action = event.target.closest('[data-se-action]');
       if (action) {
         var name = action.getAttribute('data-se-action');
@@ -158,6 +245,7 @@
         if (!confirm || !confirm.checked) { status('أكد أولاً أن النص ثابت وليس بيانات مستخدم.', 'error'); input.value = state.selected.textContent || ''; return; }
         setText(state.selected, input.value);
       } else if (input.matches('[data-attr]') && state.selected) setAttribute(state.selected, input.getAttribute('data-attr'), input.value);
+      else if (input.matches('[data-position-axis]') && state.selected) { var parts=String(state.selected.style.translate||'0px 0px').split(/\\s+/),x=parseFloat(parts[0])||0,y=parseFloat(parts[1])||0; if(input.getAttribute('data-position-axis')==='x')x=Number(input.value);else y=Number(input.value); setStyle(state.selected,'translate',x+'px '+y+'px'); }
     });
     panel.addEventListener('dragstart', function (event) { var li = event.target.closest('[data-layer-id]'); if (li) { event.dataTransfer.setData('text/plain', li.getAttribute('data-layer-id')); event.dataTransfer.effectAllowed = 'move'; } });
     panel.addEventListener('dragover', function (event) { if (event.target.closest('[data-layer-id]')) event.preventDefault(); });
@@ -194,14 +282,14 @@
     var panel = document.getElementById('sahm-editor-panel'), button = document.getElementById('sahm-editor-toggle');
     if (state.enabled) {
       state.before = w.SahmEditorCore.capture(); state.history = w.SahmEditorCore.history(render);
-      state.selected = null; state.saved = false; document.body.classList.add('sahm-editor-active');
+      state.selected = null; state.activeTool = null; state.saved = false; document.body.classList.add('sahm-editor-active');
       panel.hidden = false; button.hidden = true; render();
       document.addEventListener('click', appClick, true); document.addEventListener('pointerover', hover, true); document.addEventListener('keydown', keys, true);
     } else {
       document.removeEventListener('click', appClick, true); document.removeEventListener('pointerover', hover, true); document.removeEventListener('keydown', keys, true);
       document.body.classList.remove('sahm-editor-active'); panel.hidden = true; button.hidden = !canShow();
       if (state.selected) state.selected.classList.remove('se-selected'); if (state.hover) state.hover.classList.remove('se-hover');
-      state.selected = null; state.hover = null;
+      state.selected = null; state.hover = null; state.activeTool = null;
     }
   }
   function init() {
