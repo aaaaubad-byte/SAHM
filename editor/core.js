@@ -70,10 +70,11 @@
     function notify() { if (typeof onChange === 'function') onChange(api); }
     var api = {
       push: function (entry, undo, redo) { entries = entries.slice(0, cursor); entries.push({ entry: entry, undo: undo, redo: redo }); cursor = entries.length; notify(); },
+      pushGroup: function (batch, undo, redo) { if (!batch || !batch.length) return; entries = entries.slice(0, cursor); entries.push({ entry: batch.slice(), undo: undo, redo: redo }); cursor = entries.length; notify(); },
       undo: function () { if (!cursor) return false; entries[cursor - 1].undo(); cursor--; notify(); return true; },
       redo: function () { if (cursor >= entries.length) return false; entries[cursor].redo(); cursor++; notify(); return true; },
       canUndo: function () { return cursor > 0; }, canRedo: function () { return cursor < entries.length; },
-      serialize: function () { return entries.slice(0, cursor).map(function (x) { return x.entry; }); },
+      serialize: function () { return entries.slice(0, cursor).reduce(function (all, item) { return all.concat(Array.isArray(item.entry) ? item.entry : [item.entry]); }, []); },
       clear: function () { entries = []; cursor = 0; notify(); }
     };
     return api;
