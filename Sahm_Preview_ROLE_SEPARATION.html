@@ -3762,6 +3762,7 @@ document.addEventListener('submit',async e=>{
  const form=e.target;
  if(!['loginForm','accountLoginForm','registerForm','setupForm','updatePasswordForm','createForm','inviteeManualForm','joinForm','joinRequestForm','chatForm','profileForm'].includes(form.id))return;
  e.preventDefault();
+ if(['loginForm','accountLoginForm','registerForm'].includes(form.id))authInteractionVersion++;
  const setBusy=(on,label)=>{const b=form.querySelector('button[type="submit"]');if(b){b.disabled=!!on;if(on){b.dataset.oldLabel=b.textContent;b.textContent=label||'جارٍ التنفيذ...'}else if(b.dataset.oldLabel){b.textContent=b.dataset.oldLabel;delete b.dataset.oldLabel}}};
   if(form.id==='accountLoginForm'){
   if(authBusy)return;const d=Object.fromEntries(new FormData(form));
