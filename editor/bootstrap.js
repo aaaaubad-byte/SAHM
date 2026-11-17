@@ -359,7 +359,7 @@
       if (el.hasAttribute('data-action')) {
         h+='<div class="se-hint">هذا العنصر مرتبط بإجراء داخلي في سهم. حافظ المحرر على هذا الإجراء ولا يسمح باستبداله بوجهة تنقّل.</div>';
       } else if (el.hasAttribute('data-go') || el.tagName==='BUTTON' || el.getAttribute('role')==='button') {
-        if (el.closest('form') && el.tagName==='BUTTON' && el.type==='submit' && !el.hasAttribute('data-go')) {
+        if (el.closest('form') && el.tagName==='BUTTON' && el.type==='submit') {
           h+='<div class="se-hint">هذا زر إرسال نموذج. غيّر نوعه إلى «زر عادي» قبل تعيين وجهة تنقّل.</div>';
         } else {
           h+=selectControl('الإجراء عند النقر','data-go',el.getAttribute('data-go')||'',routes,true)+
