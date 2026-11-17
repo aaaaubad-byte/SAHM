@@ -749,7 +749,7 @@
       document.removeEventListener('click', appClick, true); document.removeEventListener('pointerover', hover, true); document.removeEventListener('pointerdown', beginDrag, true); document.removeEventListener('pointermove', moveDrag, true); document.removeEventListener('pointermove', moveSelectionFrameDrag, true); document.removeEventListener('pointerup', endDrag, true); document.removeEventListener('pointerup', endSelectionFrameDrag, true); document.removeEventListener('pointercancel', endDrag, true); document.removeEventListener('pointercancel', endSelectionFrameDrag, true); document.removeEventListener('scroll', scheduleSelectionFrame, true); w.removeEventListener('resize', scheduleSelectionFrame); document.removeEventListener('keydown', keys, true);
       if (state.selectionObserver) { state.selectionObserver.disconnect(); state.selectionObserver = null; }
       state.frameDragging = null; state.dragging = null; state.frameRaf = 0;
-      if (w.SahmAdaptiveUI && w.SahmAdaptiveUI.isOpen()) w.SahmAdaptiveUI.close(); if (w.SahmAdaptiveEngine) w.SahmAdaptiveEngine.clear(); restorePreview(); document.body.classList.remove('sahm-editor-active'); panel.hidden = true; button.hidden = !canShow();
+      if (w.SahmAdaptiveUI && w.SahmAdaptiveUI.isOpen()) w.SahmAdaptiveUI.close(); if (w.SahmAdaptiveUI && w.SahmAdaptiveUI.resetPreview) w.SahmAdaptiveUI.resetPreview(); if (w.SahmAdaptiveEngine) w.SahmAdaptiveEngine.clear(); restorePreview(); document.body.classList.remove('sahm-editor-active'); panel.hidden = true; button.hidden = !canShow();
       if (state.selected) state.selected.classList.remove('se-selected'); if (state.hover) state.hover.classList.remove('se-hover');
       state.selected = null; state.hover = null; state.activeTool = null;
     }
@@ -767,5 +767,10 @@
     visibility(); w.addEventListener('popstate', visibility);
     var screen = document.getElementById('screen'); if (screen && w.MutationObserver) new MutationObserver(visibility).observe(screen, { childList: true });
   }
+  w.SahmEditorActions = {
+    selectById: function (id) { var el = getById(id); if (!el) return false; select(el); return true; },
+    addElement: function (kind, parentId) { var parent = parentId && getById(parentId); if (parent) select(parent); addElement(kind); return state.selected || null; },
+    removeElement: function (id) { var el = getById(id); if (!el || ['app','screen','topbar','bottomnav','modal-root','toast'].includes(el.id)) return false; select(el); removeSelected(); return true; }
+  };
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', init); else init();
 })(window);
