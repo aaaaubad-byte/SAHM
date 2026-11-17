@@ -357,7 +357,7 @@
     if (!state.enabled) return;
     var selected=state.selected, history=state.history, kind=kindOf(selected);
     var tools=selected ? (
-      toolButton('plus','العناصر')+(kind==='text' ? toolButton('type','النص') : '')+
+      toolButton('plus','العناصر')+
       (hasEditableText(selected)?toolButton('type','النص'):'')+
       toolButton('palette','اللون')+toolButton('font','الخط')+toolButton('shadow','الظلال')+
       toolButton('border','الإطار')+toolButton('maximize','الحجم')+toolButton('move','الموقع')+toolButton('rotate','الدوران')+
