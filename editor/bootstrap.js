@@ -240,6 +240,7 @@
       copy:'<rect x="8" y="8" width="13" height="13" rx="2"/><path d="M16 8V5a2 2 0 0 0-2-2H5a2 2 0 0 0-2 2v9a2 2 0 0 0 2 2h3"/>',
       trash:'<path d="M3 6h18M8 6V4h8v2m3 0-1 15H6L5 6m4 4v7m6-7v7"/>',
       more:'<circle cx="5" cy="12" r="1"/><circle cx="12" cy="12" r="1"/><circle cx="19" cy="12" r="1"/>',
+      layout:'<rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18M9 9v12"/>',
       close:'<path d="m18 6-12 12M6 6l12 12"/>',
       check:'<path d="m5 12 4 4L19 6"/>'
     };
@@ -296,8 +297,8 @@
   function toolPanel() {
     var el=state.selected, kind=kindOf(el), t=normalizeTool(state.activeTool);
     if (!t || t==='select') return '';
-    var panelTitles={add:'إضافة عنصر',layers:'طبقات العناصر',sessions:'جلسات التحرير',text:'تحرير النص',color:'الألوان',font:'الخطوط',shadow:'الظلال',border:'الإطار والمسافات',position:'موقع العنصر',size:'الحجم',transform:'الحجم',rotate:'الدوران',image:'إعدادات الصورة',click:'إعدادات العنصر',more:'أدوات إضافية'};
-    var panelIcons={add:'plus',layers:'layers',sessions:'history',text:'type',color:'palette',font:'font',shadow:'shadow',border:'border',position:'move',size:'maximize',transform:'maximize',rotate:'rotate',image:'image',click:'click',more:'more'};
+    var panelTitles={add:'إضافة عنصر',layers:'طبقات العناصر',sessions:'جلسات التحرير',text:'تحرير النص',color:'الألوان',font:'الخطوط',shadow:'الظلال',border:'الإطار والمسافات',position:'موقع العنصر',size:'الحجم',transform:'الحجم',rotate:'الدوران',layout:'تخطيط الحاوية',image:'إعدادات الصورة',click:'إعدادات العنصر',more:'أدوات إضافية'};
+    var panelIcons={add:'plus',layers:'layers',sessions:'history',text:'type',color:'palette',font:'font',shadow:'shadow',border:'border',position:'move',size:'maximize',transform:'maximize',rotate:'rotate',layout:'layout',image:'image',click:'click',more:'more'};
     var panelIcon=panelIcons[t]||'more';
     var h='<section class="se-tool-panel"><div class="se-tool-panel-head"><div class="se-tool-panel-title">'+icon(panelIcon)+'<b>'+esc(panelTitles[t]||'أداة التحرير')+'</b></div><button type="button" data-se-tool="select" aria-label="إغلاق">'+icon('close')+'</button></div><div class="se-tool-panel-body">';
     if (t==='add') {
@@ -324,6 +325,26 @@
       var shadowComputed=valueOf(el,'box-shadow','none'), shadowMatch=shadowComputed.match(/0px\s+4px\s+([\d.]+)px/) || shadowComputed.match(/0\s+4px\s+([\d.]+)px/);
       var shadowLevel=shadowMatch?Math.round(Number(shadowMatch[1])):(shadowComputed==='none'?0:8);
       h+=sliderControl('قوة الظل','shadow-level','box-shadow',shadowLevel,0,30,1,'',' data-shadow-level');
+    } else if (t==='layout') {
+      var cs=w.getComputedStyle(el);
+      h+='<div class="se-layout-section"><b>طريقة ترتيب المحتوى</b>'+
+        selectControl('نظام العرض','display',cs.display,[['block','عنصر عادي'],['flex','Flex'],['inline-flex','Flex ضمن السطر'],['grid','Grid'],['inline-block','كتلة ضمن السطر'],['none','إخفاء العنصر']])+
+        selectControl('اتجاه العناصر','flex-direction',cs.flexDirection,[['row','أفقي'],['row-reverse','أفقي معكوس'],['column','عمودي'],['column-reverse','عمودي معكوس']])+
+        selectControl('السماح بالالتفاف','flex-wrap',cs.flexWrap,[['nowrap','سطر واحد'],['wrap','التفاف إلى سطر جديد'],['wrap-reverse','التفاف معكوس']])+
+        selectControl('محاذاة العناصر','align-items',cs.alignItems,[['stretch','تمديد'],['flex-start','بداية'],['center','وسط'],['flex-end','نهاية'],['baseline','خط الأساس']])+
+        selectControl('توزيع العناصر','justify-content',cs.justifyContent,[['flex-start','البداية'],['center','الوسط'],['flex-end','النهاية'],['space-between','مسافة بينية'],['space-around','مسافة حولية'],['space-evenly','مسافات متساوية']])+
+        selectControl('التمرير داخل الحاوية','overflow',cs.overflow,[['visible','إظهار المحتوى'],['hidden','إخفاء الزائد'],['auto','تمرير عند الحاجة'],['scroll','تمرير دائماً']])+
+        selectControl('التمرير العمودي','overflow-y',cs.overflowY,[['visible','إظهار'],['hidden','إخفاء'],['auto','تلقائي'],['scroll','دائماً']])+
+        selectControl('التمرير الأفقي','overflow-x',cs.overflowX,[['visible','إظهار'],['hidden','إخفاء'],['auto','تلقائي'],['scroll','دائماً']])+
+        selectControl('أعمدة Grid','grid-template-columns',cs.gridTemplateColumns,[['none','تلقائي'],['1fr','عمود واحد'],['repeat(2,minmax(0,1fr))','عمودان'],['repeat(3,minmax(0,1fr))','3 أعمدة'],['repeat(4,minmax(0,1fr))','4 أعمدة']])+
+        '</div><div class="se-layout-section"><b>المسافات والأبعاد</b>'+
+        sliderControl('المسافة بين العناصر','layout-gap','gap',parseInt(cs.gap,10)||0,0,48,1,'px')+
+        sliderControl('ارتفاع الحاوية الأدنى','layout-min-height','min-height',parseInt(cs.minHeight,10)||0,0,700,5,'px')+
+        sliderControl('الارتفاع الأقصى','layout-max-height','max-height',cs.maxHeight==='none'?0:(parseInt(cs.maxHeight,10)||0),0,900,10,'px',' data-zero-auto')+
+        sliderControl('مرونة التمدد','layout-grow','flex-grow',parseFloat(cs.flexGrow)||0,0,5,.1,'')+
+        sliderControl('مرونة الانكماش','layout-shrink','flex-shrink',parseFloat(cs.flexShrink)||1,0,3,.1,'')+
+        selectControl('عرض الحاوية','width',cs.width,[['auto','تلقائي'],['100%','عرض كامل'],['fit-content','حسب المحتوى'],['max-content','أكبر محتوى']])+
+        '</div><div class="se-hint">تتحكم هذه الإعدادات في ترتيب العناصر داخل الحاوية. اختر «تمرير عند الحاجة» إذا كان المحتوى أطول من المساحة المتاحة.</div>';
     } else if (t==='border') {
       var radius=parseInt(valueOf(el,'border-radius','8px'),10)||0, padding=parseInt(valueOf(el,'padding','0px'),10)||0;
       h+=sliderControl('استدارة الزوايا','radius','border-radius',radius,0,40,1,'px')+sliderControl('المسافة الداخلية','padding','padding',padding,0,40,1,'px');
@@ -389,6 +410,7 @@
       toolButton('plus','العناصر')+
       (hasEditableText(selected)?toolButton('type','النص'):'')+
       toolButton('palette','اللون')+toolButton('font','الخط')+toolButton('shadow','الظلال')+
+      (kind==='container'||selected.children.length?toolButton('layout','التخطيط'):'')+
       toolButton('border','الإطار')+toolButton('maximize','الحجم')+toolButton('move','الموقع')+toolButton('rotate','الدوران')+
       (kind==='image'?toolButton('image','الصورة'):'')+
       ((kind==='button'||selected.tagName==='A'||selected.hasAttribute('data-go'))?toolButton('click','السلوك'):'')+
