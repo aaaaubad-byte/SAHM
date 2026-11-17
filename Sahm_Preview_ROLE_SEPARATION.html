@@ -2449,6 +2449,50 @@ body {
  .cg-form #cg-installment-preview{max-height:64px}
  .cg-form #create-final-submit{min-height:42px}
 }
+
+/* Creation form: text-only controls, unified heights and comfortable spacing. */
+.cg-form .field>label>svg,
+.cg-form .cg-seg label>svg,
+.cg-form .btn svg{display:none!important}
+.cg-form .cg-card{
+ column-gap:14px;
+ row-gap:14px;
+ padding:18px 18px!important;
+}
+.cg-form .field{margin:6px 0}
+.cg-form .field>label{
+ min-height:20px;
+ margin:0 0 8px;
+ line-height:1.45;
+}
+.cg-form .field input,
+.cg-form .field select{
+ min-height:48px;
+ height:48px;
+ padding:11px 13px;
+ line-height:1.35;
+}
+.cg-form .cg-seg{gap:10px;margin:4px 0 7px}
+.cg-form .cg-seg label{
+ min-height:48px;
+ height:48px;
+ padding:0 12px;
+ gap:0;
+ line-height:1.4;
+}
+.cg-form .cg-row,.cg-form .grid2{gap:14px}
+.cg-form #create-final-submit{min-height:48px;margin-top:8px}
+@media(max-width:380px){
+ .cg-form .cg-card{column-gap:10px;row-gap:12px;padding:15px!important}
+ .cg-form .cg-row,.cg-form .grid2{gap:10px}
+}
+@media(max-height:760px){
+ .cg-form .cg-card{row-gap:12px;padding-block:15px!important}
+ .cg-form .field input,.cg-form .field select,
+ .cg-form .cg-seg label{min-height:46px;height:46px}
+ .cg-form #create-final-submit{min-height:46px}
+}
+
 </style>
 
 </head>
@@ -2958,20 +3002,7 @@ function createGroup(){
  ].join('');
  shell('إنشاء جمعية جديدة','groups',html);
  const form=$('#createForm');
- const fieldIcons={'cg-name':'groups','cg-start':'calendar-days','cg-first':'shuffle','cg-share':'wallet','cg-currency':'coins','cg-count':'hash','cg-amount':'wallet','cg-manager-shares':'layers'};
- Object.entries(fieldIcons).forEach(([id,name])=>{
-  const control=form.querySelector('#'+id),label=control&&control.labels&&control.labels[0];
-  if(label&&!label.querySelector('svg'))label.insertAdjacentHTML('afterbegin',uiIcon(name,19));
- });
- const choiceIcons={installmentMode:['hash','wallet'],managerMode:['user','users']};
- Object.entries(choiceIcons).forEach(([name,icons])=>{
-  form.querySelectorAll('input[name="'+name+'"]').forEach((radio,index)=>{
-   const label=radio.closest('label');
-   if(label&&!label.querySelector('svg'))label.insertAdjacentHTML('afterbegin',uiIcon(icons[index],18));
-  });
- });
- const modeLabel=Array.from(form.querySelectorAll('.field>label')).find(label=>label.textContent.trim()==='طريقة السداد');
- if(modeLabel&&!modeLabel.querySelector('svg'))modeLabel.insertAdjacentHTML('afterbegin',uiIcon('receipt',19));
+ // Creation form fields and choice cards intentionally remain text-only.
  setCreateFormValues(form);
  const update=()=>{
   const mode=form.elements.installmentMode.value||'count';
