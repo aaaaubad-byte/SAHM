@@ -2903,7 +2903,7 @@ function createGroup(){
  ].join('');
  shell('إنشاء جمعية جديدة','groups',html);
  const form=$('#createForm');
- const fieldIcons={'cg-name':'landmark','cg-start':'calendar-days','cg-first':'calendar-check','cg-share':'wallet','cg-currency':'coins','cg-count':'hash','cg-amount':'receipt','cg-manager-shares':'users'};
+ const fieldIcons={'cg-name':'landmark','cg-start':'calendar-days','cg-first':'calendar-days','cg-share':'wallet','cg-currency':'coins','cg-count':'hash','cg-amount':'receipt','cg-manager-shares':'users'};
  Object.entries(fieldIcons).forEach(([id,name])=>{
   const control=form.querySelector('#'+id),label=control&&control.labels&&control.labels[0];
   if(label&&!label.querySelector('svg'))label.insertAdjacentHTML('afterbegin',uiIcon(name,19));
