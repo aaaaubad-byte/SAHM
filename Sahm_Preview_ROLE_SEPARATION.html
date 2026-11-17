@@ -2737,7 +2737,7 @@ function setHomeSlide(index){const ss=document.querySelectorAll('#homeCarousel .
 }
 function managedGroups(){groupTab='manager';syncNavigationContext();groups()}
 function joinedGroups(){groupTab='member';syncNavigationContext();groups()}
-const CREATE_STEP_COUNT=2;
+const CREATE_STEP_COUNT=1;
 function setCreateWizardStep(step,updateHistory=true){
  const previous=createWizardStep;createWizardStep=Math.max(1,Math.min(CREATE_STEP_COUNT,step));const form=document.getElementById('createForm');
  if(form)createFormSnapshot=Object.fromEntries(new FormData(form));
