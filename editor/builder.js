@@ -202,12 +202,15 @@
   }
   function renderCanvas() {
     if (!state.canvas || !state.screen) return;
+    var scroller = state.device && state.device.querySelector('.seb-device-scroll');
+    var savedScrollTop = scroller ? scroller.scrollTop : 0;
     state.canvas.innerHTML = state.screen.elements.map(nodeMarkup).join('') ||
       '<div class="seb-empty-canvas"><span>＋</span><b>ابدأ ببناء الشاشة</b><small>أضف عنواناً أو بطاقة أو حاوية، وستتولى الأداة ضبط التخطيط تلقائياً.</small></div>';
     var viewport = VIEWPORTS[state.viewport] || VIEWPORTS.medium;
     state.device.style.width = viewport.width + 'px';
     state.device.style.height = viewport.height + 'px';
     state.device.dataset.viewport = state.viewport;
+    if (scroller) scroller.scrollTop = savedScrollTop;
     fitDevice();
   }
   function layerMarkup(list, depth) {
@@ -306,7 +309,7 @@
       '<header class="seb-header">' +
         '<div class="seb-brand"><b>منشئ الشاشات</b><small>تخطيط تكيفي جديد</small></div>' +
         '<input type="text" data-bb-title aria-label="اسم الشاشة" maxlength="60" placeholder="اسم الشاشة">' +
-        '<div class="seb-actions"><button type="button" data-bb-new>جديد</button><button type="button" data-bb-save>حفظ</button><button type="button" data-bb-export>تصدير HTML</button><button type="button" data-bb-close aria-label="إغلاق">×</button></div>' +
+        '<div class="seb-actions"><button type="button" data-bb-undo title="تراجع" aria-label="تراجع">↶</button><button type="button" data-bb-redo title="إعادة" aria-label="إعادة">↷</button><button type="button" data-bb-new>جديد</button><button type="button" data-bb-save>حفظ</button><button type="button" data-bb-export>HTML</button><button type="button" data-bb-export-json>JSON</button><button type="button" data-bb-close aria-label="إغلاق">×</button></div>' +
       '</header>' +
       '<div class="seb-device-bar"><select data-bb-saved aria-label="الشاشات المحفوظة"><option value="">شاشاتي المحفوظة</option></select>' +
         '<div class="seb-device-options">' +
@@ -429,6 +432,7 @@
     }
     if (target.hasAttribute('data-bb-save')) { saveScreen(); return; }
     if (target.hasAttribute('data-bb-export')) { download(exportHtml(), slug(state.screen.title) + '.html', 'text/html;charset=utf-8'); setStatus('تم تجهيز ملف HTML مستقل للمعاينة. لا يربط وظائف التطبيق أو بياناته.', 'success'); return; }
+    if (target.hasAttribute('data-bb-export-json')) { download(JSON.stringify(state.screen, null, 2), slug(state.screen.title) + '.json', 'application/json;charset=utf-8'); setStatus('تم تصدير بنية الشاشة وخصائصها بصيغة JSON.', 'success'); return; }
     if (target.hasAttribute('data-bb-close')) { close(); return; }
   }
   function slug(value) {
