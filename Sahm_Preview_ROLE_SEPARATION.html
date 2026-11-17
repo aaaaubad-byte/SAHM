@@ -2329,6 +2329,73 @@ body {
 #app #bottomnav .navitem .ni{ font-size: 0 !important; }
 
 </style>
+<style id="cg-create-form-refinement">
+/* Focused refinement for the single-page create-association form only. */
+.cg-form .cg-section{
+ display:grid;
+ grid-template-columns:repeat(2,minmax(0,1fr));
+ column-gap:12px;
+ row-gap:5px;
+ margin:0 0 16px;
+ align-items:end;
+}
+.cg-form .cg-section:last-of-type{margin-bottom:10px}
+.cg-form .cg-section>.field,
+.cg-form .cg-section>.grid2,
+.cg-form .cg-section>.cg-row,
+.cg-form .cg-section>.cg-result,
+.cg-form .cg-section>.cg-seg,
+.cg-form .cg-section>#cg-installment-preview{grid-column:1/-1}
+.cg-form .field{margin:7px 0}
+.cg-form .field>label{
+ display:flex;
+ align-items:center;
+ gap:7px;
+ margin:0 0 5px;
+ color:#111827;
+ font-size:13.5px!important;
+ font-weight:700;
+ line-height:1.4;
+}
+.cg-form .field>label>svg{
+ display:block;
+ flex:0 0 19px;
+ width:19px;
+ height:19px;
+ color:var(--primary);
+ stroke:currentColor;
+ stroke-width:1.8;
+ fill:none;
+}
+.cg-form .field input,
+.cg-form .field select{
+ border:1.2px solid #aeb8c8;
+ background:#fff;
+ color:#111827;
+ border-radius:var(--radius-control);
+ min-height:43px;
+ font-size:14px;
+}
+.cg-form .field input:focus,
+.cg-form .field select:focus,
+.cg-form .field input:focus-visible,
+.cg-form .field select:focus-visible{
+ outline:none!important;
+ outline-offset:0!important;
+ border-color:var(--primary);
+ box-shadow:none!important;
+}
+.cg-form .cg-row{grid-template-columns:minmax(0,1.25fr) minmax(0,.85fr);gap:10px}
+.cg-form .grid2{gap:10px}
+.cg-form .cg-seg{margin:2px 0 7px;gap:8px}
+.cg-form .cg-seg label{min-height:43px}
+.cg-form .cg-result{margin:2px 0 8px}
+.cg-form #cg-installment-preview{min-width:0}
+@media(max-width:360px){
+ .cg-form .cg-section{column-gap:8px}
+ .cg-form .cg-row,.cg-form .grid2{gap:7px}
+}
+</style>
 </head>
 <body><noscript><main dir="rtl" style="font-family:'IBM Plex Sans Arabic',sans-serif;padding:24px;color:#142f39"><h1>سهم</h1></main></noscript><div class="workspace"><div class="phone" id="app">
 <div id="topbar" class="topbar" style="display:none"></div><main id="screen" class="auth-screen">
@@ -2835,7 +2902,15 @@ function createGroup(){
   '<button class="btn primary full" id="create-final-submit" type="submit">إنشاء الجمعية</button></div></form>'
  ].join('');
  shell('إنشاء جمعية جديدة','groups',html);
- const form=$('#createForm');setCreateFormValues(form);
+ const form=$('#createForm');
+ const fieldIcons={'cg-name':'landmark','cg-start':'calendar-days','cg-first':'calendar-check','cg-share':'wallet','cg-currency':'coins','cg-count':'hash','cg-amount':'receipt','cg-manager-shares':'users'};
+ Object.entries(fieldIcons).forEach(([id,name])=>{
+  const control=form.querySelector('#'+id),label=control&&control.labels&&control.labels[0];
+  if(label&&!label.querySelector('svg'))label.insertAdjacentHTML('afterbegin',uiIcon(name,19));
+ });
+ const modeLabel=Array.from(form.querySelectorAll('.field>label')).find(label=>label.textContent.trim()==='طريقة السداد');
+ if(modeLabel&&!modeLabel.querySelector('svg'))modeLabel.insertAdjacentHTML('afterbegin',uiIcon('wallet',19));
+ setCreateFormValues(form);
  const update=()=>{
   const mode=form.elements.installmentMode.value||'count';
   const manager=form.elements.managerMode.value||'only';
