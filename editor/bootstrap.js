@@ -287,8 +287,10 @@
     return !!directTextNode(el, false) || (!el.children.length && !!String(el.textContent || '').trim());
   }
   function selectControl(label, prop, current, options, isAttr) {
+    var list=options.slice(), found=list.some(function(o){return String(o[0])===String(current);});
+    if (!found && current !== undefined && current !== null && String(current) !== '') list.unshift([String(current),String(current)+' (القيمة الحالية)']);
     return '<label class="se-field"><span>' + esc(label) + '</span><select ' + (isAttr ? 'data-attr="' : 'data-style="') + esc(prop) + '">' +
-      options.map(function (o) { return '<option value="' + esc(o[0]) + '"' + (String(current) === String(o[0]) ? ' selected' : '') + '>' + esc(o[1]) + '</option>'; }).join('') +
+      list.map(function (o) { return '<option value="' + esc(o[0]) + '"' + (String(current) === String(o[0]) ? ' selected' : '') + '>' + esc(o[1]) + '</option>'; }).join('') +
       '</select></label>';
   }
   function sliderControl(label, key, prop, value, min, max, step, unit, extra) {
@@ -338,6 +340,7 @@
         selectControl('التمرير العمودي','overflow-y',cs.overflowY,[['visible','إظهار'],['hidden','إخفاء'],['auto','تلقائي'],['scroll','دائماً']])+
         selectControl('التمرير الأفقي','overflow-x',cs.overflowX,[['visible','إظهار'],['hidden','إخفاء'],['auto','تلقائي'],['scroll','دائماً']])+
         selectControl('أعمدة Grid','grid-template-columns',cs.gridTemplateColumns,[['none','تلقائي'],['1fr','عمود واحد'],['repeat(2,minmax(0,1fr))','عمودان'],['repeat(3,minmax(0,1fr))','3 أعمدة'],['repeat(4,minmax(0,1fr))','4 أعمدة']])+
+        selectControl('توزيع الصفوف','align-content',cs.alignContent,[['normal','تلقائي'],['start','البداية'],['center','الوسط'],['end','النهاية'],['space-between','مسافة بينية'],['space-around','مسافة حولية'],['stretch','تمديد']])+
         '</div><div class="se-layout-section"><b>المسافات والأبعاد</b>'+
         sliderControl('المسافة بين العناصر','layout-gap','gap',parseInt(cs.gap,10)||0,0,48,1,'px')+
         sliderControl('ارتفاع الحاوية الأدنى','layout-min-height','min-height',parseInt(cs.minHeight,10)||0,0,700,5,'px')+
@@ -345,6 +348,9 @@
         sliderControl('مرونة التمدد','layout-grow','flex-grow',parseFloat(cs.flexGrow)||0,0,5,.1,'')+
         sliderControl('مرونة الانكماش','layout-shrink','flex-shrink',parseFloat(cs.flexShrink)||1,0,3,.1,'')+
         selectControl('عرض الحاوية','width',cs.width,[['auto','تلقائي'],['100%','عرض كامل'],['fit-content','حسب المحتوى'],['max-content','أكبر محتوى']])+
+        selectControl('ارتفاع الحاوية','height',cs.height,[['auto','تلقائي'],['100%','ارتفاع كامل'],['fit-content','حسب المحتوى'],['max-content','أكبر محتوى']])+
+        selectControl('أقل عرض','min-width',cs.minWidth,[['0px','صفر'],['100%','عرض كامل'],['auto','تلقائي']])+
+        selectControl('أقصى عرض','max-width',cs.maxWidth,[['none','بلا حد'],['100%','عرض كامل'],['fit-content','حسب المحتوى']])+
         '</div><div class="se-hint">تتحكم هذه الإعدادات في ترتيب العناصر داخل الحاوية. اختر «تمرير عند الحاجة» إذا كان المحتوى أطول من المساحة المتاحة.</div>';
     } else if (t==='border') {
       var radius=parseInt(valueOf(el,'border-radius','8px'),10)||0, padding=parseInt(valueOf(el,'padding','0px'),10)||0;
