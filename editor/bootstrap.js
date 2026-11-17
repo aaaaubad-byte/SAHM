@@ -108,6 +108,10 @@
         input._seEditKind = 'style'; input._seEditProp = prop;
       }
       var value = input.value;
+      if ((prop === 'width' || prop === 'height') && w.getComputedStyle(el).display === 'inline') {
+        if (!Object.prototype.hasOwnProperty.call(input, '_seDisplayBefore')) input._seDisplayBefore = el.style.display || '';
+        el.style.display = 'inline-block';
+      }
       if (input.hasAttribute('data-shadow-level')) { var level=Number(value)||0; value=level?'0 4px '+level+'px rgba(0,0,0,'+(Math.min(.28,.08+level/150).toFixed(2))+')':''; }
       else if (input.hasAttribute('data-unit-scale')) value=String((Number(value)||0)*Number(input.getAttribute('data-unit-scale')));
       else if (input.getAttribute('data-unit') && value !== '') value += input.getAttribute('data-unit');
@@ -167,10 +171,22 @@
     var kind = input._seEditKind, prop = input._seEditProp, before = input._seBefore, after;
     if (kind === 'style') {
       after = el.style.getPropertyValue(prop);
-      delete input._seBefore; delete input._seEditKind; delete input._seEditProp;
-      if (before === after) return;
+      var displayBefore = input._seDisplayBefore, displayAfter = el.style.display || '';
+      delete input._seBefore; delete input._seEditKind; delete input._seEditProp; delete input._seDisplayBefore;
+      if (before === after && (displayBefore === undefined || displayBefore === displayAfter)) return;
       function apply(value) { if (value) el.style.setProperty(prop, value); else el.style.removeProperty(prop); }
-      record('style.set', el, { property: prop, before: before, after: after }, function () { apply(before); }, function () { apply(after); });
+      if (displayBefore !== undefined && displayBefore !== displayAfter) {
+        var meta = w.SahmEditorCore.identify(el), timestamp = new Date().toISOString();
+        var operations = [{type:'style.set',elementId:meta.id,screen:meta.screen,source:meta,timestamp:timestamp,property:prop,before:before,after:after},
+          {type:'style.set',elementId:meta.id,screen:meta.screen,source:meta,timestamp:timestamp,property:'display',before:displayBefore,after:displayAfter}];
+        state.history.pushGroup(operations,
+          function(){apply(before);if(displayBefore)el.style.display=displayBefore;else el.style.removeProperty('display');},
+          function(){apply(after);el.style.display=displayAfter;});
+        state.saved=false;
+      } else {
+        if (before === after) return;
+        record('style.set', el, { property: prop, before: before, after: after }, function () { apply(before); }, function () { apply(after); });
+      }
     } else if (kind === 'position') {
       after = el.style.translate || '';
       delete input._seBefore; delete input._seEditKind;
