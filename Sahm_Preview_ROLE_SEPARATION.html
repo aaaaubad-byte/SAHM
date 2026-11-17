@@ -2330,13 +2330,14 @@ body {
 
 </style>
 <style id="cg-create-form-refinement">
-/* One continuous form: no visual section breaks. */
+/* Comfortable single-form layout, balanced for compact phone viewports. */
 .cg-form .cg-card{
  display:grid;
  grid-template-columns:repeat(2,minmax(0,1fr));
- column-gap:12px;
- row-gap:7px;
+ column-gap:14px;
+ row-gap:10px;
  align-content:start;
+ padding:15px 16px!important;
 }
 .cg-form .cg-section{display:contents;margin:0;padding:0;border:0}
 .cg-form .cg-section>.field:has(#cg-name),
@@ -2349,17 +2350,17 @@ body {
 .cg-form .cg-section>#manager-shares-field,
 .cg-form .cg-card>#create-final-submit{grid-column:1/-1}
 .cg-form .cg-section>#installments-count-field,
-.cg-form .cg-section>#installment-amount-field{grid-column:span 1}
-.cg-form .field{margin:5px 0}
+.cg-form .cg-section>#installment-amount-field{grid-column:1/-1;min-width:0}
+.cg-form .field{min-width:0;margin:4px 0}
 .cg-form .field>label{
  display:flex;
  align-items:center;
- gap:7px;
- margin:0 0 5px;
+ gap:8px;
+ margin:0 0 7px;
  color:#111827;
- font-size:13.5px!important;
+ font-size:14px!important;
  font-weight:700;
- line-height:1.4;
+ line-height:1.45;
 }
 .cg-form .field>label>svg{
  display:block;
@@ -2373,12 +2374,17 @@ body {
 }
 .cg-form .field input,
 .cg-form .field select{
+ display:block;
+ width:100%;
+ min-width:0;
+ min-height:45px;
+ padding:10px 12px;
  border:1.2px solid #aeb8c8;
  background:#fff;
  color:#111827;
  border-radius:var(--radius-control);
- min-height:43px;
- font-size:14px;
+ font-size:15px!important;
+ line-height:1.35;
 }
 .cg-form .field input:focus,
 .cg-form .field select:focus,
@@ -2389,14 +2395,21 @@ body {
  border-color:var(--primary);
  box-shadow:none!important;
 }
-.cg-form .cg-row{grid-template-columns:minmax(0,1.25fr) minmax(0,.85fr);gap:10px}
-.cg-form .grid2{gap:10px}
-.cg-form .cg-seg{margin:1px 0 4px;gap:8px}
-.cg-form .cg-seg label{min-height:43px;display:flex;align-items:center;justify-content:center;gap:7px}
+.cg-form .cg-row{grid-template-columns:minmax(0,1.25fr) minmax(0,.85fr);gap:12px}
+.cg-form .grid2{gap:12px}
+.cg-form .cg-seg{margin:2px 0 4px;gap:9px}
+.cg-form .cg-seg label{min-height:45px;display:flex;align-items:center;justify-content:center;gap:8px;padding:0 10px}
 .cg-form .cg-seg label>svg{width:18px;height:18px;flex:0 0 18px;color:var(--primary)}
-.cg-form .cg-result{margin:1px 0 5px}
-.cg-form #cg-installment-preview{min-width:0}
-.cg-form #create-final-submit{margin-top:7px}
+.cg-form .cg-result{margin:2px 0 4px;padding:9px 12px}
+.cg-form #cg-installment-preview{
+ min-width:0;
+ max-height:88px;
+ overflow-y:auto;
+ overscroll-behavior:contain;
+ padding-inline:2px;
+}
+.cg-form #cg-installment-preview:empty{display:none}
+.cg-form #create-final-submit{min-height:45px;margin-top:5px}
 .cg-success-card{padding:16px!important}
 .cg-success{gap:3px;margin:0 0 14px}
 .cg-success-icon{display:grid;place-items:center;width:62px;height:62px;margin:0 0 7px;color:#16845c;background:#eaf7f0;border-radius:18px}
@@ -2421,12 +2434,20 @@ body {
 .cg-success-invite-title{display:flex;align-items:center;gap:8px;margin-bottom:10px;color:var(--ink);font-weight:800}
 .cg-success-invite-title svg{width:19px;height:19px;color:var(--primary)}
 .cg-success-invite .cg-manual{margin-top:9px}
-.cg-success-invite .cg-manual summary{cursor:pointer}
-@media(max-width:360px){
- .cg-form .cg-card{column-gap:8px}
- .cg-form .cg-row,.cg-form .grid2{gap:7px}
+@media(max-width:380px){
+ .cg-form .cg-card{column-gap:10px;padding:13px!important}
+ .cg-form .cg-row,.cg-form .grid2{gap:9px}
+ .cg-form .field input,.cg-form .field select{min-height:43px}
  .cg-success-summary{gap:6px}
  .cg-success-summary>div{padding:8px}
+}
+@media(max-height:760px){
+ .cg-form .cg-card{row-gap:8px;padding-block:12px!important}
+ .cg-form .field>label{margin-bottom:5px}
+ .cg-form .field input,.cg-form .field select{min-height:41px;padding-block:8px}
+ .cg-form .cg-seg label{min-height:41px}
+ .cg-form #cg-installment-preview{max-height:64px}
+ .cg-form #create-final-submit{min-height:42px}
 }
 </style>
 
