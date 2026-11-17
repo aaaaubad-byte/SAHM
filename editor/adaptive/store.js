@@ -109,7 +109,16 @@ function normalizeDocument(collection, id, input, previous, actor) {
       if (!isObject(item) || !validId(item.elementId, /^[A-Za-z0-9][A-Za-z0-9:_-]{0,95}$/)) throw fail('OVERRIDE_REQUIRES_STABLE_ELEMENT_ID');
       if (seen.has(item.elementId)) throw fail('DUPLICATE_OVERRIDE_ELEMENT');
       seen.add(item.elementId);
-      return { elementId: item.elementId, styles: safeStyles(item.styles) };
+      const result = { elementId: item.elementId, styles: safeStyles(item.styles) };
+      if (item.expectedTag != null) {
+        if (typeof item.expectedTag !== 'string' || !/^[a-z][a-z0-9-]{0,31}$/.test(item.expectedTag)) throw fail('INVALID_OVERRIDE_EXPECTED_TAG');
+        result.expectedTag = item.expectedTag;
+      }
+      if (item.expectedStructureHash != null) {
+        if (typeof item.expectedStructureHash !== 'string' || !/^[a-zA-Z0-9_-]{4,96}$/.test(item.expectedStructureHash)) throw fail('INVALID_OVERRIDE_STRUCTURE_HASH');
+        result.expectedStructureHash = item.expectedStructureHash;
+      }
+      return result;
     });
     const roleRaw = input.roleBindings != null ? input.roleBindings : previous && previous.roleBindings;
     if (roleRaw != null && (!Array.isArray(roleRaw) || roleRaw.length > 500)) throw fail('INVALID_ROLE_BINDINGS');

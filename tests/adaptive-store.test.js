@@ -117,11 +117,13 @@ test('screen assignments retain explicit shared profile and component priorities
     profiles: [{ id: 'mobile-base', priority: 10, enabled: true }, { id: 'rtl-overrides', priority: 20, enabled: true }],
     components: [{ id: 'card-default', priority: 5, enabled: true }],
     roleBindings: [{ elementId: 'se-home-title', semanticRole: 'shared-title' }, { elementId: 'se-home-subtitle', semanticRole: 'shared-title' }],
-    overrides: [{ elementId: 'se-home-title', styles: { 'font-size': '21px' } }]
+    overrides: [{ elementId: 'se-home-title', expectedTag: 'h1', expectedStructureHash: 'abcd1234', styles: { 'font-size': '21px' } }]
   });
   assert.equal(ctx.capture.status, 201);
   assert.equal(ctx.capture.body.item.screenId, 'home');
   assert.equal(ctx.capture.body.item.roleBindings.length, 2);
+  assert.equal(ctx.capture.body.item.overrides[0].expectedTag, 'h1');
+  assert.equal(ctx.capture.body.item.overrides[0].expectedStructureHash, 'abcd1234');
   assert.deepEqual(ctx.capture.body.item.profiles.map((item) => item.priority), [10, 20]);
 });
 
@@ -139,5 +141,14 @@ test('role bindings reject invalid roles and duplicate element ids', async () =>
   await call(ctx, 'PUT', '/api/adaptive/assignments/profile', { expectedVersion: 1, profiles: [], components: [], overrides: [], roleBindings: [{ elementId: 'se-title', semanticRole: 'bad role' }] });
   assert.equal(ctx.capture.status, 400);
   await call(ctx, 'PUT', '/api/adaptive/assignments/profile', { expectedVersion: 1, profiles: [], components: [], overrides: [], roleBindings: [{ elementId: 'se-title', semanticRole: 'shared-title' }, { elementId: 'se-title', semanticRole: 'other-title' }] });
+  assert.equal(ctx.capture.status, 400);
+});
+
+test('screen override structure guards reject malformed fingerprints', async () => {
+  const ctx = setup();
+  await call(ctx, 'POST', '/api/adaptive/assignments', {
+    id: 'dashboard', profiles: [], components: [], roleBindings: [],
+    overrides: [{ elementId: 'se-title', expectedTag: 'h1', expectedStructureHash: 'bad hash', styles: { 'font-size': '20px' } }]
+  });
   assert.equal(ctx.capture.status, 400);
 });

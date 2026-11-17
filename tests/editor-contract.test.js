@@ -73,3 +73,15 @@ test('adaptive runtime monitors screen transitions and supports responsive rule-
   assert.ok(ui.includes('minWidth'));
   assert.ok(ui.includes('maxWidth'));
 });
+
+test('adaptive UI displays shared profile impact and separates screen-only overrides', () => {
+  const ui = fs.readFileSync(path.join(root, 'editor/adaptive/ui.js'), 'utf8');
+  const store = fs.readFileSync(path.join(root, 'editor/adaptive/store.js'), 'utf8');
+  const engine = fs.readFileSync(path.join(root, 'editor/adaptive/engine.js'), 'utf8');
+  assert.ok(ui.includes('s.assignments'));
+  assert.ok(ui.includes('نطاق تأثير الملف المشترك'));
+  assert.ok(ui.includes('value="screen"'));
+  assert.ok(ui.includes('saveRefs(null,null,null,overrides)'));
+  assert.ok(store.includes('expectedStructureHash'));
+  assert.ok(engine.includes('OVERRIDE_STRUCTURE_MISMATCH'));
+});
