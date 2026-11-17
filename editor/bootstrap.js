@@ -61,21 +61,18 @@
   function updateTransformControls() {
     var el = state.selected, panel = document.getElementById('sahm-editor-panel');
     if (!el || !panel) return;
-    var width = panel.querySelector('[data-style="width"]'), height = panel.querySelector('[data-style="height"]');
-    var rotate = panel.querySelector('[data-style="rotate"]');
-    var posX = panel.querySelector('[data-position-axis="x"]'), posY = panel.querySelector('[data-position-axis="y"]');
-    if (width && width.type === 'number' && document.activeElement !== width) width.value = Math.round(el.offsetWidth || 0);
-    if (height && height.type === 'number' && document.activeElement !== height) height.value = Math.round(el.offsetHeight || 0);
-    if (rotate) {
-      var angle = parseFloat(el.style.rotate) || 0;
-      if (document.activeElement !== rotate) rotate.value = angle;
-      var readout = rotate.parentElement && rotate.parentElement.querySelector('[data-rotate-value]');
-      if (readout) readout.textContent = angle + '°';
+    function sync(input, value, unit) {
+      if (!input || document.activeElement === input) return;
+      input.value = value;
+      var wrap = input.closest('.se-slider-control'), readout = wrap && wrap.querySelector('[data-range-value]');
+      if (readout) readout.textContent = value + (unit || input.getAttribute('data-unit') || '');
     }
+    sync(panel.querySelector('[data-style="width"]'), Math.round(el.offsetWidth || 0), 'px');
+    sync(panel.querySelector('[data-style="height"]'), Math.round(el.offsetHeight || 0), 'px');
+    sync(panel.querySelector('[data-style="rotate"]'), parseFloat(el.style.rotate) || 0, '°');
     var parts = String(el.style.translate || '0px 0px').trim().split(/\s+/);
-    var x = parseFloat(parts[0]) || 0, y = parseFloat(parts[1]) || 0;
-    if (posX && document.activeElement !== posX) posX.value = x;
-    if (posY && document.activeElement !== posY) posY.value = y;
+    sync(panel.querySelector('[data-position-axis="x"]'), parseFloat(parts[0]) || 0, 'px');
+    sync(panel.querySelector('[data-position-axis="y"]'), parseFloat(parts[1]) || 0, 'px');
   }
   function updateSelectionFrame() {
     var frame = document.querySelector('#sahm-editor-panel [data-se-selection-frame]');
@@ -149,15 +146,18 @@
       var confirm = document.getElementById('se-confirm-static-text');
       if (!confirm || !confirm.checked) {
         status('أكد أولاً أن النص ثابت وليس بيانات مستخدم.', 'error');
-        input.value = el.textContent || '';
+        input.value = editableText(el);
         return;
       }
+      var textNode = input._seTextNode || directTextNode(el, true);
+      if (!textNode) { status('حدد النص الداخلي نفسه لتعديله دون استبدال بنية الحاوية.', 'error'); return; }
       if (!Object.prototype.hasOwnProperty.call(input, '_seBefore')) {
-        input._seBefore = el.textContent || '';
+        input._seBefore = textNode.nodeValue || '';
+        input._seTextNode = textNode;
         input._seEditKind = 'text';
       }
-      el.textContent = input.value;
-      input._seAfter = el.textContent;
+      textNode.nodeValue = input.value;
+      input._seAfter = textNode.nodeValue;
     }
     scheduleSelectionFrame();
   }
@@ -184,10 +184,11 @@
       function apply(value) { if (value === null || value === '') el.removeAttribute(prop); else el.setAttribute(prop, value); }
       record('attribute.set', el, { attribute: prop, before: before, after: after }, function () { apply(before); }, function () { apply(after); });
     } else if (kind === 'text') {
-      after = el.textContent || '';
-      delete input._seBefore; delete input._seEditKind;
+      var node = input._seTextNode;
+      after = node ? node.nodeValue : '';
+      delete input._seBefore; delete input._seEditKind; delete input._seTextNode;
       if (before === after) return;
-      function apply(value) { el.textContent = value; }
+      function apply(value) { if (node) node.nodeValue = value; }
       record('text.set', el, { before: before, after: after }, function () { apply(before); }, function () { apply(after); });
     }
   }
@@ -246,6 +247,32 @@
     var v = el ? w.getComputedStyle(el).getPropertyValue(prop) : '';
     return v && v !== 'none' ? v : fallback;
   }
+  function colorHex(value, fallback) {
+    var v = String(value || '').trim(), m = v.match(/^#([0-9a-f]{3}|[0-9a-f]{6})$/i);
+    if (m) return m[1].length === 3 ? '#' + m[1].split('').map(function (x) { return x + x; }).join('') : v;
+    m = v.match(/rgba?\(\s*([\d.]+)[,\s]+([\d.]+)[,\s]+([\d.]+)/i);
+    if (!m) return fallback;
+    return '#' + [m[1],m[2],m[3]].map(function (x) { return Math.max(0,Math.min(255,Math.round(Number(x)||0))).toString(16).padStart(2,'0'); }).join('');
+  }
+  function directTextNode(el, create) {
+    if (!el) return null;
+    for (var i = 0; i < el.childNodes.length; i++) if (el.childNodes[i].nodeType === 3) return el.childNodes[i];
+    if (create && !el.children.length) { var node = document.createTextNode(''); el.appendChild(node); return node; }
+    return null;
+  }
+  function editableText(el) {
+    var node = directTextNode(el, false);
+    return node ? node.nodeValue : (!el.children.length ? (el.textContent || '') : '');
+  }
+  function hasEditableText(el) {
+    if (!el || /^(IMG|INPUT|TEXTAREA|SELECT|OPTION|SVG|HR)$/.test(el.tagName)) return false;
+    return !!directTextNode(el, false) || (!el.children.length && !!String(el.textContent || '').trim());
+  }
+  function selectControl(label, prop, current, options, isAttr) {
+    return '<label class="se-field"><span>' + esc(label) + '</span><select ' + (isAttr ? 'data-attr="' : 'data-style="') + esc(prop) + '">' +
+      options.map(function (o) { return '<option value="' + esc(o[0]) + '"' + (String(current) === String(o[0]) ? ' selected' : '') + '>' + esc(o[1]) + '</option>'; }).join('') +
+      '</select></label>';
+  }
   function sliderControl(label, key, prop, value, min, max, step, unit, extra) {
     var id='se-range-'+key, numeric=Math.max(Number(min),Math.min(Number(max),Number(value)||0));
     return '<div class="se-slider-control"><div class="se-slider-title"><span>'+esc(label)+'</span><b data-range-value="'+id+'">'+numeric+esc(unit||'')+'</b></div><div class="se-slider-row"><button type="button" class="se-step-button" data-range-step="-1" data-range-target="'+id+'" aria-label="تقليل '+esc(label)+'">−</button><input id="'+id+'" type="range" min="'+min+'" max="'+max+'" step="'+step+'" value="'+numeric+'"'+(prop?' data-style="'+esc(prop)+'"':'')+(unit?' data-unit="'+esc(unit)+'"':'')+(extra||'')+'><button type="button" class="se-step-button" data-range-step="1" data-range-target="'+id+'" aria-label="زيادة '+esc(label)+'">+</button></div></div>';
@@ -266,14 +293,20 @@
     } else if (!el) {
       h+='<div class="se-empty">حدد عنصراً من شاشة المعاينة أولاً.</div>';
     } else if (t==='text') {
-      h+='<label class="se-field"><span>النص الظاهر</span><textarea data-text-edit rows="3">'+esc(el.textContent||'')+'</textarea></label><label class="se-check"><input id="se-confirm-static-text" type="checkbox"> أؤكد أن النص ثابت وليس بيانات مستخدم</label>';
+      h+='<label class="se-field"><span>النص المباشر للعنصر</span><textarea data-text-edit rows="3">'+esc(editableText(el))+'</textarea></label><label class="se-check"><input id="se-confirm-static-text" type="checkbox"> أؤكد أن هذا النص ثابت وليس بيانات مستخدم</label><div class="se-hint">يتم تعديل النص المباشر فقط مع الحفاظ على العناصر الداخلية.</div>';
     } else if (t==='color') {
-      h+='<label class="se-field"><span>لون النص</span><input type="color" data-style="color" value="#182b4d"></label><label class="se-field"><span>لون الخلفية</span><input type="color" data-style="background-color" value="#ffffff"></label>';
+      var currentTextColor=colorHex(valueOf(el,'color','#182b4d'),'#182b4d');
+      var currentBackground=colorHex(valueOf(el,'background-color','rgb(255,255,255)'),'#ffffff');
+      h+='<label class="se-field"><span>لون النص الحالي</span><input type="color" data-style="color" value="'+currentTextColor+'"></label><label class="se-field"><span>لون الخلفية الحالي</span><input type="color" data-style="background-color" value="'+currentBackground+'"></label>';
     } else if (t==='font') {
       var fontSize=parseInt(valueOf(el,'font-size','14px'),10)||14;
-      h+='<label class="se-field"><span>عائلة الخط</span><input data-style="font-family" value="'+esc(valueOf(el,'font-family','IBM Plex Sans Arabic'))+'"></label>'+sliderControl('حجم الخط','font-size','font-size',fontSize,10,36,1,'px')+'<label class="se-field"><span>سماكة الخط</span><select data-style="font-weight"><option value="400">عادي</option><option value="500">متوسط</option><option value="600">شبه عريض</option><option value="700">عريض</option></select></label><label class="se-field"><span>محاذاة النص</span><select data-style="text-align"><option value="right">يمين</option><option value="center">وسط</option><option value="left">يسار</option></select></label>';
+      var fontWeight=valueOf(el,'font-weight','400'), textAlign=valueOf(el,'text-align','right');
+      h+='<label class="se-field"><span>عائلة الخط</span><input data-style="font-family" value="'+esc(valueOf(el,'font-family','IBM Plex Sans Arabic'))+'"></label>'+sliderControl('حجم الخط','font-size','font-size',fontSize,10,48,1,'px')+
+        selectControl('سماكة الخط','font-weight',fontWeight,[['300','خفيف'],['400','عادي'],['500','متوسط'],['600','شبه عريض'],['700','عريض'],['800','ثقيل']])+
+        selectControl('محاذاة النص','text-align',textAlign,[['right','يمين'],['center','وسط'],['left','يسار'],['justify','ضبط']]);
     } else if (t==='shadow') {
-      var shadowMatch=(el.style.boxShadow||'').match(/0 4px (\d+)px/), shadowLevel=shadowMatch?Number(shadowMatch[1]):(el.style.boxShadow?8:0);
+      var shadowComputed=valueOf(el,'box-shadow','none'), shadowMatch=shadowComputed.match(/0px\s+4px\s+([\d.]+)px/) || shadowComputed.match(/0\s+4px\s+([\d.]+)px/);
+      var shadowLevel=shadowMatch?Math.round(Number(shadowMatch[1])):(shadowComputed==='none'?0:8);
       h+=sliderControl('قوة الظل','shadow-level','box-shadow',shadowLevel,0,30,1,'',' data-shadow-level');
     } else if (t==='border') {
       var radius=parseInt(valueOf(el,'border-radius','8px'),10)||0, padding=parseInt(valueOf(el,'padding','0px'),10)||0;
@@ -290,9 +323,24 @@
       var tr=String(el.style.translate||'0px 0px').split(/\s+/),tx=parseFloat(tr[0])||0,ty=parseFloat(tr[1])||0;
       h+=sliderControl('الموقع الأفقي','position-x','',tx,-180,180,1,'px',' data-position-axis="x"')+sliderControl('الموقع العمودي','position-y','',ty,-240,240,1,'px',' data-position-axis="y"')+'<div class="se-hint">يمكنك أيضاً تحريك العنصر من مقبض التحريك في المعاينة.</div>';
     } else if (t==='image' && kind==='image') {
-      h+='<label class="se-field"><span>مصدر الصورة</span><input type="url" data-attr="src" value="'+esc(el.getAttribute('src')||'')+'"></label><label class="se-field"><span>النص البديل</span><input data-attr="alt" value="'+esc(el.getAttribute('alt')||'')+'"></label><label class="se-field"><span>طريقة الملاءمة</span><select data-style="object-fit"><option>contain</option><option>cover</option><option>fill</option><option>none</option></select></label>';
+      var objectFit=valueOf(el,'object-fit','contain');
+      h+='<label class="se-field"><span>مصدر الصورة</span><input type="url" data-attr="src" value="'+esc(el.getAttribute('src')||'')+'"></label><label class="se-field"><span>النص البديل</span><input data-attr="alt" value="'+esc(el.getAttribute('alt')||'')+'"></label>'+
+        selectControl('طريقة ملاءمة الصورة','object-fit',objectFit,[['contain','احتواء كامل'],['cover','ملء الإطار'],['fill','تمديد'],['none','الحجم الأصلي']]);
     } else if (t==='click') {
-      h+='<div class="se-hint">هذا العنصر يحتفظ بسلوكه الأصلي. لا يتم إنشاء إجراء جديد أو تغيير ربطه الوظيفي من المحرر المرئي.</div>';
+      var pointerEvents=valueOf(el,'pointer-events','auto'), cursor=valueOf(el,'cursor','auto');
+      h+=selectControl('استقبال النقر','pointer-events',pointerEvents,[['auto','مفعّل'],['none','معطّل']])+
+        selectControl('شكل المؤشر','cursor',cursor,[['auto','تلقائي'],['pointer','يد النقر'],['not-allowed','غير مسموح'],['grab','قابل للسحب']])+
+        '<label class="se-field"><span>تلميح العنصر</span><input data-attr="title" value="'+esc(el.getAttribute('title')||'')+'"></label>';
+      if (el.tagName==='A') {
+        h+='<label class="se-field"><span>رابط الوجهة</span><input type="url" data-attr="href" value="'+esc(el.getAttribute('href')||'')+'"></label>'+
+          selectControl('طريقة فتح الرابط','target',el.getAttribute('target')||'',[['','في النافذة نفسها'],['_self','في النافذة نفسها'],['_blank','في نافذة جديدة']],true);
+      } else if (el.tagName==='BUTTON') {
+        h+=selectControl('نوع الزر','type',el.getAttribute('type')||'button',[['button','زر عادي'],['submit','إرسال نموذج'],['reset','إعادة ضبط']],true)+
+          selectControl('حالة الزر','disabled',el.hasAttribute('disabled')?'disabled':'',[['','مفعّل'],['disabled','معطّل']],true);
+      }
+      if (el.hasAttribute('data-go')) h+='<label class="se-field"><span>وجهة التنقل (data-go)</span><input data-attr="data-go" value="'+esc(el.getAttribute('data-go')||'')+'"></label>'+
+        '<div class="se-hint">يُحافظ المحرر على معالجات التطبيق الأصلية؛ تعديل وجهة التنقل متاح فقط للعناصر المرتبطة أصلاً بوجهة.</div>';
+      else h+='<div class="se-hint">يمكنك التحكم بتفعيل النقر والمؤشر والرابط. لا يضيف المحرر وظيفة تجارية جديدة إلى الزر.</div>';
     } else if (t==='more') {
       h+='<div class="se-more-actions"><button data-se-action="duplicate">'+icon('copy')+' نسخ العنصر</button><button data-se-action="delete">'+icon('trash')+' حذف العنصر</button><button data-se-tool="layers">'+icon('layers')+' ترتيب الطبقات</button></div>';
     }
@@ -310,10 +358,12 @@
     var selected=state.selected, history=state.history, kind=kindOf(selected);
     var tools=selected ? (
       toolButton('plus','العناصر')+(kind==='text' ? toolButton('type','النص') : '')+
+      (hasEditableText(selected)?toolButton('type','النص'):'')+
       toolButton('palette','اللون')+toolButton('font','الخط')+toolButton('shadow','الظلال')+
       toolButton('border','الإطار')+toolButton('maximize','الحجم')+toolButton('move','الموقع')+toolButton('rotate','الدوران')+
       (kind==='image'?toolButton('image','الصورة'):'')+
-      (kind==='button'?toolButton('click','السلوك'):'')+toolButton('more','المزيد')
+      ((kind==='button'||selected.tagName==='A')?toolButton('click','السلوك'):'')+
+      toolButton('layers','الطبقات')+toolButton('history','الجلسات')+toolButton('more','المزيد')
     ) : (
       toolButton('cursor','تحديد')+toolButton('plus','العناصر')+toolButton('layers','الطبقات')+
       actionButton('undo','تراجع')+actionButton('redo','إعادة')+toolButton('history','الجلسات')+actionButton('save','حفظ')
