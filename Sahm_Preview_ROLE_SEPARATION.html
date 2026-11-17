@@ -2817,19 +2817,19 @@ function setCreateFormValues(form){
 function createGroup(){
  const html=[
   '<form id="createForm" class="cg-form" novalidate><div class="card cg-card">',
-  '<section class="cg-section">
+  '<section class="cg-section">',
   '<div class="field"><label for="cg-name">اسم الجمعية</label><input id="cg-name" name="name" maxlength="120" autocomplete="off" required></div>',
   '<div class="grid2"><div class="field"><label for="cg-start">تاريخ البداية</label><input id="cg-start" name="startDate" type="date" required></div>',
   '<div class="field"><label for="cg-first">تاريخ أول قرعة</label><input id="cg-first" name="firstDrawOn" type="date" required></div></div>',
   '<div class="cg-result" id="cg-result" role="status" hidden><b>مدة الدورة: <span id="cg-duration">—</span></b></div>',
   '<div class="cg-row"><div class="field"><label for="cg-share">قيمة السهم في الدورة</label><input id="cg-share" name="shareAmount" type="number" min="0.01" step="0.01" inputmode="decimal" required></div>',
   '<div class="field"><label for="cg-currency">العملة</label><select id="cg-currency" name="currency" required><option value="">اختر</option><option value="YER">ريال يمني</option><option value="SAR">ريال سعودي</option><option value="USD">دولار</option></select></div></div></section>',
-  '<section class="cg-section">
+  '<section class="cg-section">',
   '<div class="field"><label>طريقة السداد</label><div class="cg-seg" role="radiogroup" aria-label="طريقة السداد"><label><input type="radio" name="installmentMode" value="count" checked><span>عدد الأقساط</span></label><label><input type="radio" name="installmentMode" value="amount"><span>قيمة القسط</span></label></div></div>',
   '<div class="field" id="installments-count-field"><label for="cg-count">عدد الأقساط</label><input id="cg-count" name="installments" type="number" min="1" step="1" value="1" required></div>',
   '<div class="field" id="installment-amount-field" hidden><label for="cg-amount">قيمة القسط الواحد</label><input id="cg-amount" name="installmentAmount" type="number" min="0.01" step="0.01" inputmode="decimal"></div>',
   '<div id="cg-installment-preview"></div></section>',
-  '<section class="cg-section">
+  '<section class="cg-section">',
   '<div class="cg-seg" role="radiogroup" aria-label="مشاركة المدير"><label><input type="radio" name="managerMode" value="only" checked><span>مدير فقط</span></label><label><input type="radio" name="managerMode" value="both"><span>مدير ومشارك</span></label></div>',
   '<div class="field" id="manager-shares-field" hidden><label for="cg-manager-shares">عدد أسهم المدير</label><input id="cg-manager-shares" name="managerShares" type="number" min="1" step="1"></div></section>',
   '<button class="btn primary full" id="create-final-submit" type="submit">إنشاء الجمعية</button></div></form>'
