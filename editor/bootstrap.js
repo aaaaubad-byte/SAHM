@@ -108,6 +108,7 @@
         input._seEditKind = 'style'; input._seEditProp = prop;
       }
       var value = input.value;
+      if (input.hasAttribute('data-zero-auto') && Number(value) === 0) value = '';
       if ((prop === 'width' || prop === 'height') && w.getComputedStyle(el).display === 'inline') {
         if (!Object.prototype.hasOwnProperty.call(input, '_seDisplayBefore')) input._seDisplayBefore = el.style.display || '';
         el.style.display = 'inline-block';
@@ -300,7 +301,7 @@
     var panelTitles={add:'إضافة عنصر',layers:'طبقات العناصر',sessions:'جلسات التحرير',text:'تحرير النص',color:'الألوان',font:'الخطوط',shadow:'الظلال',border:'الإطار والمسافات',position:'موقع العنصر',size:'الحجم',transform:'الحجم',rotate:'الدوران',layout:'تخطيط الحاوية',image:'إعدادات الصورة',click:'إعدادات العنصر',more:'أدوات إضافية'};
     var panelIcons={add:'plus',layers:'layers',sessions:'history',text:'type',color:'palette',font:'font',shadow:'shadow',border:'border',position:'move',size:'maximize',transform:'maximize',rotate:'rotate',layout:'layout',image:'image',click:'click',more:'more'};
     var panelIcon=panelIcons[t]||'more';
-    var h='<section class="se-tool-panel"><div class="se-tool-panel-head"><div class="se-tool-panel-title">'+icon(panelIcon)+'<b>'+esc(panelTitles[t]||'أداة التحرير')+'</b></div><button type="button" data-se-tool="select" aria-label="إغلاق">'+icon('close')+'</button></div><div class="se-tool-panel-body">';
+    var h='<section class="se-tool-panel'+(t==='layout'?' se-layout-tool-panel':'')+'"><div class="se-tool-panel-head"><div class="se-tool-panel-title">'+icon(panelIcon)+'<b>'+esc(panelTitles[t]||'أداة التحرير')+'</b></div><button type="button" data-se-tool="select" aria-label="إغلاق">'+icon('close')+'</button></div><div class="se-tool-panel-body">';
     if (t==='add') {
       h+='<div class="se-element-grid">'+[['text','نص','type'],['heading','عنوان','type'],['button','زر','click'],['card','بطاقة','layers'],['image','صورة','image'],['divider','فاصل','border']].map(function(x){return '<button type="button" class="se-element-choice" data-add-kind="'+x[0]+'">'+icon(x[2])+'<span>'+x[1]+'</span></button>';}).join('')+'</div><div class="se-add-note">سيُضاف العنصر إلى الشاشة الحالية ويمكنك تعديله مباشرة.</div>';
     } else if (t==='layers') {
