@@ -256,7 +256,7 @@
   }
   function directTextNode(el, create) {
     if (!el) return null;
-    for (var i = 0; i < el.childNodes.length; i++) if (el.childNodes[i].nodeType === 3) return el.childNodes[i];
+    for (var i = 0; i < el.childNodes.length; i++) if (el.childNodes[i].nodeType === 3 && String(el.childNodes[i].nodeValue || '').trim()) return el.childNodes[i];
     if (create && !el.children.length) { var node = document.createTextNode(''); el.appendChild(node); return node; }
     return null;
   }
