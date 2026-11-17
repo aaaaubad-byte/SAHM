@@ -1,7 +1,7 @@
 /* SAHM visual editor core: identity, snapshots, command history and local sessions. */
 (function (w) {
   'use strict';
-  var STYLE_KEYS = ['display','position','width','height','min-width','max-width','min-height','max-height','color','background-color','font-family','font-size','font-weight','line-height','letter-spacing','text-align','align-items','justify-content','flex-direction','flex-wrap','grid-template-columns','gap','row-gap','column-gap','padding','margin','border','border-radius','opacity','overflow'];
+  var STYLE_KEYS = ['display','position','width','height','min-width','max-width','min-height','max-height','color','background-color','font-family','font-size','font-weight','line-height','letter-spacing','text-align','align-items','align-content','align-self','justify-content','justify-self','flex-direction','flex-wrap','flex-grow','flex-shrink','flex-basis','grid-template-columns','grid-auto-flow','gap','row-gap','column-gap','padding','margin','border','border-radius','opacity','overflow','overflow-x','overflow-y'];
   var SAFE_ATTRS = ['id','class','role','aria-label','aria-hidden','type','data-action','data-go','data-tab','placeholder'];
   function screen() {
     return w.history && w.history.state && w.history.state.screenName ? String(w.history.state.screenName) : 'unknown';
