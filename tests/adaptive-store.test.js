@@ -116,10 +116,12 @@ test('screen assignments retain explicit shared profile and component priorities
     id: 'home',
     profiles: [{ id: 'mobile-base', priority: 10, enabled: true }, { id: 'rtl-overrides', priority: 20, enabled: true }],
     components: [{ id: 'card-default', priority: 5, enabled: true }],
+    roleBindings: [{ elementId: 'se-home-title', semanticRole: 'shared-title' }, { elementId: 'se-home-subtitle', semanticRole: 'shared-title' }],
     overrides: [{ elementId: 'se-home-title', styles: { 'font-size': '21px' } }]
   });
   assert.equal(ctx.capture.status, 201);
   assert.equal(ctx.capture.body.item.screenId, 'home');
+  assert.equal(ctx.capture.body.item.roleBindings.length, 2);
   assert.deepEqual(ctx.capture.body.item.profiles.map((item) => item.priority), [10, 20]);
 });
 
@@ -128,4 +130,14 @@ test('every adaptive endpoint requires editor authorization', async () => {
   await call(ctx, 'GET', '/api/adaptive/profiles');
   assert.equal(ctx.capture.status, 401);
   assert.equal(ctx.capture.body.error, 'AUTH_REQUIRED');
+});
+
+test('role bindings reject invalid roles and duplicate element ids', async () => {
+  const ctx = setup();
+  await call(ctx, 'POST', '/api/adaptive/assignments', { id: 'profile', profiles: [], components: [], overrides: [], roleBindings: [{ elementId: 'se-title', semanticRole: 'shared-title' }] });
+  assert.equal(ctx.capture.status, 201);
+  await call(ctx, 'PUT', '/api/adaptive/assignments/profile', { expectedVersion: 1, profiles: [], components: [], overrides: [], roleBindings: [{ elementId: 'se-title', semanticRole: 'bad role' }] });
+  assert.equal(ctx.capture.status, 400);
+  await call(ctx, 'PUT', '/api/adaptive/assignments/profile', { expectedVersion: 1, profiles: [], components: [], overrides: [], roleBindings: [{ elementId: 'se-title', semanticRole: 'shared-title' }, { elementId: 'se-title', semanticRole: 'other-title' }] });
+  assert.equal(ctx.capture.status, 400);
 });

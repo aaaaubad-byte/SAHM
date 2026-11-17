@@ -1,0 +1,53 @@
+#sahm-adaptive-root[hidden]{display:none!important}
+#sahm-adaptive-root{position:fixed;inset:0;z-index:100200;direction:rtl;color:#f3f6fb;font-family:"IBM Plex Sans Arabic",sans-serif;box-sizing:border-box}
+#sahm-adaptive-root *{box-sizing:border-box}
+#sahm-adaptive-root .sa-backdrop{position:absolute;inset:0;background:#07101dcc;backdrop-filter:blur(3px)}
+#sahm-adaptive-root .sa-panel{position:absolute;top:50%;right:50%;transform:translate(50%,-50%);display:flex;flex-direction:column;width:min(570px,calc(100vw - 22px));max-height:min(760px,calc(100dvh - 24px));background:#111d30;border:1px solid #ffffff24;border-radius:18px;box-shadow:0 24px 80px #0009;overflow:hidden}
+#sahm-adaptive-root .sa-header{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:12px 15px;background:#142238;border-bottom:1px solid #ffffff18}
+#sahm-adaptive-root .sa-header>div:first-child{display:grid;gap:2px}
+#sahm-adaptive-root .sa-header b{font-size:15px}
+#sahm-adaptive-root .sa-header small{font-size:11px;color:#aab7c9}
+#sahm-adaptive-root .sa-header>div:last-child{display:flex;align-items:center;gap:8px}
+#sahm-adaptive-root .sa-header button{width:34px;height:34px;border:1px solid #ffffff20;border-radius:10px;background:#1b2c45;color:#fff;font-size:22px}
+#sahm-adaptive-root button,#sahm-adaptive-root input,#sahm-adaptive-root textarea,#sahm-adaptive-root select{font:inherit}
+#sahm-adaptive-root button{cursor:pointer}
+#sahm-adaptive-root button:disabled{opacity:.45;cursor:not-allowed}
+#sahm-adaptive-root .sa-tabs{display:grid;grid-template-columns:repeat(4,1fr);gap:5px;padding:8px 10px;background:#101a2a;border-bottom:1px solid #ffffff16}
+#sahm-adaptive-root .sa-tabs button{min-height:36px;border:1px solid transparent;border-radius:9px;background:transparent;color:#aebbcf;font-size:12px}
+#sahm-adaptive-root .sa-tabs button.active{border-color:#5c8bdc66;background:#21395a;color:#fff}
+#sahm-adaptive-root .sa-content{min-height:0;overflow:auto;padding:13px;overscroll-behavior:contain}
+#sahm-adaptive-root .sa-pane{display:grid;gap:12px}
+#sahm-adaptive-root h3{margin:0;color:#e7edf7;font-size:13px}
+#sahm-adaptive-root .sa-context{display:grid;gap:3px;padding:10px 12px;border:1px solid #ffffff17;border-radius:11px;background:#172841}
+#sahm-adaptive-root .sa-context small{color:#9cacc2;font-size:10px}
+#sahm-adaptive-root .sa-context b{font-size:14px;overflow-wrap:anywhere}
+#sahm-adaptive-root .sa-list{display:grid;gap:5px;max-height:180px;overflow:auto}
+#sahm-adaptive-root .sa-row{display:grid;gap:3px;padding:9px 11px;border:1px solid #ffffff17;border-radius:10px;background:#17263b;color:#eaf0f8;text-align:right}
+#sahm-adaptive-root .sa-row.active{border-color:#6a9be0;background:#203957}
+#sahm-adaptive-root .sa-row b,#sahm-adaptive-root .sa-check b{font-size:11px}
+#sahm-adaptive-root .sa-row small,#sahm-adaptive-root .sa-check small{font-size:10px;color:#a5b5c9}
+#sahm-adaptive-root .sa-empty{padding:12px;border:1px dashed #ffffff27;border-radius:10px;color:#aab8ca;font-size:11px;line-height:1.7}
+#sahm-adaptive-root .sa-check{display:flex;align-items:center;gap:9px;padding:9px 10px;border:1px solid #ffffff14;border-radius:9px;background:#17263b}
+#sahm-adaptive-root .sa-check input{width:16px;height:16px;accent-color:#79a9ea;flex:0 0 auto}
+#sahm-adaptive-root .sa-check span{display:grid;gap:2px}
+#sahm-adaptive-root form,#sahm-adaptive-root .sa-shared{display:grid;gap:9px;padding:11px;border:1px solid #ffffff18;border-radius:11px;background:#15243a}
+#sahm-adaptive-root form label{display:grid;gap:5px;color:#bbc7d8;font-size:11px}
+#sahm-adaptive-root input,#sahm-adaptive-root textarea,#sahm-adaptive-root select{width:100%;min-width:0;padding:9px 10px;border:1px solid #ffffff23;border-radius:8px;outline:none;background:#0e1929;color:#f1f5fb;font-size:12px}
+#sahm-adaptive-root textarea{min-height:58px;resize:vertical}
+#sahm-adaptive-root .sa-fields{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}
+#sahm-adaptive-root .sa-field{display:grid;gap:4px;min-width:0}
+#sahm-adaptive-root .sa-field span{font-size:10px;color:#b8c5d7}
+#sahm-adaptive-root .sa-field input{direction:ltr;text-align:left}
+#sahm-adaptive-root .sa-primary,#sahm-adaptive-root .sa-secondary{width:100%;min-height:39px;padding:8px 12px;border-radius:9px;font-size:12px;font-weight:700}
+#sahm-adaptive-root .sa-primary{border:1px solid #4779bf;background:#2a568e;color:#fff}
+#sahm-adaptive-root .sa-secondary{border:1px solid #ffffff25;background:#22334b;color:#e7edf7}
+#sahm-adaptive-root .sa-diagnostics{display:grid;gap:6px;padding:10px;border:1px solid #ffffff18;border-radius:10px;background:#0e1929;font-size:10px;color:#aab8ca}
+#sahm-adaptive-root .sa-version{display:flex;align-items:center;justify-content:space-between;padding:8px;border-radius:8px;background:#1a2a40}
+#sahm-adaptive-root .sa-version b{font-size:11px}
+#sahm-adaptive-root .sa-version button{padding:6px 10px;border:1px solid #557cae;border-radius:7px;background:#203b5c;color:#fff;font-size:10px}
+#sahm-adaptive-root .sa-footer{padding:8px 13px;border-top:1px solid #ffffff17;background:#101a2a}
+#sahm-adaptive-root .sa-status{font-size:10px;color:#a9b8ca}
+#sahm-adaptive-root .sa-status[data-type=success]{color:#9cddb8}
+#sahm-adaptive-root .sa-status[data-type=warning]{color:#f2c17a}
+#sahm-adaptive-root .sa-status[data-type=error]{color:#f29a9a}
+@media(max-width:520px){#sahm-adaptive-root .sa-panel{top:8px;bottom:8px;right:8px;left:8px;transform:none;width:auto;max-height:none;border-radius:14px}#sahm-adaptive-root .sa-content{padding:10px}#sahm-adaptive-root .sa-tabs button{font-size:11px}}

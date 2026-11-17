@@ -426,7 +426,7 @@
       toolButton('cursor','تحديد')+toolButton('plus','العناصر')+toolButton('layers','الطبقات')+
       actionButton('undo','تراجع')+actionButton('redo','إعادة')+toolButton('history','الجلسات')+actionButton('save','حفظ')
     );
-    var html='<div class="se-topbar"><div class="se-brand"><b>سهم</b><small>محرر الواجهة</small></div><div class="se-top-actions"><button data-se-action="screen-builder" title="بناء شاشة جديدة">'+icon('layout')+'</button><button data-se-action="undo" '+(!history.canUndo()?'disabled':'')+' title="تراجع">'+icon('undo')+'</button><button data-se-action="redo" '+(!history.canRedo()?'disabled':'')+' title="إعادة">'+icon('redo')+'</button><button data-se-action="save" title="حفظ الجلسة">'+icon('save')+'</button><button data-se-action="exit" title="إغلاق المحرر">'+icon('close')+'</button></div></div>';
+    var html='<div class="se-topbar"><div class="se-brand"><b>سهم</b><small>محرر الواجهة</small></div><div class="se-top-actions"><button data-se-action="adaptive" title="نظام التكييف"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M4 7h10M18 7h2M4 17h2M10 17h10"/><circle cx="16" cy="7" r="2"/><circle cx="8" cy="17" r="2"/></svg></button><button data-se-action="screen-builder" title="بناء شاشة جديدة">'+icon('layout')+'</button><button data-se-action="undo" '+(!history.canUndo()?'disabled':'')+' title="تراجع">'+icon('undo')+'</button><button data-se-action="redo" '+(!history.canRedo()?'disabled':'')+' title="إعادة">'+icon('redo')+'</button><button data-se-action="save" title="حفظ الجلسة">'+icon('save')+'</button><button data-se-action="exit" title="إغلاق المحرر">'+icon('close')+'</button></div></div>';
     html += selectionFrameMarkup();
     html+=toolPanel();
     html+='<div class="se-dock-wrap"><div class="se-context-label">'+(selected?selectionBreadcrumb(selected):'<span>أدوات المحرر</span>')+'</div><nav class="se-dock" aria-label="أدوات التحرير">'+tools+'</nav><div id="sahm-editor-status" class="se-status">حدد عنصراً من المعاينة لعرض أدواته الخاصة.</div></div>';
@@ -463,7 +463,7 @@
     if (!el || el === app() || w.SahmEditorCore.isEditorNode(el)) return;
     if (state.selected) state.selected.classList.remove('se-selected');
     if (state.selectionObserver) { state.selectionObserver.disconnect(); state.selectionObserver = null; }
-    state.selected = el; state.activeTool = 'size'; w.SahmEditorCore.identify(el); el.classList.add('se-selected');
+    state.selected = el; state.activeTool = 'size'; w.SahmEditorCore.identify(el); if (w.SahmAdaptiveUI) w.SahmAdaptiveUI.setSelected(el); el.classList.add('se-selected');
     if (w.ResizeObserver) { state.selectionObserver = new ResizeObserver(scheduleSelectionFrame); state.selectionObserver.observe(el); }
     render();
   }
@@ -575,7 +575,8 @@
         else if (name === 'duplicate') duplicate();
         else if (name === 'delete') removeSelected();
         else if (name === 'add') addElement(document.getElementById('se-add-kind').value);
-        else if (name === 'screen-builder') { if (w.SahmScreenBuilder) w.SahmScreenBuilder.open(); else status('تعذر تحميل منشئ الشاشات.', 'error'); }
+        else if (name === 'adaptive') { if (w.SahmAdaptiveUI) w.SahmAdaptiveUI.open(state.selected).catch(function (e) { status('تعذر فتح نظام التكييف: ' + e.message, 'error'); }); else status('تعذر تحميل نظام التكييف.', 'error'); }
+         else if (name === 'screen-builder') { if (w.SahmScreenBuilder) w.SahmScreenBuilder.open(); else status('تعذر تحميل منشئ الشاشات.', 'error'); }
         else if (name === 'save') save();
         else if (name === 'export') { if (state.lastSession) w.SahmEditorCore.download(state.lastSession); else w.SahmEditorCore.listSessions().then(function (a) { if (a[0]) w.SahmEditorCore.download(a[0]); }); }
         else if (name === 'exit') toggle(false);
@@ -727,7 +728,7 @@
   }
   function keys(event) {
     if (!state.enabled) return;
-    if (event.key === 'Escape') { if (w.SahmScreenBuilder && w.SahmScreenBuilder.isOpen()) { w.SahmScreenBuilder.close(); event.preventDefault(); return; } toggle(false); event.preventDefault(); return; }
+    if (event.key === 'Escape') { if (w.SahmAdaptiveUI && w.SahmAdaptiveUI.isOpen()) { w.SahmAdaptiveUI.close(); event.preventDefault(); return; } if (w.SahmScreenBuilder && w.SahmScreenBuilder.isOpen()) { w.SahmScreenBuilder.close(); event.preventDefault(); return; } toggle(false); event.preventDefault(); return; }
     if ((event.ctrlKey || event.metaKey) && event.key.toLowerCase() === 'z') { event.preventDefault(); event.shiftKey ? state.history.redo() : state.history.undo(); }
     else if ((event.ctrlKey || event.metaKey) && event.key.toLowerCase() === 'y') { event.preventDefault(); state.history.redo(); }
   }
@@ -741,13 +742,13 @@
     if (state.enabled) {
       state.before = w.SahmEditorCore.capture(); state.history = w.SahmEditorCore.history(function (action) { if (action === 'push') refreshHistoryControls(); else render(); });
       state.selected = null; state.activeTool = null; state.saved = false; document.body.classList.add('sahm-editor-active'); preparePreview();
-      panel.hidden = false; button.hidden = true; render();
+      panel.hidden = false; button.hidden = true; render(); if (w.SahmAdaptiveEngine) w.SahmAdaptiveEngine.init(w.SahmEditorCore.screen()).catch(function (e) { status('تعذر تحميل إعدادات التكييف: ' + e.message, 'error'); });
       document.addEventListener('click', appClick, true); document.addEventListener('pointerover', hover, true); document.addEventListener('pointerdown', beginDrag, true); document.addEventListener('pointermove', moveDrag, true); document.addEventListener('pointermove', moveSelectionFrameDrag, true); document.addEventListener('pointerup', endDrag, true); document.addEventListener('pointerup', endSelectionFrameDrag, true); document.addEventListener('pointercancel', endDrag, true); document.addEventListener('pointercancel', endSelectionFrameDrag, true); document.addEventListener('scroll', scheduleSelectionFrame, true); w.addEventListener('resize', scheduleSelectionFrame); document.addEventListener('keydown', keys, true);
     } else {
       document.removeEventListener('click', appClick, true); document.removeEventListener('pointerover', hover, true); document.removeEventListener('pointerdown', beginDrag, true); document.removeEventListener('pointermove', moveDrag, true); document.removeEventListener('pointermove', moveSelectionFrameDrag, true); document.removeEventListener('pointerup', endDrag, true); document.removeEventListener('pointerup', endSelectionFrameDrag, true); document.removeEventListener('pointercancel', endDrag, true); document.removeEventListener('pointercancel', endSelectionFrameDrag, true); document.removeEventListener('scroll', scheduleSelectionFrame, true); w.removeEventListener('resize', scheduleSelectionFrame); document.removeEventListener('keydown', keys, true);
       if (state.selectionObserver) { state.selectionObserver.disconnect(); state.selectionObserver = null; }
       state.frameDragging = null; state.dragging = null; state.frameRaf = 0;
-      restorePreview(); document.body.classList.remove('sahm-editor-active'); panel.hidden = true; button.hidden = !canShow();
+      if (w.SahmAdaptiveUI && w.SahmAdaptiveUI.isOpen()) w.SahmAdaptiveUI.close(); if (w.SahmAdaptiveEngine) w.SahmAdaptiveEngine.clear(); restorePreview(); document.body.classList.remove('sahm-editor-active'); panel.hidden = true; button.hidden = !canShow();
       if (state.selected) state.selected.classList.remove('se-selected'); if (state.hover) state.hover.classList.remove('se-hover');
       state.selected = null; state.hover = null; state.activeTool = null;
     }

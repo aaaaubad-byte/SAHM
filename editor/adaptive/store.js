@@ -111,7 +111,17 @@ function normalizeDocument(collection, id, input, previous, actor) {
       seen.add(item.elementId);
       return { elementId: item.elementId, styles: safeStyles(item.styles) };
     });
-    return Object.assign(base, { screenId: id, profiles: profiles, components: components, overrides: overrides });
+    const roleRaw = input.roleBindings != null ? input.roleBindings : previous && previous.roleBindings;
+    if (roleRaw != null && (!Array.isArray(roleRaw) || roleRaw.length > 500)) throw fail('INVALID_ROLE_BINDINGS');
+    const roleSeen = new Set();
+    const roleBindings = (roleRaw || []).map((item) => {
+      if (!isObject(item) || !validId(item.elementId, /^[A-Za-z0-9][A-Za-z0-9:_-]{0,95}$/) ||
+          typeof item.semanticRole !== 'string' || !/^[a-z][a-z0-9_-]{0,47}$/.test(item.semanticRole)) throw fail('INVALID_ROLE_BINDING');
+      if (roleSeen.has(item.elementId)) throw fail('DUPLICATE_ROLE_BINDING');
+      roleSeen.add(item.elementId);
+      return { elementId: item.elementId, semanticRole: item.semanticRole };
+    });
+    return Object.assign(base, { screenId: id, profiles: profiles, components: components, overrides: overrides, roleBindings: roleBindings });
   }
   throw fail('UNKNOWN_ADAPTIVE_COLLECTION', 404);
 }

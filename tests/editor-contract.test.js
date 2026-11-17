@@ -5,7 +5,7 @@ const path = require('node:path');
 const root = path.resolve(__dirname, '..');
 
 test('visual editor modules and session contract exist', () => {
-  const required = ['editor/core.js','editor/sync.js','editor/ui/layers.js','editor/ui/inspector.js','editor/bootstrap.js','editor/editor.css','editor/session.schema.json','editor/server.js','package.json'];
+  const required = ['editor/core.js','editor/sync.js','editor/ui/layers.js','editor/ui/inspector.js','editor/bootstrap.js','editor/editor.css','editor/session.schema.json','editor/server.js','editor/adaptive/store.js','editor/adaptive/schema.json','editor/adaptive/engine.js','editor/adaptive/ui.js','editor/adaptive/adaptive.css','package.json'];
   for (const file of required) assert.ok(fs.existsSync(path.join(root, file)), file + ' exists');
   const schema = JSON.parse(fs.readFileSync(path.join(root, 'editor/session.schema.json'), 'utf8'));
   assert.equal(schema.properties.schemaVersion.const, 1);
@@ -43,4 +43,22 @@ test('adaptive screen builder is independently integrated', () => {
   assert.ok(css.includes('.seb-overlay'));
   assert.ok(css.includes('grid-template-columns:repeat(auto-fit'));
   assert.ok(css.includes('overflow-wrap:anywhere'));
+});
+
+test('adaptive runtime and UI are separately integrated with the editor', () => {
+  const html = fs.readFileSync(path.join(root, 'Sahm_Preview_ROLE_SEPARATION.html'), 'utf8');
+  const worker = fs.readFileSync(path.join(root, 'sw.js'), 'utf8');
+  const bootstrap = fs.readFileSync(path.join(root, 'editor/bootstrap.js'), 'utf8');
+  const engine = fs.readFileSync(path.join(root, 'editor/adaptive/engine.js'), 'utf8');
+  const ui = fs.readFileSync(path.join(root, 'editor/adaptive/ui.js'), 'utf8');
+  assert.ok(html.includes('/editor/adaptive/engine.js'));
+  assert.ok(html.includes('/editor/adaptive/ui.js'));
+  assert.ok(html.includes('/editor/adaptive/adaptive.css'));
+  assert.ok(worker.includes('/editor/adaptive/engine.js'));
+  assert.ok(bootstrap.includes("name === 'adaptive'"));
+  assert.ok(engine.includes('expectedStructureHash'));
+  assert.ok(engine.includes('roleBindings'));
+  assert.ok(engine.includes('ResizeObserver'));
+  assert.ok(ui.includes('data-form="rule"'));
+  assert.ok(ui.includes('data-restore'));
 });
