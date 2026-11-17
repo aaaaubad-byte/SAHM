@@ -2354,7 +2354,7 @@ const money=(n,c='YER')=>{const cur=SahmCore.CURRENCIES[c]||SahmCore.CURRENCIES.
 const today=()=>SahmApp.todayIn();
 const AUTH_SCREEN_NAMES=['welcome','register','profile-setup','reset-password','logged-out','account-login'];
 let db={session:false,verified:false,user:{id:null,name:'',phone:'',city:'',email:'',avatarKey:'avatar-01',notifications:true,biometric:false},groups:[],unread:0},screenName='welcome',params={},groupTab='all',groupDetailTab='overview',toastTimer,homeSlideTimer=null,homeSlideIndex=0,selectedInstallmentCycle=1,selectedInstallmentStatus='all',pendingJoinCode=null,pendingJoinContext=null,lastSubmittedRequestId=null,joinRequestFilter='pending',createGroupBusy=false,bulkInvitesBusy=false,joinRequestBusy=false,joinDecisionBusy=false,createdGroupLink=null,createdLinkWarning=null;
-let selectedAvatarKey='avatar-01',authBusy=false,activeProfile=null,pendingAccountLogin=null;
+let selectedAvatarKey='avatar-01',authBusy=false,activeProfile=null,pendingAccountLogin=null,authInteractionVersion=0;
 let currentGroupId=(db.groups[0]||{}).id||null,createdGroupId=null,createWizardStep=1,createFormSnapshot={},reminderRequest=null,navigation=null;
 SahmApp.onResult((name,result)=>{if(result&&result.ok===false)toast(result.message||'تعذر تنفيذ العملية');else if(result&&result.persisted===false)toast(result.warning||'تعذر حفظ التغييرات في تخزين المعاينة');});
 
@@ -2589,6 +2589,7 @@ function applyNavigationState(state,fromPop=false){
 }
 function go(s,p={},context={}){
  if(!Object.prototype.hasOwnProperty.call(ALL_SCREEN_REGISTRY,s)){toast('تعذر فتح الشاشة المطلوبة');return false}
+ if(AUTH_SCREEN_NAMES.includes(s))authInteractionVersion++;
  if(s==='managed-groups')context.groupTab='manager';if(s==='joined-groups')context.groupTab='member';
  if(!db.session&&!AUTH_SCREEN_NAMES.includes(s)){toast('سجل الدخول أولاً للمتابعة');return false}
  if(s==='create-group'&&screenName!=='create-group'){createWizardStep=1;createFormSnapshot={}}
@@ -2614,6 +2615,7 @@ function back(){
  if(!db.session&&screenName!=='welcome'){resetNavigation('welcome',{});return}
 }
 function toast(t){const el=$('#toast');el.textContent=t;el.classList.add('show');clearTimeout(toastTimer);toastTimer=setTimeout(()=>el.classList.remove('show'),2300)}
+function withAuthTimeout(operation,label){let timer;return Promise.race([Promise.resolve(operation),new Promise((_,reject)=>{timer=setTimeout(()=>reject(new Error(label||'انتهت مهلة الاتصال بالخادم. تحقق من اتصال الإنترنت ثم أعد المحاولة.')),25000)})]).finally(()=>clearTimeout(timer))}
 function header(title,sub=''){
  // Screen titles and back navigation now live exclusively in the fixed app bar.
  return ''
@@ -3768,7 +3770,7 @@ document.addEventListener('submit',async e=>{
   const previousUserId=db.user&&db.user.id;
   SahmSupabaseData.stopRealtime();
   try{
-   const signed=await SahmSupabase.signIn(d.email,d.password);
+   const signed=await withAuthTimeout(SahmSupabase.signIn(d.email,d.password));
    activeProfile=await SahmSupabase.profile(signed.user.id);
    SahmSupabaseData.clear();await SahmSupabaseData.init(activeProfile);SahmSupabaseData.install();
    db=load();currentGroupId=(db.groups[0]||{}).id||null;db.session=true;db.verified=!!signed.user.email_confirmed_at;
@@ -3792,7 +3794,7 @@ if(form.id==='loginForm'){
   const hadRemoteSession=SahmSupabaseData.isRemote();
   if(hadRemoteSession)SahmSupabaseData.stopRealtime();
   try{
-   const signed=await SahmSupabase.signIn(d.email,d.password);
+   const signed=await withAuthTimeout(SahmSupabase.signIn(d.email,d.password));
    SahmSupabaseData.clear();
    activeProfile=await SahmSupabase.profile(signed.user.id);
    selectedAvatarKey=activeProfile.avatarKey||'avatar-01';
@@ -3811,7 +3813,7 @@ if(form.id==='loginForm'){
   if(d.password!==d.confirmPassword){toast('كلمتا المرور غير متطابقتين');return}
   authBusy=true;setBusy(true,'جارٍ إنشاء الحساب...');
   try{
-   const created=await SahmSupabase.signUp(d.email,d.password,true);
+   const created=await withAuthTimeout(SahmSupabase.signUp(d.email,d.password,true));
    if(created.session){
     activeProfile=await SahmSupabase.profile(created.user.id);
     await SahmSupabaseData.init(activeProfile);SahmSupabaseData.install();db=load();currentGroupId=(db.groups[0]||{}).id||null;startRemoteRealtime();
@@ -3953,28 +3955,61 @@ if(form.id==='loginForm'){
  }
 });
 navigation=SahmNavigation.create({window:window,onChange:(state)=>applyNavigationState(state,true)});
-async function bootSahm(){
- try{
-  const session=await SahmSupabase.session();
-  if(session&&session.user){
-   activeProfile=await SahmSupabase.profile(session.user.id);
-   await SahmSupabaseData.init(activeProfile);SahmSupabaseData.install();db=load();currentGroupId=(db.groups[0]||{}).id||null;startRemoteRealtime();
-   db.session=true;db.verified=!!session.user.email_confirmed_at;
-   db.user=Object.assign(db.user,{id:session.user.id,email:session.user.email,name:activeProfile.fullName,phone:activeProfile.phone,city:activeProfile.city,avatarKey:activeProfile.avatarKey});
-   selectedAvatarKey=activeProfile.avatarKey||'avatar-01';
-   screenName=(location.hash.includes('reset-password')||new URLSearchParams(location.search).get('auth_action')==='reset-password')?'reset-password':(activeProfile.completed?((new URLSearchParams(location.search).get('invite')||new URLSearchParams(location.search).get('join'))?'join-group':'home'):'profile-setup');
-  }else{db.session=false;screenName='welcome'}
-  SahmSupabase.onAuthStateChange((event,sess)=>{
-   if(event==='PASSWORD_RECOVERY'){resetNavigation('reset-password',{});return;}
-   if(event==='SIGNED_OUT'){SahmSupabaseData.clear();db={session:false,verified:false,user:{id:null,name:'',phone:'',city:'',email:'',avatarKey:'avatar-01',notifications:true,biometric:false},groups:[],unread:0};currentGroupId=null;screenName='welcome';resetNavigation('welcome',{});}
-  });
- }catch(err){
+// Start the guest interface before any storage, network, or profile restoration work.
+navigation.start(routeSnapshot());
+try{render()}catch(err){document.querySelector('#screen').className='auth-screen';document.querySelector('#screen').innerHTML='<div style="background:white;color:#142f39;border-radius:18px;padding:20px;margin-top:35px"><h2>تعذر تشغيل المعاينة</h2><p>حدث خطأ أثناء تشغيل الواجهة. أعد فتح الملف في متصفح Chrome.</p><small>'+String(err&&err.message||err)+'</small></div>';console.error(err)}
+function attachSahmAuthListener(){
+ SahmSupabase.onAuthStateChange((event,sess)=>{
+  if(event==='PASSWORD_RECOVERY'){resetNavigation('reset-password',{});return;}
+  if(event==='SIGNED_OUT'){SahmSupabaseData.clear();db={session:false,verified:false,user:{id:null,name:'',phone:'',city:'',email:'',avatarKey:'avatar-01',notifications:true,biometric:false},groups:[],unread:0};currentGroupId=null;screenName='welcome';resetNavigation('welcome',{});}
+ });
+}
+async function finishSahmBoot(session,bootVersion){
+ if(bootVersion!==authInteractionVersion)return;
+ if(session&&session.user){
+  activeProfile=await SahmSupabase.profile(session.user.id);
+  if(bootVersion!==authInteractionVersion)return;
+  await SahmSupabaseData.init(activeProfile);
+  if(bootVersion!==authInteractionVersion)return;
+  SahmSupabaseData.install();db=load();currentGroupId=(db.groups[0]||{}).id||null;startRemoteRealtime();
+  db.session=true;db.verified=!!session.user.email_confirmed_at;
+  db.user=Object.assign(db.user,{id:session.user.id,email:session.user.email,name:activeProfile.fullName,phone:activeProfile.phone,city:activeProfile.city,avatarKey:activeProfile.avatarKey});
+  selectedAvatarKey=activeProfile.avatarKey||'avatar-01';
+  screenName=(location.hash.includes('reset-password')||new URLSearchParams(location.search).get('auth_action')==='reset-password')?'reset-password':(activeProfile.completed?((new URLSearchParams(location.search).get('invite')||new URLSearchParams(location.search).get('join'))?'join-group':'home'):'profile-setup');
+ }else{
   db.session=false;screenName='welcome';
-  console.warn('SAHM authentication bootstrap:',err);
-  setTimeout(()=>toast(SahmSupabase.friendlyError(err)),350);
  }
- navigation.start(routeSnapshot());
- try{render()}catch(err){document.querySelector('#screen').className='auth-screen';document.querySelector('#screen').innerHTML='<div style="background:white;color:#142f39;border-radius:18px;padding:20px;margin-top:35px"><h2>تعذر تشغيل المعاينة</h2><p>حدث خطأ أثناء تشغيل الواجهة. أعد فتح الملف في متصفح Chrome.</p><small>'+String(err&&err.message||err)+'</small></div>';console.error(err)}
+ if(bootVersion!==authInteractionVersion)return;
+ resetNavigation(screenName,{});
+}
+async function bootSahm(){
+ const bootVersion=authInteractionVersion;
+ attachSahmAuthListener();
+ const sessionTask=SahmSupabase.session();
+ let timer;
+ const timeoutTask=new Promise(resolve=>{timer=setTimeout(()=>resolve({timedOut:true}),10000)});
+ try{
+  const outcome=await Promise.race([
+   sessionTask.then(session=>({session}),error=>({error})),
+   timeoutTask
+  ]);
+  clearTimeout(timer);
+  if(outcome.timedOut){
+   toast('استعادة الجلسة تستغرق وقتًا أطول من المعتاد. يمكنك متابعة الدخول أو إنشاء حساب.');
+   sessionTask.then(session=>finishSahmBoot(session,bootVersion)).catch(error=>{
+    if(bootVersion===authInteractionVersion)console.warn('SAHM delayed session restore:',error);
+   });
+   return;
+  }
+  if(outcome.error)throw outcome.error;
+  await finishSahmBoot(outcome.session,bootVersion);
+ }catch(err){
+  clearTimeout(timer);
+  if(bootVersion!==authInteractionVersion)return;
+  db.session=false;
+  console.warn('SAHM authentication bootstrap:',err);
+  toast(SahmSupabase.friendlyError(err));
+ }
 }
 bootSahm();
 </script>
