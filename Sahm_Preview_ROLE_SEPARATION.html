@@ -2340,6 +2340,7 @@ body {
 }
 .cg-form .cg-section{display:contents;margin:0;padding:0;border:0}
 .cg-form .cg-card>.field:first-of-type,
+.cg-form .cg-card>.field:has(input[name="installmentMode"]),
 .cg-form .cg-card>.grid2,
 .cg-form .cg-card>.cg-result,
 .cg-form .cg-card>.cg-row,
@@ -2428,105 +2429,7 @@ body {
  .cg-success-summary>div{padding:8px}
 }
 </style>
-<style id="cg-create-form-refinement">
-/* One continuous form: no visual section breaks. */
-.cg-form .cg-card{
- display:grid;
- grid-template-columns:repeat(2,minmax(0,1fr));
- column-gap:12px;
- row-gap:7px;
- align-content:start;
-}
-.cg-form .cg-section{display:contents;margin:0;padding:0;border:0}
-.cg-form .cg-card>.field:first-of-type,
-.cg-form .cg-card>.grid2,
-.cg-form .cg-card>.cg-result,
-.cg-form .cg-card>.cg-row,
-.cg-form .cg-card>#cg-installment-preview,
-.cg-form .cg-card>.cg-seg,
-.cg-form .cg-card>#manager-shares-field,
-.cg-form .cg-card>#create-final-submit{grid-column:1/-1}
-.cg-form .cg-card>#installments-count-field,
-.cg-form .cg-card>#installment-amount-field{grid-column:span 1}
-.cg-form .field{margin:5px 0}
-.cg-form .field>label{
- display:flex;
- align-items:center;
- gap:7px;
- margin:0 0 5px;
- color:#111827;
- font-size:13.5px!important;
- font-weight:700;
- line-height:1.4;
-}
-.cg-form .field>label>svg{
- display:block;
- flex:0 0 19px;
- width:19px;
- height:19px;
- color:var(--primary);
- stroke:currentColor;
- stroke-width:1.8;
- fill:none;
-}
-.cg-form .field input,
-.cg-form .field select{
- border:1.2px solid #aeb8c8;
- background:#fff;
- color:#111827;
- border-radius:var(--radius-control);
- min-height:43px;
- font-size:14px;
-}
-.cg-form .field input:focus,
-.cg-form .field select:focus,
-.cg-form .field input:focus-visible,
-.cg-form .field select:focus-visible{
- outline:none!important;
- outline-offset:0!important;
- border-color:var(--primary);
- box-shadow:none!important;
-}
-.cg-form .cg-row{grid-template-columns:minmax(0,1.25fr) minmax(0,.85fr);gap:10px}
-.cg-form .grid2{gap:10px}
-.cg-form .cg-seg{margin:1px 0 4px;gap:8px}
-.cg-form .cg-seg label{min-height:43px;display:flex;align-items:center;justify-content:center;gap:7px}
-.cg-form .cg-seg label>svg{width:18px;height:18px;flex:0 0 18px;color:var(--primary)}
-.cg-form .cg-result{margin:1px 0 5px}
-.cg-form #cg-installment-preview{min-width:0}
-.cg-form #create-final-submit{margin-top:7px}
-.cg-success-card{padding:16px!important}
-.cg-success{gap:3px;margin:0 0 14px}
-.cg-success-icon{display:grid;place-items:center;width:62px;height:62px;margin:0 0 7px;color:#16845c;background:#eaf7f0;border-radius:18px}
-.cg-success-icon svg{width:34px;height:34px;stroke-width:1.8}
-.cg-success h1{font-size:18px;line-height:1.5}
-.cg-success strong{max-width:100%;font-size:16px;line-height:1.5;color:var(--ink)}
-.cg-success-summary{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px;margin:0 0 13px}
-.cg-success-summary>div{min-width:0;padding:10px;border:1px solid var(--line);border-radius:var(--radius-control);background:#fafbfe}
-.cg-success-summary span{display:flex;align-items:center;gap:6px;margin-bottom:5px;color:var(--muted);font-size:12px;font-weight:600}
-.cg-success-summary span svg{width:17px;height:17px;flex:0 0 17px;color:var(--primary)}
-.cg-success-summary b{display:block;color:var(--ink);font-size:14px;font-weight:750;overflow-wrap:anywhere}
-.cg-success-link{padding-top:11px;border-top:1px solid var(--line)}
-.cg-success-link>label{display:flex;align-items:center;gap:6px;margin-bottom:6px;color:var(--ink2);font-size:13px;font-weight:700}
-.cg-success-link>label svg,.cg-success-link-note svg{width:17px;height:17px;color:var(--primary)}
-.cg-success-link .field{margin:0}
-.cg-success-link input{direction:ltr;text-align:left;font-size:12px;min-height:40px}
-.cg-success-link .grid2{margin-top:7px}
-.cg-success-link .btn{min-height:40px;padding:8px;font-size:13px}
-.cg-success-link-note{display:flex;align-items:center;gap:7px;padding:10px 0;border-top:1px solid var(--line);color:var(--muted);font-size:12px}
-.cg-success-open{margin-top:12px}
-.cg-success-invite{padding:13px!important}
-.cg-success-invite-title{display:flex;align-items:center;gap:8px;margin-bottom:10px;color:var(--ink);font-weight:800}
-.cg-success-invite-title svg{width:19px;height:19px;color:var(--primary)}
-.cg-success-invite .cg-manual{margin-top:9px}
-.cg-success-invite .cg-manual summary{cursor:pointer}
-@media(max-width:360px){
- .cg-form .cg-card{column-gap:8px}
- .cg-form .cg-row,.cg-form .grid2{gap:7px}
- .cg-success-summary{gap:6px}
- .cg-success-summary>div{padding:8px}
-}
-</style>
+
 </head>
 <body><noscript><main dir="rtl" style="font-family:'IBM Plex Sans Arabic',sans-serif;padding:24px;color:#142f39"><h1>سهم</h1></main></noscript><div class="workspace"><div class="phone" id="app">
 <div id="topbar" class="topbar" style="display:none"></div><main id="screen" class="auth-screen">
