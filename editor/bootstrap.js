@@ -378,7 +378,7 @@
       toolButton('palette','اللون')+toolButton('font','الخط')+toolButton('shadow','الظلال')+
       toolButton('border','الإطار')+toolButton('maximize','الحجم')+toolButton('move','الموقع')+toolButton('rotate','الدوران')+
       (kind==='image'?toolButton('image','الصورة'):'')+
-      ((kind==='button'||selected.tagName==='A')?toolButton('click','السلوك'):'')+
+      ((kind==='button'||selected.tagName==='A'||selected.hasAttribute('data-go'))?toolButton('click','السلوك'):'')+
       toolButton('layers','الطبقات')+toolButton('history','الجلسات')+toolButton('more','المزيد')
     ) : (
       toolButton('cursor','تحديد')+toolButton('plus','العناصر')+toolButton('layers','الطبقات')+
