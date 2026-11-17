@@ -2428,8 +2428,8 @@ function uiIcon(name,size=20){
    Applies to inner screens only; the home screen, top bar and bottom bar are left untouched. */
 const IC_GLYPH={'⌁':'scroll','★':'trophy','✓':'check-circle','!':'alert','♧':'bell'};
 const IC_GO={'create-group':'plus-circle','join-group':'link','invite':'user-plus','invites':'send','group-detail':'landmark','groups':'landmark','members':'users','member-reception':'users','join-requests':'inbox','join-request-detail':'inbox','installments':'receipt','receipts':'file-text','audit':'scroll','draw-room':'shuffle','draw-history':'trophy','chat':'messages','news':'wall','home':'home','settings':'settings','edit-profile':'edit','notifications':'bell','profile':'user','welcome':'user','register':'user-plus'};
-const IC_ACTION={'copy-group-link':'copy','copy-new-invite':'copy','copy-bulk-invite-link':'copy','share-group-link':'share','share-bulk-invite-link':'share','pick-device-contacts':'contact','submit-bulk-invites':'send','record-paid':'check-circle','send-reminder':'bell','send-reminder-all':'bell','schedule-draw':'calendar-days','run-draw':'shuffle','create-group-link':'link','rotate-group-link':'refresh','pause-group-link':'pause','resume-group-link':'play','revoke-group-link':'x','approve-join-request':'check-circle','reject-join-request':'x','cancel-join-request':'x','cancel-invite':'x','invitation-interested':'check-circle','invitation-declined':'x','invitation-deferred':'clock','accept-legacy-invite-detail':'check-circle','continue-invitation-join':'arrow','create-next':'arrow','receipt-correct':'edit','switch-account':'refresh','add-account':'user-plus','logout-confirm':'exit-screen','close':'x','confirm-public-link-action':'alert','join-confirm':'check-circle','draw-presentation-completed':'check-circle','draw-presentation-failed':'alert'};
-const IC_TRAILING=['create-next','continue-invitation-join'];
+const IC_ACTION={'copy-group-link':'copy','copy-new-invite':'copy','copy-bulk-invite-link':'copy','share-group-link':'share','share-bulk-invite-link':'share','pick-device-contacts':'contact','submit-bulk-invites':'send','record-paid':'check-circle','send-reminder':'bell','send-reminder-all':'bell','schedule-draw':'calendar-days','run-draw':'shuffle','create-group-link':'link','rotate-group-link':'refresh','pause-group-link':'pause','resume-group-link':'play','revoke-group-link':'x','approve-join-request':'check-circle','reject-join-request':'x','cancel-join-request':'x','cancel-invite':'x','invitation-interested':'check-circle','invitation-declined':'x','invitation-deferred':'clock','accept-legacy-invite-detail':'check-circle','continue-invitation-join':'arrow','receipt-correct':'edit','switch-account':'refresh','add-account':'user-plus','logout-confirm':'exit-screen','close':'x','confirm-public-link-action':'alert','join-confirm':'check-circle','draw-presentation-completed':'check-circle','draw-presentation-failed':'alert'};
+const IC_TRAILING=['continue-invitation-join'];
 const IC_TEXT=[[/^إنشاء الجمعية$/,'check'],[/^(إغلاق|إلغاء)$/,'x'],[/^تأكيد/,'check'],[/^حفظ/,'check'],[/^تعديل/,'edit'],[/إنشاء حساب/,'user-plus'],[/تسجيل الخروج/,'exit-screen'],[/عرض/,'eye']];
 const IC_HEAD=[[/السداد/,'wallet'],[/رابط/,'link'],[/إعدادات|إدارة/,'settings'],[/القرعة|الدورات/,'shuffle'],[/نشر الأحداث|الأخبار|أخبار/,'wall'],[/الإشعارات/,'bell'],[/المدير/,'user-check'],[/ملخص/,'clipboard-list'],[/إضافة يدوية/,'user-plus'],[/الأعضاء|العضوية|المشارك/,'users'],[/دعوة|دعوات/,'send'],[/طلب/,'inbox'],[/التزام|الأقساط|القسط/,'wallet'],[/سجل|عمليات/,'scroll'],[/استلام/,'receipt'],[/كلمة المرور|الأمان/,'lock'],[/الحساب|الملف|بيانات/,'user'],[/جمعية|الجمعية/,'landmark']];
 const IC_LABEL=[[/متأخر/,'alert'],[/مدفوع/,'check-circle'],[/مستحق/,'clock'],[/اسم الجمعية|^الجمعية$/,'landmark'],[/بداية|تاريخ الإنشاء/,'calendar-days'],[/قرعة|الجولات|الجولة/,'shuffle'],[/قيمة|الدفعة|حصة|مبلغ|جائزة|التزام|إجمالي/,'wallet'],[/مدة|موعد|الدورة/,'clock'],[/القسط|الأقساط/,'receipt'],[/أسهم|الأسهم|السهم/,'layers'],[/المدير|مدير/,'user-check'],[/الأعضاء|المشارك|العضو/,'users'],[/الدعوات|دعوة/,'send'],[/طلبات|طلب/,'inbox'],[/الهاتف|رقم/,'phone'],[/البريد/,'mail'],[/المدينة/,'map-pin'],[/^الاسم|اسم/,'user'],[/العملة/,'coins'],[/طريقة/,'wallet'],[/كلمة المرور/,'lock'],[/الحالة|حالة/,'info']];
@@ -2739,13 +2739,9 @@ function managedGroups(){groupTab='manager';syncNavigationContext();groups()}
 function joinedGroups(){groupTab='member';syncNavigationContext();groups()}
 const CREATE_STEP_COUNT=1;
 function setCreateWizardStep(step,updateHistory=true){
- const previous=createWizardStep;createWizardStep=Math.max(1,Math.min(CREATE_STEP_COUNT,step));const form=document.getElementById('createForm');
+ createWizardStep=1;
+ const form=document.getElementById('createForm');
  if(form)createFormSnapshot=Object.fromEntries(new FormData(form));
- if(updateHistory&&navigation&&screenName==='create-group'&&previous!==createWizardStep)navigation.navigate(routeSnapshot());
- document.querySelectorAll('.cg-step').forEach((node,i)=>node.hidden=i+1!==createWizardStep);
- const next=document.getElementById('create-next'),submit=document.getElementById('create-final-submit');
- if(next)next.hidden=createWizardStep===CREATE_STEP_COUNT;if(submit)submit.hidden=createWizardStep!==CREATE_STEP_COUNT;
- document.getElementById('screen')?.scrollTo({top:0,behavior:'smooth'});
 }
 function createInput(form,name){return form.elements[name]&&form.elements[name].value?String(form.elements[name].value).trim():''}
 function createDraft(form){
@@ -3521,7 +3517,6 @@ async function handleAppAction(action,el){
   SahmSupabase.resetPassword(email).then(()=>toast('أرسلنا رابط استعادة كلمة المرور إلى بريدك الإلكتروني.')).catch(e=>toast(SahmSupabase.friendlyError(e)));return;
  }
  if(action==='back'){back();return}if(action==='overlay-close'||action==='close'){closeModal();return}
- if(action==='create-next'){if(validateCreateStep(createWizardStep))setCreateWizardStep(createWizardStep+1);return}
   if(action==='open-group'){go('group-detail',{}, {currentGroupId:el.dataset.id,groupDetailTab:'overview'});return}
  if(action==='home-managed'){go('managed-groups',{}, {groupTab:'manager'});return}if(action==='home-member'){go('joined-groups',{}, {groupTab:'member'});return}
  if(action==='home-slide'){setHomeSlide(Number(el.dataset.index)||0);return}if(action==='group-tab'){groupTab=el.dataset.tab;syncNavigationContext();groups();return}if(action==='detail-tab'){groupDetailTab=el.dataset.tab;syncNavigationContext();groupDetail();return}if(action==='join-request-filter'){joinRequestFilter=el.dataset.filter||'pending';syncNavigationContext();joinRequests();return}
@@ -3877,7 +3872,6 @@ if(form.id==='loginForm'){
  }
  e.preventDefault();
  if(form.id==='createForm'){
-  if(createWizardStep<CREATE_STEP_COUNT){if(validateCreateStep(createWizardStep))setCreateWizardStep(createWizardStep+1);return}
   if(createGroupBusy)return;
   if(!validateCreateStep(1)||!validateCreateStep(2))return;
   createGroupBusy=true;
