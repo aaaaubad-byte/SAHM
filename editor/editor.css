@@ -120,3 +120,20 @@ body.sahm-editor-active #app #bottomnav{flex-shrink:0!important}
  .se-step-button{width:32px;height:30px;font-size:19px}
  .se-slider-row input[type=range]{height:24px}
 }
+
+
+/* Layer tree: high-contrast labels, clear hierarchy, and readable selection. */
+.se-layers-help{margin:0 0 8px;padding:7px 9px;border:1px solid #405573;border-radius:8px;background:#22334b;color:#d5e1f2;font-size:10px;line-height:1.65}
+.se-layer-tree,.se-layer-tree ul{list-style:none;margin:0;padding:0}
+.se-layer-tree ul{margin:3px 0 4px 0;padding-right:13px;border-right:1px solid #526783}
+.se-layer{margin:3px 0}
+.se-layer-pick{width:100%;min-height:34px;display:flex;align-items:center;gap:7px;padding:5px 7px;border:1px solid #40516b;border-radius:8px;background:#202f45;color:#f1f5fb;text-align:right;font:500 11px "IBM Plex Sans Arabic",sans-serif;cursor:pointer;transition:background .12s,border-color .12s}
+.se-layer-pick:hover{background:#2a3e5b;border-color:#7189ad}
+.se-layer.is-selected>.se-layer-pick{background:#244d83;border-color:#8bb7ff;color:#fff;box-shadow:inset -3px 0 0 #8bb7ff}
+.se-layer-type{flex:0 0 auto;min-width:48px;padding:3px 5px;border:1px solid #526783;border-radius:5px;background:#30445f;color:#dce9fb;text-align:center;font-size:9px;font-weight:600}
+.se-layer.is-selected>.se-layer-pick .se-layer-type{background:#37649b;border-color:#9bc3ff;color:#fff}
+.se-layer-name{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;color:inherit;font-size:11px}
+.se-layer-count{flex:0 0 auto;padding:2px 5px;border-radius:5px;background:#334761;color:#c5d5e9;font-size:9px;white-space:nowrap}
+.se-layer-grip{flex:0 0 auto;color:#91a6c2;font-size:15px;line-height:1;cursor:grab}
+.se-layer-pick:active .se-layer-grip{cursor:grabbing}
+.se-layer.is-selected>.se-layer-pick .se-layer-grip{color:#fff}
