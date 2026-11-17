@@ -2993,22 +2993,30 @@ function createGroup(){
 }function createdGroup(){const g=currentGroup();if(!g){go('home');return}pendingInvitees=[];showCreatedGroup(g)}
 function showCreatedGroup(g){
  const link=createdGroupLink,canInvite=isManager()&&!g.locked;
+ const detail=SahmApp.groupDetail(g.id),plan=detail&&detail.ok?detail.plan||{}:{};
  const linkBlock=link&&link.status==='paused'
-  ? '<div class="cg-success-link-note">'+uiIcon('pause',17)+'<span>رابط الدعوة متوقف حاليًا</span></div>'
+  ? '<div class="cg-success-link-note">'+uiIcon('pause',17)+'<span>رابط الدعوة متوقف حاليًا؛ يمكنك إدارته من استقبال الأعضاء</span></div>'
   : link&&link.url
    ? '<div class="cg-success-link"><label for="createdPublicLink">'+uiIcon('link',17)+' رابط الانضمام</label><input id="createdPublicLink" readonly value="'+escapeHtml(link.url)+'"><div class="grid2"><button class="btn outline" type="button" data-action="copy-group-link">'+uiIcon('copy',17)+' نسخ الرابط</button><button class="btn outline" type="button" data-action="share-group-link">'+uiIcon('share',17)+' مشاركة الرابط</button></div></div>'
    : '<div class="cg-success-link-note">'+uiIcon('info',17)+'<span>يمكنك إنشاء رابط الانضمام لاحقًا من استقبال الأعضاء</span></div>';
- const summary='<div class="cg-success-summary">'+
-  '<div><span>'+uiIcon('calendar-days',17)+' بداية الجمعية</span><b>'+dateLabel(g.start)+'</b></div>'+
-  '<div><span>'+uiIcon('shuffle',17)+' أول قرعة</span><b>'+dateLabel(g.first)+'</b></div>'+
-  '<div><span>'+uiIcon('wallet',17)+' قيمة السهم</span><b>'+money(g.share,g.currency)+'</b></div>'+
-  '<div><span>'+uiIcon('receipt',17)+' الأقساط</span><b>'+g.installments+'</b></div></div>';
+ const rows=[
+  ['calendar-days','بداية الجمعية',dateLabel(g.start)],
+  ['calendar-check','أول قرعة',dateLabel(g.first)],
+  ['clock','مدة الدورة',Number(plan.durationDays||0)?Number(plan.durationDays)+' يومًا':'—'],
+  ['wallet','قيمة السهم في الدورة',money(g.share,g.currency)],
+  ['receipt','عدد الأقساط',String(g.installments||'—')],
+  ['users','المشاركون المسجلون',detail&&detail.ok?String(detail.members||0):'—']
+ ];
+ if(plan.prizeTarget!=null)rows.push(['trophy','الجائزة المستهدفة',minorMoney(plan.prizeTarget,g.currency)]);
+ const summary='<div class="cg-success-summary">'+rows.map(([ic,label,value])=>'<div><span>'+uiIcon(ic,17)+' '+label+'</span><b>'+escapeHtml(value)+'</b></div>').join('')+'</div>';
+ const open='<button class="btn outline" type="button" data-go="group-detail">'+uiIcon('landmark',18)+' فتح الجمعية</button>';
  const content='<div class="card cg-success-card">'+
   '<div class="cg-success"><span class="cg-success-icon">'+uiIcon('check-circle',34)+'</span><h1>تم إنشاء الجمعية بنجاح</h1><strong>'+escapeHtml(g.name)+'</strong></div>'+
   summary+linkBlock+
-  '<button class="btn primary full cg-success-open" type="button" data-go="group-detail">'+uiIcon('landmark',18)+' فتح الجمعية</button></div>'+
+  (canInvite?'':'<button class="btn primary full cg-success-open" type="button" data-go="group-detail">'+uiIcon('landmark',18)+' فتح الجمعية</button>')+
+  '</div>'+
   (canInvite
-   ? '<div class="card cg-success-invite"><div class="cg-success-invite-title">'+uiIcon('user-plus',19)+' دعوة المشاركين</div>'+inviteePickerHtml()+'</div>'+inviteeListHtml()+inviteeBarHtml()
+   ? '<div class="card cg-success-invite"><div class="cg-success-invite-title">'+uiIcon('user-plus',19)+' الخطوة التالية: دعوة المشاركين</div>'+inviteePickerHtml()+'</div>'+inviteeListHtml()+inviteeBarHtml(open)
    : '');
  shell('تم إنشاء الجمعية','groups',content);
  if(canInvite)bindInviteePicker();
