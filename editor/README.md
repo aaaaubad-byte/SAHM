@@ -20,3 +20,6 @@ Screenshots, import/apply engine, automatic functional wiring, a separate Supaba
 
 ## Import contract
 Every session records its base commit, branch, screen, before/after component trees, operations and source locators. An importer must compare the requested session with the target source revision, detect conflicts, apply narrow source patches, connect newly-added actions to existing routes/data/RPCs as required, and run functional tests before calling a change fully imported.
+
+## Adaptive screen builder
+The **منشئ الشاشات** tool creates an independent screen model instead of cloning or inheriting the currently rendered application DOM or computed CSS. New elements use intrinsic, flexible sizing, content wrapping, responsive grid/flex containers, bounded images and natural content height. The builder supports 320px, 360px, 430px and 768px preview widths, nested containers/cards, element properties, layer selection/reordering, undo/redo, local draft persistence, and standalone HTML export. Exported screens are visual prototypes only; application routes, data bindings and business actions must be mapped and reviewed before integration.

@@ -426,7 +426,7 @@
       toolButton('cursor','تحديد')+toolButton('plus','العناصر')+toolButton('layers','الطبقات')+
       actionButton('undo','تراجع')+actionButton('redo','إعادة')+toolButton('history','الجلسات')+actionButton('save','حفظ')
     );
-    var html='<div class="se-topbar"><div class="se-brand"><b>سهم</b><small>محرر الواجهة</small></div><div class="se-top-actions"><button data-se-action="undo" '+(!history.canUndo()?'disabled':'')+' title="تراجع">'+icon('undo')+'</button><button data-se-action="redo" '+(!history.canRedo()?'disabled':'')+' title="إعادة">'+icon('redo')+'</button><button data-se-action="save" title="حفظ الجلسة">'+icon('save')+'</button><button data-se-action="exit" title="إغلاق المحرر">'+icon('close')+'</button></div></div>';
+    var html='<div class="se-topbar"><div class="se-brand"><b>سهم</b><small>محرر الواجهة</small></div><div class="se-top-actions"><button data-se-action="screen-builder" title="بناء شاشة جديدة">'+icon('layout')+'</button><button data-se-action="undo" '+(!history.canUndo()?'disabled':'')+' title="تراجع">'+icon('undo')+'</button><button data-se-action="redo" '+(!history.canRedo()?'disabled':'')+' title="إعادة">'+icon('redo')+'</button><button data-se-action="save" title="حفظ الجلسة">'+icon('save')+'</button><button data-se-action="exit" title="إغلاق المحرر">'+icon('close')+'</button></div></div>';
     html += selectionFrameMarkup();
     html+=toolPanel();
     html+='<div class="se-dock-wrap"><div class="se-context-label">'+(selected?selectionBreadcrumb(selected):'<span>أدوات المحرر</span>')+'</div><nav class="se-dock" aria-label="أدوات التحرير">'+tools+'</nav><div id="sahm-editor-status" class="se-status">حدد عنصراً من المعاينة لعرض أدواته الخاصة.</div></div>';
@@ -575,6 +575,7 @@
         else if (name === 'duplicate') duplicate();
         else if (name === 'delete') removeSelected();
         else if (name === 'add') addElement(document.getElementById('se-add-kind').value);
+        else if (name === 'screen-builder') { if (w.SahmScreenBuilder) w.SahmScreenBuilder.open(); else status('تعذر تحميل منشئ الشاشات.', 'error'); }
         else if (name === 'save') save();
         else if (name === 'export') { if (state.lastSession) w.SahmEditorCore.download(state.lastSession); else w.SahmEditorCore.listSessions().then(function (a) { if (a[0]) w.SahmEditorCore.download(a[0]); }); }
         else if (name === 'exit') toggle(false);
@@ -726,7 +727,7 @@
   }
   function keys(event) {
     if (!state.enabled) return;
-    if (event.key === 'Escape') { toggle(false); event.preventDefault(); return; }
+    if (event.key === 'Escape') { if (w.SahmScreenBuilder && w.SahmScreenBuilder.isOpen()) { w.SahmScreenBuilder.close(); event.preventDefault(); return; } toggle(false); event.preventDefault(); return; }
     if ((event.ctrlKey || event.metaKey) && event.key.toLowerCase() === 'z') { event.preventDefault(); event.shiftKey ? state.history.redo() : state.history.undo(); }
     else if ((event.ctrlKey || event.metaKey) && event.key.toLowerCase() === 'y') { event.preventDefault(); state.history.redo(); }
   }

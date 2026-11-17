@@ -28,3 +28,19 @@ test('GitHub writer keeps credentials server-side and restricts access', () => {
   assert.ok(server.includes('EDITOR_FORBIDDEN'));
   assert.ok(!server.includes('service_role'));
 });
+
+test('adaptive screen builder is independently integrated', () => {
+  const html = fs.readFileSync(path.join(root, 'Sahm_Preview_ROLE_SEPARATION.html'), 'utf8');
+  const builder = fs.readFileSync(path.join(root, 'editor/builder.js'), 'utf8');
+  const css = fs.readFileSync(path.join(root, 'editor/editor.css'), 'utf8');
+  assert.ok(html.includes('/editor/builder.js'));
+  assert.ok(builder.includes('SahmScreenBuilder'));
+  assert.ok(builder.includes('STORAGE_KEY'));
+  assert.ok(builder.includes('320'));
+  assert.ok(builder.includes('768'));
+  assert.ok(builder.includes('function makeNode(type)'));
+  assert.ok(!builder.includes('getComputedStyle('), 'new screens must not inherit computed app styles');
+  assert.ok(css.includes('.seb-overlay'));
+  assert.ok(css.includes('grid-template-columns:repeat(auto-fit'));
+  assert.ok(css.includes('overflow-wrap:anywhere'));
+});
