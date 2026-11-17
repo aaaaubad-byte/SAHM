@@ -241,7 +241,8 @@
       copy:'<rect x="8" y="8" width="13" height="13" rx="2"/><path d="M16 8V5a2 2 0 0 0-2-2H5a2 2 0 0 0-2 2v9a2 2 0 0 0 2 2h3"/>',
       trash:'<path d="M3 6h18M8 6V4h8v2m3 0-1 15H6L5 6m4 4v7m6-7v7"/>',
       more:'<circle cx="5" cy="12" r="1"/><circle cx="12" cy="12" r="1"/><circle cx="19" cy="12" r="1"/>',
-      layout:'<rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18M9 9v12"/>',
+      adaptive:'<path d="M4 7h16M4 17h16"/><circle cx="9" cy="7" r="2"/><circle cx="15" cy="17" r="2"/>',
+       layout:'<rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18M9 9v12"/>',
       close:'<path d="m18 6-12 12M6 6l12 12"/>',
       check:'<path d="m5 12 4 4L19 6"/>'
     };
@@ -421,12 +422,12 @@
       toolButton('border','الإطار')+toolButton('maximize','الحجم')+toolButton('move','الموقع')+toolButton('rotate','الدوران')+
       (kind==='image'?toolButton('image','الصورة'):'')+
       ((kind==='button'||selected.tagName==='A'||selected.hasAttribute('data-go'))?toolButton('click','السلوك'):'')+
-      toolButton('layers','الطبقات')+toolButton('history','الجلسات')+toolButton('more','المزيد')
+      toolButton('layers','الطبقات')+toolButton('history','الجلسات')+toolButton('more','المزيد')+actionButton('adaptive','التكييف')
     ) : (
       toolButton('cursor','تحديد')+toolButton('plus','العناصر')+toolButton('layers','الطبقات')+
-      actionButton('undo','تراجع')+actionButton('redo','إعادة')+toolButton('history','الجلسات')+actionButton('save','حفظ')
+      actionButton('undo','تراجع')+actionButton('redo','إعادة')+toolButton('history','الجلسات')+actionButton('save','حفظ')+actionButton('adaptive','التكييف')
     );
-    var html='<div class="se-topbar"><div class="se-brand"><b>سهم</b><small>محرر الواجهة</small></div><div class="se-top-actions"><button data-se-action="adaptive" title="نظام التكييف"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M4 7h10M18 7h2M4 17h2M10 17h10"/><circle cx="16" cy="7" r="2"/><circle cx="8" cy="17" r="2"/></svg></button><button data-se-action="screen-builder" title="بناء شاشة جديدة">'+icon('layout')+'</button><button data-se-action="undo" '+(!history.canUndo()?'disabled':'')+' title="تراجع">'+icon('undo')+'</button><button data-se-action="redo" '+(!history.canRedo()?'disabled':'')+' title="إعادة">'+icon('redo')+'</button><button data-se-action="save" title="حفظ الجلسة">'+icon('save')+'</button><button data-se-action="exit" title="إغلاق المحرر">'+icon('close')+'</button></div></div>';
+    var html='<div class="se-topbar"><div class="se-brand"><b>سهم</b><small>محرر الواجهة</small></div><div class="se-top-actions"><button type="button" data-se-action="adaptive" aria-label="نظام التكييف" aria-haspopup="dialog" title="نظام التكييف">'+icon('adaptive')+'</button><button type="button" data-se-action="screen-builder" title="بناء شاشة جديدة">'+icon('layout')+'</button><button type="button" data-se-action="undo" '+(!history.canUndo()?'disabled':'')+' title="تراجع">'+icon('undo')+'</button><button type="button" data-se-action="redo" '+(!history.canRedo()?'disabled':'')+' title="إعادة">'+icon('redo')+'</button><button type="button" data-se-action="save" title="حفظ الجلسة">'+icon('save')+'</button><button type="button" data-se-action="exit" title="إغلاق المحرر">'+icon('close')+'</button></div></div>';
     html += selectionFrameMarkup();
     html+=toolPanel();
     html+='<div class="se-dock-wrap"><div class="se-context-label">'+(selected?selectionBreadcrumb(selected):'<span>أدوات المحرر</span>')+'</div><nav class="se-dock" aria-label="أدوات التحرير">'+tools+'</nav><div id="sahm-editor-status" class="se-status">حدد عنصراً من المعاينة لعرض أدواته الخاصة.</div></div>';
@@ -575,7 +576,7 @@
         else if (name === 'duplicate') duplicate();
         else if (name === 'delete') removeSelected();
         else if (name === 'add') addElement(document.getElementById('se-add-kind').value);
-        else if (name === 'adaptive') { if (w.SahmAdaptiveUI) w.SahmAdaptiveUI.open(state.selected).catch(function (e) { status('تعذر فتح نظام التكييف: ' + e.message, 'error'); }); else status('تعذر تحميل نظام التكييف.', 'error'); }
+        else if (name === 'adaptive') { if (w.SahmAdaptiveUI) Promise.resolve().then(function () { return w.SahmAdaptiveUI.open(state.selected); }).catch(function (e) { status('تعذر فتح نظام التكييف: ' + e.message, 'error'); }); else status('تعذر تحميل نظام التكييف.', 'error'); }
          else if (name === 'screen-builder') { if (w.SahmScreenBuilder) w.SahmScreenBuilder.open(); else status('تعذر تحميل منشئ الشاشات.', 'error'); }
         else if (name === 'save') save();
         else if (name === 'export') { if (state.lastSession) w.SahmEditorCore.download(state.lastSession); else w.SahmEditorCore.listSessions().then(function (a) { if (a[0]) w.SahmEditorCore.download(a[0]); }); }
