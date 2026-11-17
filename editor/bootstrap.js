@@ -415,17 +415,17 @@
     if (!state.enabled) return;
     var selected=state.selected, history=state.history, kind=kindOf(selected);
     var tools=selected ? (
-      toolButton('plus','العناصر')+
+      toolButton('plus','العناصر')+actionButton('adaptive','التكييف')+
       (hasEditableText(selected)?toolButton('type','النص'):'')+
       toolButton('palette','اللون')+toolButton('font','الخط')+toolButton('shadow','الظلال')+
       (kind==='container'||selected.children.length?toolButton('layout','التخطيط'):'')+
       toolButton('border','الإطار')+toolButton('maximize','الحجم')+toolButton('move','الموقع')+toolButton('rotate','الدوران')+
       (kind==='image'?toolButton('image','الصورة'):'')+
       ((kind==='button'||selected.tagName==='A'||selected.hasAttribute('data-go'))?toolButton('click','السلوك'):'')+
-      toolButton('layers','الطبقات')+toolButton('history','الجلسات')+toolButton('more','المزيد')+actionButton('adaptive','التكييف')
+      toolButton('layers','الطبقات')+toolButton('history','الجلسات')+toolButton('more','المزيد')
     ) : (
-      toolButton('cursor','تحديد')+toolButton('plus','العناصر')+toolButton('layers','الطبقات')+
-      actionButton('undo','تراجع')+actionButton('redo','إعادة')+toolButton('history','الجلسات')+actionButton('save','حفظ')+actionButton('adaptive','التكييف')
+      toolButton('cursor','تحديد')+toolButton('plus','العناصر')+actionButton('adaptive','التكييف')+toolButton('layers','الطبقات')+
+      actionButton('undo','تراجع')+actionButton('redo','إعادة')+toolButton('history','الجلسات')+actionButton('save','حفظ')
     );
     var html='<div class="se-topbar"><div class="se-brand"><b>سهم</b><small>محرر الواجهة</small></div><div class="se-top-actions"><button type="button" data-se-action="adaptive" aria-label="نظام التكييف" aria-haspopup="dialog" title="نظام التكييف">'+icon('adaptive')+'</button><button type="button" data-se-action="screen-builder" title="بناء شاشة جديدة">'+icon('layout')+'</button><button type="button" data-se-action="undo" '+(!history.canUndo()?'disabled':'')+' title="تراجع">'+icon('undo')+'</button><button type="button" data-se-action="redo" '+(!history.canRedo()?'disabled':'')+' title="إعادة">'+icon('redo')+'</button><button type="button" data-se-action="save" title="حفظ الجلسة">'+icon('save')+'</button><button type="button" data-se-action="exit" title="إغلاق المحرر">'+icon('close')+'</button></div></div>';
     html += selectionFrameMarkup();
