@@ -7,7 +7,7 @@
     Array.prototype.forEach.call(el.childNodes || [], function (node) {
       if (node.nodeType === 3) value += ' ' + node.nodeValue;
     });
-    return value.replace(/\\s+/g, ' ').trim();
+    return value.replace(/\s+/g, ' ').trim();
   }
   function typeName(el) {
     var tag = el.tagName;
@@ -30,7 +30,7 @@
     }
     if (!text && el.id) text = el.id.replace(/[-_]+/g, ' ');
     if (!text) text = typeName(el);
-    text = text.replace(/\\s+/g, ' ').trim();
+    text = text.replace(/\s+/g, ' ').trim();
     return text.length > 38 ? text.slice(0, 35) + '…' : text;
   }
   function renderNode(el, selected, depth, count) {
