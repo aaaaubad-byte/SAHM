@@ -62,3 +62,14 @@ test('adaptive runtime and UI are separately integrated with the editor', () => 
   assert.ok(ui.includes('data-form="rule"'));
   assert.ok(ui.includes('data-restore'));
 });
+
+test('adaptive runtime monitors screen transitions and supports responsive rule-width testing', () => {
+  const engine = fs.readFileSync(path.join(root, 'editor/adaptive/engine.js'), 'utf8');
+  const ui = fs.readFileSync(path.join(root, 'editor/adaptive/ui.js'), 'utf8');
+  assert.ok(engine.includes('MutationObserver'));
+  assert.ok(engine.includes('setPreviewWidth'));
+  assert.ok(ui.includes('data-preview-width'));
+  assert.ok(ui.includes('screenChanged'));
+  assert.ok(ui.includes('minWidth'));
+  assert.ok(ui.includes('maxWidth'));
+});

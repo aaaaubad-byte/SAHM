@@ -1,6 +1,6 @@
 /* Responsive adaptive rules apply only inside the active editor preview. */
 (function(w){'use strict';
-var s={screen:null,assignment:null,profiles:[],components:[],issues:[],applied:[],base:new WeakMap(),roles:[],roleBase:new WeakMap(),observer:null,raf:0,width:0,loading:null,active:false};
+var s={screen:null,assignment:null,profiles:[],components:[],issues:[],applied:[],base:new WeakMap(),roles:[],roleBase:new WeakMap(),observer:null,routeObserver:null,raf:0,width:0,testWidth:0,loading:null,active:false};
 function app(){return w.document.getElementById('app')}
 function screen(){return w.SahmEditorCore?String(w.SahmEditorCore.screen()||'unknown'):'unknown'}
 function request(url,options){if(!w.SahmSupabase||typeof w.SahmSupabase.session!=='function')return Promise.reject(new Error('AUTH_SESSION_UNAVAILABLE'));return w.SahmSupabase.session().then(function(x){if(!x||!x.access_token)throw new Error('AUTH_REQUIRED');var o=Object.assign({},options||{});o.credentials='same-origin';o.cache='no-store';o.headers=Object.assign({Authorization:'Bearer '+x.access_token,Accept:'application/json'},o.headers||{});return fetch(url,o)}).then(function(r){return r.json().catch(function(){return{}}).then(function(j){if(!r.ok){var e=new Error(j.error||('HTTP_'+r.status));e.status=r.status;throw e}return j})})}
@@ -15,15 +15,51 @@ function clearStyles(){var done=new WeakMap();s.applied.slice().reverse().forEac
 function clearRoles(){var seen=new Set();s.roles.slice().reverse().forEach(function(el){if(!el||!el.isConnected||seen.has(el))return;seen.add(el);var old=s.roleBase.get(el);if(old&&old.present)el.setAttribute('data-sahm-adaptive-role',old.value);else el.removeAttribute('data-sahm-adaptive-role')});s.roles=[]}
 function ordered(a){return(a||[]).filter(function(x){return x&&x.enabled!==false}).slice().sort(function(x,y){return(Number(x.priority)||0)-(Number(y.priority)||0)})}
 function mapRoles(){(s.assignment.roleBindings||[]).forEach(function(x){var nodes=find(x.elementId);if(nodes.length!==1){s.issues.push({code:nodes.length?'AMBIGUOUS_ELEMENT_ID':'ELEMENT_NOT_FOUND',target:x});return}var el=nodes[0];if(!s.roleBase.has(el))s.roleBase.set(el,{present:el.hasAttribute('data-sahm-adaptive-role'),value:el.getAttribute('data-sahm-adaptive-role')});el.setAttribute('data-sahm-adaptive-role',x.semanticRole);s.roles.push(el)})}
-function viewport(){var a=app();return a?Math.round(a.getBoundingClientRect().width||a.clientWidth||0):w.innerWidth}
+function viewport(){if(s.testWidth)return s.testWidth;var a=app();return a?Math.round(a.getBoundingClientRect().width||a.clientWidth||0):w.innerWidth}
 function applyProfile(p,width){if(!p||p.status==='archived')return;ordered(p.rules).forEach(function(r){if(r.screenId&&r.screenId!==s.screen)return;if(r.minWidth!=null&&width<r.minWidth)return;if(r.maxWidth!=null&&width>r.maxWidth)return;targets(r.target).forEach(function(el){style(el,r.styles)})})}
 function applyComponent(c){if(!c||c.status==='archived')return;var a=c.appliesTo||{},els=a.semanticRole?role(a.semanticRole):(a.tagName&&app()?Array.prototype.slice.call(app().querySelectorAll(a.tagName)):[]);els.forEach(function(el){style(el,c.styles)})}
 function apply(){if(!app()||!s.assignment||!w.document.body.classList.contains('sahm-editor-active')){clearStyles();clearRoles();s.active=false;return{applied:0,issues:[]}}clearStyles();clearRoles();s.issues=[];mapRoles();var width=viewport(),pm=new Map(s.profiles.map(function(x){return[x.id,x]})),cm=new Map(s.components.map(function(x){return[x.id,x]}));ordered(s.assignment.profiles).forEach(function(x){applyProfile(pm.get(x.id),width)});ordered(s.assignment.components).forEach(function(x){applyComponent(cm.get(x.id))});(s.assignment.overrides||[]).forEach(function(x){var els=find(x.elementId);if(els.length!==1)s.issues.push({code:'OVERRIDE_TARGET_MISSING',target:x});else style(els[0],x.styles)});s.active=true;s.width=width;say(s.issues.length?'توجد '+s.issues.length+' تنبيهات تطابق في المعاينة.':'تم تطبيق القواعد على عرض '+width+'px.',s.issues.length?'warning':'success');return{applied:s.applied.length,issues:s.issues.slice(),width:width}}
 function schedule(){if(s.raf)return;s.raf=w.requestAnimationFrame(function(){s.raf=0;if(viewport()!==s.width)apply()})}
-function observe(){if(s.observer)s.observer.disconnect();var a=app();if(a&&w.ResizeObserver){s.observer=new ResizeObserver(schedule);s.observer.observe(a)}else w.addEventListener('resize',schedule)}
+function routeChanged(){
+ var next=screen();
+ if(!next||next===s.screen)return;
+ clearStyles();
+ clearRoles();
+ s.assignment=null;
+ s.screen=next;
+ if(w.SahmAdaptiveUI&&w.SahmAdaptiveUI.isOpen()&&w.SahmAdaptiveUI.screenChanged){
+  w.SahmAdaptiveUI.screenChanged(next);
+ }else{
+  refresh();
+ }
+}
+function watchRoute(){
+ if(s.routeObserver)s.routeObserver.disconnect();
+ var target=app();
+ if(target&&w.MutationObserver){
+  s.routeObserver=new MutationObserver(routeChanged);
+  s.routeObserver.observe(target,{childList:true,subtree:true});
+ }
+ w.removeEventListener('popstate',routeChanged);
+ w.removeEventListener('hashchange',routeChanged);
+ w.addEventListener('popstate',routeChanged);
+ w.addEventListener('hashchange',routeChanged);
+}
+function observe(){
+ if(s.observer)s.observer.disconnect();
+ var target=app();
+ if(target&&w.ResizeObserver){
+  s.observer=new ResizeObserver(schedule);
+  s.observer.observe(target);
+ }else{
+  w.addEventListener('resize',schedule);
+ }
+ watchRoute();
+}
 function refresh(){if(s.loading)return s.loading;s.screen=screen();s.loading=Promise.all([request('/api/adaptive/profiles'),request('/api/adaptive/components'),request('/api/adaptive/assignments/'+encodeURIComponent(s.screen)).catch(function(e){if(e.status===404)return{item:null};throw e})]).then(function(x){s.profiles=x[0].items||[];s.components=x[1].items||[];s.assignment=x[2].item||null;observe();return apply()}).finally(function(){s.loading=null});return s.loading}
 function init(id){if(!w.document.body.classList.contains('sahm-editor-active'))return Promise.resolve({applied:0,issues:[]});if(id&&id!==s.screen){clearStyles();clearRoles();s.assignment=null}return refresh()}
-function clear(){if(s.observer){s.observer.disconnect();s.observer=null}w.removeEventListener('resize',schedule);if(s.raf){w.cancelAnimationFrame(s.raf);s.raf=0}clearStyles();clearRoles();s.active=false}
-function snapshot(){return{active:s.active,width:s.width,appliedCount:s.applied.length,issues:s.issues.slice()}}
-w.SahmAdaptiveEngine={init:init,refresh:refresh,apply:apply,clear:clear,snapshot:snapshot,structureHash:fingerprint,request:request};
+function clear(){if(s.observer){s.observer.disconnect();s.observer=null}if(s.routeObserver){s.routeObserver.disconnect();s.routeObserver=null}w.removeEventListener('resize',schedule);w.removeEventListener('popstate',routeChanged);w.removeEventListener('hashchange',routeChanged);s.testWidth=0;if(s.raf){w.cancelAnimationFrame(s.raf);s.raf=0}clearStyles();clearRoles();s.active=false}
+function setPreviewWidth(value){var n=Number(value);s.testWidth=(Number.isInteger(n)&&n>=320&&n<=7680)?n:0;return apply()}
+function snapshot(){return{active:s.active,width:s.width,previewWidth:s.testWidth,appliedCount:s.applied.length,issues:s.issues.slice()}}
+w.SahmAdaptiveEngine={init:init,refresh:refresh,apply:apply,clear:clear,snapshot:snapshot,setPreviewWidth:setPreviewWidth,structureHash:fingerprint,request:request};
 })(window);
