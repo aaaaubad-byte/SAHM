@@ -347,16 +347,29 @@
       h+=selectControl('استقبال النقر','pointer-events',pointerEvents,[['auto','مفعّل'],['none','معطّل']])+
         selectControl('شكل المؤشر','cursor',cursor,[['auto','تلقائي'],['pointer','يد النقر'],['not-allowed','غير مسموح'],['grab','قابل للسحب']])+
         '<label class="se-field"><span>تلميح العنصر</span><input data-attr="title" value="'+esc(el.getAttribute('title')||'')+'"></label>';
-      if (el.tagName==='A') {
+      var routes=[['','لا يوجد إجراء'],['home','الرئيسية'],['groups','الجمعيات'],['group-detail','تفاصيل الجمعية'],['create-group','إنشاء جمعية'],['join-group','الانضمام إلى جمعية'],['member-reception','استقبال الأعضاء'],['members','الأعضاء'],['installments','الأقساط'],['draw-room','غرفة القرعة'],['draw-history','نتائج القرعة'],['news','الأخبار'],['chat','المحادثة'],['receipts','سجلات الاستلام'],['invite','دعوة عضو'],['invites','الدعوات'],['join-requests','طلبات الانضمام'],['notifications','الإشعارات'],['profile','الملف الشخصي'],['edit-profile','تعديل الملف'],['settings','الإعدادات'],['audit','سجل العمليات'],['welcome','تسجيل الدخول']];
+      if (el.tagName==='A' && !el.hasAttribute('data-go')) {
         h+='<label class="se-field"><span>رابط الوجهة</span><input type="url" data-attr="href" value="'+esc(el.getAttribute('href')||'')+'"></label>'+
           selectControl('طريقة فتح الرابط','target',el.getAttribute('target')||'',[['','في النافذة نفسها'],['_self','في النافذة نفسها'],['_blank','في نافذة جديدة']],true);
-      } else if (el.tagName==='BUTTON') {
-        h+=selectControl('نوع الزر','type',el.getAttribute('type')||'button',[['button','زر عادي'],['submit','إرسال نموذج'],['reset','إعادة ضبط']],true)+
+      }
+      if (el.tagName==='BUTTON') {
+        h+=selectControl('نوع الزر','type',el.type||'submit',[['button','زر عادي'],['submit','إرسال نموذج'],['reset','إعادة ضبط']],true)+
           selectControl('حالة الزر','disabled',el.hasAttribute('disabled')?'disabled':'',[['','مفعّل'],['disabled','معطّل']],true);
       }
-      if (el.hasAttribute('data-go')) h+='<label class="se-field"><span>وجهة التنقل (data-go)</span><input data-attr="data-go" value="'+esc(el.getAttribute('data-go')||'')+'"></label>'+
-        '<div class="se-hint">يُحافظ المحرر على معالجات التطبيق الأصلية؛ تعديل وجهة التنقل متاح فقط للعناصر المرتبطة أصلاً بوجهة.</div>';
-      else h+='<div class="se-hint">يمكنك التحكم بتفعيل النقر والمؤشر والرابط. لا يضيف المحرر وظيفة تجارية جديدة إلى الزر.</div>';
+      if (el.hasAttribute('data-action')) {
+        h+='<div class="se-hint">هذا العنصر مرتبط بإجراء داخلي في سهم. حافظ المحرر على هذا الإجراء ولا يسمح باستبداله بوجهة تنقّل.</div>';
+      } else if (el.hasAttribute('data-go') || el.tagName==='BUTTON' || el.getAttribute('role')==='button') {
+        if (el.closest('form') && el.tagName==='BUTTON' && el.type==='submit' && !el.hasAttribute('data-go')) {
+          h+='<div class="se-hint">هذا زر إرسال نموذج. غيّر نوعه إلى «زر عادي» قبل تعيين وجهة تنقّل.</div>';
+        } else {
+          h+=selectControl('الإجراء عند النقر','data-go',el.getAttribute('data-go')||'',routes,true)+
+            '<div class="se-hint">تُنفّذ وجهة التنقّل عند إغلاق المحرر واستخدام الشاشة بصورة طبيعية.</div>';
+        }
+      } else if (el.tagName==='A') {
+        h+='<div class="se-hint">يمكنك تغيير رابط هذا العنصر من الحقل أعلاه.</div>';
+      } else {
+        h+='<div class="se-hint">يمكنك التحكم في استقبال النقر وشكل المؤشر لهذا العنصر.</div>';
+      }
     } else if (t==='more') {
       h+='<div class="se-more-actions"><button data-se-action="duplicate">'+icon('copy')+' نسخ العنصر</button><button data-se-action="delete">'+icon('trash')+' حذف العنصر</button><button data-se-tool="layers">'+icon('layers')+' ترتيب الطبقات</button></div>';
     }
