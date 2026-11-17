@@ -2314,6 +2314,49 @@ body {
 
 </style>
 <link rel="stylesheet" href="/editor/editor.css">
+
+<style id="sahm-home-latest-activity-layout-fix">
+/* Remove obsolete fixed-height flex rules that clipped the latest-activity cards. */
+#app #screen.home-screen .latest-activity{
+  display:flex!important;
+  flex:0 0 auto!important;
+  flex-direction:column!important;
+  height:auto!important;
+  min-height:0!important;
+  max-height:none!important;
+  overflow:visible!important;
+  justify-content:flex-start!important;
+}
+#app #screen.home-screen .latest-activity .activity-list{
+  display:flex!important;
+  flex:0 1 auto!important;
+  flex-direction:column!important;
+  height:auto!important;
+  min-height:0!important;
+  max-height:min(38dvh,280px)!important;
+  overflow-x:hidden!important;
+  overflow-y:auto!important;
+  overscroll-behavior-y:contain!important;
+  -webkit-overflow-scrolling:touch!important;
+  touch-action:pan-y!important;
+  padding:1px 3px 10px!important;
+  box-sizing:border-box!important;
+}
+#app #screen.home-screen .latest-activity .activity-card{
+  flex:0 0 auto!important;
+  width:100%!important;
+  min-height:66px!important;
+  box-sizing:border-box!important;
+}
+@media(max-height:700px){
+  #app #screen.home-screen .latest-activity .activity-list{
+    max-height:min(34dvh,220px)!important;
+  }
+  #app #screen.home-screen .latest-activity .activity-card{
+    min-height:62px!important;
+  }
+}
+</style>
 </head>
 <body><noscript><main dir="rtl" style="font-family:'IBM Plex Sans Arabic',sans-serif;padding:24px;color:#142f39"><h1>سهم</h1></main></noscript><div class="workspace"><div class="phone" id="app">
 <div id="topbar" class="topbar" style="display:none"></div><main id="screen" class="auth-screen">
