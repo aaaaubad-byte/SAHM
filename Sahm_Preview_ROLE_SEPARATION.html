@@ -2330,23 +2330,26 @@ body {
 
 </style>
 <style id="cg-create-form-refinement">
-/* Focused refinement for the single-page create-association form only. */
-.cg-form .cg-section{
+/* One continuous form: no visual section breaks. */
+.cg-form .cg-card{
  display:grid;
  grid-template-columns:repeat(2,minmax(0,1fr));
  column-gap:12px;
- row-gap:5px;
- margin:0 0 16px;
- align-items:end;
+ row-gap:7px;
+ align-content:start;
 }
-.cg-form .cg-section:last-of-type{margin-bottom:10px}
-.cg-form .cg-section>.field,
-.cg-form .cg-section>.grid2,
-.cg-form .cg-section>.cg-row,
-.cg-form .cg-section>.cg-result,
-.cg-form .cg-section>.cg-seg,
-.cg-form .cg-section>#cg-installment-preview{grid-column:1/-1}
-.cg-form .field{margin:7px 0}
+.cg-form .cg-section{display:contents;margin:0;padding:0;border:0}
+.cg-form .cg-card>.field:first-of-type,
+.cg-form .cg-card>.grid2,
+.cg-form .cg-card>.cg-result,
+.cg-form .cg-card>.cg-row,
+.cg-form .cg-card>#cg-installment-preview,
+.cg-form .cg-card>.cg-seg,
+.cg-form .cg-card>#manager-shares-field,
+.cg-form .cg-card>#create-final-submit{grid-column:1/-1}
+.cg-form .cg-card>#installments-count-field,
+.cg-form .cg-card>#installment-amount-field{grid-column:span 1}
+.cg-form .field{margin:5px 0}
 .cg-form .field>label{
  display:flex;
  align-items:center;
@@ -2387,13 +2390,141 @@ body {
 }
 .cg-form .cg-row{grid-template-columns:minmax(0,1.25fr) minmax(0,.85fr);gap:10px}
 .cg-form .grid2{gap:10px}
-.cg-form .cg-seg{margin:2px 0 7px;gap:8px}
-.cg-form .cg-seg label{min-height:43px}
-.cg-form .cg-result{margin:2px 0 8px}
+.cg-form .cg-seg{margin:1px 0 4px;gap:8px}
+.cg-form .cg-seg label{min-height:43px;display:flex;align-items:center;justify-content:center;gap:7px}
+.cg-form .cg-seg label>svg{width:18px;height:18px;flex:0 0 18px;color:var(--primary)}
+.cg-form .cg-result{margin:1px 0 5px}
 .cg-form #cg-installment-preview{min-width:0}
+.cg-form #create-final-submit{margin-top:7px}
+.cg-success-card{padding:16px!important}
+.cg-success{gap:3px;margin:0 0 14px}
+.cg-success-icon{display:grid;place-items:center;width:62px;height:62px;margin:0 0 7px;color:#16845c;background:#eaf7f0;border-radius:18px}
+.cg-success-icon svg{width:34px;height:34px;stroke-width:1.8}
+.cg-success h1{font-size:18px;line-height:1.5}
+.cg-success strong{max-width:100%;font-size:16px;line-height:1.5;color:var(--ink)}
+.cg-success-summary{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px;margin:0 0 13px}
+.cg-success-summary>div{min-width:0;padding:10px;border:1px solid var(--line);border-radius:var(--radius-control);background:#fafbfe}
+.cg-success-summary span{display:flex;align-items:center;gap:6px;margin-bottom:5px;color:var(--muted);font-size:12px;font-weight:600}
+.cg-success-summary span svg{width:17px;height:17px;flex:0 0 17px;color:var(--primary)}
+.cg-success-summary b{display:block;color:var(--ink);font-size:14px;font-weight:750;overflow-wrap:anywhere}
+.cg-success-link{padding-top:11px;border-top:1px solid var(--line)}
+.cg-success-link>label{display:flex;align-items:center;gap:6px;margin-bottom:6px;color:var(--ink2);font-size:13px;font-weight:700}
+.cg-success-link>label svg,.cg-success-link-note svg{width:17px;height:17px;color:var(--primary)}
+.cg-success-link .field{margin:0}
+.cg-success-link input{direction:ltr;text-align:left;font-size:12px;min-height:40px}
+.cg-success-link .grid2{margin-top:7px}
+.cg-success-link .btn{min-height:40px;padding:8px;font-size:13px}
+.cg-success-link-note{display:flex;align-items:center;gap:7px;padding:10px 0;border-top:1px solid var(--line);color:var(--muted);font-size:12px}
+.cg-success-open{margin-top:12px}
+.cg-success-invite{padding:13px!important}
+.cg-success-invite-title{display:flex;align-items:center;gap:8px;margin-bottom:10px;color:var(--ink);font-weight:800}
+.cg-success-invite-title svg{width:19px;height:19px;color:var(--primary)}
+.cg-success-invite .cg-manual{margin-top:9px}
+.cg-success-invite .cg-manual summary{cursor:pointer}
 @media(max-width:360px){
- .cg-form .cg-section{column-gap:8px}
+ .cg-form .cg-card{column-gap:8px}
  .cg-form .cg-row,.cg-form .grid2{gap:7px}
+ .cg-success-summary{gap:6px}
+ .cg-success-summary>div{padding:8px}
+}
+</style>
+<style id="cg-create-form-refinement">
+/* One continuous form: no visual section breaks. */
+.cg-form .cg-card{
+ display:grid;
+ grid-template-columns:repeat(2,minmax(0,1fr));
+ column-gap:12px;
+ row-gap:7px;
+ align-content:start;
+}
+.cg-form .cg-section{display:contents;margin:0;padding:0;border:0}
+.cg-form .cg-card>.field:first-of-type,
+.cg-form .cg-card>.grid2,
+.cg-form .cg-card>.cg-result,
+.cg-form .cg-card>.cg-row,
+.cg-form .cg-card>#cg-installment-preview,
+.cg-form .cg-card>.cg-seg,
+.cg-form .cg-card>#manager-shares-field,
+.cg-form .cg-card>#create-final-submit{grid-column:1/-1}
+.cg-form .cg-card>#installments-count-field,
+.cg-form .cg-card>#installment-amount-field{grid-column:span 1}
+.cg-form .field{margin:5px 0}
+.cg-form .field>label{
+ display:flex;
+ align-items:center;
+ gap:7px;
+ margin:0 0 5px;
+ color:#111827;
+ font-size:13.5px!important;
+ font-weight:700;
+ line-height:1.4;
+}
+.cg-form .field>label>svg{
+ display:block;
+ flex:0 0 19px;
+ width:19px;
+ height:19px;
+ color:var(--primary);
+ stroke:currentColor;
+ stroke-width:1.8;
+ fill:none;
+}
+.cg-form .field input,
+.cg-form .field select{
+ border:1.2px solid #aeb8c8;
+ background:#fff;
+ color:#111827;
+ border-radius:var(--radius-control);
+ min-height:43px;
+ font-size:14px;
+}
+.cg-form .field input:focus,
+.cg-form .field select:focus,
+.cg-form .field input:focus-visible,
+.cg-form .field select:focus-visible{
+ outline:none!important;
+ outline-offset:0!important;
+ border-color:var(--primary);
+ box-shadow:none!important;
+}
+.cg-form .cg-row{grid-template-columns:minmax(0,1.25fr) minmax(0,.85fr);gap:10px}
+.cg-form .grid2{gap:10px}
+.cg-form .cg-seg{margin:1px 0 4px;gap:8px}
+.cg-form .cg-seg label{min-height:43px;display:flex;align-items:center;justify-content:center;gap:7px}
+.cg-form .cg-seg label>svg{width:18px;height:18px;flex:0 0 18px;color:var(--primary)}
+.cg-form .cg-result{margin:1px 0 5px}
+.cg-form #cg-installment-preview{min-width:0}
+.cg-form #create-final-submit{margin-top:7px}
+.cg-success-card{padding:16px!important}
+.cg-success{gap:3px;margin:0 0 14px}
+.cg-success-icon{display:grid;place-items:center;width:62px;height:62px;margin:0 0 7px;color:#16845c;background:#eaf7f0;border-radius:18px}
+.cg-success-icon svg{width:34px;height:34px;stroke-width:1.8}
+.cg-success h1{font-size:18px;line-height:1.5}
+.cg-success strong{max-width:100%;font-size:16px;line-height:1.5;color:var(--ink)}
+.cg-success-summary{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px;margin:0 0 13px}
+.cg-success-summary>div{min-width:0;padding:10px;border:1px solid var(--line);border-radius:var(--radius-control);background:#fafbfe}
+.cg-success-summary span{display:flex;align-items:center;gap:6px;margin-bottom:5px;color:var(--muted);font-size:12px;font-weight:600}
+.cg-success-summary span svg{width:17px;height:17px;flex:0 0 17px;color:var(--primary)}
+.cg-success-summary b{display:block;color:var(--ink);font-size:14px;font-weight:750;overflow-wrap:anywhere}
+.cg-success-link{padding-top:11px;border-top:1px solid var(--line)}
+.cg-success-link>label{display:flex;align-items:center;gap:6px;margin-bottom:6px;color:var(--ink2);font-size:13px;font-weight:700}
+.cg-success-link>label svg,.cg-success-link-note svg{width:17px;height:17px;color:var(--primary)}
+.cg-success-link .field{margin:0}
+.cg-success-link input{direction:ltr;text-align:left;font-size:12px;min-height:40px}
+.cg-success-link .grid2{margin-top:7px}
+.cg-success-link .btn{min-height:40px;padding:8px;font-size:13px}
+.cg-success-link-note{display:flex;align-items:center;gap:7px;padding:10px 0;border-top:1px solid var(--line);color:var(--muted);font-size:12px}
+.cg-success-open{margin-top:12px}
+.cg-success-invite{padding:13px!important}
+.cg-success-invite-title{display:flex;align-items:center;gap:8px;margin-bottom:10px;color:var(--ink);font-weight:800}
+.cg-success-invite-title svg{width:19px;height:19px;color:var(--primary)}
+.cg-success-invite .cg-manual{margin-top:9px}
+.cg-success-invite .cg-manual summary{cursor:pointer}
+@media(max-width:360px){
+ .cg-form .cg-card{column-gap:8px}
+ .cg-form .cg-row,.cg-form .grid2{gap:7px}
+ .cg-success-summary{gap:6px}
+ .cg-success-summary>div{padding:8px}
 }
 </style>
 </head>
@@ -2903,13 +3034,20 @@ function createGroup(){
  ].join('');
  shell('إنشاء جمعية جديدة','groups',html);
  const form=$('#createForm');
- const fieldIcons={'cg-name':'landmark','cg-start':'calendar-days','cg-first':'calendar-days','cg-share':'wallet','cg-currency':'coins','cg-count':'hash','cg-amount':'receipt','cg-manager-shares':'users'};
+ const fieldIcons={'cg-name':'groups','cg-start':'calendar-days','cg-first':'shuffle','cg-share':'wallet','cg-currency':'coins','cg-count':'hash','cg-amount':'wallet','cg-manager-shares':'layers'};
  Object.entries(fieldIcons).forEach(([id,name])=>{
   const control=form.querySelector('#'+id),label=control&&control.labels&&control.labels[0];
   if(label&&!label.querySelector('svg'))label.insertAdjacentHTML('afterbegin',uiIcon(name,19));
  });
+ const choiceIcons={installmentMode:['hash','wallet'],managerMode:['user','users']};
+ Object.entries(choiceIcons).forEach(([name,icons])=>{
+  form.querySelectorAll('input[name="'+name+'"]').forEach((radio,index)=>{
+   const label=radio.closest('label');
+   if(label&&!label.querySelector('svg'))label.insertAdjacentHTML('afterbegin',uiIcon(icons[index],18));
+  });
+ });
  const modeLabel=Array.from(form.querySelectorAll('.field>label')).find(label=>label.textContent.trim()==='طريقة السداد');
- if(modeLabel&&!modeLabel.querySelector('svg'))modeLabel.insertAdjacentHTML('afterbegin',uiIcon('wallet',19));
+ if(modeLabel&&!modeLabel.querySelector('svg'))modeLabel.insertAdjacentHTML('afterbegin',uiIcon('receipt',19));
  setCreateFormValues(form);
  const update=()=>{
   const mode=form.elements.installmentMode.value||'count';
@@ -2931,16 +3069,23 @@ function createGroup(){
 }function createdGroup(){const g=currentGroup();if(!g){go('home');return}pendingInvitees=[];showCreatedGroup(g)}
 function showCreatedGroup(g){
  const link=createdGroupLink,canInvite=isManager()&&!g.locked;
- const linkBlock=link&&link.status==='paused'?'<small>الرابط متوقف حاليًا؛ يمكنك إدارته من شاشة استقبال الأعضاء.</small>':link&&link.url
-  ? '<div class="field"><label for="createdPublicLink">رابط الانضمام</label><input id="createdPublicLink" readonly value="'+escapeHtml(link.url)+'"></div><div class="grid2"><button class="btn outline" type="button" data-action="copy-group-link">نسخ الرابط</button><button class="btn outline" type="button" data-action="share-group-link">مشاركة الرابط</button></div>'
-  : '<small>لم يتم إصدار رابط في هذه الجلسة. يمكنك إنشاؤه من شاشة استقبال الأعضاء.</small>';
- const open='<button class="btn outline" data-go="group-detail">فتح الجمعية</button>';
- const content='<div class="card cg-card"><div class="cg-success"><span class="cg-success-icon">'+uiIcon('check-circle',28)+'</span><h1>تم إنشاء الجمعية</h1><strong>'+escapeHtml(g.name)+'</strong></div>'+
-  '<div class="keyvalue"><span>بداية الجمعية</span><b>'+dateLabel(g.start)+'</b></div><div class="keyvalue"><span>أول قرعة</span><b>'+dateLabel(g.first)+'</b></div><div class="keyvalue"><span>السهم</span><b>'+money(g.share,g.currency)+' · '+g.installments+' أقساط</b></div>'+
-  '<div style="margin-top:14px">'+linkBlock+'</div></div>'+
+ const linkBlock=link&&link.status==='paused'
+  ? '<div class="cg-success-link-note">'+uiIcon('pause',17)+'<span>رابط الدعوة متوقف حاليًا</span></div>'
+  : link&&link.url
+   ? '<div class="cg-success-link"><label for="createdPublicLink">'+uiIcon('link',17)+' رابط الانضمام</label><input id="createdPublicLink" readonly value="'+escapeHtml(link.url)+'"><div class="grid2"><button class="btn outline" type="button" data-action="copy-group-link">'+uiIcon('copy',17)+' نسخ الرابط</button><button class="btn outline" type="button" data-action="share-group-link">'+uiIcon('share',17)+' مشاركة الرابط</button></div></div>'
+   : '<div class="cg-success-link-note">'+uiIcon('info',17)+'<span>يمكنك إنشاء رابط الانضمام لاحقًا من استقبال الأعضاء</span></div>';
+ const summary='<div class="cg-success-summary">'+
+  '<div><span>'+uiIcon('calendar-days',17)+' بداية الجمعية</span><b>'+dateLabel(g.start)+'</b></div>'+
+  '<div><span>'+uiIcon('shuffle',17)+' أول قرعة</span><b>'+dateLabel(g.first)+'</b></div>'+
+  '<div><span>'+uiIcon('wallet',17)+' قيمة السهم</span><b>'+money(g.share,g.currency)+'</b></div>'+
+  '<div><span>'+uiIcon('receipt',17)+' الأقساط</span><b>'+g.installments+'</b></div></div>';
+ const content='<div class="card cg-success-card">'+
+  '<div class="cg-success"><span class="cg-success-icon">'+uiIcon('check-circle',34)+'</span><h1>تم إنشاء الجمعية بنجاح</h1><strong>'+escapeHtml(g.name)+'</strong></div>'+
+  summary+linkBlock+
+  '<button class="btn primary full cg-success-open" type="button" data-go="group-detail">'+uiIcon('landmark',18)+' فتح الجمعية</button></div>'+
   (canInvite
-   ? '<div class="card cg-card">'+inviteePickerHtml()+'</div>'+inviteeListHtml()+inviteeBarHtml(open)
-   : '<button class="btn outline full" data-go="group-detail">فتح الجمعية</button>');
+   ? '<div class="card cg-success-invite"><div class="cg-success-invite-title">'+uiIcon('user-plus',19)+' دعوة المشاركين</div>'+inviteePickerHtml()+'</div>'+inviteeListHtml()+inviteeBarHtml()
+   : '');
  shell('تم إنشاء الجمعية','groups',content);
  if(canInvite)bindInviteePicker();
 }
