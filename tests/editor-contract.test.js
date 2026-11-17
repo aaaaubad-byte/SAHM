@@ -45,7 +45,7 @@ test('adaptive screen builder is independently integrated', () => {
   assert.ok(css.includes('overflow-wrap:anywhere'));
 });
 
-test('adaptive runtime and UI are separately integrated with the editor', () => {
+test('adaptive runtime and one-click screen-first UI are integrated with the editor', () => {
   const html = fs.readFileSync(path.join(root, 'Sahm_Preview_ROLE_SEPARATION.html'), 'utf8');
   const worker = fs.readFileSync(path.join(root, 'sw.js'), 'utf8');
   const bootstrap = fs.readFileSync(path.join(root, 'editor/bootstrap.js'), 'utf8');
@@ -59,29 +59,36 @@ test('adaptive runtime and UI are separately integrated with the editor', () => 
   assert.ok(engine.includes('expectedStructureHash'));
   assert.ok(engine.includes('roleBindings'));
   assert.ok(engine.includes('ResizeObserver'));
-  assert.ok(ui.includes('data-form="rule"'));
-  assert.ok(ui.includes('data-restore'));
+  assert.ok(ui.includes('تكييف الشاشة تلقائياً'));
+  assert.ok(ui.includes('حفظ قواعد الشاشة'));
+  assert.ok(ui.includes('data-act="restore"'));
+  assert.ok(ui.includes('data-act="delete"'));
+  assert.ok(ui.includes('data-act="add"'));
 });
 
-test('adaptive runtime monitors screen transitions and supports responsive rule-width testing', () => {
+test('adaptive runtime monitors screen transitions and archived assignments', () => {
   const engine = fs.readFileSync(path.join(root, 'editor/adaptive/engine.js'), 'utf8');
   const ui = fs.readFileSync(path.join(root, 'editor/adaptive/ui.js'), 'utf8');
   assert.ok(engine.includes('MutationObserver'));
   assert.ok(engine.includes('setPreviewWidth'));
-  assert.ok(ui.includes('data-preview-width'));
+  assert.ok(engine.includes("s.assignment.status==='archived'"));
   assert.ok(ui.includes('screenChanged'));
-  assert.ok(ui.includes('minWidth'));
-  assert.ok(ui.includes('maxWidth'));
+  assert.ok(ui.includes('expectedStructureHash'));
+  assert.ok(ui.includes('/versions'));
 });
 
-test('adaptive UI displays shared profile impact and separates screen-only overrides', () => {
+test('screen-first adaptive files consolidate per-element rules and preserve versions', () => {
   const ui = fs.readFileSync(path.join(root, 'editor/adaptive/ui.js'), 'utf8');
   const store = fs.readFileSync(path.join(root, 'editor/adaptive/store.js'), 'utf8');
   const engine = fs.readFileSync(path.join(root, 'editor/adaptive/engine.js'), 'utf8');
-  assert.ok(ui.includes('s.assignments'));
-  assert.ok(ui.includes('نطاق تأثير الملف المشترك'));
-  assert.ok(ui.includes('value="screen"'));
-  assert.ok(ui.includes('saveRefs(null,null,null,overrides)'));
+  assert.ok(ui.includes('var rules=[]'));
+  assert.ok(ui.includes('rules.push({id:'));
+  assert.ok(ui.includes('s.assignment'));
+  assert.ok(ui.includes('/api/adaptive/assignments/'));
+  assert.ok(ui.includes('/restore'));
+  assert.ok(ui.includes('restoreElement'));
   assert.ok(store.includes('expectedStructureHash'));
+  assert.ok(store.includes('adaptive-data/history/'));
+  assert.ok(store.includes('reactivateArchived'));
   assert.ok(engine.includes('OVERRIDE_STRUCTURE_MISMATCH'));
 });

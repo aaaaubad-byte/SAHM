@@ -152,3 +152,23 @@ test('screen override structure guards reject malformed fingerprints', async () 
   });
   assert.equal(ctx.capture.status, 400);
 });
+
+test('archived screen assignments require explicit reactivation and a matching version', async () => {
+  const ctx = setup();
+  await call(ctx, 'POST', '/api/adaptive/assignments', {
+    id: 'home', profiles: [], components: [], roleBindings: [], overrides: []
+  });
+  assert.equal(ctx.capture.status, 201);
+  await call(ctx, 'DELETE', '/api/adaptive/assignments/home', { expectedVersion: 1 });
+  assert.equal(ctx.capture.body.item.status, 'archived');
+  await call(ctx, 'PUT', '/api/adaptive/assignments/home', {
+    expectedVersion: 2, profiles: [], components: [], roleBindings: [], overrides: []
+  });
+  assert.equal(ctx.capture.status, 409);
+  await call(ctx, 'PUT', '/api/adaptive/assignments/home', {
+    expectedVersion: 2, reactivateArchived: true, profiles: [], components: [], roleBindings: [], overrides: []
+  });
+  assert.equal(ctx.capture.status, 200);
+  assert.equal(ctx.capture.body.item.status, 'active');
+  assert.equal(ctx.capture.body.item.version, 3);
+});

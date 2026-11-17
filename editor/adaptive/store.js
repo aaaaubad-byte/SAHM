@@ -186,7 +186,7 @@ function createAdaptiveStore(options) {
   }
   async function saveRecord(collection, id, input, actor, expectedVersion, restoredFrom) {
     const previous = await readRecord(collection, id);
-    if (previous && previous.status === 'archived') throw fail('ADAPTIVE_RECORD_ARCHIVED', 409);
+    if (previous && previous.status === 'archived' && input.reactivateArchived !== true) throw fail('ADAPTIVE_RECORD_ARCHIVED', 409);
     if (!previous && expectedVersion != null && expectedVersion !== 0) throw fail('ADAPTIVE_RECORD_NOT_FOUND', 404);
     if (previous && (!Number.isInteger(expectedVersion) || expectedVersion !== previous.version)) throw fail('ADAPTIVE_VERSION_CONFLICT', 409);
     const doc = normalizeDocument(collection, id, input, previous, actor);
