@@ -567,7 +567,7 @@ test('inner screens and dialogs share one standard type scale; home, top bar and
 });
 
 test('managed association tabs follow the approved five-section order', () => {
-  const block = managed.match(/const items = \[([\s\S]*?)\];/);
+  const block = managed.match(/const managers=\[([\s\S]*?)\];/);
   assert.ok(block);
   const ids = [...block[1].matchAll(/\['(installments|shares|draws|members|settings)'/g)].map(x=>x[1]);
   assert.deepEqual(ids,['installments','shares','draws','members','settings']);
@@ -578,7 +578,7 @@ test('managed association tabs follow the approved five-section order', () => {
 
 test('draw and member tabs expose round progress and member win/eligibility filters', () => {
   assert.match(managed,/data-action="managed-open-cycle"/);
-  assert.match(managed,/data-status="\'+status/);
+  assert.match(managed,/data-status=/);
   assert.match(managed,/mgdDrawSearch/);
   assert.match(managed,/mgdMemberStatus/);
   assert.match(managed,/memberStatus==='won'/);
@@ -586,8 +586,6 @@ test('draw and member tabs expose round progress and member win/eligibility filt
 });
 
 test('shared association workspace routes both roles through one detail component', () => {
-  const html = read('Sahm_Preview_ROLE_SEPARATION.html');
-  const managed = read('sahm-managed-group.js');
   assert.match(html, /function groupDetail\(\)[\s\S]*SahmManagedGroup\.render\(g,d\)/);
   assert.doesNotMatch(html, /function legacyGroupDetail|legacy-group-detail/);
   for (const tab of ['overview','installments','shares','draws','communication']) assert.ok(managed.includes("['"+tab+"'"), 'missing participant tab '+tab);

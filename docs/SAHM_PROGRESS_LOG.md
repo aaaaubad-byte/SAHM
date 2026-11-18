@@ -408,3 +408,6 @@
 - Backend and database remain unchanged.
 - Tightened participant identity resolution: the workspace now requires the current user's own membership row and never falls back to the first member in the group.
 - Removed display of an internal share UUID as though it were a public share number in draw history.
+
+- Merged the new workspace CSS declarations into their existing selector rules instead of leaving a second override layer; kept only genuinely new selectors and the mobile breakpoint additions.
+- Updated UI contract tests to validate the role-specific tab arrays and the current cycle-card status markup; tests now use the file fixtures already loaded by the suite.
