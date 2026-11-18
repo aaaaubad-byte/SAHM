@@ -76,3 +76,12 @@
 #screen .mgd-draw-nav button.active{background:#fff;color:#3158d6;box-shadow:0 2px 7px rgba(29,49,83,.08)}
 #screen .mgd-empty{padding:20px 12px;text-align:center;color:#7b8799;font-size:13px;background:#fff;border:1px dashed #dce3ed;border-radius:12px}
 @media(max-width:360px){#screen .mgd-tabs button{font-size:10px}#screen .mgd-facts{gap:13px 8px}#screen .mgd-fact>span{font-size:11px}}
+
+#screen .mgd-member-tools{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px;margin-top:11px}
+#screen .mgd-member-tools button,#screen .mgd-bulk-reminder button{min-height:39px;padding:8px 10px;border:1px solid #dce3ed;border-radius:9px;background:#fff;color:#3158d6;font-size:12px;font-weight:800}
+#screen .mgd-bulk-reminder{display:flex;align-items:end;gap:8px;margin-top:12px;padding:12px;border:1px solid #e2e8f1;border-radius:12px;background:#f8faff}
+#screen .mgd-bulk-reminder label{display:flex;flex:1;min-width:0;flex-direction:column;gap:5px;color:#68778d;font-size:11px;font-weight:750}
+#screen .mgd-bulk-reminder select{width:100%;min-height:39px;border:1px solid #dce3ed;border-radius:9px;background:#fff;padding:7px;color:#26364f;font:inherit;font-size:12px}
+#screen .mgd-bulk-reminder button{background:#3158d6;color:#fff;border-color:#3158d6;white-space:nowrap}
+#screen .mgd-utilities{display:flex;flex-wrap:wrap;justify-content:center;gap:7px;margin:16px 0 5px;padding:10px 0;border-top:1px solid #e7ebf2}
+#screen .mgd-utilities button{min-height:34px;padding:6px 10px;border:1px solid #e0e6ef;border-radius:9px;background:#fff;color:#68778d;font-size:11px;font-weight:750}
