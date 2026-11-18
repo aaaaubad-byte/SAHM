@@ -253,3 +253,61 @@
   #screen .mgd-tabs button{transition:none}
   #screen .mgd-loading-spinner{animation:none}
 }
+
+/* Draw-room tabs: horizontally scrollable, touch-friendly and role-aware. */
+#screen .mgd-draw-nav{
+  display:flex;
+  align-items:stretch;
+  gap:5px;
+  width:100%;
+  max-width:100%;
+  margin:0 0 14px;
+  padding:5px;
+  overflow-x:auto;
+  overflow-y:hidden;
+  overscroll-behavior-inline:contain;
+  -webkit-overflow-scrolling:touch;
+  touch-action:pan-x;
+  scroll-snap-type:x proximity;
+  scrollbar-width:none;
+  background:#f2f5fa;
+  border:1px solid #e6ebf3;
+  border-radius:12px;
+}
+#screen .mgd-draw-nav::-webkit-scrollbar{display:none}
+#screen .mgd-draw-nav button{
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  flex:0 0 auto;
+  min-width:82px;
+  min-height:40px;
+  padding:8px 12px;
+  border:1px solid transparent;
+  border-radius:8px;
+  background:transparent;
+  color:#65748a;
+  font-size:12px;
+  font-weight:700;
+  line-height:1.35;
+  white-space:nowrap;
+  scroll-snap-align:center;
+}
+#screen .mgd-draw-nav button.active{
+  border-color:#dfe6f2;
+  background:#fff;
+  color:#294fbf;
+  box-shadow:0 1px 4px rgba(29,49,83,.07);
+}
+#screen .mgd-draw-nav button:focus-visible{
+  outline:2px solid #3158d6;
+  outline-offset:2px;
+}
+#screen .mgd-draw-panel{min-width:0;animation:mgd-panel-in .16s ease-out}
+#screen .mgd-member-draw-entry p{margin:0 0 12px;color:#68778d;font-size:13px;line-height:1.7}
+#screen .mgd-member-draw-entry .mgd-room-entry{margin:0}
+@keyframes mgd-panel-in{from{opacity:.55;transform:translateY(3px)}to{opacity:1;transform:translateY(0)}}
+@media(max-width:360px){
+  #screen .mgd-draw-nav{gap:4px;padding:4px}
+  #screen .mgd-draw-nav button{min-width:74px;padding:7px 9px;font-size:11px}
+}
