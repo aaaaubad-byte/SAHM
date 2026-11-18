@@ -67,8 +67,8 @@
       });
     });
   }
-  function cycleCards(g, d) {
-    const historyResult = SahmApp.getDrawHistory(g.id);
+  async function cycleCards(g, d) {
+    const historyResult = await SahmApp.getDrawHistory(g.id);
     const history = historyResult && historyResult.ok ? (historyResult.history || []) : [];
     const byRound = new Map(history.map(x => [Number(x.round_no || x.round), x]));
     const total = Math.max(0, Number(d.rounds) || 0), current = Math.min(total, (Number(d.drawn) || 0) + 1);
@@ -130,8 +130,8 @@
       '<section class="mgd-bulk-reminder"><label>تذكير جماعي بالقسط<select id="reminderInstallment">' + installmentOptions + '</select></label><button type="button" data-action="send-reminder-all">إرسال للمستحقين والمتأخرين</button></section>' +
       '<button type="button" class="mgd-secondary-link" data-go="receipts">سجل الاستلام والتصحيحات ' + uiIcon('back-screen', 16) + '</button>';
   }
-  function cycleDetail(g, d, round) {
-    const historyResult = SahmApp.getDrawHistory(g.id), history = historyResult && historyResult.ok ? (historyResult.history || []) : [];
+  async function cycleDetail(g, d, round) {
+    const historyResult = await SahmApp.getDrawHistory(g.id), history = historyResult && historyResult.ok ? (historyResult.history || []) : [];
     const draw = history.find(x => Number(x.round_no || x.round) === round);
     const rows = SahmApp.installmentRows(g.id, { cycle: round, status: 'all' });
     const obligations = rows && rows.ok ? rows.rows || [] : [];
@@ -208,7 +208,7 @@
       return;
     }
     if (view === 'cycle') {
-      content = cycleDetail(g, d, Number(params.round) || 1);
+      content = await cycleDetail(g, d, Number(params.round) || 1);
       shell('تفاصيل الدورة', 'groups', identity(g, d) + content);
       return;
     }
@@ -218,7 +218,7 @@
       return;
     }
     if (active === 'members') { content = memberCards(g); }
-    else if (active === 'cycles') { content = cycleCards(g, d); }
+    else if (active === 'cycles') { content = await cycleCards(g, d); }
     else if (active === 'installments') { content = installmentsPanel(g, d); }
     else { params.managedDrawView = params.managedDrawView || 'summary'; content = await drawPanel(g, d); }
     shell('تفاصيل الجمعية', 'groups', identity(g, d) + tabs(active) + '<main class="mgd-content">' + content + '</main>' +
