@@ -3,7 +3,7 @@
    No database, Supabase, engine, or shared-screen behavior is changed here. */
 (function (root) {
   'use strict';
-  const state = { cycle: null, installment: 'all', status: 'all', query: '', drawView: 'summary', installmentFiltersOpen: false, installmentSelectMode: false, installmentSelected: new Set() };
+  const state = { cycle: null, installment: 'all', status: 'all', query: '', drawView: 'summary', installmentFiltersOpen: false, installmentSelectMode: false, installmentSelected: new Set(), installmentSelectionGroupId: null };
   const readCache = new Map();
   let renderVersion = 0;
   let dashboardTimer = null;
@@ -147,8 +147,8 @@
       const actions = state.installmentSelectMode ? '' : ((collect || remind) ? '<div class="mgd-row-actions">'+
         (collect ? actionButton('تحصيل','record-paid',attrs,'primary') : '')+
         (remind ? actionButton('تذكير','send-reminder',attrs,'') : '')+'</div>' : '');
-      return '<article class="mgd-installment-card'+(state.installmentSelectMode?' is-selectable':'')+(selected?' is-selected':'')+'" data-installment-key="'+esc(key)+'" data-selectable="'+(state.installmentSelectMode?'true':'false')+'" tabindex="'+(state.installmentSelectMode?'0':'-1')+'" aria-checked="'+(selected?'true':'false')+'">'+
-        '<div class="mgd-installment-top"><span class="mgd-installment-status-icon '+meta[2]+'" title="'+esc(meta[1])+'" aria-label="'+esc(meta[1])+'">'+uiIcon(meta[0],19)+'</span><b>'+esc(x.memberName)+'</b>'+
+      return '<article class="mgd-installment-card'+(state.installmentSelectMode?' is-selectable':'')+(selected?' is-selected':'')+'" role="'+(state.installmentSelectMode?'checkbox':'group')+'" data-installment-key="'+esc(key)+'" data-selectable="'+(state.installmentSelectMode?'true':'false')+'" tabindex="'+(state.installmentSelectMode?'0':'-1')+'" aria-checked="'+(selected?'true':'false')+'">'+
+        '<div class="mgd-installment-top"><b>'+esc(x.memberName)+'</b><span class="mgd-installment-status-icon '+meta[2]+'" title="'+esc(meta[1])+'" aria-label="'+esc(meta[1])+'">'+uiIcon(meta[0],19)+'</span>+
         (state.installmentSelectMode?'<span class="mgd-select-mark">'+uiIcon(selected?'check-circle-2':'circle',20)+'</span>':'')+'</div>'+
         '<div class="mgd-installment-meta"><span>'+ (memberMap.get(String(x.memberId))||0) +' سهم</span><i>|</i><b>'+esc(moneyValue(x.total,g.currency))+'</b><i>|</i><span>القسط '+esc(x.no)+'</span></div>'+actions+'</article>';
     }).join('') || '<div class="mgd-empty">لا توجد أقساط مطابقة للبحث والفلترة</div>';
@@ -208,6 +208,7 @@
     update();
   }
   function installmentsPanel(g,d) {
+    if(state.installmentSelectionGroupId!==g.id){state.installmentSelectionGroupId=g.id;state.installmentSelected.clear();state.installmentSelectMode=false;state.installmentFiltersOpen=false;state.installment='all';state.status='all';state.query='';state.cycle=null;}
     const totalCycles=Math.max(1,Number(d.rounds)||1),cycle=Math.min(totalCycles,Math.max(1,Number(state.cycle||d.cycle||1)));
     const snap=SahmApp.installmentRows(g.id,{cycle,status:'all'})||{},all=snap.ok?snap.rows||[]:[];
     const today=SahmApp.todayIn(g.tz||'Asia/Aden'),inRange=all.find(x=>String(today)>=String(x.periodStart)&&String(today)<=String(x.periodEnd));
@@ -215,7 +216,8 @@
     const chosen=state.installment==='all'?null:Number(state.installment),shown=chosen?all.filter(x=>Number(x.no)===chosen):all;
     const paid=shown.filter(x=>x.status==='paid').length,late=shown.filter(x=>x.status==='late').length,pending=shown.filter(x=>x.status==='due'||x.status==='upcoming').length,first=shown[0]||{};
     const cycleOptions=Array.from({length:totalCycles},(_,i)=>'<option value="'+(i+1)+'" '+(cycle===i+1?'selected':'')+'>القرعة '+(i+1)+'</option>').join('');
-    const installmentOptions='<option value="'+(inRange?inRange.no:'current')+'" '+(String(state.installment)===(inRange?String(inRange.no):'current')?'selected':'')+'>القسط الحالي</option><option value="all" '+(state.installment==='all'?'selected':'')+'>جميع الأقساط</option>'+
+    const currentNo=(inRange||all.find(x=>x.status==='due'||x.status==='late')||all[0]||{}).no;
+    const installmentOptions='<option value="'+(currentNo||'all')+'" '+(String(state.installment)===String(currentNo||'all')?'selected':'')+'>القسط الحالي</option><option value="all" '+(state.installment==='all'?'selected':'')+'>جميع الأقساط</option>'+
       Array.from({length:Math.max(1,Number(g.installments)||1)},(_,i)=>'<option value="'+(i+1)+'" '+(String(state.installment)===String(i+1)?'selected':'')+'>القسط '+(i+1)+'</option>').join('');
     return '<section class="mgd-installment-summary"><div class="mgd-summary-top"><b>القرعة '+cycle+'</b><span>'+esc(first.periodStart?dateLabel(first.periodStart):'—')+' – '+esc(first.periodEnd?dateLabel(first.periodEnd):'—')+'</span></div><div class="mgd-summary-stats"><span>الإجمالي <b>'+shown.length+'</b></span><span>مدفوعة <b>'+paid+'</b></span><span>معلقة <b>'+pending+'</b></span><span>متأخرة <b>'+late+'</b></span></div></section>'+
       '<div class="mgd-installment-toolbar" id="mgdInstallmentToolbar"><label class="mgd-search mgd-installment-search">'+uiIcon('search',17)+'<input id="mgdInstallmentSearch" type="search" placeholder="ابحث باسم العضو" autocomplete="off"></label>'+
