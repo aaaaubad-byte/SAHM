@@ -501,3 +501,32 @@ test('association subroutes all resolve to the shared workspace and retired dupl
   }
   assert.doesNotMatch(html, /selectedInstallmentCycle|selectedInstallmentStatus|installments\(\)/);
 });
+
+
+test('association workspace tabs consume the correct role-specific data contracts', () => {
+  assert.match(managed, /history\.map\(x=>\[Number\(x\.round_no\|\|x\.round\),x\]\)/);
+  assert.match(managed, /r&&r\.ok\?\(r\.history\|\|r\.draws\|\|\[\]\):\[\]/);
+  assert.match(managed, /winner_owner_name\|\|x\.winnerLabel/);
+  assert.match(managed, /winner_share_no\|\|x\.winnerShareId/);
+  assert.match(managed, /pct===100\?'waiting':'collecting'/);
+  assert.match(managed, /value=\"waiting\">بانتظار الموعد/);
+  assert.match(managed, /memberStatement\(g\.id,ownMemberId\(g\)\)/);
+  assert.match(managed, /تفاصيل رقم كل سهم وحالته غير متاحة/);
+  assert.match(managed, /Number\(statement\.shares\|\|0\)/);
+});
+
+test('managed workspace external stylesheet has balanced responsive rules and visible focus states', () => {
+  const css = fs.readFileSync(path.join(ROOT, 'sahm-managed-group.css'), 'utf8');
+  assert.match(html, /href=\"\/sahm-managed-group\.css\"/);
+  assert.match(html, /src=\"\/sahm-managed-group\.js\"/);
+  assert.doesNotMatch(css, /margin:9px 0 8px\\s*#screen/);
+  assert.match(css, /#screen \.mgd-tabs button:focus-visible/);
+  assert.match(css, /@media\(max-width:420px\)/);
+  let depth = 0;
+  for (const ch of css) {
+    if (ch === '{') depth++;
+    if (ch === '}') depth--;
+    assert.ok(depth >= 0, 'stylesheet braces close in order');
+  }
+  assert.equal(depth, 0, 'all managed workspace CSS blocks are balanced');
+});
