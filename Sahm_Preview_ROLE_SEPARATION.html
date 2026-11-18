@@ -2575,7 +2575,7 @@ const $=s=>document.querySelector(s);
 const money=(n,c='YER')=>{const cur=SahmCore.CURRENCIES[c]||SahmCore.CURRENCIES.YER;const minor=Math.round(Number(n||0)*cur.minor);return SahmCore.fmtMoney(minor,c in SahmCore.CURRENCIES?c:'YER')};
 const today=()=>SahmApp.todayIn();
 const AUTH_SCREEN_NAMES=['welcome','register','profile-setup','reset-password','logged-out','account-login'];
-let db={session:false,verified:false,user:{id:null,name:'',phone:'',city:'',email:'',avatarKey:'avatar-01',notifications:true,biometric:false},groups:[],unread:0},screenName='welcome',params={},groupTab='all',groupDetailTab='overview',toastTimer,homeSlideTimer=null,homeSlideIndex=0,selectedInstallmentCycle=1,selectedInstallmentStatus='all',pendingJoinCode=null,pendingJoinContext=null,lastSubmittedRequestId=null,joinRequestFilter='pending',createGroupBusy=false,bulkInvitesBusy=false,joinRequestBusy=false,joinDecisionBusy=false,createdGroupLink=null,createdLinkWarning=null;
+let db={session:false,verified:false,user:{id:null,name:'',phone:'',city:'',email:'',avatarKey:'avatar-01',notifications:true,biometric:false},groups:[],unread:0},screenName='welcome',params={},groupTab='all',groupDetailTab='overview',toastTimer,homeSlideTimer=null,homeSlideIndex=0,pendingJoinCode=null,pendingJoinContext=null,lastSubmittedRequestId=null,joinRequestFilter='pending',createGroupBusy=false,bulkInvitesBusy=false,joinRequestBusy=false,joinDecisionBusy=false,createdGroupLink=null,createdLinkWarning=null;
 let selectedAvatarKey='avatar-01',authBusy=false,activeProfile=null,pendingAccountLogin=null,authInteractionVersion=0;
 let currentGroupId=(db.groups[0]||{}).id||null,createdGroupId=null,createWizardStep=1,createFormSnapshot={},reminderRequest=null,navigation=null;
 SahmApp.onResult((name,result)=>{if(result&&result.ok===false)toast(result.message||'تعذر تنفيذ العملية');else if(result&&result.persisted===false)toast(result.warning||'تعذر حفظ التغييرات في تخزين المعاينة');});
@@ -2654,7 +2654,7 @@ const IC_ACTION={'copy-group-link':'copy','copy-new-invite':'copy','copy-bulk-in
 const IC_TRAILING=['continue-invitation-join'];
 const IC_TEXT=[[/^إنشاء الجمعية$/,'check'],[/^(إغلاق|إلغاء)$/,'x'],[/^تأكيد/,'check'],[/^حفظ/,'check'],[/^تعديل/,'edit'],[/إنشاء حساب/,'user-plus'],[/تسجيل الخروج/,'exit-screen'],[/عرض/,'eye']];
 const IC_HEAD=[[/السداد/,'wallet'],[/رابط/,'link'],[/إعدادات|إدارة/,'settings'],[/القرعة|الدورات/,'shuffle'],[/نشر الأحداث|الأخبار|أخبار/,'wall'],[/الإشعارات/,'bell'],[/المدير/,'user-check'],[/ملخص/,'clipboard-list'],[/إضافة يدوية/,'user-plus'],[/الأعضاء|العضوية|المشارك/,'users'],[/دعوة|دعوات/,'send'],[/طلب/,'inbox'],[/التزام|الأقساط|القسط/,'wallet'],[/سجل|عمليات/,'scroll'],[/استلام/,'receipt'],[/كلمة المرور|الأمان/,'lock'],[/الحساب|الملف|بيانات/,'user'],[/جمعية|الجمعية/,'landmark']];
-const IC_LABEL=[[/متأخر/,'alert'],[/مدفوع/,'check-circle'],[/مستحق/,'clock'],[/اسم الجمعية|^الجمعية$/,'landmark'],[/بداية|تاريخ الإنشاء/,'calendar-days'],[/قرعة|الجولات|الجولة/,'shuffle'],[/قيمة|الدفعة|حصة|مبلغ|جائزة|التزام|إجمالي/,'wallet'],[/مدة|موعد|الدورة/,'clock'],[/القسط|الأقساط/,'receipt'],[/أسهم|الأسهم|السهم/,'layers'],[/المدير|مدير/,'user-check'],[/الأعضاء|المشارك|العضو/,'users'],[/الدعوات|دعوة/,'send'],[/طلبات|طلب/,'inbox'],[/الهاتف|رقم/,'phone'],[/البريد/,'mail'],[/المدينة/,'map-pin'],[/^الاسم|اسم/,'user'],[/العملة/,'coins'],[/طريقة/,'wallet'],[/كلمة المرور/,'lock'],[/الحالة|حالة/,'info']];
+const IC_LABEL=[[/متأخر/,'alert'],[/مدفوع/,'check-circle'],[/مستحق/,'clock'],[/اسم الجمعية|^الجمعية$/,'landmark'],[/بداية|تاريخ الإنشاء/,'calendar-days'],[/قرعة|القرعات|القرعة/,'shuffle'],[/قيمة|الدفعة|حصة|مبلغ|جائزة|التزام|إجمالي/,'wallet'],[/مدة|موعد|القرعة/,'clock'],[/القسط|الأقساط/,'receipt'],[/أسهم|الأسهم|السهم/,'layers'],[/المدير|مدير/,'user-check'],[/الأعضاء|المشارك|العضو/,'users'],[/الدعوات|دعوة/,'send'],[/طلبات|طلب/,'inbox'],[/الهاتف|رقم/,'phone'],[/البريد/,'mail'],[/المدينة/,'map-pin'],[/^الاسم|اسم/,'user'],[/العملة/,'coins'],[/طريقة/,'wallet'],[/كلمة المرور/,'lock'],[/الحالة|حالة/,'info']];
 const IC_EMPTY={wall:'messages',chat:'messages',notifications:'bell',news:'wall',audit:'scroll',installments:'receipt',members:'users',invites:'send','join-requests':'inbox',receipts:'file-text','draw-history':'trophy',groups:'landmark','managed-groups':'landmark','joined-groups':'landmark'};
 function icPick(rules,text){const t=String(text||'').trim();for(const r of rules)if(r[0].test(t))return r[1];return ''}
 function icSvg(name,size,cls){return name?uiIcon(name,size).replace('<svg ','<svg class="ic '+cls+'" '):''}
@@ -2771,7 +2771,7 @@ function routeSnapshot(nextScreen=screenName,nextParams=params,context={}){
  return Object.assign({
   screenName:nextScreen,params:nextParams||{},currentGroupId:currentGroupId,
   groupTab:groupTab,groupDetailTab:groupDetailTab,
-  viewState:{selectedInstallmentCycle:selectedInstallmentCycle,selectedInstallmentStatus:selectedInstallmentStatus,joinRequestFilter:joinRequestFilter,createWizardStep:createWizardStep,createFormSnapshot:$('#createForm')?Object.fromEntries(new FormData($('#createForm'))):createFormSnapshot}
+  viewState:{joinRequestFilter:joinRequestFilter,createWizardStep:createWizardStep,createFormSnapshot:$('#createForm')?Object.fromEntries(new FormData($('#createForm'))):createFormSnapshot}
  },context||{});
 }
 function sameRouteSnapshot(a,b){
@@ -2793,8 +2793,6 @@ function applyNavigationState(state,fromPop=false){
  currentGroupId=db.groups.some(g=>g.id===next.currentGroupId)?next.currentGroupId:((db.groups[0]||{}).id||null);
  groupTab=next.groupTab||'all';groupDetailTab=next.groupDetailTab||'overview';
  const view=next.viewState||{};
- selectedInstallmentCycle=Number(view.selectedInstallmentCycle)||1;
- selectedInstallmentStatus=view.selectedInstallmentStatus||'all';
  joinRequestFilter=['pending','approved','rejected','cancelled','all'].includes(view.joinRequestFilter)?view.joinRequestFilter:joinRequestFilter;
  createWizardStep=Math.max(1,Math.min(CREATE_STEP_COUNT,Number(view.createWizardStep)||1));
  createFormSnapshot=Object.assign({},view.createFormSnapshot||{});
@@ -2995,16 +2993,16 @@ function validateCreateStep(step){
   if(!SahmCore.isValidDate(d.startDate)){toast('حدد تاريخ بداية الجمعية');return false}
   if(!SahmCore.isValidDate(d.firstDrawOn)){toast('حدد موعد أول قرعة');return false}
   if(d.firstDrawOn<=d.startDate){toast('موعد أول قرعة يجب أن يكون بعد تاريخ البداية');return false}
-  if(d.durationDays<1||d.durationDays>3650){toast('مدة الدورة بين يوم واحد و3650 يومًا');return false}
+  if(d.durationDays<1||d.durationDays>3650){toast('مدة فترة التحصيل بين يوم واحد و3650 يومًا');return false}
   if(!SahmCore.CURRENCIES[d.currency]){toast('اختر العملة');return false}
   if(!d.shareAmountMinor||d.shareAmountMinor<1){toast('أدخل قيمة حصة السهم');return false}
  }
  if(step===2){
   if(d.installmentMode==='count'){
-   if(!Number.isInteger(d.installments)||d.installments<1||d.installments>d.durationDays){toast('عدد الأقساط غير صالح أو يتجاوز مدة الدورة');return false}
+   if(!Number.isInteger(d.installments)||d.installments<1||d.installments>d.durationDays){toast('عدد الأقساط غير صالح أو يتجاوز مدة فترة التحصيل');return false}
   }else if(d.installmentMode==='amount'){
    if(!d.installmentAmountMinor||d.installmentAmountMinor<1||d.installmentAmountMinor>d.shareAmountMinor){toast('قيمة القسط يجب أن تكون موجبة ولا تتجاوز حصة السهم');return false}
-   if(Math.ceil(d.shareAmountMinor/d.installmentAmountMinor)>d.durationDays){toast('عدد الأقساط الناتج يتجاوز مدة الدورة');return false}
+   if(Math.ceil(d.shareAmountMinor/d.installmentAmountMinor)>d.durationDays){toast('عدد الأقساط الناتج يتجاوز مدة فترة التحصيل');return false}
   }else{toast('اختر طريقة السداد');return false}
   if(d.managerMode==='both'&&(!Number.isInteger(d.managerShares)||d.managerShares<1)){toast('أدخل عدد أسهم المدير');return false}
  }
@@ -3043,8 +3041,8 @@ function createGroup(){
   '<div class="field"><label for="cg-name">اسم الجمعية</label><input id="cg-name" name="name" maxlength="120" autocomplete="off" required></div>',
   '<div class="grid2"><div class="field"><label for="cg-start">تاريخ البداية</label><input id="cg-start" name="startDate" type="date" required></div>',
   '<div class="field"><label for="cg-first">تاريخ أول قرعة</label><input id="cg-first" name="firstDrawOn" type="date" required></div></div>',
-  '<div class="cg-result" id="cg-result" role="status" hidden><b>مدة الدورة: <span id="cg-duration">—</span></b></div>',
-  '<div class="cg-row"><div class="field"><label for="cg-share">قيمة السهم في الدورة</label><input id="cg-share" name="shareAmount" type="number" min="0.01" step="0.01" inputmode="decimal" required></div>',
+  '<div class="cg-result" id="cg-result" role="status" hidden><b>مدة فترة التحصيل: <span id="cg-duration">—</span></b></div>',
+  '<div class="cg-row"><div class="field"><label for="cg-share">قيمة السهم للقرعة</label><input id="cg-share" name="shareAmount" type="number" min="0.01" step="0.01" inputmode="decimal" required></div>',
   '<div class="field"><label for="cg-currency">العملة</label><select id="cg-currency" name="currency" required><option value="">اختر</option><option value="YER">ريال يمني</option><option value="SAR">ريال سعودي</option><option value="USD">دولار</option></select></div></div></section>',
   '<section class="cg-section">',
   '<div class="field"><label>طريقة السداد</label><div class="cg-seg" role="radiogroup" aria-label="طريقة السداد"><label><input type="radio" name="installmentMode" value="count" checked><span>عدد الأقساط</span></label><label><input type="radio" name="installmentMode" value="amount"><span>قيمة القسط</span></label></div></div>',
@@ -3096,8 +3094,8 @@ function showCreatedGroup(g){
  const rows=[
   ['calendar-days','بداية الجمعية',dateLabel(g.start)],
   ['calendar-check','أول قرعة',dateLabel(g.first)],
-  ['clock','مدة الدورة',Number(plan.durationDays||0)?Number(plan.durationDays)+' يومًا':'—'],
-  ['wallet','قيمة السهم في الدورة',money(g.share,g.currency)],
+  ['clock','مدة فترة التحصيل',Number(plan.durationDays||0)?Number(plan.durationDays)+' يومًا':'—'],
+  ['wallet','قيمة السهم للقرعة',money(g.share,g.currency)],
   ['receipt','عدد الأقساط',String(g.installments||'—')],
   ['users','المشاركون المسجلون',detail&&detail.ok?String(detail.members||0):'—']
  ];
@@ -3145,23 +3143,6 @@ async function loadAssociationPublicLinkStatus(associationId,canInvite){
   (link.createdAt?'<small>تاريخ الإنشاء: '+dateLabel(String(link.createdAt).slice(0,10))+'</small>':'')+
   (status==='active'?'<small>الرمز القابل للمشاركة لا يمكن استعادته بعد مغادرة شاشة إصدار الرابط؛ استخدم التجديد فقط عند الحاجة وبعد التأكد من إبطال الرمز السابق.</small>':'')+controls;
 }
-function members(){
- const g=currentGroup();if(!g){go('groups');return}
- const detail=SahmApp.groupDetail(g.id);if(!detail||!detail.ok||!detail.role.manager){toast('قائمة الأعضاء متاحة لمدير الجمعية فقط');go('group-detail');return}
- const r=SahmApp.memberList(g.id);if(!r||!r.ok){toast(r&&r.message||'تعذر تحميل الأعضاء');return}
- const list=r.members||[],shares=list.reduce((n,m)=>n+m.shares,0),shareSummary=g.total==null?shares+' سهم':shares+' / '+g.total,canInvite=!!(detail.permissions&&detail.permissions.canInvite);
- const lock=detail.agreementLocked?'<div class="card"><b>الاتفاق مقفل</b><small>لا يمكن تعديل الأعضاء أو الأسهم أو إرسال دعوات جديدة بعد بدء الجمعية أو تثبيت أول قرعة.</small></div>':'';
- const memberRows=list.map(m=>'<div class="listrow"><div class="avatar '+(m.isManager?'dark':'')+'">'+escapeHtml(m.name.slice(0,1))+'</div><div class="grow"><strong>'+escapeHtml(m.name)+'</strong><small>'+(m.isManager?'مدير الجمعية':'مشارك')+' · '+m.shares+' أسهم</small></div></div>').join('');
- const empty=list.length?memberRows:'<div class="empty"><b>لا يوجد أعضاء بعد</b></div>';
- shell('الأعضاء','groups',header('إدارة الأعضاء',g.name)+lock+'<div class="member-summary"><div><span>المشاركون</span><b>'+list.length+'</b></div><div><span>الأسهم المسجلة</span><b>'+shareSummary+'</b></div></div><div class="toolbar"><input class="searchbox" placeholder="ابحث عن اسم مشارك..." aria-label="البحث عن مشارك" id="memberSearch">'+(canInvite?'<button class="btn primary small" data-go="invite">دعوة عضو</button>':'')+'</div><div class="card" id="membersList">'+empty+'</div>'+(canInvite?'<button class="btn outline full" data-go="member-reception">إدارة استقبال الأعضاء</button>':''));
- const search=$('#memberSearch'),container=$('#membersList');
- if(search&&container)search.addEventListener('input',()=>{
-  const q=String(search.value||'').trim().toLowerCase();
-  const filtered=!q?list:list.filter(m=>String(m.name||'').toLowerCase().includes(q));
-  container.innerHTML=filtered.length?filtered.map(m=>'<div class="listrow"><div class="avatar '+(m.isManager?'dark':'')+'">'+escapeHtml(m.name.slice(0,1))+'</div><div class="grow"><strong>'+escapeHtml(m.name)+'</strong><small>'+(m.isManager?'مدير الجمعية':'مشارك')+' · '+m.shares+' أسهم</small></div></div>').join():(q?'<div class="empty"><b>لا توجد نتائج مطابقة</b></div>':'<div class="empty"><b>لا يوجد أعضاء بعد</b></div>');
- });
-}
-let pendingInvitees=[];
 function invitePhoneKey(value){
  let v=String(value||'').replace(/[٠-٩]/g,d=>'٠١٢٣٤٥٦٧٨٩'.indexOf(d)).replace(/[۰-۹]/g,d=>'۰۱۲۳۴۵۶۷۸۹'.indexOf(d));
  v=v.trim().replace(/[()\s.-]/g,'');
@@ -3279,8 +3260,8 @@ function inviteDetail(){
    '<div class="keyvalue"><span>حالة الدعوة</span><b>'+escapeHtml(statusText)+'</b></div>'+
    '<div class="keyvalue"><span>بداية الجمعية</span><b>'+dateLabel(info.startDate)+'</b></div>'+
    '<div class="keyvalue"><span>أول قرعة</span><b>'+dateLabel(info.firstDrawOn)+'</b></div>'+
-   '<div class="keyvalue"><span>مدة الدورة</span><b>'+Number(info.cycleDays||0)+' يومًا</b></div>'+
-   '<div class="keyvalue"><span>قيمة السهم في الدورة</span><b>'+minorMoney(info.shareAmountMinor,info.currency)+'</b></div>'+
+   '<div class="keyvalue"><span>مدة فترة التحصيل</span><b>'+Number(info.cycleDays||0)+' يومًا</b></div>'+
+   '<div class="keyvalue"><span>قيمة السهم للقرعة</span><b>'+minorMoney(info.shareAmountMinor,info.currency)+'</b></div>'+
    '<div class="keyvalue"><span>طريقة السداد</span><b>'+(info.installmentMode==='amount'?'قيمة القسط':'عدد الأقساط')+'</b></div>'+
    '<div class="keyvalue"><span>عدد الأقساط</span><b>'+Number(info.installments||0)+'</b></div>'+
    (legacy?'<div class="keyvalue"><span>أسهم الدعوة القديمة</span><b>'+Number(info.sharesRequested||0)+'</b></div>':'')+
@@ -3343,18 +3324,18 @@ function joinInstallmentPreview(info,requestedShares){
   return '<div class="listrow"><div class="grow"><strong>القسط '+p.no+'</strong><small>'+dateLabel(from)+(from!==to?' — '+dateLabel(to):'')+'</small></div><b>'+minorMoney(perShare*shares,currency)+'</b></div>';
  }).join('');
  const total=share*shares,first=ranges.length?amounts[0]*shares:0;
- return '<div class="card join-payment-plan"><div class="keyvalue"><span>إجمالي الالتزام في الدورة</span><b>'+minorMoney(total,currency)+'</b></div><div class="keyvalue"><span>طريقة السداد</span><b>'+(mode==='amount'?'حسب قيمة القسط':'حسب عدد الأقساط')+'</b></div><div class="keyvalue"><span>عدد الأقساط</span><b>'+count+'</b></div><div class="keyvalue"><span>قيمة القسط الأول</span><b>'+minorMoney(first,currency)+'</b></div><div class="field-hint">توزيع الأقساط ومواعيدها</div>'+rows+'</div>';
+ return '<div class="card join-payment-plan"><div class="keyvalue"><span>إجمالي الالتزام للقرعة</span><b>'+minorMoney(total,currency)+'</b></div><div class="keyvalue"><span>طريقة السداد</span><b>'+(mode==='amount'?'حسب قيمة القسط':'حسب عدد الأقساط')+'</b></div><div class="keyvalue"><span>عدد الأقساط</span><b>'+count+'</b></div><div class="keyvalue"><span>قيمة القسط الأول</span><b>'+minorMoney(first,currency)+'</b></div><div class="field-hint">توزيع الأقساط ومواعيدها</div>'+rows+'</div>';
 }
 function showJoinRequestForm(info,source,token,invitationId){
  pendingJoinContext={source:source,token:token,info:info,invitationId:invitationId||info.invitationId||info.id||null};
  const currency=info.currency||'YER',share=Number(info.shareAmountMinor)||0;
  const details='<div class="card"><h3>'+escapeHtml(info.name||'الجمعية')+'</h3><div class="keyvalue"><span>المدير</span><b>'+escapeHtml(info.managerName||'—')+'</b></div>'+
   '<div class="keyvalue"><span>بداية الجمعية</span><b>'+dateLabel(info.startDate)+'</b></div><div class="keyvalue"><span>أول قرعة</span><b>'+dateLabel(info.firstDrawOn)+'</b></div>'+
-  '<div class="keyvalue"><span>مدة الدورة</span><b>'+Number(info.cycleDays||0)+' يومًا</b></div><div class="keyvalue"><span>حصة السهم</span><b>'+minorMoney(share,currency)+'</b></div>'+
+  '<div class="keyvalue"><span>مدة فترة التحصيل</span><b>'+Number(info.cycleDays||0)+' يومًا</b></div><div class="keyvalue"><span>حصة السهم</span><b>'+minorMoney(share,currency)+'</b></div>'+
   '<div class="keyvalue"><span>طريقة السداد</span><b>'+(info.installmentMode==='amount'?'قيمة القسط':'عدد الأقساط')+'</b></div><div class="keyvalue"><span>عدد الأقساط</span><b>'+Number(info.installments||1)+'</b></div></div>';
  const form='<div class="card"><form id="joinRequestForm"><div class="field"><label>عدد الأسهم التي ترغب بها</label><input name="requestedShares" id="requestedShares" type="number" min="1" step="1" value="1" required></div>'+
   '<div id="joinPaymentPreview">'+joinInstallmentPreview(info,1)+'</div>'+
-  '<small>هذا تقدير لالتزام الدورة، ولا يصبح نهائيًا ولا تُعتمد الأسهم إلا بعد موافقة المدير.</small>'+
+  '<small>هذا تقدير لالتزام القرعة، ولا يصبح نهائيًا ولا تُعتمد الأسهم إلا بعد موافقة المدير.</small>'+
   '<label class="terms-check"><input type="checkbox" name="confirmCommitment" required><span>راجعت عدد الأسهم وقيمة الالتزام وأوافق على تقديم الطلب.</span></label>'+
   '<button class="btn primary full" type="submit">إرسال طلب الانضمام</button></form></div>';
  shell('طلب الانضمام','groups',header('تحديد الأسهم وطلب الانضمام',info.name||'')+details+form);
@@ -3365,7 +3346,7 @@ function joinRequestStatus(){
  const request=db.joinRequests.find(x=>x.id===params.id)||null;
  if(!request){toast('طلب الانضمام غير موجود');go('home');return}
  const status=({pending:'بانتظار موافقة المدير',approved:'تمت الموافقة على الطلب',rejected:'تم رفض الطلب',cancelled:'تم إلغاء الطلب'})[request.status]||request.status;
- shell('حالة طلب الانضمام','groups',header('حالة طلب الانضمام')+'<div class="card"><h3>'+escapeHtml(status)+'</h3><div class="keyvalue"><span>الجمعية</span><b>'+escapeHtml(request.groupName||params.groupName||(db.groups.find(g=>g.id===request.groupId)||{}).name||'الجمعية')+'</b></div><div class="keyvalue"><span>الأسهم المطلوبة</span><b>'+request.requestedShares+'</b></div><div class="keyvalue"><span>التزام الدورة التقديري</span><b>'+minorMoney(request.estimatedAmountMinor,request.currency)+'</b></div><div class="keyvalue"><span>تاريخ التقديم</span><b>'+escapeHtml(request.submittedAt||'—')+'</b></div>'+(request.rejectionReason?'<p>سبب الرفض: '+escapeHtml(request.rejectionReason)+'</p>':'')+'</div>'+
+ shell('حالة طلب الانضمام','groups',header('حالة طلب الانضمام')+'<div class="card"><h3>'+escapeHtml(status)+'</h3><div class="keyvalue"><span>الجمعية</span><b>'+escapeHtml(request.groupName||params.groupName||(db.groups.find(g=>g.id===request.groupId)||{}).name||'الجمعية')+'</b></div><div class="keyvalue"><span>الأسهم المطلوبة</span><b>'+request.requestedShares+'</b></div><div class="keyvalue"><span>التزام القرعة التقديري</span><b>'+minorMoney(request.estimatedAmountMinor,request.currency)+'</b></div><div class="keyvalue"><span>تاريخ التقديم</span><b>'+escapeHtml(request.submittedAt||'—')+'</b></div>'+(request.rejectionReason?'<p>سبب الرفض: '+escapeHtml(request.rejectionReason)+'</p>':'')+'</div>'+
   (request.status==='pending'?'<button class="btn danger full" data-action="cancel-join-request" data-id="'+request.id+'">إلغاء الطلب</button>':''));
 }
 function joinRequests(){
@@ -3390,33 +3371,9 @@ function joinRequestDetail(){
  const actions=request.status==='pending'?(canApprove?'<div class="grid2"><button class="btn primary" data-action="approve-join-request" data-id="'+request.id+'">الموافقة على الطلب</button><button class="btn danger" data-action="reject-join-request" data-id="'+request.id+'">رفض الطلب</button></div>':'<div class="card"><b>الاتفاق مقفل</b><small>لا يمكن اعتماد طلبات انضمام جديدة بعد بدء الجمعية أو تثبيت أول قرعة.</small><button class="btn danger full" data-action="reject-join-request" data-id="'+request.id+'">رفض الطلب</button></div>'):'';
  shell('تفاصيل طلب الانضمام','groups',header('تفاصيل طلب الانضمام',request.applicantName)+'<div class="card"><div class="between"><h3>'+escapeHtml(request.applicantName)+'</h3>'+pill(request.status)+'</div>'+
   '<div class="keyvalue"><span>الحالة</span><b>'+escapeHtml(status)+'</b></div><div class="keyvalue"><span>مصدر الطلب</span><b>'+(request.sourceType==='invitation'?'دعوة شخصية':'رابط عام')+'</b></div>'+
-  '<div class="keyvalue"><span>الأسهم المطلوبة</span><b>'+request.requestedShares+'</b></div><div class="keyvalue"><span>التزام الدورة التقديري</span><b>'+minorMoney(request.estimatedAmountMinor,request.currency)+'</b></div>'+
+  '<div class="keyvalue"><span>الأسهم المطلوبة</span><b>'+request.requestedShares+'</b></div><div class="keyvalue"><span>التزام القرعة التقديري</span><b>'+minorMoney(request.estimatedAmountMinor,request.currency)+'</b></div>'+
   '<div class="keyvalue"><span>تاريخ التقديم</span><b>'+dateLabel(String(request.submittedAt||'').slice(0,10))+'</b></div><div class="keyvalue"><span>الأقساط</span><b>'+g.installments+'</b></div>'+
   (request.rejectionReason?'<p>سبب الرفض: '+escapeHtml(request.rejectionReason)+'</p>':'')+'</div>'+actions);
-}
-function installments(){
- const g=currentGroup();if(!g){go('groups');return}
- const detail=SahmApp.groupDetail(g.id);if(!detail||!detail.ok){toast(detail&&detail.message||'تعذر تحميل الجمعية');return}
- const manager=!!detail.role.manager,rounds=detail.rounds||g.shares||0;
- if(!selectedInstallmentCycle||selectedInstallmentCycle>rounds)selectedInstallmentCycle=detail.cycle||1;
- const options=Array.from({length:Math.max(0,rounds)},(_,i)=>'<option value="'+(i+1)+'" '+(selectedInstallmentCycle===i+1?'selected':'')+'>الدورة '+(i+1)+'</option>').join('');
- const reminderOptions=Array.from({length:g.installments},(_,i)=>'<option value="'+(i+1)+'">القسط '+(i+1)+'</option>').join('');
- const result=rounds?SahmApp.installmentRows(g.id,{cycle:selectedInstallmentCycle,status:selectedInstallmentStatus}):{ok:true,rows:[],counts:{paid:0,due:0,late:0,upcoming:0}};
- if(!result||!result.ok){shell('الأقساط','groups',header('أقساط الدورة',g.name)+'<div class="card empty"><b>'+escapeHtml(result&&result.message||'لا توجد أقساط لعرضها')+'</b></div>');return}
- const rows=result.rows||[],counts=result.counts||{paid:0,due:0,late:0,upcoming:0},filters=[['all','الكل'],['due','مستحق'],['paid','مدفوع'],['late','متأخر']];
- const rowsHtml=rows.map(x=>{
-  const canRecord=manager&&(x.status==='due'||x.status==='late');
-  const actions=canRecord?'<div class="dialog-actions"><button class="btn primary small" data-action="record-paid" data-member="'+x.memberId+'" data-cycle="'+x.cycle+'" data-no="'+x.no+'">تسجيل مدفوع</button><button class="btn outline small" data-action="send-reminder" data-member="'+x.memberId+'" data-cycle="'+x.cycle+'" data-no="'+x.no+'">تذكير</button></div>':'';
-  return '<div class="listrow installment-row"><div class="grow"><strong>'+escapeHtml(x.memberName)+' · القسط '+x.no+' من '+x.of+'</strong><small>'+dateLabel(x.periodStart)+' — '+dateLabel(x.periodEnd)+'</small><small>'+x.shares+' أسهم · '+minorMoney(x.total,g.currency)+'</small></div>'+pill(x.status)+'<div class="installment-actions">'+actions+'</div></div>';
- }).join('');
- const reminderTools=manager?'<div class="card reminder-tools"><div class="field"><label>تذكير جميع المشاركين بالقسط</label><select id="reminderInstallment">'+reminderOptions+'</select></div><button class="btn outline full" data-action="send-reminder-all">إرسال التذكير للمستحقين والمتأخرين</button><small>لن يصل التذكير لمن سجل القسط مدفوعًا أو لم يحن موعده بعد.</small></div>':'';
- shell('الأقساط','groups',header('أقساط الدورة',g.name)+
- '<div class="member-summary three"><div><span>مدفوعة</span><b>'+counts.paid+'</b></div><div><span>مستحقة</span><b>'+counts.due+'</b></div><div><span>متأخرة</span><b>'+counts.late+'</b></div></div>'+
- '<div class="field"><label>الدورة</label><select id="installmentCycle">'+options+'</select></div>'+reminderTools+
- '<div class="segmented">'+filters.map(f=>'<button class="'+(selectedInstallmentStatus===f[0]?'active':'')+'" data-action="installment-filter" data-filter="'+f[0]+'">'+f[1]+'</button>').join('')+'</div>'+
- '<div class="card" id="installmentRows">'+(rowsHtml||'<div class="empty"><b>لا توجد أقساط مطابقة لهذا المرشح</b></div>')+'</div>'+
- '<button class="btn outline full" data-go="receipts">سجل الاستلام والتصحيحات</button>'+
- (manager?'<button class="btn outline full" data-go="audit">سجل أحداث الجمعية</button>':''));
 }
 function adenDateTimeToUtc(value){
  const m=String(value||'').match(/^([0-9]{4})-([0-9]{2})-([0-9]{2})T([0-9]{2}):([0-9]{2})$/);if(!m)return null;
@@ -3427,46 +3384,13 @@ function utcToAdenDateTime(value){
  return new Date(d.getTime()+180*60000).toISOString().slice(0,16);
 }
 let drawAnimationPending=false;
-async function drawRoom(){
- const g=currentGroup();if(!g){go('groups');return}
- const detail=SahmApp.groupDetail(g.id);if(!detail||!detail.ok){toast('تعذر التحقق من عضوية الجمعية');go('groups');return}
- const manager=!!detail.role.manager;
- const roomResult=await SahmApp.getDrawRoom(g.id);
- if(!roomResult||!roomResult.ok){toast(roomResult&&roomResult.message||'تعذر تحميل غرفة القرعة');return}
- const room=roomResult.room||{},cycle=room.cycle||{},draw=room.draw||null,eligible=room.eligible_shares||[];
- const readinessResult=manager?await SahmApp.getDrawReadiness(g.id):null;
- const financeResult=manager?await SahmApp.getFinancialSummary(g.id):null;
- const readiness=readinessResult&&readinessResult.ok?readinessResult:{};
- const financial=financeResult&&financeResult.ok?financeResult.summary:null;
- const reasonLabels={NO_SHARES:'لا توجد أسهم مؤهلة',DRAW_COMPLETE:'اكتملت جميع جولات القرعة',DRAW_NOT_DUE:'لم يحن موعد القرعة بعد',INSTALLMENTS_UNPAID:'توجد أقساط غير مكتملة',FINANCIAL_NOT_READY:'لم تكتمل المتطلبات المالية'};
- const reasons=(readiness.reasons||[]).map(x=>reasonLabels[x]||x);
- const stateLabels={none:'لم تبدأ الجولة',pending:'بانتظار موعد القرعة',scheduled:'موعد محدد',open:'مفتوحة',presenting:'جارٍ عرض النتيجة',completed:'اكتمل العرض',failed:'تعذر العرض'};
- const winner=draw?(String(draw.winner_owner_name||'المشارك')+' · السهم '+String(draw.winner_share_no||'—')):'';
- const count=Math.max(eligible.length,1),colors=['#0f766e','#1d4ed8','#b45309','#7c3aed','#0f766e','#be123c','#0369a1','#4d7c0f'];
- const gradient=eligible.length?'conic-gradient('+eligible.map((x,i)=>colors[i%colors.length]+' '+(i*360/count)+'deg '+((i+1)*360/count)+'deg').join(',')+')':'conic-gradient(#cbd5e1 0deg 360deg)';
- const index=draw&&Number.isInteger(Number(draw.winner_index))?Number(draw.winner_index):0;
- const rotation=draw?(360*5+(360-((index+.5)*360/count))):0;
- const spin=draw&&drawAnimationPending;drawAnimationPending=false;
- const wheel='<div class="draw-wheel-wrap"><div class="draw-pointer"></div><div class="draw-wheel" style="background:'+gradient+';transform:rotate('+(spin?0:rotation)+'deg);'+(spin?'transition:transform 4.2s cubic-bezier(.12,.72,.12,1);':'transition:none;')+'"><span>سهم</span></div></div>';
- const eligibleRows=eligible.map(x=>'<div class="listrow"><div class="avatar">'+escapeHtml(String(x.share_no||'—'))+'</div><div class="grow"><strong>السهم '+escapeHtml(String(x.share_no||'—'))+'</strong><small>'+escapeHtml(x.owner_name||'مشارك')+'</small></div></div>').join('');
- const schedule=manager&&!draw?'<div class="card"><b>موعد القرعة · توقيت اليمن Asia/Aden</b><div class="field"><input id="drawScheduledAt" type="datetime-local" value="'+escapeHtml(utcToAdenDateTime(cycle.draw_scheduled_at))+'"></div><button class="btn outline full" data-action="schedule-draw">حفظ موعد القرعة</button></div>':'';
- const admin=manager?'<div class="card"><b>أدوات المدير</b><div class="keyvalue"><span>الجاهزية المالية</span><b>'+(readiness.financialReady?'مكتملة':'غير مكتملة')+'</b></div><div class="keyvalue"><span>جاهزية التنفيذ</span><b>'+(readiness.canDraw?'جاهزة':'غير جاهزة')+'</b></div><div class="keyvalue"><span>حالة العرض</span><b>'+escapeHtml(stateLabels[room.state]||room.state||'—')+'</b></div>'+(draw?'<div class="grid2"><button class="btn primary" data-action="draw-presentation-completed">تسجيل اكتمال العرض</button><button class="btn outline" data-action="draw-presentation-failed">تسجيل فشل العرض</button></div>':'<button class="btn primary full" data-action="run-draw" '+(!readiness.canDraw?'disabled':'')+'>تنفيذ القرعة وتثبيت النتيجة</button>')+'</div>':'';
- const totals=financial&&financial.totals||{},shareState=financial&&financial.shares||{};
- const financialCard=manager&&financial?'<div class="card"><b>التفاصيل المالية للجولة الحالية</b><div class="keyvalue"><span>إجمالي الالتزامات</span><b>'+minorMoney(totals.due_minor||0,g.currency)+'</b></div><div class="keyvalue"><span>المبالغ المستلمة</span><b>'+minorMoney(totals.collected_minor||0,g.currency)+'</b></div><div class="keyvalue"><span>المبالغ المتبقية</span><b>'+minorMoney(totals.remaining_minor||0,g.currency)+'</b></div><div class="keyvalue"><span>المبالغ المتأخرة</span><b>'+minorMoney(totals.overdue_minor||0,g.currency)+'</b></div><div class="keyvalue"><span>الأقساط المكتملة</span><b>'+Number(totals.paid_count||0)+' من '+Number(totals.obligations||0)+'</b></div><div class="keyvalue"><span>الأسهم المكتملة ماليًا</span><b>'+Number(shareState.complete||0)+' من '+Number(shareState.total||0)+'</b></div><div class="keyvalue"><span>الأسهم غير المكتملة</span><b>'+Number(shareState.incomplete||0)+'</b></div></div>':'';
- shell('غرفة القرعة','groups',header('غرفة القرعة',g.name)+'<div class="card draw-card"><div class="between"><b>الجولة '+(room.round_no||'—')+' من '+(room.rounds_total||'—')+'</b><span class="pill">'+escapeHtml(stateLabels[room.state]||room.state||'—')+'</span></div><div class="keyvalue"><span>تاريخ الاستحقاق</span><b>'+dateLabel(cycle.due_on)+'</b></div><div class="keyvalue"><span>موعد القرعة</span><b>'+escapeHtml(cycle.draw_scheduled_at?SahmCore.fmtDateTime(cycle.draw_scheduled_at,'Asia/Aden'):'غير محدد')+'</b></div><div class="keyvalue"><span>الأسهم المؤهلة</span><b>'+eligible.length+'</b></div><div class="keyvalue"><span>النتيجة</span><b>'+(draw?'مثبتة ومحفوظة':'لم تثبت بعد')+'</b></div></div>'+schedule+wheel+(draw?'<div class="card draw-winner"><span class="pill green">النتيجة المثبتة</span><h3>'+escapeHtml(winner)+'</h3><small>رقم القرعة: '+escapeHtml(String(draw.round_no||room.round_no))+'</small></div>':'')+'<div class="card"><b>الأسهم المؤهلة</b>'+(eligibleRows||'<div class="empty">لا توجد أسهم مؤهلة حاليًا.</div>')+'</div>'+(manager&&reasons.length?'<div class="card"><b>متطلبات الجاهزية</b>'+reasons.map(x=>'<div class="listrow">'+escapeHtml(x)+'</div>').join('')+'</div>':'')+admin+financialCard+'<button class="btn outline full" data-go="draw-history">سجل نتائج القرعة</button>');
- if(spin){const wheelElement=document.querySelector('.draw-wheel');if(wheelElement)requestAnimationFrame(()=>{wheelElement.style.transform='rotate('+rotation+'deg)';});}
-}
-async function drawHistory(){
- const g=currentGroup();if(!g){go('groups');return}const r=await SahmApp.getDrawHistory(g.id),rows=r&&r.ok?r.history:[];
- shell('سجل القرعة','groups',header('محاضر ونتائج القرعة',g.name)+'<div class="card">'+(rows.map(x=>'<div class="listrow"><div class="avatar gold">'+x.round_no+'</div><div class="grow"><strong>الجولة '+x.round_no+' · '+escapeHtml(x.winner_owner_name||'—')+' · السهم '+escapeHtml(String(x.winner_share_no||'—'))+'</strong><small>موعد الجولة: '+dateLabel(x.scheduled_on)+'</small><small>الجائزة المستهدفة: '+minorMoney(x.prize_target_minor||0,x.currency||g.currency)+'</small><small>حالة العرض: '+escapeHtml(x.presentation_status||'—')+'</small></div><span class="pill green">مثبتة</span></div>').join('')||'<div class="empty"><b>لا توجد محاضر مسجلة</b></div>')+'</div>');
-}
 function receipts(){
  const g=currentGroup();if(!g){go('groups');return}const r=SahmApp.receiptList(g.id,{includeVoided:!!isManager()}),rows=r&&r.ok?r.receipts:[];
- shell('سجلات الاستلام','groups',header(isManager()?'سجل استلام الجمعية':'سجلات استلامك',g.name)+'<div class="card">'+(rows.map(x=>'<button class="listrow" data-action="receipt-open" data-id="'+x.id+'"><div class="avatar">'+(x.voided?'!':'✓')+'</div><div class="grow"><strong>'+escapeHtml(x.memberName)+' · القسط '+x.no+'</strong><small>الدورة '+x.cycle+' · '+dateLabel(String(x.recordedAt||'').slice(0,10))+'</small></div><b>'+minorMoney(x.amount,g.currency)+'</b><span class="pill '+(x.voided?'red':'green')+'">'+(x.voided?'مصَحح':'مسجل')+'</span></button>').join('')||'<div class="empty"><b>لا توجد سجلات استلام</b></div>')+'</div>');
+ shell('سجلات الاستلام','groups',header(isManager()?'سجل استلام الجمعية':'سجلات استلامك',g.name)+'<div class="card">'+(rows.map(x=>'<button class="listrow" data-action="receipt-open" data-id="'+x.id+'"><div class="avatar">'+(x.voided?'!':'✓')+'</div><div class="grow"><strong>'+escapeHtml(x.memberName)+' · القسط '+x.no+'</strong><small>القرعة '+x.cycle+' · '+dateLabel(String(x.recordedAt||'').slice(0,10))+'</small></div><b>'+minorMoney(x.amount,g.currency)+'</b><span class="pill '+(x.voided?'red':'green')+'">'+(x.voided?'مصَحح':'مسجل')+'</span></button>').join('')||'<div class="empty"><b>لا توجد سجلات استلام</b></div>')+'</div>');
 }
 function receiptDetail(){
  const r=SahmApp.receiptDetail(params.id);if(!r||!r.ok){toast(r&&r.message||'سجل الاستلام غير موجود');go('receipts');return}
- shell('تفاصيل الاستلام','groups',header('سجل استلام',r.id)+'<div class="receipt"><div class="receipt-mark">'+(r.voided?'!':'✓')+'</div><div style="text-align:center;margin-top:8px"><b style="font-size:var(--sahm-font-card-title)">سجل استلام القسط</b><div class="hero-num" style="color:var(--ink)">'+minorMoney(r.amount,r.currency)+'</div><span class="pill '+(r.voided?'red':'green')+'">'+(r.voided?'تم تصحيحه':'تم تسجيل الاستلام')+'</span></div><div class="keyvalue"><span>اسم المشارك</span><b>'+escapeHtml(r.memberName)+'</b></div><div class="keyvalue"><span>الدورة والقسط</span><b>'+r.cycle+' · '+r.no+'</b></div><div class="keyvalue"><span>الفترة الأصلية</span><b>'+dateLabel(r.periodStart)+' — '+dateLabel(r.periodEnd)+'</b></div><div class="keyvalue"><span>وقت التسجيل</span><b>'+escapeHtml(r.recordedAt||'—')+'</b></div><div class="keyvalue"><span>التسجيل الذاتي</span><b>'+(r.self?'نعم':'لا')+'</b></div></div>'+(r.canCorrect?'<button class="btn danger full" data-action="receipt-correct" data-id="'+r.id+'">تصحيح سجل الاستلام</button>':'')+(r.corrections&&r.corrections.length?'<div class="card"><b>سجل التصحيحات</b>'+r.corrections.map(x=>'<div class="listrow"><small>'+escapeHtml(x.reason||'')+'</small></div>').join('')+'</div>':''));
+ shell('تفاصيل الاستلام','groups',header('سجل استلام',r.id)+'<div class="receipt"><div class="receipt-mark">'+(r.voided?'!':'✓')+'</div><div style="text-align:center;margin-top:8px"><b style="font-size:var(--sahm-font-card-title)">سجل استلام القسط</b><div class="hero-num" style="color:var(--ink)">'+minorMoney(r.amount,r.currency)+'</div><span class="pill '+(r.voided?'red':'green')+'">'+(r.voided?'تم تصحيحه':'تم تسجيل الاستلام')+'</span></div><div class="keyvalue"><span>اسم المشارك</span><b>'+escapeHtml(r.memberName)+'</b></div><div class="keyvalue"><span>القرعة والقسط</span><b>'+r.cycle+' · '+r.no+'</b></div><div class="keyvalue"><span>الفترة الأصلية</span><b>'+dateLabel(r.periodStart)+' — '+dateLabel(r.periodEnd)+'</b></div><div class="keyvalue"><span>وقت التسجيل</span><b>'+escapeHtml(r.recordedAt||'—')+'</b></div><div class="keyvalue"><span>التسجيل الذاتي</span><b>'+(r.self?'نعم':'لا')+'</b></div></div>'+(r.canCorrect?'<button class="btn danger full" data-action="receipt-correct" data-id="'+r.id+'">تصحيح سجل الاستلام</button>':'')+(r.corrections&&r.corrections.length?'<div class="card"><b>سجل التصحيحات</b>'+r.corrections.map(x=>'<div class="listrow"><small>'+escapeHtml(x.reason||'')+'</small></div>').join('')+'</div>':''));
 }
 async function copyText(value,successMessage){
  const text=String(value||'');if(!text){toast('لا يوجد نص متاح للنسخ');return false}
@@ -3487,11 +3411,6 @@ async function copyText(value,successMessage){
  toast('تعذر النسخ تلقائيًا؛ حدد الرابط وانسخه يدويًا');return false;
 }
 function escapeHtml(s){return String(s==null?'':s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]))}
-function chat(){
- const g=currentGroup();if(!g){go('groups');return}const r=SahmApp.chatView(g.id);if(!r||!r.ok){toast(r&&r.message||'تعذر تحميل المحادثة');return}
- SahmApp.markChatRead(g.id);const rows=r.messages||[];
- shell('المحادثة','wall',header('محادثة الجمعية',g.name)+'<div class="card" id="chatMessages" style="min-height:250px">'+rows.map(x=>'<div class="chatbubble '+(x.kind==='member'&&x.mine?'mine':'')+'"><b>'+(x.kind==='system'?'سهم':escapeHtml(x.senderName||'مشارك'))+'</b><div>'+escapeHtml(x.text)+'</div><small class="eyebrow">'+escapeHtml(x.timeLabel||SahmApp.chatTime(x.at))+'</small></div>').join('')+'</div><form id="chatForm"><div class="field"><label>رسالتك</label><textarea name="text" maxlength="'+SahmApp.maxMessage()+'" id="chatInput" placeholder="اكتب رسالة..." required></textarea><div class="between"><span id="charCount">0 / '+SahmApp.maxMessage()+'</span></div></div><button class="btn primary full" type="submit">إرسال الرسالة</button></form>');
-}
 function wall(){
  const rows=SahmApp.chatList()||[];
  const items=rows.map(item=>{
@@ -3511,21 +3430,6 @@ function notifications(){
  const labels={received:'تسجيل استلام قسط',reminder:'تذكير بقسط',drawResult:'نتيجة القرعة',late:'تأخر قسط',drawSoon:'اقتراب موعد القرعة',drawDue:'موعد القرعة',joined:'انضمام عضو',completed:'اكتمال الأقساط',join_approved:'الموافقة على طلب انضمامك',join_rejected:'رفض طلب انضمامك'};
  const rows=(r.notifications||[]).map(x=>'<button type="button" class="listrow" data-action="notification-open" data-id="'+escapeHtml(x.id)+'" data-related-id="'+escapeHtml(x.relatedEntityId||'')+'" data-decision="'+(['join_approved','join_rejected'].includes(x.type)?'true':'false')+'"><div class="avatar">'+(x.type==='drawResult'?'★':['join_approved','join_rejected'].includes(x.type)?'✓':'♧')+'</div><div class="grow"><strong>'+escapeHtml(labels[x.type]||'إشعار سهم')+'</strong><small>'+escapeHtml(x.text)+'</small><small>'+escapeHtml(x.at||'')+'</small></div>'+(!x.read?'<span class="pill gold">جديد</span>':'<span class="pill">مقروء</span>')+'</button>').join('');
  shell('الإشعارات','notifications',header('الإشعارات','تنبيهات حسابك')+'<div class="card">'+(rows||'<div class="empty"><b>لا توجد إشعارات</b></div>')+'</div>');
-}
-async function news(){
- const g=currentGroup();if(!g){go('groups');return}
- const result=await SahmApp.getNews(g.id,50);if(!result||!result.ok){toast(result&&result.message||'تعذر تحميل أخبار الجمعية');return}
- const labels={received:'استلام قسط',completed:'اكتمال الأقساط',late:'تأخر قسط',drawSoon:'اقتراب القرعة',drawDue:'موعد القرعة',drawResult:'نتيجة القرعة',joined:'انضمام عضو',motivate:'خبر الجمعية'};
- const rows=(result.news||[]).map(x=>'<div class="listrow"><div class="avatar">'+(x.type==='drawResult'?'★':'⌁')+'</div><div class="grow"><strong>'+escapeHtml(x.title||labels[x.type]||'خبر الجمعية')+'</strong><small>'+escapeHtml(x.body||'')+'</small>'+(x.subject_visible===true&&x.subject_name?'<small>'+escapeHtml(x.subject_name)+'</small>':'')+'<small class="eyebrow">'+escapeHtml(x.occurred_at||'')+'</small></div></div>').join('');
- shell('أخبار الجمعية','groups',header('أخبار الجمعية',g.name)+'<div class="card">'+(rows||'<div class="empty"><b>لا توجد أخبار منشورة</b></div>')+'</div>');
-}
-async function audit(){
- const g=currentGroup();if(!g){go('groups');return}
- const detail=SahmApp.groupDetail(g.id);if(!detail||!detail.ok||!detail.role.manager){toast('سجل العمليات متاح لمدير الجمعية فقط');go('group-detail');return}
- const result=await SahmApp.getAuditLog(g.id,100),rows=result&&result.ok?result.log:[];
- const labels={association_created:'إنشاء الجمعية',association_updated:'تعديل الجمعية',member_joined:'انضمام عضو',member_removed:'إزالة عضو',shares_added:'إضافة أسهم',shares_removed:'إزالة أسهم',invitation_created:'إنشاء دعوة',invitation_cancelled:'إلغاء دعوة',receipt_recorded:'تسجيل استلام',installment_received:'استلام قسط',receipt_corrected:'تصحيح استلام',draw_result:'تثبيت نتيجة القرعة',draw_scheduled:'تحديد موعد القرعة',draw_presentation_completed:'اكتمال عرض القرعة',draw_presentation_failed:'فشل عرض القرعة',notification_settings_updated:'تعديل إعدادات النشر',reminders_sent:'إرسال تذكيرات'};
- const items=rows.map(x=>'<div class="listrow"><div class="avatar">⌁</div><div class="grow"><strong>'+escapeHtml(labels[x.event_type]||x.event_type||'عملية إدارية')+'</strong><small>'+escapeHtml(x.actor_name||'سهم')+' · '+escapeHtml(x.entity_type||'')+'</small><small class="eyebrow">'+escapeHtml(x.occurred_at||'')+'</small></div></div>'+(x.after_data?'<details><summary>تفاصيل العملية</summary><pre class="audit-json">'+escapeHtml(JSON.stringify(x.after_data,null,2))+'</pre></details>':'')).join('');
- shell('سجل العمليات','groups',header('سجل العمليات الإداري',g.name)+'<div class="card">'+(items||'<div class="empty"><b>لا توجد عمليات مسجلة</b></div>')+'</div>');
 }
 function profile(){
  const avatarIcon=(AVATAR_OPTIONS.find(x=>x[0]===(db.user.avatarKey||'avatar-01'))||AVATAR_OPTIONS[0])[1];
@@ -3608,7 +3512,7 @@ function openAssociationWorkspace(tab, view) {
 const ALL_SCREEN_REGISTRY={
  welcome:welcome,register:register,'account-login':accountLogin,'profile-setup':profileSetup,'reset-password':resetPasswordScreen,'logged-out':logout,
  home:home,groups:groups,'managed-groups':managedGroups,'joined-groups':joinedGroups,'create-group':createGroup,'created-group':createdGroup,'group-detail':groupDetail,
- members:()=>openAssociationWorkspace('members'),'member-reception':memberReception,invite:invite,invites:invites,'invite-detail':inviteDetail,'join-group':joinGroup,'join-request-status':joinRequestStatus,'join-requests':joinRequests,'join-request-detail':joinRequestDetail,installments:installments,
+ members:()=>openAssociationWorkspace('members'),'member-reception':memberReception,invite:invite,invites:invites,'invite-detail':inviteDetail,'join-group':joinGroup,'join-request-status':joinRequestStatus,'join-requests':joinRequests,'join-request-detail':joinRequestDetail,installments:()=>openAssociationWorkspace('installments'),
  'draw-room':()=>openAssociationWorkspace('draws','summary'),'draw-history':()=>openAssociationWorkspace('draws','history'),receipts:receipts,'receipt-detail':receiptDetail,
  chat:()=>openAssociationWorkspace('chat'),wall:wall,news:()=>openAssociationWorkspace('news'),notifications:notifications,audit:()=>openAssociationWorkspace('audit'),profile:profile,'edit-profile':editProfile,settings:settings
 };
@@ -3888,7 +3792,7 @@ async function handleAppAction(action,el){
   const selectedNo=$('#mgdInstallmentNumber')?.value;
   if(screenName==='group-detail'&&(!selectedNo||selectedNo==='all')){toast('حدد رقم القسط لإرسال التذكير');return}
   const no=Number(selectedNo||$('#reminderInstallment')?.value||1);
-  reminderRequest={groupId:g.id,cycle:selectedInstallmentCycle,no:no};
+  const reminderDetail=SahmApp.groupDetail(g.id);reminderRequest={groupId:g.id,cycle:Number(el.dataset.cycle||reminderDetail&&reminderDetail.cycle||1),no:no};
   const r=await SahmApp.sendReminder(reminderRequest);
   if(r&&r.ok){refreshData();toast('تم إرسال التذكير إلى '+r.recipients+' مشاركين')}
   else if(r&&r.code==='REMINDER_REPEAT'){showModal('تأكيد تكرار التذكير',escapeHtml(r.message),[['إرسال مرة أخرى','send-reminder-confirm','primary'],['إلغاء','close','outline']])}
@@ -3898,10 +3802,10 @@ async function handleAppAction(action,el){
   reminderRequest={groupId:g.id,cycle:Number(el.dataset.cycle),no:Number(el.dataset.no),memberId:el.dataset.member||undefined};
   const r=await SahmApp.sendReminder(reminderRequest);if(r&&r.ok){refreshData();toast('تم إرسال التذكير')}else if(r&&r.code==='REMINDER_REPEAT'){showModal('تأكيد تكرار التذكير',escapeHtml(r.message),[['إرسال مرة أخرى','send-reminder-confirm','primary'],['إلغاء','close','outline']])}return;
  }
- if(action==='send-reminder-confirm'&&reminderRequest){const r=await SahmApp.sendReminder(Object.assign({},reminderRequest,{confirmRepeat:true}));if(r&&r.ok){closeModal();refreshData();if(screenName==='group-detail')groupDetail();else installments();toast('تم إرسال التذكير')}return}
+ if(action==='send-reminder-confirm'&&reminderRequest){const r=await SahmApp.sendReminder(Object.assign({},reminderRequest,{confirmRepeat:true}));if(r&&r.ok){closeModal();refreshData();if(screenName==='group-detail')groupDetail();else openAssociationWorkspace('installments');toast('تم إرسال التذكير')}return}
  if(action==='schedule-draw'){
   if(!g||!isManager())return;const value=document.getElementById('drawScheduledAt')&&document.getElementById('drawScheduledAt').value,utc=adenDateTimeToUtc(value);if(!utc){toast('حدد موعدًا صحيحًا بتوقيت اليمن');return}
-  const result=await SahmApp.setDrawScheduledAt(g.id,utc);if(result&&result.ok){toast('تم حفظ الموعد بتوقيت اليمن');if(screenName==='group-detail')groupDetail();else drawRoom()}return;
+  const result=await SahmApp.setDrawScheduledAt(g.id,utc);if(result&&result.ok){toast('تم حفظ الموعد بتوقيت اليمن');if(screenName==='group-detail')groupDetail();else openAssociationWorkspace('draws','summary')}return;
  }
  if(action==='run-draw'){
   if(!g||!isManager())return;const result=await SahmApp.performDraw(g.id);if(result&&result.ok){refreshData();drawAnimationPending=true;if(screenName==='group-detail')await groupDetail();else await drawRoom()}return;
@@ -3982,7 +3886,7 @@ document.addEventListener('click',async e=>{
 });
 document.addEventListener('change',async e=>{
  const el=e.target;if(el.id==='notifToggle'){db.user.notifications=el.checked;save();return}if(el.id==='bioToggle'){db.user.biometric=el.checked;save();return}
- if(el.id==='installmentCycle'){selectedInstallmentCycle=Number(el.value)||1;syncNavigationContext();installments();return}
+ 
  if(el.dataset.action==='mute-toggle'){const g=currentGroup();if(!g)return;const prefs=SahmApp.prefs(),old=prefs.mute&&prefs.mute[g.id]||{},patch={};patch[el.dataset.kind]=el.checked;const r=await SahmApp.setMute(g.id,Object.assign({},old,patch));if(r&&r.ok){refreshData();groupDetail()}return}
  if(el.dataset.action==='notify-channel-toggle'){const g=currentGroup();if(!g||!isManager())return;const d=SahmApp.groupDetail(g.id);if(!d||!d.ok)return;const settings={feed:Object.assign({},d.group.notify||{}),chat:Object.assign({},d.group.notifyChat||{}),names:Object.assign({},d.group.notifyNames||{})};const channel=el.dataset.channel;if(!settings[channel])settings[channel]={};settings[channel][el.dataset.type]=el.checked;const result=await SahmApp.setNotifySettings(g.id,settings);if(result&&result.ok){refreshData();groupDetail()}else el.checked=!el.checked;return}
 });
@@ -4144,7 +4048,7 @@ if(form.id==='loginForm'){
    $('#modal-root').dataset.invitationId=info.invitationId;return;
   }
   pendingJoinContext={source:'invitation',token:token,info:info,invitationId:info.invitationId};
-  const body='<b>'+escapeHtml(info.name)+'</b><div class="keyvalue"><span>المدير</span><b>'+escapeHtml(info.managerName)+'</b></div><div class="keyvalue"><span>بداية الجمعية</span><b>'+dateLabel(info.startDate)+'</b></div><div class="keyvalue"><span>أول قرعة</span><b>'+dateLabel(info.firstDrawOn)+'</b></div><div class="keyvalue"><span>مدة الدورة</span><b>'+info.cycleDays+' يومًا</b></div><div class="keyvalue"><span>حصة السهم</span><b>'+minorMoney(info.shareAmountMinor,info.currency)+'</b></div><div class="keyvalue"><span>عدد الأقساط</span><b>'+info.installments+'</b></div><p>اختيار «نعم» يفتح نموذج تحديد الأسهم فقط، ولا ينشئ عضوية أو التزامًا نهائيًا.</p>';
+  const body='<b>'+escapeHtml(info.name)+'</b><div class="keyvalue"><span>المدير</span><b>'+escapeHtml(info.managerName)+'</b></div><div class="keyvalue"><span>بداية الجمعية</span><b>'+dateLabel(info.startDate)+'</b></div><div class="keyvalue"><span>أول قرعة</span><b>'+dateLabel(info.firstDrawOn)+'</b></div><div class="keyvalue"><span>مدة فترة التحصيل</span><b>'+info.cycleDays+' يومًا</b></div><div class="keyvalue"><span>حصة السهم</span><b>'+minorMoney(info.shareAmountMinor,info.currency)+'</b></div><div class="keyvalue"><span>عدد الأقساط</span><b>'+info.installments+'</b></div><p>اختيار «نعم» يفتح نموذج تحديد الأسهم فقط، ولا ينشئ عضوية أو التزامًا نهائيًا.</p>';
   showModal('دعوة للانضمام إلى جمعية',body,[['نعم، أرغب بالانضمام','invitation-interested','primary'],['لا، أرفض الدعوة','invitation-declined','outline'],['ليس الآن','invitation-deferred','outline']]);
   return;
  }

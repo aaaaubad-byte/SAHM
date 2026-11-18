@@ -413,3 +413,10 @@
 - Updated UI contract tests to validate the role-specific tab arrays and the current cycle-card status markup; tests now use the file fixtures already loaded by the suite.
 - Removed the internal winning-share UUID from participant draw-history cards; the existing winner label already identifies the winning share without exposing a database identifier.
 - Updated architecture-sensitive UI contracts: the shared workspace module is included when checking generated buttons/actions/forms, and the member-reception entry is asserted in the workspace settings rather than the removed legacy detail renderer.
+
+## 2026-11-18 — Remove duplicate association sub-screens
+- Routed members, installments, draw room/history, group chat, news, and audit entry points through the shared association workspace.
+- Removed the former standalone renderers for those sections instead of leaving parallel/obsolete screen implementations.
+- Removed the old standalone installment selector state and its event handler; reminder actions now use the installment's own cycle metadata, with the current cycle as fallback.
+- Replaced visible "الدورة/الجولة" terminology with "القرعة" and "فترة التحصيل" where the label refers to the collection window.
+- Kept receipt lists/details and member reception/invitation management as distinct supporting workflows.

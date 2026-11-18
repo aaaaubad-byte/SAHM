@@ -598,3 +598,13 @@ test('participant workspace never guesses another member when own membership is 
   assert.doesNotMatch(managed, /members\.find\(x=>x\.isMe\)\s*\|\|\s*members\[0\]/);
   assert.match(managed, /SahmApp\.memberStatement\(g\.id,ownMemberId\(g\)\)/);
 });
+
+test('association subroutes all resolve to the shared workspace and retired duplicate renderers are absent', () => {
+  assert.match(html, /installments:\(\)=>openAssociationWorkspace\('installments'\)/);
+  assert.match(html, /'draw-room':\(\)=>openAssociationWorkspace\('draws','summary'\)/);
+  assert.match(html, /'draw-history':\(\)=>openAssociationWorkspace\('draws','history'\)/);
+  for (const name of ['members','installments','drawRoom','drawHistory','chat','news','audit']) {
+    assert.doesNotMatch(html, new RegExp('(?:async\\s+)?function\\s+'+name+'\\s*\\('), 'retired renderer removed: '+name);
+  }
+  assert.doesNotMatch(html, /selectedInstallmentCycle|selectedInstallmentStatus|installments\(\)/);
+});
