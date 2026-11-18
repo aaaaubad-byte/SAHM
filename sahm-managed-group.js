@@ -148,7 +148,7 @@
         (collect ? actionButton('تحصيل','record-paid',attrs,'primary') : '')+
         (remind ? actionButton('تذكير','send-reminder',attrs,'') : '')+'</div>' : '');
       return '<article class="mgd-installment-card'+(state.installmentSelectMode?' is-selectable':'')+(selected?' is-selected':'')+'" role="'+(state.installmentSelectMode?'checkbox':'group')+'" data-installment-key="'+esc(key)+'" data-selectable="'+(state.installmentSelectMode?'true':'false')+'" tabindex="'+(state.installmentSelectMode?'0':'-1')+'" aria-checked="'+(selected?'true':'false')+'">'+
-        '<div class="mgd-installment-top"><b>'+esc(x.memberName)+'</b><span class="mgd-installment-status-icon '+meta[2]+'" title="'+esc(meta[1])+'" aria-label="'+esc(meta[1])+'">'+uiIcon(meta[0],19)+'</span>+
+        '<div class="mgd-installment-top"><b>'+esc(x.memberName)+'</b><span class="mgd-installment-status-icon '+meta[2]+'" title="'+esc(meta[1])+'" aria-label="'+esc(meta[1])+'">'+uiIcon(meta[0],19)+'</span>'+
         (state.installmentSelectMode?'<span class="mgd-select-mark">'+uiIcon(selected?'check-circle-2':'circle',20)+'</span>':'')+'</div>'+
         '<div class="mgd-installment-meta"><span>'+ (memberMap.get(String(x.memberId))||0) +' سهم</span><i>|</i><b>'+esc(moneyValue(x.total,g.currency))+'</b><i>|</i><span>القسط '+esc(x.no)+'</span></div>'+actions+'</article>';
     }).join('') || '<div class="mgd-empty">لا توجد أقساط مطابقة للبحث والفلترة</div>';
