@@ -172,7 +172,7 @@
       selectedInstallmentCycle=state.cycle;
       if(list) list.innerHTML=installmentRows(g,d);
       const summary=document.querySelector('.mgd-installment-summary'),stats=summary&&summary.querySelector('.mgd-summary-stats');
-      if(stats){const paid=scoped.filter(x=>x.status==='paid').length,late=scoped.filter(x=>x.status==='late').length,pending=scoped.filter(x=>x.status==='due'||x.status==='upcoming').length;
+      if(stats){const paid=scoped.filter(x=>x.status==='paid').length,late=scoped.filter(x=>x.status==='late').length,pending=scoped.filter(x=>x.status==='due'||x.status === 'upcoming').length;
         stats.innerHTML='<span>الإجمالي <b>'+scoped.length+'</b></span><span>مدفوعة <b>'+paid+'</b></span><span>معلقة <b>'+pending+'</b></span><span>متأخرة <b>'+late+'</b></span>';}
       if(toolbar){toolbar.classList.toggle('filters-open',state.installmentFiltersOpen);toolbar.classList.toggle('selection-open',state.installmentSelectMode);}
       if(filterToggle)filterToggle.setAttribute('aria-expanded',state.installmentFiltersOpen?'true':'false');
@@ -221,10 +221,10 @@
       Array.from({length:Math.max(1,Number(g.installments)||1)},(_,i)=>'<option value="'+(i+1)+'" '+(String(state.installment)===String(i+1)?'selected':'')+'>القسط '+(i+1)+'</option>').join('');
     return '<section class="mgd-installment-summary"><div class="mgd-summary-top"><b>القرعة '+cycle+'</b><span>'+esc(first.periodStart?dateLabel(first.periodStart):'—')+' – '+esc(first.periodEnd?dateLabel(first.periodEnd):'—')+'</span></div><div class="mgd-summary-stats"><span>الإجمالي <b>'+shown.length+'</b></span><span>مدفوعة <b>'+paid+'</b></span><span>معلقة <b>'+pending+'</b></span><span>متأخرة <b>'+late+'</b></span></div></section>'+
       '<div class="mgd-installment-toolbar" id="mgdInstallmentToolbar"><label class="mgd-search mgd-installment-search">'+uiIcon('search',17)+'<input id="mgdInstallmentSearch" type="search" placeholder="ابحث باسم العضو" autocomplete="off"></label>'+
-      '<button type="button" class="mgd-tool-icon" id="mgdInstallmentSelectToggle" aria-label="تحديد الأقساط" aria-pressed="'+(state.installmentSelectMode?'true':'false')+'">'+uiIcon('list-checks',19)+'</button>'+
-      '<button type="button" class="mgd-tool-icon" id="mgdInstallmentFilterToggle" aria-label="الفلاتر" aria-expanded="'+(state.installmentFiltersOpen?'true':'false')+'">'+uiIcon('sliders-horizontal',19)+'</button>'+
+      '<button type="button" class="mgd-tool-icon" data-action="managed-installment-select" id="mgdInstallmentSelectToggle" aria-label="تحديد الأقساط" aria-pressed="'+(state.installmentSelectMode?'true':'false')+'">'+uiIcon('list-checks',19)+'</button>'+
+      '<button type="button" class="mgd-tool-icon" data-action="managed-installment-filter" id="mgdInstallmentFilterToggle" aria-label="الفلاتر" aria-expanded="'+(state.installmentFiltersOpen?'true':'false')+'">'+uiIcon('sliders-horizontal',19)+'</button>'+
       '<div class="mgd-installment-filter-fields"><label class="mgd-select"><select id="mgdInstallmentCycle" aria-label="القرعة">'+cycleOptions+'</select></label><label class="mgd-select"><select id="mgdInstallmentNumber" aria-label="رقم القسط">'+installmentOptions+'</select></label><label class="mgd-select"><select id="mgdInstallmentStatus" aria-label="حالة القسط"><option value="all">كل الحالات</option></select></label></div>'+
-      '<button type="button" class="mgd-bulk-reminder-action" id="mgdInstallmentBulkReminder" hidden disabled>'+uiIcon('bell',16)+'<span>تذكير (0)</span></button></div>'+
+      '<button type="button" class="mgd-bulk-reminder-action" data-action="managed-installment-bulk-reminder" id="mgdInstallmentBulkReminder" hidden disabled>'+uiIcon('bell',16)+'<span>تذكير (0)</span></button></div>'+
       '<div id="mgdInstallmentList" class="mgd-installment-list"></div><button type="button" class="mgd-secondary-link" data-go="receipts">سجل الاستلام والتصحيحات '+uiIcon('back-screen',16)+'</button>';
   }
   async function cycleDetail(g, d, round) {
@@ -632,6 +632,7 @@
     const el = event.target.closest('[data-action]');
     if (!el) return;
     const action = el.dataset.action;
+    if (['managed-installment-select','managed-installment-filter','managed-installment-bulk-reminder'].includes(action)) { event.preventDefault(); event.stopImmediatePropagation(); return; }
     if (['record-paid','send-reminder','send-reminder-all','schedule-draw','run-draw','draw-presentation-completed','draw-presentation-failed','notify-channel-toggle'].includes(action)) invalidateReads();
     if (!['managed-home-slide','managed-home-section','managed-tab','managed-open-member','managed-open-cycle','managed-back','managed-draw-view','managed-settings-view'].includes(action)) return;
     event.preventDefault();
