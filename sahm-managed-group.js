@@ -50,7 +50,7 @@
       '<button type="button" class="mgd-member-card" data-action="managed-open-member" data-member-id="' + esc(m.memberId) + '">' +
       '<span class="mgd-avatar">' + esc((m.name || '؟').slice(0, 1)) + '</span><span class="mgd-member-main"><b>' + esc(m.name) + '</b>' +
       '<small>' + (m.isManager ? 'مدير الجمعية' : 'عضو') + (m.isMe ? ' · حسابك' : '') + '</small></span>' +
-      '<span class="mgd-member-shares"><b>' + Number(m.shares || 0) + '</b><small>أسهم</small></span>' + uiIcon('chevron-left', 18) + '</button>'
+      '<span class="mgd-member-shares"><b>' + Number(m.shares || 0) + '</b><small>أسهم</small></span>' + uiIcon('back-screen', 18) + '</button>'
     ).join('');
     return '<div class="mgd-list-head"><b>الأعضاء</b><span>' + list.length + ' عضو</span></div>' +
       '<label class="mgd-search">' + uiIcon('search', 18) + '<input id="mgdMemberSearch" type="search" placeholder="البحث باسم العضو" autocomplete="off"></label>' +
@@ -78,7 +78,7 @@
       const winner = draw ? (draw.winner_owner_name || draw.winnerLabel || '—') : 'لم تُنفذ القرعة';
       return '<button type="button" class="mgd-cycle-card" data-action="managed-open-cycle" data-round="' + n + '">' +
         '<span class="mgd-cycle-number">' + n + '</span><span class="mgd-cycle-main"><b>الدورة ' + n + '</b><small>' + esc(winner) + '</small></span>' +
-        '<span class="mgd-cycle-state">' + esc(stateLabel) + '</span>' + uiIcon('chevron-left', 18) + '</button>';
+        '<span class="mgd-cycle-state">' + esc(stateLabel) + '</span>' + uiIcon('back-screen', 18) + '</button>';
     }).join('');
     return '<div class="mgd-list-head"><b>الدورات</b><span>' + total + ' دورة</span></div>' +
       '<div class="mgd-list">' + (cards || '<div class="mgd-empty">لا توجد دورات لعرضها</div>') + '</div>';
@@ -128,7 +128,7 @@
       '<label class="mgd-select"><span>حالة القسط</span><select id="mgdInstallmentStatus"><option value="all">جميع الحالات</option><option value="due">مستحق</option><option value="paid">مدفوع</option><option value="late">متأخر</option><option value="upcoming">لم يحن موعده</option></select></label></div>' +
       '<div id="mgdInstallmentList" class="mgd-installment-list"></div>' +
       '<section class="mgd-bulk-reminder"><label>تذكير جماعي بالقسط<select id="reminderInstallment">' + installmentOptions + '</select></label><button type="button" data-action="send-reminder-all">إرسال للمستحقين والمتأخرين</button></section>' +
-      '<button type="button" class="mgd-secondary-link" data-go="receipts">سجل الاستلام والتصحيحات ' + uiIcon('chevron-left', 16) + '</button>';
+      '<button type="button" class="mgd-secondary-link" data-go="receipts">سجل الاستلام والتصحيحات ' + uiIcon('back-screen', 16) + '</button>';
   }
   function cycleDetail(g, d, round) {
     const historyResult = SahmApp.getDrawHistory(g.id), history = historyResult && historyResult.ok ? (historyResult.history || []) : [];
