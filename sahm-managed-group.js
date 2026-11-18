@@ -288,6 +288,8 @@
     else if (active === 'chat') { content = chatPanel(g); }
     else if (active === 'audit') { content = await auditPanel(g); }
     shell('تفاصيل الجمعية', 'groups', identity(g, d) + tabs(active) + '<main class="mgd-content">' + content + '</main>');
+    const activeTab = document.querySelector && document.querySelector('.mgd-tabs button.active');
+    if (activeTab && typeof activeTab.scrollIntoView === 'function') activeTab.scrollIntoView({ block: 'nearest', inline: 'nearest' });
     if (active === 'members') bindMemberSearch();
     if (active === 'installments') bindInstallmentFilters(g, d);
     if (active === 'chat') bindChatComposer();
