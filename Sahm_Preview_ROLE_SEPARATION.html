@@ -707,13 +707,19 @@ button{
   border: 1px solid #dce5ff;
 }
 .group-card{
-  border: 1px solid var(--line);
-  border-right: 1px solid var(--line);
+  padding: 15px 15px 13px;
+  margin-bottom: 11px;
+  border: 1px solid #e2e8f2;
+  border-right: 1px solid #e2e8f2;
+  border-radius: var(--radius-card);
+  background: linear-gradient(180deg,#fff 0%,#fcfdff 100%);
+  box-shadow: 0 4px 13px rgba(30,49,83,.045);
   cursor: pointer;
-  transition: transform .15s,box-shadow .15s;
+  transition: transform .15s,box-shadow .15s,border-color .15s;
 }
 .group-card:active{
-  transform: scale(.99);
+  transform: translateY(1px);
+  box-shadow: 0 2px 7px rgba(30,49,83,.04);
 }
 
 
@@ -812,16 +818,20 @@ textarea:focus-visible{
 .group-card-metrics{
   display: grid;
   grid-template-columns: repeat(3,minmax(0,1fr));
-  gap: 8px;
-  margin: 16px 0 8px;
-  padding-top: 12px;
+  gap: 7px;
+  margin: 13px 0 8px;
+  padding-top: 11px;
   border-top: 1px solid #edf0f5;
 }
 .group-card-metrics div{
   min-width: 0;
   display: flex;
   flex-direction: column;
-  gap: 5px;
+  gap: 4px;
+  padding: 8px 7px;
+  border: 1px solid #edf1f7;
+  border-radius: var(--radius-small);
+  background: #f8faff;
 }
 .group-card-metrics span{
   
@@ -855,8 +865,10 @@ textarea:focus-visible{
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-top: 10px;
-  color: #8490a1;
+  margin-top: 11px;
+  padding-top: 9px;
+  border-top: 1px solid #f0f2f6;
+  color: #77859a;
   
 }
 .group-card-footer>span:last-child{
@@ -939,7 +951,45 @@ textarea:focus-visible{
 }
 .toolbar{
   gap: 7px;
-  margin: 9px 0;
+  margin: 9px 0 13px;
+}
+.groups-toolbar{
+  width: 100%;
+}
+.groups-toolbar{
+  position: relative;
+}
+.groups-toolbar .searchbox{
+  display: block;
+  width: 100%;
+  min-height: 46px;
+  padding: 10px 42px 10px 13px;
+  border: 1.5px solid #d5deeb;
+  border-radius: var(--radius-control);
+  background: #fff;
+  box-shadow: 0 2px 7px rgba(28,48,82,.035);
+  font-size: 14px;
+  transition: border-color .16s,box-shadow .16s,background .16s;
+}
+.groups-search-icon{
+  position: absolute;
+  top: 50%;
+  right: 14px;
+  display: grid;
+  place-items: center;
+  color: #78869c;
+  transform: translateY(-50%);
+  pointer-events: none;
+}
+.groups-toolbar .searchbox:focus + .groups-search-icon{
+  color: var(--primary);
+}
+.groups-toolbar .searchbox:focus,
+.groups-toolbar .searchbox:focus-visible{
+  outline: none;
+  border-color: var(--primary);
+  background: #fff;
+  box-shadow: 0 0 0 1px var(--primary),0 3px 10px rgba(49,88,214,.08);
 }
 .field{
   margin: 8px 0;
@@ -2827,10 +2877,10 @@ function groupCard(g){
  const total=hasTarget?Math.max(0,Number(g.total)):null,shares=Number(g.shares)||0;
  const percent=hasTarget&&total>0?Math.min(100,Math.round(shares/total*100)):0;
  return `<article class="card group-card ${manager?'manager-card':'member-card'}" data-action="open-group" data-id="${escapeHtml(g.id)}" tabindex="0" role="button" aria-label="فتح جمعية ${escapeHtml(g.name)}">
- <div class="between"><div class="row"><div class="avatar ${manager?'dark':''}">${escapeHtml(g.name.slice(0,1))}</div><div class="grow"><strong>${escapeHtml(g.name)}</strong><small class="eyebrow">${escapeHtml(g.id)} · ${manager?'إدارة الجمعية':'عضوية مشاركة'}</small></div></div>${pill(g.status)}</div>
- <div class="group-card-metrics"><div><span>الدفعة لكل سهم</span><b>${money(g.share,g.currency)}</b></div><div><span>${manager?(hasTarget?'الأسهم المكتملة':'إجمالي الأسهم'):'أسهمك'}</span><b>${manager?(hasTarget?`${shares} / ${total}`:`${shares} سهم`):`${Number(g.myShares)||0} سهم`}</b></div><div><span>المشاركون</span><b>${g.members}</b></div></div>
+ <div class="between group-card-heading"><div class="row"><div class="avatar ${manager?'dark':''}">${escapeHtml(g.name.slice(0,1))}</div><div class="grow"><strong>${escapeHtml(g.name)}</strong><small class="eyebrow">${manager?'جمعية تديرها':'جمعية تشارك فيها'} · ${escapeHtml(g.id)}</small></div></div>${pill(g.status)}</div>
+ <div class="group-card-metrics"><div><span>قيمة السهم</span><b>${money(g.share,g.currency)}</b></div><div><span>${manager?(hasTarget?'الأسهم المكتملة':'إجمالي الأسهم'):'أسهمك'}</span><b>${manager?(hasTarget?`${shares} / ${total}`:`${shares} سهم`):`${Number(g.myShares)||0} سهم`}</b></div><div><span>المشاركون</span><b>${g.members}</b></div></div>
  ${manager&&hasTarget?`<div class="progress"><i style="width:${percent}%"></i></div><div class="progress-caption"><span>اكتمال الأسهم</span><b>${percent}%</b></div>`:''}
- <div class="group-card-footer"><span>${escapeHtml(g.period||'')}</span><span>التفاصيل ${uiIcon('arrow',15)}</span></div></article>`
+ <div class="group-card-footer"><span>${escapeHtml(g.period||'')}</span><span>عرض التفاصيل ${uiIcon('arrow',15)}</span></div></article>`
 }
 function home(){
  const managed=db.groups.filter(g=>g.role==='manager'),joined=db.groups.filter(g=>g.role==='member');
@@ -2899,7 +2949,7 @@ function setHomeSlide(index){const ss=document.querySelectorAll('#homeCarousel .
  const empty=groupTab==='manager'?'لا توجد جمعيات تديرها':groupTab==='member'?'لا توجد جمعيات تشارك فيها':'لا توجد جمعيات حتى الآن';
  const title=groupTab==='manager'?'جمعيات أديرها':groupTab==='member'?'جمعيات أشارك فيها':'الجمعيات';
  const initial=own.length?own.map(groupCard).join():'<div class="card empty"><div class="big">'+uiIcon('groups',27)+'</div><b>'+empty+'</b></div>';
- shell(title,'groups',`<div class="toolbar"><input class="searchbox" id="groupSearch" aria-label="البحث في الجمعيات" placeholder="ابحث باسم الجمعية أو رمزها..."><button class="btn primary small" data-go="create-group">${uiIcon('plus',15)} إنشاء</button></div><div id="groupList">${initial}</div><button class="btn outline full" data-go="join-group">الانضمام إلى جمعية برمز أو رابط</button>`);
+ shell(title,'groups',`<div class="toolbar groups-toolbar"><input class="searchbox" type="search" id="groupSearch" aria-label="البحث في الجمعيات" placeholder="ابحث عن جمعية..."><span class="groups-search-icon" aria-hidden="true">${uiIcon('search',19)}</span></div><div id="groupList">${initial}</div>`);
  const search=$('#groupSearch'),list=$('#groupList');
  if(search&&list)search.addEventListener('input',()=>{
   const q=String(search.value||'').trim().toLowerCase();
