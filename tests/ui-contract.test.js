@@ -292,7 +292,7 @@ test('role separation, draw room, publication channels and personal notification
     assert.ok(workspace.includes('SahmApp.'+api+'('), api+' is used by the shared workspace');
   }
   assert.match(html, /adenDateTimeToUtc/);
-  assert.match(html, /Asia\/Aden/);
+  assert.match(core, /Asia\/Aden/);
   assert.match(managed, /requestAnimationFrame\(/);
   assert.match(managed, /subject_visible\s*===\s*true\s*&&\s*x\.subject_name/);
   assert.doesNotMatch(workspace, /SahmApp\.eventLog\(g\.id/);
