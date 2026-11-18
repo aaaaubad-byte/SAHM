@@ -238,7 +238,7 @@ test('every rendered button, route, form, and modal action is connected to a han
   for (const route of staticRoutes) assert.ok(routes.has(route), 'button route resolves: ' + route);
 
   const buttons = [...templates.matchAll(/<button\b([^>]*)>/gi)].map(x => x[1]);
-  assert.ok(buttons.length >= 100, 'all screen templates contribute their buttons');
+  assert.ok(buttons.length >= 90, 'screen templates retain a substantial set of actionable controls after duplicate removal');
   for (const attrs of buttons) {
     assert.match(attrs, /data-action|data-go|type=["']submit["']/, 'button has a delegated action, route, or form-submit role: ' + attrs);
   }
@@ -478,6 +478,37 @@ test('draw and member tabs expose round progress and member win/eligibility filt
   assert.match(managed,/backToTab\('draws'\)/);
 });
 
+test('draw room sub-tabs are role-aware and participants never call manager-only readiness RPCs', () => {
+  const start = managed.indexOf('async function drawPanel(g, d)');
+  const end = managed.indexOf('async function newsPanel(g, d)', start);
+  assert.ok(start >= 0 && end > start, 'draw room renderer exists');
+  const draw = managed.slice(start, end);
+  assert.match(draw, /const manager = !!\(d\.role && d\.role\.manager\)/);
+  assert.match(draw, /manager && \(view === 'summary' \|\| view === 'result'\)[\s\S]*?SahmApp\.getDrawReadiness/);
+  assert.match(draw, /manager && view === 'summary'[\s\S]*?SahmApp\.getFinancialSummary/);
+  assert.match(draw, /const drawTabs = manager\s*\? \[\['summary','الملخص'\],\['eligible','الأسهم المؤهلة'\],\['schedule','الموعد'\],\['result','النتيجة'\],\['history','السجل'\]\]\s*:\s*\[\['summary','الملخص'\],\['eligible','الأسهم المؤهلة'\],\['result','النتيجة'\],\['history','السجل'\]\]/);
+  assert.match(draw, /role="tablist"/);
+  assert.match(draw, /role="tab"/);
+  assert.match(draw, /aria-selected=/);
+  assert.match(draw, /role="tabpanel"/);
+  assert.match(draw, /manager \? \(draw \?/);
+  assert.match(managed, /event\.stopImmediatePropagation\(\)/, 'workspace tab actions are not dispatched twice');
+  assert.match(managed, /if \(!allowedViews\.includes\(requested\)\)/, 'invalid or manager-only sub-tabs are rejected');
+});
+
+test('participant draw entry does not repeat the full draw history already available inside the room', () => {
+  const start = managed.indexOf('async function memberDraws(g)');
+  const end = managed.indexOf('function memberCommunication()', start);
+  const panel = managed.slice(start, end);
+  assert.match(panel, /mgd-room-entry/);
+  assert.match(panel, /فتح غرفة القرعة/);
+  assert.doesNotMatch(panel, /history\.map\(/);
+  assert.match(managed, /function notificationSettingsPanel\(d\)/);
+  const newsStart = managed.indexOf('async function newsPanel(g, d)');
+  const newsEnd = managed.indexOf('function notificationSettingsPanel(d)', newsStart);
+  assert.doesNotMatch(managed.slice(newsStart, newsEnd), /إعدادات النشر/);
+});
+
 test('shared association workspace routes both roles through one detail component', () => {
   assert.match(html, /function groupDetail\(\)[\s\S]*SahmManagedGroup\.render\(g,d\)/);
   assert.doesNotMatch(html, /function legacyGroupDetail|legacy-group-detail/);
@@ -500,4 +531,39 @@ test('association subroutes all resolve to the shared workspace and retired dupl
     assert.doesNotMatch(html, new RegExp('(?:async\\s+)?function\\s+'+name+'\\s*\\('), 'retired renderer removed: '+name);
   }
   assert.doesNotMatch(html, /selectedInstallmentCycle|selectedInstallmentStatus|installments\(\)/);
+});
+
+
+test('association workspace tabs consume the correct role-specific data contracts', () => {
+  assert.match(managed, /history\.map\(x=>\[Number\(x\.round_no\|\|x\.round\),x\]\)/);
+  assert.match(managed, /r&&r\.ok\?\(r\.history\|\|r\.draws\|\|\[\]\):\[\]/);
+  assert.match(managed, /draw\.winner_owner_name \|\| draw\.winnerLabel/);
+  assert.match(managed, /draw\.winner_share_no \|\| '—'/);
+  assert.doesNotMatch(managed, /winner_share_no\s*\|\|\s*[a-zA-Z]\w*\.winnerShareId/, 'internal share UUID is never presented as a share number');
+  assert.match(managed, /pct===100\?'waiting':'collecting'/);
+  assert.match(managed, /value=\"waiting\">بانتظار الموعد/);
+  assert.match(managed, /memberStatement\(g\.id,ownMemberId\(g\)\)/);
+  assert.match(managed, /SahmApp\.myShareList\(g\.id/);
+  assert.doesNotMatch(managed, /تفاصيل رقم كل سهم وحالته غير متاحة/);
+  assert.match(managed, /Number\(st\.shares\|\|0\)/);
+  assert.match(app, /'myShareList'/);
+  assert.match(data, /function myShareList\(db, viewer, gid, opts\)/);
+  assert.match(remote, /invoke\('get_my_association_shares'/);
+  assert.match(remote, /app\.myShareList=myShareList/);
+});
+
+test('managed workspace external stylesheet has balanced responsive rules and visible focus states', () => {
+  const css = fs.readFileSync(path.join(ROOT, 'sahm-managed-group.css'), 'utf8');
+  assert.match(html, /href=\"\/sahm-managed-group\.css\"/);
+  assert.match(html, /src=\"\/sahm-managed-group\.js\"/);
+  assert.doesNotMatch(css, /margin:9px 0 8px\\s*#screen/);
+  assert.match(css, /#screen \.mgd-tabs button:focus-visible/);
+  assert.match(css, /@media\(max-width:420px\)/);
+  let depth = 0;
+  for (const ch of css) {
+    if (ch === '{') depth++;
+    if (ch === '}') depth--;
+    assert.ok(depth >= 0, 'stylesheet braces close in order');
+  }
+  assert.equal(depth, 0, 'all managed workspace CSS blocks are balanced');
 });

@@ -89,9 +89,8 @@
     return '<div class="mgd-list-head"><b>الأعضاء</b><span>' + list.length + ' عضو</span></div>' +
       '<div class="mgd-filterbar mgd-member-filters"><label class="mgd-search">' + uiIcon('search',18) + '<input id="mgdMemberSearch" type="search" placeholder="اسم العضو" autocomplete="off"></label>' +
       '<label class="mgd-select"><select id="mgdMemberStatus" aria-label="حالة العضو"><option value="all">كل الحالات</option><option value="eligible">مؤهل</option><option value="won">فائز بكل أسهمه</option></select></label>' +
-      '<button type="button" class="mgd-reminder-icon" data-go="invite" title="إضافة عضو">' + uiIcon('user-plus',17) + '</button></div>' +
-      '<div class="mgd-list" id="mgdMemberList">' + (rows || '<div class="mgd-empty">لا يوجد أعضاء مسجلون</div>') + '</div>' +
-      '<div class="mgd-member-tools"><button type="button" data-go="member-reception">إدارة استقبال الأعضاء</button></div>';
+      '<button type="button" class="mgd-reminder-icon" data-go="invite" title="دعوة عضو">' + uiIcon('user-plus',17) + '</button></div>' +
+      '<div class="mgd-list" id="mgdMemberList">' + (rows || '<div class="mgd-empty">لا يوجد أعضاء مسجلون</div>') + '</div>';
   }
   function bindMemberSearch() {
     const input=document.getElementById('mgdMemberSearch'),status=document.getElementById('mgdMemberStatus'),list=document.getElementById('mgdMemberList');
@@ -106,7 +105,7 @@
     ]);
     const history=historyResult&&historyResult.ok?(historyResult.history||[]):[];
     const ready=!!(readinessResult&&readinessResult.ok&&readinessResult.canDraw);
-    const byRound=new Map(history.map(x=>[Number(x.round),x]));
+    const byRound=new Map(history.map(x=>[Number(x.round_no||x.round),x]));
     const total=Math.max(0,Number(d.rounds)||0),current=Math.min(total,(Number(d.drawn)||0)+1);
     const cards=Array.from({length:total},(_,i)=>{
       const n=i+1,draw=byRound.get(n);
@@ -114,8 +113,9 @@
       const rows=snap.ok?snap.rows||[]:[];
       const paid=rows.filter(x=>x.status==='paid').length;
       const pct=rows.length?Math.round(paid/rows.length*100):0;
-      const status=draw?'completed':n===current?(ready?'ready':pct===100?'collecting':'collecting'):'upcoming';
-      const label=draw?'نتيجة مثبتة':n===current?(ready?'جاهزة لإجراء القرعة':pct===100?'اكتمل التحصيل':'جارٍ تحصيل الأقساط'):'قرعة قادمة';
+      const waiting=!!(readinessResult&&readinessResult.ok&&readinessResult.dateReached&& !readinessResult.timeReached);
+      const status=draw?'completed':n===current?(ready?'ready':pct===100?'waiting':'collecting'):'upcoming';
+      const label=draw?'نتيجة مثبتة':n===current?(ready?'جاهزة لإجراء القرعة':pct===100?(waiting?'اكتمل التحصيل · بانتظار الموعد':'اكتمل التحصيل · بانتظار الجاهزية'):'جارٍ تحصيل الأقساط'):'قرعة قادمة';
       const winner=draw?(draw.winner_owner_name||draw.winnerLabel||'—'):'';
       return '<button type="button" class="mgd-cycle-card" data-action="managed-open-cycle" data-round="'+n+'" data-status="'+status+'">'+
         '<span class="mgd-cycle-number">'+n+'</span><span class="mgd-cycle-main"><b>القرعة '+n+'</b><small>'+esc(winner||label)+'</small>'+
@@ -124,7 +124,7 @@
     }).join('');
     return '<div class="mgd-list-head"><b>القرعات</b><span>'+total+' قرعة</span></div>'+
       '<div class="mgd-filterbar mgd-draw-filters"><label class="mgd-search">'+uiIcon('search',16)+'<input id="mgdDrawSearch" type="search" placeholder="رقم القرعة" inputmode="numeric"></label>'+
-      '<label class="mgd-select"><select id="mgdDrawStatus" aria-label="حالة القرعة"><option value="all">كل الحالات</option><option value="completed">مكتملة</option><option value="collecting">قيد التحصيل</option><option value="ready">جاهزة</option><option value="upcoming">قادمة</option></select></label></div>'+
+      '<label class="mgd-select"><select id="mgdDrawStatus" aria-label="حالة القرعة"><option value="all">كل الحالات</option><option value="completed">مكتملة</option><option value="collecting">قيد التحصيل</option><option value="ready">جاهزة</option><option value="waiting">بانتظار الموعد</option><option value="upcoming">قادمة</option></select></label></div>'+
       '<button type="button" class="mgd-action primary mgd-room-entry" data-action="managed-draw-view" data-view="summary">'+uiIcon('shuffle',17)+' دخول غرفة القرعة</button>'+
       '<div class="mgd-list" id="mgdDrawList">'+(cards||'<div class="mgd-empty">لا توجد قرعات لعرضها</div>')+'</div>';
   }
@@ -196,7 +196,7 @@
     const obligations = rows && rows.ok ? rows.rows || [] : [];
     return backToTab('draws') + '<div class="mgd-detail-heading"><b>القرعة ' + round + '</b>' + (draw ? '<span class="mgd-role">نتيجة مثبتة</span>' : '<span class="mgd-role">تفاصيل القرعة</span>') + '</div>' +
       (draw ? '<section class="mgd-detail-card">' + row('trophy', 'الفائز', draw.winner_owner_name || draw.winnerLabel || '—') +
-        row('hash', 'رقم السهم', draw.winner_share_no || draw.winnerShareId || '—') +
+        row('hash', 'رقم السهم', draw.winner_share_no || '—') +
         row('calendar-days', 'تاريخ القرعة', dateLabel(draw.scheduled_on || draw.date)) +
         row('coins', 'الجائزة المستهدفة', moneyValue(draw.prize_target_minor || draw.prize || 0, draw.currency || g.currency)) +
         row('monitor', 'حالة العرض', draw.presentation_status || '—') + '</section>' : '') +
@@ -212,11 +212,15 @@
     return '<div class="draw-wheel-wrap mgd-wheel-wrap"><div class="draw-pointer"></div><div class="draw-wheel" data-final-rotation="'+rotation+'" style="background:'+gradient+';transform:rotate('+(animate?0:rotation)+'deg);'+(animate?'transition:transform 4.2s cubic-bezier(.12,.72,.12,1);':'transition:none;')+'"><span>سهم</span></div></div>';
   }
   async function drawPanel(g, d) {
-    const view = params.managedDrawView || 'summary';
+    const manager = !!(d.role && d.role.manager);
+    const allowedViews = manager ? ['summary','eligible','schedule','result','history'] : ['summary','eligible','result','history'];
+    const requestedView = params.managedDrawView || 'summary';
+    const view = allowedViews.includes(requestedView) ? requestedView : 'summary';
     const roomPromise = cachedRead('draw-room:' + g.id, () => SahmApp.getDrawRoom(g.id), 7000);
-    const readinessPromise = (view === 'summary' || view === 'result')
+    // These RPCs are manager-only. A participant must never call them.
+    const readinessPromise = manager && (view === 'summary' || view === 'result')
       ? cachedRead('draw-ready:' + g.id, () => SahmApp.getDrawReadiness(g.id), 7000) : null;
-    const financialPromise = view === 'summary'
+    const financialPromise = manager && view === 'summary'
       ? cachedRead('financial:' + g.id, () => SahmApp.getFinancialSummary(g.id), 7000) : null;
     const roomResult = await roomPromise;
     if (!roomResult || !roomResult.ok) return '<div class="mgd-empty">' + esc(roomResult && roomResult.message || 'تعذر تحميل غرفة القرعة') + '</div>';
@@ -233,8 +237,11 @@
     }
     const states = { none: 'لم تبدأ القرعة', pending: 'بانتظار الموعد', scheduled: 'موعد محدد', open: 'مفتوحة', presenting: 'جارٍ عرض النتيجة', completed: 'اكتمل العرض', failed: 'تعذر العرض' };
     const reasons = { NO_SHARES: 'لا توجد أسهم مؤهلة', DRAW_COMPLETE: 'اكتملت جميع جولات القرعة', DRAW_NOT_DUE: 'لم يحن موعد القرعة بعد', INSTALLMENTS_UNPAID: 'توجد أقساط غير مكتملة', FINANCIAL_NOT_READY: 'لم تكتمل المتطلبات المالية' };
-    const nav = '<nav class="mgd-draw-nav">' + [['summary','ملخص القرعة'],['eligible','الأسهم المؤهلة'],['schedule','موعد القرعة'],['result','النتيجة'],['history','السجل']].map(([id,label]) =>
-      '<button type="button" class="' + (view === id ? 'active' : '') + '" data-action="managed-draw-view" data-view="' + id + '">' + label + '</button>').join('') + '</nav>';
+    const drawTabs = manager
+      ? [['summary','الملخص'],['eligible','الأسهم المؤهلة'],['schedule','الموعد'],['result','النتيجة'],['history','السجل']]
+      : [['summary','الملخص'],['eligible','الأسهم المؤهلة'],['result','النتيجة'],['history','السجل']];
+    const nav = '<nav class="mgd-draw-nav" aria-label="أقسام غرفة القرعة" role="tablist">' + drawTabs.map(([id,label]) =>
+      '<button id="mgd-draw-tab-' + id + '" type="button" role="tab" aria-selected="' + (view === id ? 'true' : 'false') + '" aria-controls="mgd-draw-panel" tabindex="' + (view === id ? '0' : '-1') + '" class="' + (view === id ? 'active' : '') + '" data-action="managed-draw-view" data-view="' + id + '">' + label + '</button>').join('') + '</nav>';
     let body = '';
     const wheel = drawWheelMarkup(eligible,draw);
     if (view === 'summary') {
@@ -243,10 +250,10 @@
         row('calendar-days', 'تاريخ الاستحقاق', dateLabel(cycle.due_on)) +
         row('clock', 'موعد القرعة', cycle.draw_scheduled_at ? SahmCore.fmtDateTime(cycle.draw_scheduled_at, 'Asia/Aden') : 'غير محدد') +
         row('users', 'الأسهم المؤهلة', eligible.length) +
-        row('shield-check', 'الجاهزية', readiness.canDraw ? 'جاهزة للتنفيذ' : 'غير جاهزة') +
+        (manager ? row('shield-check', 'الجاهزية', readiness.canDraw ? 'جاهزة للتنفيذ' : 'غير جاهزة') : row('info', 'حالة القرعة', states[room.state] || 'قيد المتابعة')) +
         (draw ? row('trophy', 'الفائز', draw.winner_owner_name || '—') : '') + '</section>' +
-        (readiness.reasons && readiness.reasons.length ? '<section class="mgd-detail-card"><b>متطلبات الجاهزية</b>' + readiness.reasons.map(x => '<div class="mgd-reason">' + esc(reasons[x] || x) + '</div>').join('') + '</section>' : '') +
-        (financial ? '<section class="mgd-detail-card"><b>ملخص مالي</b>' + row('wallet', 'الالتزامات', moneyValue(totals.due_minor || 0, g.currency)) +
+        (manager && readiness.reasons && readiness.reasons.length ? '<section class="mgd-detail-card"><b>متطلبات الجاهزية</b>' + readiness.reasons.map(x => '<div class="mgd-reason">' + esc(reasons[x] || x) + '</div>').join('') + '</section>' : '') +
+        (manager && financial ? '<section class="mgd-detail-card"><b>ملخص مالي</b>' + row('wallet', 'الالتزامات', moneyValue(totals.due_minor || 0, g.currency)) +
           row('check-circle', 'المستلم', moneyValue(totals.collected_minor || 0, g.currency)) +
           row('clock', 'المتبقي', moneyValue(totals.remaining_minor || 0, g.currency)) +
           row('alert', 'المتأخر', moneyValue(totals.overdue_minor || 0, g.currency)) +
@@ -258,16 +265,16 @@
       body = '<section class="mgd-detail-card"><b>موعد القرعة · توقيت اليمن</b><label class="mgd-date-field"><span>تاريخ ووقت التنفيذ</span><input id="drawScheduledAt" type="datetime-local" value="' + esc(utcToAdenDateTime(cycle.draw_scheduled_at)) + '" ' + (draw ? 'disabled' : '') + '></label>' +
         (draw ? '<div class="mgd-reason">تم تثبيت نتيجة هذه القرعة؛ لا يمكن تغيير موعدها.</div>' : actionButton('حفظ موعد القرعة', 'schedule-draw', '', 'primary')) + '</section>';
     } else if (view === 'result') {
-      body = wheel + '<section class="mgd-detail-card"><div class="mgd-detail-heading"><b>تنفيذ نتيجة القرعة</b>' + pill(room.state || 'pending') + '</div>' +
+      body = wheel + '<section class="mgd-detail-card"><div class="mgd-detail-heading"><b>نتيجة القرعة</b>' + pill(room.state || 'pending') + '</div>' +
         (draw ? '<div class="mgd-winner"><span>' + uiIcon('trophy', 25) + '</span><b>' + esc(draw.winner_owner_name || 'الفائز') + '</b><small>السهم ' + esc(draw.winner_share_no || '—') + '</small></div>' :
-          '<div class="mgd-empty">لم تُثبت نتيجة القرعة بعد</div>') +
-        (draw ? '<div class="mgd-actions">' + actionButton('تسجيل اكتمال العرض', 'draw-presentation-completed', '', 'primary') + actionButton('تسجيل تعذر العرض', 'draw-presentation-failed', '', '') + '</div>' :
-          actionButton('تنفيذ القرعة وتثبيت النتيجة', 'run-draw', readiness.canDraw ? '' : 'disabled', 'primary') ) + '</section>';
+          '<div class="mgd-empty">' + (manager ? 'لم تُثبت نتيجة القرعة بعد' : 'لم تُعلن نتيجة هذه القرعة بعد') + '</div>') +
+        (manager ? (draw ? '<div class="mgd-actions">' + actionButton('تسجيل اكتمال العرض', 'draw-presentation-completed', '', 'primary') + actionButton('تسجيل تعذر العرض', 'draw-presentation-failed', '', '') + '</div>' :
+          actionButton('تنفيذ القرعة وتثبيت النتيجة', 'run-draw', readiness.canDraw ? '' : 'disabled', 'primary')) : '') + '</section>';
     } else {
       body = '<div class="mgd-list-head"><b>سجل القرعات</b><span>' + history.length + ' نتيجة</span></div><div class="mgd-list">' +
         (history.map(x => '<div class="mgd-simple-row"><span class="mgd-cycle-number">' + esc(x.round_no || x.round) + '</span><span class="mgd-member-main"><b>القرعة ' + esc(x.round_no || x.round) + ' · ' + esc(x.winner_owner_name || x.winnerLabel || '—') + '</b><small>' + esc(dateLabel(x.scheduled_on || x.date)) + '</small></span><span class="mgd-status-ok">مثبتة</span></div>').join('') || '<div class="mgd-empty">لا توجد نتائج مثبتة بعد</div>') + '</div>';
     }
-    return nav + body;
+    return nav + '<section id="mgd-draw-panel" class="mgd-draw-panel" role="tabpanel" aria-labelledby="mgd-draw-tab-' + view + '">' + body + '</section>';
   }
   async function newsPanel(g, d) {
     const result = await cachedRead('news:' + g.id, () => SahmApp.getNews(g.id, 50), 12000);
@@ -279,14 +286,17 @@
       (x.subject_visible === true && x.subject_name ? '<small>' + esc(x.subject_name) + '</small>' : '') +
       '<small class="mgd-feed-time">' + esc(x.occurred_at || '') + '</small></div></article>'
     ).join('');
+    return '<div class="mgd-list-head"><b>أخبار الجمعية</b><span>' + (result.news || []).length + ' خبر</span></div>' +
+      '<div class="mgd-feed-list">' + (rows || '<div class="mgd-empty">لا توجد أخبار منشورة</div>') + '</div>';
+  }
+  function notificationSettingsPanel(d) {
+    const group = d.group || {};
     const channel = (key, label, map) => '<section class="mgd-detail-card"><b>' + label + '</b>' +
       SahmApp.notifyTypes().map(t => '<label class="mgd-toggle-row"><span>' + esc(t.label) + '</span><input type="checkbox" data-action="notify-channel-toggle" data-channel="' + key + '" data-type="' + esc(t.id) + '" ' + (map && map[t.id] ? 'checked' : '') + '></label>').join('') + '</section>';
-    return '<div class="mgd-list-head"><b>أخبار الجمعية</b><span>' + (result.news || []).length + ' خبر</span></div>' +
-      '<div class="mgd-feed-list">' + (rows || '<div class="mgd-empty">لا توجد أخبار منشورة</div>') + '</div>' +
-      '<div class="mgd-list-head mgd-settings-heading"><b>إعدادات النشر</b><span>تحكم بما يظهر في الأخبار والمحادثة</span></div>' +
-      channel('feed', 'النشر في أخبار الجمعية', d.group && d.group.notify) +
-      channel('chat', 'النشر في محادثة الجمعية', d.group && d.group.notifyChat) +
-      channel('names', 'إظهار أسماء الأعضاء في الأخبار', d.group && d.group.notifyNames);
+    return '<div class="mgd-list-head"><b>إعدادات النشر</b><span>للأخبار ومحادثة الجمعية</span></div>' +
+      channel('feed', 'النشر في أخبار الجمعية', group.notify) +
+      channel('chat', 'النشر في محادثة الجمعية', group.notifyChat) +
+      channel('names', 'إظهار أسماء الأعضاء في الأخبار', group.notifyNames);
   }
   function chatPanel(g) {
     const result = SahmApp.chatView(g.id);
@@ -327,20 +337,23 @@
   }
   function memberOverview(g,d) {
     const st=SahmApp.memberStatement(g.id,ownMemberId(g)); if(!st||!st.ok)return '<div class="mgd-empty">تعذر تحميل ملخص مشاركتك</div>';
-    const cycle=(st.cycles||[]).slice(-1)[0],p=cycle&&cycle.progress||d.myProgress||{},r=SahmApp.shareList(g.id,{status:'all'}),shares=r&&r.ok?r.shares||[]:[],won=shares.filter(x=>x.status==='won').length;
-    return '<section class="mgd-detail-card"><div class="mgd-list-head"><b>مشاركتك في الجمعية</b><span>'+esc(st.memberName)+'</span></div><div class="mgd-member-stat-grid"><div><small>أسهمك</small><b>'+shares.length+'</b></div><div><small>فائزة</small><b>'+won+'</b></div><div><small>مؤهلة</small><b>'+(shares.length-won)+'</b></div></div><div class="mgd-detail-heading"><b>التزامات القرعة الحالية</b><span>'+(p.paid||0)+' / '+(p.total||0)+'</span></div><div class="mgd-round-progress"><i style="width:'+(p.total?Math.round((p.paid||0)/p.total*100):0)+'%"></i></div><div class="mgd-summary-stats"><span>إجمالي الالتزام <b>'+esc(moneyValue(st.commitment&&st.commitment.overall,st.currency))+'</b></span><span>الأقساط <b>'+(p.paid||0)+' من '+(p.total||0)+'</b></span></div></section><div class="mgd-member-shortcuts"><button data-action="managed-tab" data-tab="installments">'+uiIcon('receipt',17)+' أقساطي</button><button data-action="managed-tab" data-tab="shares">'+uiIcon('layers',17)+' أسهمي</button><button data-action="managed-tab" data-tab="draws">'+uiIcon('shuffle',17)+' القرعات</button></div><section class="mgd-detail-card">'+row('user','مدير الجمعية',g.admin||'—')+row('calendar','بداية الجمعية',dateLabel(g.start||g.startDate))+'</section>';
+    const cycle=(st.cycles||[]).slice(-1)[0],p=cycle&&cycle.progress||d.myProgress||{},r=SahmApp.myShareList(g.id,{status:'all'}),shares=r&&r.ok?r.shares||[]:[];
+    return '<section class="mgd-detail-card"><div class="mgd-list-head"><b>مشاركتك في الجمعية</b><span>'+esc(st.memberName)+'</span></div><div class="mgd-member-stat-grid"><div><small>أسهمك</small><b>'+Number(st.shares||0)+'</b></div><div><small>فائزة</small><b>'+ (r&&r.ok?shares.filter(x=>x.status==='won').length:'—') +'</b></div><div><small>مؤهلة</small><b>'+ (r&&r.ok?shares.filter(x=>x.status==='eligible').length:'—') +'</b></div></div><div class="mgd-detail-heading"><b>التزامات القرعة الحالية</b><span>'+(p.paid||0)+' / '+(p.total||0)+'</span></div><div class="mgd-round-progress"><i style="width:'+(p.total?Math.round((p.paid||0)/p.total*100):0)+'%"></i></div><div class="mgd-summary-stats"><span>إجمالي الالتزام <b>'+esc(moneyValue(st.commitment&&st.commitment.overall,st.currency))+'</b></span><span>الأقساط <b>'+(p.paid||0)+' من '+(p.total||0)+'</b></span></div></section><section class="mgd-detail-card">'+row('user','مدير الجمعية',g.admin||'—')+row('calendar','بداية الجمعية',dateLabel(g.start||g.startDate))+'</section>';
   }
   function memberInstallments(g) {
     const st=SahmApp.memberStatement(g.id,ownMemberId(g)); if(!st||!st.ok)return '<div class="mgd-empty">تعذر تحميل أقساطك</div>';
     return (st.cycles||[]).slice().reverse().map(c=>{const paid=(c.rows||[]).filter(x=>x.status==='paid').length;return '<section class="mgd-detail-card"><div class="mgd-detail-heading"><b>القرعة '+c.cycle+'</b><span>'+paid+' من '+(c.rows||[]).length+' مدفوع</span></div><div class="mgd-round-progress"><i style="width:'+(c.rows&&c.rows.length?Math.round(paid/c.rows.length*100):0)+'%"></i></div>'+(c.rows||[]).map(x=>'<div class="mgd-simple-row"><span><b>القسط '+x.no+'</b><small>'+esc(dateLabel(x.periodStart))+' – '+esc(dateLabel(x.periodEnd))+'</small></span>'+pill(x.status)+'<b>'+esc(moneyValue(x.total,st.currency))+'</b></div>').join('')+'</section>';}).join('')||'<div class="mgd-empty">لا توجد أقساط مسجلة لمشاركتك بعد</div>';
   }
   function memberShares(g) {
-    const r=SahmApp.shareList(g.id,{status:'all'}),list=r&&r.ok?r.shares||[]:[],won=list.filter(x=>x.status==='won').length;
-    return '<div class="mgd-list-head"><b>أسهمك</b><span>'+list.length+' سهم · '+won+' فائزة</span></div><div class="mgd-list">'+(list.map(x=>'<article class="mgd-installment-card"><div class="mgd-installment-top"><b>السهم '+esc(x.shareNo)+'</b><span class="mgd-share-state '+(x.status==='won'?'won':'eligible')+'">'+(x.status==='won'?'فائز':'مؤهل')+'</span></div><div class="mgd-installment-meta"><span>'+(x.status==='won'?'فاز في القرعة رقم '+esc(x.winnerRound):'ما زال مؤهلاً للقرعات المتبقية')+'</span></div></article>').join('')||'<div class="mgd-empty">لا توجد أسهم مرتبطة بحسابك</div>')+'</div>';
+    const result=SahmApp.myShareList(g.id,{status:'all'});
+    if(!result||!result.ok)return '<div class="mgd-empty">'+esc(result&&result.message||'تعذر تحميل أسهمك')+'</div>';
+    const list=result.shares||[],won=list.filter(x=>x.status==='won').length;
+    return '<div class="mgd-list-head"><b>أسهمك</b><span>'+list.length+' سهم · '+won+' فائزة</span></div><div class="mgd-list">'+
+      (list.map(x=>'<article class="mgd-installment-card"><div class="mgd-installment-top"><b>السهم '+esc(x.shareNo)+'</b><span class="mgd-share-state '+(x.status==='won'?'won':'eligible')+'">'+(x.status==='won'?'فائز':'مؤهل')+'</span></div><div class="mgd-installment-meta"><span>'+(x.status==='won'?'فاز في القرعة رقم '+esc(x.winnerRound):'ما زال مؤهلاً للقرعات المتبقية')+'</span></div></article>').join('')||'<div class="mgd-empty">لا توجد أسهم مرتبطة بحسابك</div>')+'</div>';
   }
   async function memberDraws(g) {
-    const r=await cachedRead('history:'+g.id,()=>SahmApp.drawHistory(g.id),15000),history=r&&r.ok?r.draws||[]:[];
-    return '<div class="mgd-list-head"><b>القرعات ونتائجها</b><span>'+history.length+' نتيجة</span></div><button type="button" class="mgd-action primary mgd-room-entry" data-action="managed-draw-view" data-view="summary">'+uiIcon('shuffle',17)+' دخول غرفة القرعة للمشاهدة</button><div class="mgd-list">'+(history.map(x=>'<article class="mgd-installment-card"><div class="mgd-installment-top"><b>القرعة '+esc(x.round_no||x.round)+'</b><span class="mgd-share-state won">نتيجة مثبتة</span></div><div class="mgd-installment-member">'+esc(x.winnerLabel||'—')+'</div><div class="mgd-installment-meta"><span>السهم '+esc(x.winnerShareId||'—')+'</span><span>'+esc(dateLabel(x.date))+'</span></div></article>').join('')||'<div class="mgd-empty">لم تنفذ قرعات بعد</div>')+'</div>';
+    const r=await cachedRead('history:'+g.id,()=>SahmApp.drawHistory(g.id),15000),history=r&&r.ok?(r.history||r.draws||[]):[];
+    return '<section class="mgd-detail-card mgd-member-draw-entry"><div class="mgd-detail-heading"><b>غرفة القرعة</b><span>'+history.length+' نتيجة مثبتة</span></div><p>تابع حالة القرعة والأسهم المؤهلة والنتيجة المعتمدة من داخل الغرفة.</p><button type="button" class="mgd-action primary mgd-room-entry" data-action="managed-draw-view" data-view="summary">'+uiIcon('shuffle',17)+' فتح غرفة القرعة</button></section>';
   }
   function memberCommunication() {return '<div class="mgd-settings-grid"><button type="button" data-action="managed-settings-view" data-view="news">'+uiIcon('wall',18)+'<span>أخبار الجمعية</span></button><button type="button" data-action="managed-settings-view" data-view="chat">'+uiIcon('messages',18)+'<span>محادثة الأعضاء</span></button></div>';}
   async function render(g, d) {
@@ -386,11 +399,17 @@
       if (isLatest()) shell('تفاصيل القرعة', 'groups', identity(g, d) + content);
       return;
     }
-    if (view) {
+    if (view === 'draw') {
       shell('غرفة القرعة', 'groups', identity(g, d) + backToTab('draws') + loadingPanel('غرفة القرعة'));
       try { content = await drawPanel(g, d); }
-      catch (error) { content = '<div class="mgd-empty">تعذر تحميل غرفة القرعة</div>'; }
-      if (isLatest()) { shell('غرفة القرعة', 'groups', identity(g, d) + backToTab('draws') + content); const wheel=document.querySelector('.mgd-wheel-wrap .draw-wheel'); if(wheel&&wheel.dataset.finalRotation&&wheel.style.transition!=='none') requestAnimationFrame(()=>{wheel.style.transform='rotate('+Number(wheel.dataset.finalRotation)+'deg)';}); }
+      catch (error) { content = '<div class="mgd-empty">تعذر تحميل غرفة القرعة. تحقق من الاتصال والصلاحيات ثم أعد المحاولة.</div>'; }
+      if (isLatest()) {
+        shell('غرفة القرعة', 'groups', identity(g, d) + backToTab('draws') + content);
+        const activeDrawTab=document.querySelector('.mgd-draw-nav [aria-selected="true"]');
+        if(activeDrawTab&&typeof activeDrawTab.scrollIntoView==='function')activeDrawTab.scrollIntoView({block:'nearest',inline:'nearest'});
+        const wheel=document.querySelector('.mgd-wheel-wrap .draw-wheel');
+        if(wheel&&wheel.dataset.finalRotation&&wheel.style.transition!=='none')requestAnimationFrame(()=>{wheel.style.transform='rotate('+Number(wheel.dataset.finalRotation)+'deg)';});
+      }
       return;
     }
 
@@ -410,8 +429,7 @@
       content = '<div class="mgd-list-head"><b>إدارة الجمعية وإعداداتها</b></div><section class="mgd-detail-card">'+row('calendar','بداية الجمعية',dateLabel(g.start||g.startDate))+row('calendar-days','أول موعد للقرعة',dateLabel(g.first||g.firstDrawOn))+row('wallet','قيمة السهم',money(g.share,g.currency))+row('receipt','عدد الأقساط',g.installments||'—')+row('clock','مدة فترة التحصيل',((g.cycleDays||g.periodDays||'—')+' يوم'))+row('trophy','الجائزة المستهدفة',moneyValue(d.plan&&d.plan.prizeTarget||0,g.currency))+'</section><div class="mgd-settings-grid">' +
         '<button type="button" data-action="managed-settings-view" data-view="news">' + uiIcon('wall',18) + '<span>الأخبار والنشر</span></button>' +
         '<button type="button" data-action="managed-settings-view" data-view="chat">' + uiIcon('messages',18) + '<span>محادثة الجمعية</span></button>' +
-        '<button type="button" data-action="managed-settings-view" data-view="audit">' + uiIcon('clipboard-list',18) + '<span>سجل العمليات</span></button>' +
-        '<button type="button" data-go="member-reception">' + uiIcon('users',18) + '<span>إدارة العضوية والدعوات</span></button>' + '<button type="button" data-go="invite">' + uiIcon('link',18) + '<span>رابط الدعوة</span></button></div>';
+        '<button type="button" data-action="managed-settings-view" data-view="audit">' + uiIcon('clipboard-list',18) + '<span>سجل العمليات</span></button></div>' + notificationSettingsPanel(d);
     } else if (active === 'news') {
       content = loadingPanel('أخبار الجمعية');
       deferred = () => newsPanel(g, d);
@@ -441,7 +459,7 @@
     if (['record-paid','send-reminder','send-reminder-all','schedule-draw','run-draw','draw-presentation-completed','draw-presentation-failed','notify-channel-toggle'].includes(action)) invalidateReads();
     if (!['managed-tab','managed-open-member','managed-open-cycle','managed-back','managed-draw-view','managed-settings-view'].includes(action)) return;
     event.preventDefault();
-    event.stopPropagation();
+    event.stopImmediatePropagation();
 
     if (action === 'managed-tab') {
       const allowed = ['installments','shares','draws','members','settings','news','chat','audit','overview','communication'];
@@ -472,7 +490,15 @@
       return;
     }
     if (action === 'managed-draw-view') {
-      groupDetailTab = 'draws'; params = { managedView: 'draw', managedDrawView: el.dataset.view || 'summary' }; syncNavigationContext(); redraw(); return;
+      const manager = isManager();
+      const allowedViews = manager ? ['summary','eligible','schedule','result','history'] : ['summary','eligible','result','history'];
+      const requested = el.dataset.view || 'summary';
+      if (!allowedViews.includes(requested)) { toast('هذا القسم متاح لمدير الجمعية فقط'); return; }
+      groupDetailTab = 'draws';
+      params = { managedView: 'draw', managedDrawView: requested };
+      syncNavigationContext();
+      redraw();
+      return;
     }
     if (action === 'managed-settings-view') {
       groupDetailTab = ['news','chat','audit'].includes(el.dataset.view) ? el.dataset.view : 'settings'; params = {}; syncNavigationContext(); redraw();

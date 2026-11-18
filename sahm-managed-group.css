@@ -75,11 +75,17 @@
 #screen .mgd-winner>span{color:#c18a2d}
 #screen .mgd-winner>b{font-size:19px;font-weight:850}
 #screen .mgd-winner>small{color:#718097}
-#screen .mgd-draw-nav{display:flex;gap:5px;overflow-x:auto;margin:0 0 12px;padding:4px;background:#edf1f8;border-radius:11px;scrollbar-width:none}
-#screen .mgd-draw-nav button{flex:1;min-height:37px;padding:6px 9px;border-radius:8px;background:transparent;color:#65748a;font-size:11px;font-weight:750;white-space:nowrap}
-#screen .mgd-draw-nav button.active{background:#fff;color:#3158d6;box-shadow:0 2px 7px rgba(29,49,83,.08)}
+#screen .mgd-draw-nav{display:flex;align-items:stretch;gap:5px;width:100%;max-width:100%;margin:0 0 14px;padding:5px;overflow-x:auto;overflow-y:hidden;overscroll-behavior-inline:contain;-webkit-overflow-scrolling:touch;touch-action:pan-x;scroll-snap-type:x proximity;scrollbar-width:none;background:#f2f5fa;border:1px solid #e6ebf3;border-radius:12px}
+#screen .mgd-draw-nav::-webkit-scrollbar{display:none}
+#screen .mgd-draw-nav button{display:inline-flex;align-items:center;justify-content:center;flex:0 0 auto;min-width:82px;min-height:40px;padding:8px 12px;border:1px solid transparent;border-radius:8px;background:transparent;color:#65748a;font-size:12px;font-weight:700;line-height:1.35;white-space:nowrap;scroll-snap-align:center}
+#screen .mgd-draw-nav button.active{border-color:#dfe6f2;background:#fff;color:#294fbf;box-shadow:0 1px 4px rgba(29,49,83,.07)}
+#screen .mgd-draw-nav button:focus-visible{outline:2px solid #3158d6;outline-offset:2px}
+#screen .mgd-draw-panel{min-width:0;animation:mgd-panel-in .16s ease-out}
+#screen .mgd-member-draw-entry p{margin:0 0 12px;color:#68778d;font-size:13px;line-height:1.7}
+#screen .mgd-member-draw-entry .mgd-room-entry{margin:0}
+@keyframes mgd-panel-in{from{opacity:.55;transform:translateY(3px)}to{opacity:1;transform:translateY(0)}}
 #screen .mgd-empty{padding:20px 12px;text-align:center;color:#7b8799;font-size:13px;background:#fff;border:1px dashed #dce3ed;border-radius:12px}
-@media(max-width:360px){#screen .mgd-tabs button{font-size:10px}#screen .mgd-facts{gap:13px 8px}#screen .mgd-fact>span{font-size:11px}}
+@media(max-width:360px){#screen .mgd-tabs button{font-size:10px}#screen .mgd-facts{gap:13px 8px}#screen .mgd-fact>span{font-size:11px}#screen .mgd-draw-nav{gap:4px;padding:4px}#screen .mgd-draw-nav button{min-width:74px;padding:7px 9px;font-size:11px}}
 
 #screen .mgd-member-tools{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px;margin-top:11px}
 #screen .mgd-member-tools button,#screen .mgd-bulk-reminder button{min-height:39px;padding:8px 10px;border:1px solid #dce3ed;border-radius:9px;background:#fff;color:#3158d6;font-size:12px;font-weight:800}
@@ -128,13 +134,7 @@
 #screen .mgd-tabs{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:2px;margin-bottom:12px}
 #screen .mgd-tabs button{min-width:0;gap:4px;padding:9px 2px;font-size:11px}
 #screen .mgd-tabs button svg{width:16px;height:16px}
-@media(max-width:360px){#screen .mgd-identity-metrics{gap:5px;display:grid;grid-template-columns:repeat(4,minmax(0,1fr));margin:9px 0 8px
-#screen .mgd-identity-metrics{gap:2px}
-
-#screen .mgd-identity-metrics>span{font-size:9px}
-
-#screen .mgd-tabs button{font-size:9px}
-}#screen .mgd-tabs button{font-size:10px;min-width:0;padding:8px 2px;gap:4px}}
+@media(max-width:360px){#screen .mgd-identity-metrics{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:5px;margin:9px 0 8px}#screen .mgd-identity-metrics>span{font-size:9px}#screen .mgd-tabs button{font-size:10px;min-width:0;padding:8px 2px;gap:4px}}
 
 #screen .mgd-room-entry{display:flex;align-items:center;justify-content:center;gap:7px;width:100%;margin:0 0 10px;min-height:43px}
 #screen .mgd-share-state{display:inline-flex;align-items:center;border-radius:7px;padding:4px 8px;font-size:11px;font-weight:800}
@@ -209,3 +209,53 @@
 #screen .mgd-member-summary{margin-bottom:10px}
 
 #screen .mgd-member-shortcuts button:focus-visible,#screen .mgd-settings-grid button:focus-visible{outline:2px solid #3158d6;outline-offset:2px}
+
+
+/* Workspace visual pass: consistent hierarchy, compact controls, and reliable mobile layout. */
+#screen .mgd-tabs button{min-height:44px;color:#68778d;transition:color .18s ease,background .18s ease}
+#screen .mgd-tabs button.active{color:#244fc2}
+#screen .mgd-tabs button.active:after{height:3px;background:#244fc2}
+#screen .mgd-tabs button:focus-visible,
+#screen .mgd-action:focus-visible,
+#screen .mgd-member-card:focus-visible,
+#screen .mgd-cycle-card:focus-visible,
+#screen .mgd-settings-grid button:focus-visible,
+#screen .mgd-member-shortcuts button:focus-visible{outline:2px solid #3158d6;outline-offset:2px}
+#screen .mgd-filterbar{display:flex;align-items:center;gap:8px;margin:0 0 10px;min-width:0}
+#screen .mgd-filterbar .mgd-search{flex:1;min-width:0;margin:0}
+#screen .mgd-filterbar .mgd-select{min-width:0}
+#screen .mgd-installment-summary{box-shadow:0 3px 12px rgba(23,43,79,.045)}
+#screen .mgd-installment-card,
+#screen .mgd-detail-card,
+#screen .mgd-member-card,
+#screen .mgd-cycle-card{box-shadow:0 2px 8px rgba(23,43,79,.035);border-color:#e1e7f0}
+#screen .mgd-installment-card{padding:12px;margin-bottom:8px}
+#screen .mgd-row-actions .mgd-action{min-height:39px}
+#screen .mgd-action.primary{background:#244fc2;border-color:#244fc2}
+#screen .mgd-action:not(.primary):hover,
+#screen .mgd-member-tools button:hover,
+#screen .mgd-settings-grid button:hover{background:#f5f8ff}
+#screen .mgd-empty{line-height:1.8}
+#screen .mgd-cycle-state{max-width:104px;white-space:normal;text-align:center;line-height:1.5}
+#screen .mgd-member-shares{min-width:62px}
+#screen .mgd-member-shares>small:last-child{white-space:nowrap}
+#screen .mgd-feed-time{direction:ltr;text-align:right}
+#screen .mgd-chat-form textarea:focus,
+#screen .mgd-date-field input:focus,
+#screen .mgd-select select:focus{outline:2px solid rgba(49,88,214,.22);border-color:#3158d6}
+@media(max-width:420px){
+  #screen .mgd-identity{padding:11px 12px}
+  #screen .mgd-identity-metrics{gap:7px}
+  #screen .mgd-tabs{gap:0}
+  #screen .mgd-tabs button{font-size:10px;padding-inline:1px}
+  #screen .mgd-tabs button svg{width:15px;height:15px}
+  #screen .mgd-installment-filters{flex-wrap:wrap}
+  #screen .mgd-installment-filters .mgd-select{flex:1 1 28%}
+  #screen .mgd-installment-filters .mgd-reminder-icon{width:36px;height:36px}
+  #screen .mgd-member-card,#screen .mgd-cycle-card{gap:7px;padding:10px}
+  #screen .mgd-cycle-state{display:none}
+}
+@media(prefers-reduced-motion:reduce){
+  #screen .mgd-tabs button{transition:none}
+  #screen .mgd-loading-spinner{animation:none}
+}

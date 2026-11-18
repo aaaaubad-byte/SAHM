@@ -25,7 +25,7 @@
     'setNotifyType', 'setMute', 'markChatRead', 'markNotificationsRead', 'joinByCode'];
   /* queries that take (db, viewer, ...) */
   var VIEW_QUERIES = ['groupDetail', 'installmentRows', 'memberStatement', 'receiptList', 'receiptDetail', 'eventLog',
-    'memberList', 'shareList', 'inviteList', 'myInvitations', 'drawHistory', 'notificationList', 'chatView'];
+    'memberList', 'shareList', 'myShareList', 'inviteList', 'myInvitations', 'drawHistory', 'notificationList', 'chatView'];
   /* helpers that take (db, ...) with no viewer */
   var PLAIN = ['drawStatus', 'previewJoin', 'inviteSummary', 'getInviteInfo', 'lastReminder'];
 

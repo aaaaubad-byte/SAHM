@@ -1233,6 +1233,19 @@
     if (opts.status && opts.status !== 'all') shares = shares.filter(function (s) { return s.status === opts.status; });
     return { ok:true, groupId:gid, shares:shares, total:shares.length };
   }
+  function myShareList(db, viewer, gid, opts) {
+    var v = guardView(db, viewer, gid); if (v.err) return v.err;
+    opts = opts || {};
+    var membership = memberOf(db, v.g, viewer);
+    var shares = membership ? db.shares.filter(function (s) {
+      return s.groupId === gid && s.memberId === membership.id;
+    }).map(function (s) {
+      var win = db.draws.find(function (d) { return d.winnerShareId === s.id; });
+      return { id:s.id, shareNo:s.no, memberId:s.memberId, ownerName:membership.name || 'أنت', status:win ? 'won' : 'eligible', winnerRound:win ? win.round : null };
+    }) : [];
+    if (opts.status && opts.status !== 'all') shares = shares.filter(function (s) { return s.status === opts.status; });
+    return { ok:true, groupId:gid, shares:shares, total:shares.length };
+  }
   function drawHistory(db, viewer, gid) {
     var v = guardView(db, viewer, gid); if (v.err) return v.err; var K = C();
     var list = db.draws.filter(function (d) { return d.groupId === gid; }).sort(function (a, b) { return a.round - b.round; }).map(function (d) {
@@ -1287,6 +1300,6 @@
     sendMessage: sendMessage, markChatRead: markChatRead, setNotifyType: setNotifyType, setMute: setMute, isMuted: isMuted, markNotificationsRead: markNotificationsRead,
     /* queries */
     groupDetail: groupDetail, installmentRows: installmentRows, memberStatement: memberStatement, receiptList: receiptList, receiptDetail: receiptDetail,
-    eventLog: eventLog, memberList: memberList, shareList: shareList, inviteList: inviteList, myInvitations: myInvitations, drawHistory: drawHistory, notificationList: notificationList, chatView: chatView
+    eventLog: eventLog, memberList: memberList, shareList: shareList, myShareList: myShareList, inviteList: inviteList, myInvitations: myInvitations, drawHistory: drawHistory, notificationList: notificationList, chatView: chatView
   };
 })(typeof window !== 'undefined' ? window : globalThis);
