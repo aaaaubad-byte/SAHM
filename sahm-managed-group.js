@@ -148,22 +148,35 @@
       state.installment = number ? number.value : 'all';
       selectedInstallmentCycle = state.cycle;
       if (list) list.innerHTML = installmentRows(g, d);
+      const summary=document.querySelector('.mgd-installment-summary');
+      if(summary){const all=(SahmApp.installmentRows(g.id,{cycle:state.cycle,status:'all'})||{}).rows||[];const selected=state.installment==='all'?all:all.filter(x=>Number(x.no)===Number(state.installment));const paid=selected.filter(x=>x.status==='paid').length;const late=selected.filter(x=>x.status==='late').length;const pending=selected.filter(x=>x.status==='due'||x.status==='upcoming').length;summary.querySelector('.mgd-summary-stats').innerHTML='<span>الإجمالي <b>'+selected.length+'</b></span><span>مكتملة <b>'+paid+'</b></span><span>معلقة <b>'+pending+'</b></span><span>متأخرة <b>'+late+'</b></span>';}
     };
     [search, status, cycle, number].forEach(el => el && el.addEventListener(el === search ? 'input' : 'change', update));
     update();
   }
   function installmentsPanel(g, d) {
-    const totalCycles = Math.max(1, Number(d.rounds) || 1), cycle = Math.min(totalCycles, Math.max(1, Number(state.cycle || d.cycle || 1)));
-    const cycleOptions = Array.from({ length: totalCycles }, (_, i) => '<option value="' + (i + 1) + '" ' + (cycle === i + 1 ? 'selected' : '') + '>القرعة ' + (i + 1) + '</option>').join('');
-    const installmentOptions = Array.from({ length: Math.max(1, Number(g.installments) || 1) }, (_, i) => '<option value="' + (i + 1) + '" ' + (String(state.installment) === String(i + 1) ? 'selected' : '') + '>القسط ' + (i + 1) + '</option>').join('');
-    return '<div class="mgd-list-head"><b>الأقساط</b><span>إدارة التحصيل</span></div>' +
-      '<div class="mgd-filter-grid"><label class="mgd-search">' + uiIcon('search', 18) + '<input id="mgdInstallmentSearch" type="search" placeholder="ابحث باسم العضو" autocomplete="off"></label>' +
-      '<label class="mgd-select"><span>القرعة</span><select id="mgdInstallmentCycle">' + cycleOptions + '</select></label>' +
-      '<label class="mgd-select"><span>رقم القسط</span><select id="mgdInstallmentNumber"><option value="all">كل الأقساط</option>' + installmentOptions + '</select></label>' +
-      '<label class="mgd-select"><span>حالة القسط</span><select id="mgdInstallmentStatus"><option value="all">جميع الحالات</option><option value="due">مستحق</option><option value="paid">مدفوع</option><option value="late">متأخر</option><option value="upcoming">لم يحن موعده</option></select></label></div>' +
-      '<div id="mgdInstallmentList" class="mgd-installment-list"></div>' +
-      '<section class="mgd-bulk-reminder"><label>تذكير جماعي بالقسط<select id="reminderInstallment">' + installmentOptions + '</select></label><button type="button" data-action="send-reminder-all">إرسال للمستحقين والمتأخرين</button></section>' +
-      '<button type="button" class="mgd-secondary-link" data-go="receipts">سجل الاستلام والتصحيحات ' + uiIcon('back-screen', 16) + '</button>';
+    const totalCycles=Math.max(1,Number(d.rounds)||1), cycle=Math.min(totalCycles,Math.max(1,Number(state.cycle||d.cycle||1)));
+    const snapshot=SahmApp.installmentRows(g.id,{cycle:cycle,status:'all'})||{};
+    const allRows=snapshot.ok?snapshot.rows||[]:[];
+    const today=SahmApp.todayIn(g.tz||'Asia/Aden');
+    const inRange=allRows.find(x=>String(today)>=String(x.periodStart)&&String(today)<=String(x.periodEnd));
+    if(state.installment==='all')state.installment=inRange?String(inRange.no):'all';
+    const chosen=state.installment==='all'?null:Number(state.installment);
+    const shown=chosen?allRows.filter(x=>Number(x.no)===chosen):allRows;
+    const paid=shown.filter(x=>x.status==='paid').length, late=shown.filter(x=>x.status==='late').length;
+    const pending=shown.filter(x=>x.status==='due'||x.status==='upcoming').length;
+    const first=shown[0]||{};
+    const cycleOptions=Array.from({length:totalCycles},(_,i)=>'<option value="'+(i+1)+'" '+(cycle===i+1?'selected':'')+'>القرعة '+(i+1)+'</option>').join('');
+    const installmentOptions=Array.from({length:Math.max(1,Number(g.installments)||1)},(_,i)=>'<option value="'+(i+1)+'" '+(String(state.installment)===String(i+1)?'selected':'')+'>القسط '+(i+1)+'</option>').join('');
+    return '<section class="mgd-installment-summary"><div class="mgd-summary-top"><b>القرعة '+cycle+'</b><span>'+esc(first.periodStart?dateLabel(first.periodStart):'—')+' – '+esc(first.periodEnd?dateLabel(first.periodEnd):'—')+'</span></div>'+
+      '<div class="mgd-summary-stats"><span>الإجمالي <b>'+shown.length+'</b></span><span>مكتملة <b>'+paid+'</b></span><span>معلقة <b>'+pending+'</b></span><span>متأخرة <b>'+late+'</b></span></div></section>'+
+      '<div class="mgd-filterbar mgd-installment-filters"><label class="mgd-select"><select id="mgdInstallmentCycle" aria-label="رقم القرعة">'+cycleOptions+'</select></label>'+
+      '<label class="mgd-select"><select id="mgdInstallmentNumber" aria-label="رقم القسط"><option value="all">كل الأقساط</option>'+installmentOptions+'</select></label>'+
+      '<label class="mgd-select"><select id="mgdInstallmentStatus" aria-label="حالة القسط"><option value="all">كل الحالات</option><option value="due">مستحق</option><option value="paid">مدفوع</option><option value="late">متأخر</option><option value="upcoming">لم يحن موعده</option></select></label>'+
+      '<button type="button" class="mgd-reminder-icon" data-action="send-reminder-all" title="تذكير جماعي">'+uiIcon('bell',17)+'</button></div>'+
+      '<label class="mgd-search mgd-installment-search">'+uiIcon('search',17)+'<input id="mgdInstallmentSearch" type="search" placeholder="ابحث باسم العضو" autocomplete="off"></label>'+
+      '<div id="mgdInstallmentList" class="mgd-installment-list"></div>'+
+      '<button type="button" class="mgd-secondary-link" data-go="receipts">سجل الاستلام والتصحيحات '+uiIcon('back-screen',16)+'</button>';
   }
   async function cycleDetail(g, d, round) {
     const historyResult = await cachedRead('history:' + g.id, () => SahmApp.getDrawHistory(g.id), 15000), history = historyResult && historyResult.ok ? (historyResult.history || []) : [];
