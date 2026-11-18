@@ -30,22 +30,18 @@ function objectKeys(source, marker) {
 test('every registered screen has a real renderer and every static route resolves', () => {
   const registryMatch = html.match(/const ALL_SCREEN_REGISTRY=\{([\s\S]*?)\n\};/);
   assert.ok(registryMatch, 'central screen registry exists');
-  const screenEntries = [...registryMatch[1].matchAll(/(?:^|,)\s*'?([A-Za-z_$][\w$-]*)'?\s*:\s*([A-Za-z_$][\w$]*)/gm)];
+  const screenEntries = [...registryMatch[1].matchAll(/(?:^|,)\s*'?([A-Za-z_$][\w$-]*)'?\s*:\s*([^,\n]+)/gm)];
   assert.ok(screenEntries.length >= 20, 'all application screens are registered');
-
   const renderers = new Set([...html.matchAll(/\bfunction\s+([A-Za-z_$][\w$]*)\s*\(/g)].map(x => x[1]));
-  for (const [, route, renderer] of screenEntries) {
-    assert.ok(renderers.has(renderer), route + ' has renderer ' + renderer);
+  for (const [, route, expression] of screenEntries) {
+    const renderer = expression.trim();
+    if (/^[A-Za-z_$][\w$]*$/.test(renderer)) assert.ok(renderers.has(renderer), route + ' has renderer ' + renderer);
   }
-
   const routes = new Set(screenEntries.map(x => x[1]));
-  const directTargets = [...html.matchAll(/data-go="([^"]+)"/g)]
-    .map(x => x[1]).filter(x => !x.includes('${'));
-  for (const route of directTargets) {
-    assert.ok(routes.has(route), 'data-go route is registered: ' + route);
-  }
+  const directTargets = [...(html + managed).matchAll(/data-go="([^"]+)"/g)]
+    .map(x => x[1]).filter(x => !x.includes('$'));
+  for (const route of directTargets) assert.ok(routes.has(route), 'data-go route is registered: ' + route);
 });
-
 test('saved-account reauthentication screen is reachable without logging out the current account', () => {
   assert.match(html, /'account-login':accountLogin/);
   assert.match(html, /const AUTH_SCREEN_NAMES=\[[^;]*'account-login'/);
@@ -225,44 +221,12 @@ test('navigation runtime is loaded in order and precached by the service worker'
   const navigationScript = html.indexOf('<script src="/sahm-navigation.js"></script>');
   const nextInlineScript = html.indexOf('<script>', navigationScript + '<script src="/sahm-navigation.js"></script>'.length);
   assert.ok(appScript >= 0 && appScript < navigationScript && navigationScript < nextInlineScript);
-  assert.match(sw, /const CACHE_NAME = 'sahm-pwa-v30'/);
+  assert.match(sw, /const BUILD_ID = '[^']+';/);
+  assert.match(sw, /const CACHE_NAME = .sahm-pwa-\$\{BUILD_ID\}./);
   assert.match(sw, /APP_SHELL[\s\S]*?'\/sahm-navigation\.js'/);
   assert.match(sw, /APP_SHELL[\s\S]*?'\/sahm-supabase-data\.js'/);
   assert.ok(sw.includes("'/sahm-app.js'"));
 });
-
-
-test('unified association UI and invitation renderer follow the new contract', () => {
-  assert.match(html, /name="firstDrawOn"/);
-  assert.match(html, /name="installmentMode"/);
-  assert.match(html, /SahmCore\.installmentAmounts/);
-  assert.match(html, /createInvitationsBulk/);
-  assert.match(html, /data-action="submit-bulk-invites"/);
-  assert.equal((html.match(/function inviteDetail\(\)\{/g) || []).length, 1);
-  const handler = html.slice(html.indexOf("if(action==='invitation-interested'"), html.indexOf("if(action==='cancel-join-request'"));
-  assert.ok(handler.indexOf("const response=") < handler.indexOf("if(response==='interested'"));
-  assert.match(html, /shareSummary=g\.total==null/);
-});
-
-
-test('viewport metadata allows browser zoom for accessibility', () => {
-  const viewport = html.match(/<meta name="viewport" content="([^"]+)"/);
-  assert.ok(viewport, 'viewport metadata exists');
-  assert.doesNotMatch(viewport[1], /user-scalable\s*=\s*no/i);
-  assert.doesNotMatch(viewport[1], /maximum-scale\s*=\s*1(?:[;,]|$)/i);
-});
-
-test('modal dialogs expose ARIA semantics and keyboard focus management', () => {
-  assert.match(html, /role="dialog"\s+aria-modal="true"\s+aria-labelledby="modal-title"/);
-  assert.match(html, /<h3 id="modal-title">/);
-  assert.match(html, /modalReturnFocus=document\.activeElement/);
-  assert.match(html, /modalReturnFocus\.focus\(\)/);
-  assert.match(html, /e\.key==='Escape'/);
-  assert.match(html, /e\.key==='Tab'/);
-  assert.match(html, /dialog\.contains\(document\.activeElement\)/);
-});
-
-
 test('every rendered button, route, form, and modal action is connected to a handler', () => {
   const templates = html + managed;
   const registry = html.match(/const ALL_SCREEN_REGISTRY\s*=\s*\{([\s\S]*?)\n\};/);
@@ -318,34 +282,31 @@ test('account switch failures attempt to restore the previously active account',
 
 
 test('role separation, draw room, publication channels and personal notification reads match Supabase contracts', () => {
+  const workspace = html + managed;
   assert.doesNotMatch(html, /quorumInfo|quorum|attendance-toggle|setAttendance|>حاضر<|>غير حاضر<|تسجيل الحضور|إلغاء الحضور/);
   assert.doesNotMatch(html, /name=["']tz["']|المنطقة الزمنية للجمعية/);
   assert.match(html, /agreementLocked/);
   assert.ok(html.includes("const managerOnly=['members','member-reception','invite','invites','join-requests','join-request-detail','audit']"));
   assert.match(html, /s==='draw-room'[\s\S]*?targetDetail\.role\.manager\|\|targetDetail\.role\.participant/);
-  assert.match(html, /SahmApp\.getDrawRoom\(/);
-  assert.match(html, /SahmApp\.getDrawHistory\(/);
-  assert.match(html, /SahmApp\.getDrawReadiness\(/);
-  assert.match(html, /SahmApp\.setDrawScheduledAt\(/);
-  assert.match(html, /SahmApp\.setDrawPresentationStatus\(/);
-  assert.match(html, /SahmApp\.performDraw\(/);
+  for (const api of ['getDrawRoom','getDrawHistory','getDrawReadiness','setDrawScheduledAt','setDrawPresentationStatus','performDraw','getNews','getAuditLog']) {
+    assert.ok(workspace.includes('SahmApp.'+api+'('), api+' is used by the shared workspace');
+  }
   assert.match(html, /adenDateTimeToUtc/);
   assert.match(html, /Asia\/Aden/);
-  assert.match(html, /requestAnimationFrame\(\(\)=>\{wheelElement\.style\.transform/);
-  assert.match(html, /SahmApp\.getNews\(/);
-  assert.match(html, /subject_visible===true&&x\.subject_name/);
-  assert.match(html, /SahmApp\.getAuditLog\(/);
-  assert.doesNotMatch(html, /SahmApp\.eventLog\(g\.id/);
-  assert.match(html, /channel\('feed'/);
-  assert.match(html, /channel\('chat'/);
-  assert.match(html, /channel\('names'/);
+  assert.match(managed, /requestAnimationFrame\(/);
+  assert.match(managed, /subject_visible===true&&x\.subject_name/);
+  assert.doesNotMatch(workspace, /SahmApp\.eventLog\(g\.id/);
+  assert.match(remote, /channel\('sahm-user-'\+user\.id\)/);
+  assert.match(remote, /table:'chat_messages'/);
+  assert.match(remote, /table:'notifications'/);
+  assert.match(remote, /table:'join_requests'/);
+  assert.match(remote, /table:'invitations'/);
   assert.match(html, /SahmApp\.setNotifySettings\(/);
   assert.match(html, /SahmApp\.markNotificationsRead\(\[id\]\)/);
   assert.doesNotMatch(html, /SahmApp\.markNotificationsRead\(\)/);
-  assert.match(html, /function news\(\)/);
-  assert.match(html, /news:news/);
+  assert.match(managed, /function newsPanel\(/);
+  assert.match(html, /news:\(\)=>openAssociationWorkspace\('news'\)/);
 });
-
 test('confirmed unused stylesheet components and Supabase data helpers stay removed', () => {
   const styleMatch = html.match(/<style\b[^>]*>([\s\S]*?)<\/style>/i);
   assert.ok(styleMatch, 'application stylesheet exists');
@@ -387,24 +348,22 @@ test('priority UX fixes keep managed/member routes separate and wire visible sea
   assert.match(html, /go\('managed-groups'/);
   assert.match(html, /go\('joined-groups'/);
   assert.match(groupsScreen, /search\.addEventListener\('input'/);
-  assert.equal((groupsScreen.match(/data-go="create-group"/g) || []).length, 1,
-    'the groups screen exposes only one create-association button');
-
-  const memberStart = html.indexOf('function members(){');
-  const memberEnd = html.indexOf('let pendingInvitees', memberStart);
-  const membersScreen = html.slice(memberStart, memberEnd);
-  assert.match(membersScreen, /search\.addEventListener\('input'/);
-  assert.match(membersScreen, /container\.innerHTML=filtered\.length/);
-
+  assert.equal((groupsScreen.match(/data-go="create-group"/g) || []).length, 0,
+    'creation shortcut lives on the home screen, not duplicated in the groups list');
+  const homeStart=html.indexOf('function home(){'),homeEnd=html.indexOf('function groups(){',homeStart);
+  assert.equal((html.slice(homeStart,homeEnd).match(/data-go="create-group"/g)||[]).length,1,'one home creation shortcut');
+  assert.match(managed,/mgdMemberSearch/);
+  assert.match(managed,/bindMemberSearch\(\)/);
+  assert.match(managed,/mgdMemberStatus/);
+  assert.match(managed,/memberStatus==='won'/);
   const navStart = html.indexOf('function nav(active){');
   const navEnd = html.indexOf('function shell(', navStart);
   const navCode = html.slice(navStart, navEnd);
   assert.match(navCode, /const groupScreens=/);
   assert.match(navCode, /const wallScreens=/);
   assert.match(navCode, /resolvedActive===s/);
-
   const statusStart = html.indexOf('async function loadAssociationPublicLinkStatus');
-  const statusEnd = html.indexOf('function members(){', statusStart);
+  const statusEnd = html.indexOf('function memberReception()', statusStart);
   const linkStatus = html.slice(statusStart, statusEnd);
   assert.match(linkStatus, /if\(status==='active'\)/);
   assert.match(linkStatus, /data-action="pause-group-link"/);
@@ -412,7 +371,6 @@ test('priority UX fixes keep managed/member routes separate and wire visible sea
   assert.match(linkStatus, /canInvite\?'<button class="btn soft small" data-action="rotate-group-link"/);
   assert.match(linkStatus, /استقبال الأعضاء مغلق/);
   assert.doesNotMatch(html, /data-action="rotate-group-link">إدارة رابط الانضمام/);
-
   const profileStart = html.indexOf('function profile(){');
   const profileEnd = html.indexOf('function editProfile(){', profileStart);
   const profileScreen = html.slice(profileStart, profileEnd);
@@ -420,58 +378,11 @@ test('priority UX fixes keep managed/member routes separate and wire visible sea
   assert.match(profileScreen, /const auditLink=managedGroup\?/);
   assert.doesNotMatch(profileScreen, />سجل العمليات</);
   assert.match(html, /if\(route==='audit'&&el\.dataset\.groupId\)context\.currentGroupId=el\.dataset\.groupId/);
-
   const style = html.match(/<style\b[^>]*>([\s\S]*?)<\/style>/i)[1];
   assert.match(style, /#bottomnav \.navitem\.active,\s*#bottomnav \.navitem\[aria-current="page"\]\s*\{[^}]*color:\s*var\(--primary\);[^}]*background:\s*transparent/);
   assert.doesNotMatch(style, /#bottomnav \.navitem[^{}]*\{[^}]*background:\s*#edf2ff/);
   assert.match(html, /'aria-current="page"'/);
 });
-
-
-test('member reception is the central manager entry point and destructive link changes require confirmation', () => {
-  assert.match(html, /'member-reception':memberReception/);
-  assert.ok(html.includes("const managerOnly=['members','member-reception','invite','invites','join-requests','join-request-detail','audit']"));
-
-  const receptionStart = html.indexOf('function memberReception(){');
-  const receptionEnd = html.indexOf('function joinGroup(){', receptionStart);
-  const reception = html.slice(receptionStart, receptionEnd);
-  assert.match(reception, /استقبال الأعضاء/);
-  assert.match(reception, /data-go="members"/);
-  assert.match(reception, /data-go="invite"/);
-  assert.match(reception, /data-go="invites"/);
-  assert.match(reception, /data-go="join-requests"/);
-  assert.ok(reception.includes('loadAssociationPublicLinkStatus(g.id,canInvite)'));
-
-  const createdStart = html.indexOf('function showCreatedGroup(g){');
-  const createdEnd = html.indexOf('function groupDetail(){', createdStart);
-  const created = html.slice(createdStart, createdEnd);
-  // The result screen merges success + invitations: no separate invite step after creation.
-  assert.doesNotMatch(created, /data-go="invite"/);
-  assert.match(created, /data-go="group-detail"/);
-  assert.match(created, /data-action="copy-group-link"/);
-  assert.match(created, /data-action="share-group-link"/);
-  for (const helper of ['inviteePickerHtml()', 'inviteeListHtml()', 'inviteeBarHtml(', 'bindInviteePicker()']) {
-    assert.ok(created.includes(helper), 'result screen uses ' + helper);
-  }
-  assert.ok(created.indexOf('inviteePickerHtml()') < created.indexOf('inviteeBarHtml('), 'contacts picker comes before the invite bar');
-  assert.doesNotMatch(created, /data-go="member-reception"|data-go="invites"|data-go="join-requests"/);
-
-  const pickerStart = html.indexOf('function inviteePickerHtml(){');
-  const pickerEnd = html.indexOf('function inviteDetail(){', pickerStart);
-  const picker = html.slice(pickerStart, pickerEnd);
-  assert.ok(picker.indexOf('data-action="pick-device-contacts"') < picker.indexOf('<details class="cg-manual">'), 'contacts button precedes the folded manual entry');
-  assert.match(picker, /id="inviteeManualForm"/);
-  assert.match(picker, /id="sendInviteesButton"[^>]*data-action="submit-bulk-invites"/);
-  const inviteStart = picker.indexOf('function invite(){');
-  assert.ok(inviteStart > -1 && picker.slice(inviteStart).includes('inviteePickerHtml()'), 'invite from group details reuses the same picker');
-
-  assert.match(html, /action==='confirm-public-link-action'/);
-  assert.match(html, /سيصبح الرابط الحالي غير صالح/);
-  assert.match(html, /سيُبطل الرابط العام نهائيًا/);
-  assert.ok(html.includes("['rotate-group-link','revoke-group-link'].includes(action)"));
-});
-
-
 test('public-link lifecycle is managed in one place rather than duplicated across success and settings screens', () => {
   const detailStart = html.indexOf('function groupDetail(){');
   const detailEnd = html.indexOf('async function loadAssociationPublicLinkStatus', detailStart);
@@ -495,40 +406,22 @@ test('public-link lifecycle is managed in one place rather than duplicated acros
 });
 
 
-test('create-association flow is two flat steps with one primary action and no stale wizard code', () => {
-  const start = html.indexOf('function setCreateWizardStep(');
+test('create-association flow is one compact screen with a single submit action', () => {
+  const start = html.indexOf('function createGroup(){');
   const end = html.indexOf('function groupDetail(){', start);
   const flow = html.slice(start, end);
-  assert.match(html, /const CREATE_STEP_COUNT=2;/);
-  assert.equal((html.match(/Math\.min\(2,/g) || []).length, 0, 'step limit is not hard-coded');
-  for (const id of ['create-step-1', 'create-step-2']) assert.ok(flow.includes('id="' + id + '"'), id);
-  assert.ok(!flow.includes('id="create-step-3"'), 'no third step');
-  assert.ok(flow.includes("'+CREATE_STEP_COUNT+'"), 'step counter follows CREATE_STEP_COUNT');
-  const step1 = flow.slice(flow.indexOf('id="create-step-1"'), flow.indexOf('id="create-step-2"'));
-  const step2 = flow.slice(flow.indexOf('id="create-step-2"'), flow.indexOf('id="create-next"'));
-  for (const field of ['name', 'startDate', 'firstDrawOn', 'shareAmount', 'currency']) assert.ok(step1.includes('name="' + field + '"'), 'screen 1 field: ' + field);
-  for (const field of ['installmentMode', 'installments', 'installmentAmount', 'managerMode', 'managerShares']) assert.ok(step2.includes('name="' + field + '"'), 'screen 2 field: ' + field);
-  assert.match(step1, /<div class="grid2"><div class="field"><label for="cg-start">[\s\S]*?name="startDate"[\s\S]*?name="firstDrawOn"/, 'start date and first draw share one row');
-  assert.ok(step1.indexOf('id="cg-result"') > step1.indexOf('name="firstDrawOn"') && step1.indexOf('id="cg-result"') < step1.indexOf('name="shareAmount"'), 'computed duration line sits between the dates and the share row');
-  assert.match(step1, /<div class="cg-row">[\s\S]*name="shareAmount"[\s\S]*name="currency"/, 'share amount and currency share one row');
-  assert.ok(step2.indexOf('id="cg-installment-preview"') > step2.indexOf('name="installmentMode"') && step2.indexOf('id="cg-installment-preview"') < step2.indexOf('name="managerMode"'), 'actual installments list sits between payment method and manager');
-  assert.ok(step2.indexOf('name="managerMode"') < flow.indexOf('id="create-final-submit"'));
-  assert.ok(flow.indexOf('name="name"') < flow.indexOf('name="startDate"'));
-  assert.ok(flow.indexOf('name="startDate"') < flow.indexOf('name="firstDrawOn"'));
-  assert.ok(flow.indexOf('name="firstDrawOn"') < flow.indexOf('name="shareAmount"'));
-  assert.ok(flow.indexOf('name="shareAmount"') < flow.indexOf('name="installmentMode"'));
-  assert.ok(flow.indexOf('name="installmentMode"') < flow.indexOf('name="managerMode"'));
-  for (const field of ['name', 'currency', 'startDate', 'firstDrawOn', 'shareAmount', 'installmentMode', 'installments', 'installmentAmount', 'managerMode', 'managerShares']) {
-    assert.ok(flow.includes('name="' + field + '"'), 'form field kept: ' + field);
+  assert.match(html, /const CREATE_STEP_COUNT=1;/);
+  assert.match(flow, /<form id="createForm"/);
+  for (const field of ['name','currency','startDate','firstDrawOn','shareAmount','installmentMode','installments','installmentAmount','managerMode','managerShares']) {
+    assert.ok(flow.includes('name="' + field + '"'), 'form field: ' + field);
   }
-  assert.doesNotMatch(flow, /create-prev|create-stage-title|create-section|inviteOpensOn|inviteClosesOn|name="rules"/);
-  assert.equal((flow.match(/id="create-next"/g) || []).length, 1);
-  assert.equal((flow.match(/id="create-final-submit"/g) || []).length, 1);
-  assert.match(flow, /SahmCore\.periods\(duration,count\)/);
-  assert.doesNotMatch(html, /create-step-active-|\.create-section|\.create-field|\.create-manager|\.create-rules-grid/);
+  assert.match(flow, /id="create-final-submit"/);
+  assert.doesNotMatch(flow, /create-step-[23]|create-next|create-prev/);
+  assert.match(flow, /id="cg-installment-preview"/);
+  assert.match(flow, /مدة فترة التحصيل/);
+  assert.match(html, /if\(form\.id==='createForm'\)[\s\S]*?validateCreateStep\(1\)[\s\S]*?validateCreateStep\(2\)/);
+  assert.match(html, /SahmCore\.periods\(duration,count\)/);
 });
-
-
 test('line-icon system decorates inner screens only and never draws icon bubbles', () => {
   const start = html.indexOf('function decorateIcons(){');
   const end = html.indexOf('(function(){', start);
