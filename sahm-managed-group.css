@@ -116,3 +116,16 @@
 #screen .mgd-loading{display:flex;align-items:center;justify-content:center;gap:9px;min-height:112px;padding:20px;color:#748197;font-size:12px;font-weight:700}
 #screen .mgd-loading-spinner{width:17px;height:17px;border:2px solid #dce4f1;border-top-color:#3158d6;border-radius:50%;animation:mgd-spin .7s linear infinite}
 @keyframes mgd-spin{to{transform:rotate(360deg)}}
+
+/* Compact manager header and five primary tabs */
+#screen .mgd-identity{min-height:0;padding:12px 14px 10px;margin-bottom:9px;border-radius:12px}
+#screen .mgd-identity-top>strong{font-size:16px}
+#screen .mgd-identity-metrics{display:flex;align-items:center;gap:16px;margin:9px 0 7px}
+#screen .mgd-identity-metrics>span{display:flex;align-items:center;gap:5px;font-size:11px;color:rgba(255,255,255,.82)}
+#screen .mgd-identity-metrics b{font-size:12px;color:#fff}
+#screen .mgd-progress-head{font-size:11px}
+#screen .mgd-progress-caption{display:block;margin-top:3px;text-align:left;font-size:10px;color:rgba(255,255,255,.78)}
+#screen .mgd-tabs{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:2px}
+#screen .mgd-tabs button{min-width:0;gap:4px;padding:9px 2px;font-size:11px}
+#screen .mgd-tabs button svg{width:16px;height:16px}
+@media(max-width:360px){#screen .mgd-identity-metrics{gap:9px}#screen .mgd-tabs button{font-size:10px}}

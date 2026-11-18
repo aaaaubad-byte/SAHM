@@ -45,20 +45,18 @@
     const p = progress(d);
     return '<section class="mgd-identity">' +
       '<div class="mgd-identity-top"><strong>' + esc(g.name) + '</strong><span class="mgd-role">' + esc(currentRole(g)) + '</span></div>' +
-      '<div class="mgd-facts">' +
-      '<div class="mgd-fact"><span>' + uiIcon('wallet', 18) + '<span>قيمة السهم</span></span><b>' + esc(money(g.share, g.currency)) + '</b></div>' +
-      '<div class="mgd-fact"><span>' + uiIcon('calendar-days', 18) + '<span>مدة الدورة</span></span><b>' + esc((d.plan && d.plan.durationDays) || g.cycleDays || '—') + ' يوم</b></div>' +
-      '<div class="mgd-fact"><span>' + uiIcon('users', 18) + '<span>عدد الأعضاء</span></span><b>' + esc(d.members || 0) + '</b></div>' +
-      '<div class="mgd-fact"><span>' + uiIcon('shield-check', 18) + '<span>صفة المستخدم</span></span><b>' + esc(currentRole(g)) + '</b></div>' +
-      '</div><div class="mgd-progress-head"><span>تقدم الدورات</span><b>' + p.done + ' من ' + p.total + '</b></div>' +
-      '<div class="mgd-progress"><i style="width:' + p.pct + '%"></i></div></section>';
+      '<div class="mgd-identity-metrics">' +
+      '<span title="قيمة السهم">' + uiIcon('wallet',16) + '<b>' + esc(money(g.share,g.currency)) + '</b></span>' +
+      '<span title="عدد الأعضاء">' + uiIcon('users',16) + '<b>' + esc(d.members||0) + '</b></span>' +
+      '<span title="إجمالي القرعات">' + uiIcon('shuffle',16) + '<b>' + p.total + '</b></span></div>' +
+      '<div class="mgd-progress-head"><span>إنجاز القرعات</span><b>' + p.pct + '%</b></div>' +
+      '<div class="mgd-progress"><i style="width:' + p.pct + '%"></i></div><small class="mgd-progress-caption">' + p.done + ' من ' + p.total + ' قرعة مكتملة</small></section>';
   }
   function tabs(active) {
     const items = [
-      ['members', 'users', 'الأعضاء'], ['cycles', 'calendar-days', 'الدورات'],
-      ['installments', 'receipt', 'الأقساط'], ['draw-room', 'shuffle', 'القرعة'],
-      ['news', 'wall', 'الأخبار'], ['chat', 'messages', 'المحادثة'],
-      ['audit', 'clipboard-list', 'السجل']
+      ['installments','receipt','الأقساط'], ['shares','layers','الأسهم'],
+      ['draws','shuffle','القرعات'], ['members','users','الأعضاء'],
+      ['settings','settings','الإعدادات']
     ];
     return '<nav class="mgd-tabs" aria-label="أقسام الجمعية" role="tablist">' + items.map(([id, icon, label]) =>
       '<button type="button" role="tab" aria-selected="' + (active === id ? 'true' : 'false') + '" class="' + (active === id ? 'active' : '') + '" data-action="managed-tab" data-tab="' + id + '">' +
