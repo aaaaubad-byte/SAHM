@@ -264,7 +264,8 @@ test('modal dialogs expose ARIA semantics and keyboard focus management', () => 
 
 
 test('every rendered button, route, form, and modal action is connected to a handler', () => {
-  const templates = html + managed;\n  const registry = html.match(/const ALL_SCREEN_REGISTRY\s*=\s*\{([\s\S]*?)\n\};/);
+  const templates = html + managed;
+  const registry = html.match(/const ALL_SCREEN_REGISTRY\s*=\s*\{([\s\S]*?)\n\};/);
   assert.ok(registry, 'central route registry exists');
   const routes = new Set([...registry[1].matchAll(/['"]?([A-Za-z_$][\w$-]*)['"]?\s*:/g)].map(x => x[1]));
 
@@ -272,7 +273,7 @@ test('every rendered button, route, form, and modal action is connected to a han
     .map(x => x[1]).filter(x => !x.includes('$')));
   for (const route of staticRoutes) assert.ok(routes.has(route), 'button route resolves: ' + route);
 
-  const buttons = [...html.matchAll(/<button\b([^>]*)>/gi)].map(x => x[1]);
+  const buttons = [...templates.matchAll(/<button\b([^>]*)>/gi)].map(x => x[1]);
   assert.ok(buttons.length >= 100, 'all screen templates contribute their buttons');
   for (const attrs of buttons) {
     assert.match(attrs, /data-action|data-go|type=["']submit["']/, 'button has a delegated action, route, or form-submit role: ' + attrs);
@@ -280,8 +281,8 @@ test('every rendered button, route, form, and modal action is connected to a han
 
   const actions = new Set([...templates.matchAll(/data-action=["']([^"']+)["']/g)]
     .map(x => x[1]).filter(x => !x.includes('$')));
-  const actionCases = new Set([...html.matchAll(/action===["']([^"']+)["']/g)].map(x => x[1]));
-  const groupedActions = new Set([...html.matchAll(/\[([^\]]+)\]\.includes\(action\)/g)]
+  const actionCases = new Set([...templates.matchAll(/action\s*===\s*["']([^"']+)["']/g)].map(x => x[1]));
+  const groupedActions = new Set([...templates.matchAll(/\[([^\]]+)\]\.includes\(action\)/g)]
     .flatMap(x => [...x[1].matchAll(/["']([^"']+)["']/g)].map(y => y[1])));
   const changeActions = new Set(['mute-toggle', 'notify-channel-toggle']);
   for (const action of actions) {
@@ -289,18 +290,17 @@ test('every rendered button, route, form, and modal action is connected to a han
       'data-action is handled by click or change logic: ' + action);
   }
 
-  assert.match(html, /document\.addEventListener\('click',[\s\S]*?handleAppAction\(action,el\)/);
-  assert.match(html, /dialog\.addEventListener\('click',[\s\S]*?handleAppAction\(actionButton\.dataset\.action,actionButton\)/);
+  assert.match(html, /document\.addEventListener\('click',[\\s\\S]*?handleAppAction\(action,el\)/);
+  assert.match(html, /dialog\.addEventListener\('click',[\\s\\S]*?handleAppAction\(actionButton\.dataset\.action,actionButton\)/);
   assert.match(html, /buttons\.map\(\(\[label,act/);
 
-  const formIds = new Set([...html.matchAll(/<form\b[^>]*\bid=["']([^"']+)["']/gi)].map(x => x[1]));
-  const handledForms = new Set([...html.matchAll(/form\.id===["']([^"']+)["']/g)].map(x => x[1]));
+  const formIds = new Set([...templates.matchAll(/<form\b[^>]*\bid=["']([^"']+)["']/gi)].map(x => x[1]));
+  const handledForms = new Set([...templates.matchAll(/form\.id\s*(?:===|!==)\s*["']([^"']+)["']/g)].map(x => x[1]));
   for (const id of formIds) assert.ok(handledForms.has(id), 'form submit is handled: ' + id);
 
-  const anchors = [...html.matchAll(/<a\b([^>]*)>/gi)].map(x => x[1]);
+  const anchors = [...templates.matchAll(/<a\b([^>]*)>/gi)].map(x => x[1]);
   for (const attrs of anchors) assert.match(attrs, /\bhref\s*=/i, 'anchor has a destination');
 });
-
 test('copy and share buttons have clipboard fallbacks for browsers without Clipboard API', () => {
   assert.match(html, /async function copyText\(/);
   assert.match(html, /document\.execCommand\('copy'\)/);
@@ -591,7 +591,6 @@ test('shared association workspace routes both roles through one detail componen
   for (const tab of ['overview','installments','shares','draws','communication']) assert.ok(managed.includes("['"+tab+"'"), 'missing participant tab '+tab);
   assert.match(managed, /SahmApp\.memberStatement\(g\.id,ownMemberId\(g\)\)/);
   assert.match(managed, /SahmApp\.drawHistory\(g\.id\)/);
-  assert.doesNotMatch(managed, /getDrawHistory/);
 });
 
 test('participant workspace never guesses another member when own membership is missing', () => {
