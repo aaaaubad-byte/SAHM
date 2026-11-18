@@ -488,7 +488,7 @@ test('manager collection screen implements current installment filters, selectiv
   assert.ok(managed.includes("const collect = x.status === 'due' || x.status === 'late' || x.status === 'upcoming'"));
   assert.ok(managed.includes("remind = x.status === 'due' || x.status === 'late'"));
   assert.ok(managed.includes('mgd-installment-status-icon'));
-  assert.ok(managed.includes('aria-label="\'+esc(meta[1])\'"'), 'status wording remains accessible');
+  assert.ok(managed.includes("title=\"'+esc(meta[1])+'\" aria-label=\"'+esc(meta[1])+'\">"), 'status wording remains accessible');
   assert.ok(managed.includes('SahmApp.installmentRows(g.id'));
   assert.ok(managed.includes('SahmApp.sendReminder('));
   assert.ok(managed.includes('skipRefresh:true'));
