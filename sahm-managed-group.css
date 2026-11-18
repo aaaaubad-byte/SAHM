@@ -259,3 +259,177 @@
   #screen .mgd-tabs button{transition:none}
   #screen .mgd-loading-spinner{animation:none}
 }
+
+/* SAHM workspace visual cleanup — final, single-purpose overrides. */
+#screen .mgd-identity{
+  color:#1d2b43;
+  background:#fff;
+  border:1px solid #e4e9f1;
+  border-radius:14px;
+  box-shadow:0 2px 8px rgba(24,42,74,.035);
+  padding:14px 15px 12px;
+}
+#screen .mgd-identity-top>strong{color:#1d2b43}
+#screen .mgd-identity-sub{color:#77849a}
+#screen .mgd-role{
+  background:#eef3ff;
+  color:#3158b7;
+  border:1px solid #e0e8fb;
+}
+#screen .mgd-identity-metrics{
+  display:grid;
+  grid-template-columns:repeat(4,minmax(0,1fr));
+  gap:7px;
+  margin:11px 0 9px;
+}
+#screen .mgd-identity-metrics>span{
+  justify-content:center;
+  min-width:0;
+  padding:7px 4px;
+  border:1px solid #edf0f5;
+  border-radius:9px;
+  background:#fafbfe;
+  color:#748198;
+  font-size:11px;
+}
+#screen .mgd-identity-metrics>span svg{color:#6179b6}
+#screen .mgd-identity-metrics b{
+  color:#263650;
+  font-size:12px;
+  font-weight:700;
+}
+#screen .mgd-progress-head{color:#53627a}
+#screen .mgd-progress{
+  height:6px;
+  background:#edf1f7;
+  margin-top:6px;
+}
+#screen .mgd-progress>i{background:#4267c9}
+#screen .mgd-progress-caption{color:#7b8799}
+#screen .mgd-current-round{
+  border-color:#e9edf4;
+}
+#screen .mgd-current-round-head{color:#34445e}
+#screen .mgd-current-round>small{color:#7b8799}
+#screen .mgd-round-progress{background:#edf1f7}
+#screen .mgd-round-progress>i{background:#4267c9}
+#screen .mgd-tabs{
+  margin:0 0 13px;
+  border-bottom-color:#e6eaf1;
+}
+#screen .mgd-tabs button{
+  min-height:46px;
+  gap:5px;
+  padding:8px 3px 10px;
+  color:#748198;
+  font-size:12px;
+  font-weight:600;
+}
+#screen .mgd-tabs button svg{color:currentColor}
+#screen .mgd-tabs button.active{
+  color:#3158b7;
+  font-weight:750;
+}
+#screen .mgd-tabs button.active:after{
+  right:12px;
+  left:12px;
+  height:2px;
+  border-radius:2px 2px 0 0;
+}
+#screen .mgd-content{padding-bottom:5px}
+#screen .mgd-detail-card,
+#screen .mgd-installment-card,
+#screen .mgd-member-card,
+#screen .mgd-cycle-card,
+#screen .mgd-feed-card,
+#screen .mgd-audit-item{
+  border-color:#e7ebf2;
+  border-radius:12px;
+  box-shadow:0 1px 4px rgba(24,42,74,.025);
+}
+#screen .mgd-detail-card{padding:14px}
+#screen .mgd-list{gap:7px}
+#screen .mgd-search{
+  min-height:44px;
+  border:1px solid #e0e6ef;
+  border-radius:10px;
+  box-shadow:none;
+}
+#screen .mgd-search:focus-within{
+  border-color:#7892d8;
+  box-shadow:0 0 0 3px rgba(66,103,201,.09);
+}
+#screen .mgd-select select,
+#screen .mgd-date-field input,
+#screen .mgd-chat-form textarea{
+  border-color:#e0e6ef;
+  border-radius:10px;
+  background:#fff;
+}
+#screen .mgd-action{
+  border-radius:10px;
+  font-weight:700;
+}
+#screen .mgd-action.primary{
+  background:#3158b7;
+  border-color:#3158b7;
+}
+#screen .mgd-draw-nav{
+  gap:4px;
+  padding:4px;
+  border:1px solid #e8edf4;
+  border-radius:11px;
+  background:#f7f8fb;
+}
+#screen .mgd-draw-nav button{
+  min-height:40px;
+  border-radius:8px;
+  color:#6c7890;
+}
+#screen .mgd-draw-nav button.active{
+  border-color:#e3e9f4;
+  color:#3158b7;
+  box-shadow:0 1px 3px rgba(24,42,74,.045);
+}
+#screen .mgd-member-stat-grid>div{
+  border-color:#e8edf4;
+  background:#fafbfe;
+}
+#screen .mgd-settings-grid button,
+#screen .mgd-member-shortcuts button{
+  border-color:#e5eaf2;
+  border-radius:11px;
+  box-shadow:none;
+}
+#screen .mgd-empty{
+  border-color:#e2e8f1;
+  background:#fafbfe;
+}
+#screen .mgd-loading{color:#69778e}
+#screen .mgd-loading-spinner{border-color:#e2e8f1;border-top-color:#4267c9}
+#screen .mgd-tabs button:focus-visible,
+#screen .mgd-draw-nav button:focus-visible,
+#screen .mgd-action:focus-visible,
+#screen .mgd-search input:focus-visible,
+#screen .mgd-select select:focus-visible{
+  outline:2px solid #7892d8;
+  outline-offset:2px;
+}
+@media(max-width:420px){
+  #screen .mgd-identity{padding:12px}
+  #screen .mgd-identity-metrics{gap:5px}
+  #screen .mgd-identity-metrics>span{padding:7px 2px;font-size:10px}
+  #screen .mgd-identity-metrics b{font-size:11px}
+  #screen .mgd-tabs button{font-size:10px;min-height:44px}
+  #screen .mgd-tabs button svg{width:14px;height:14px}
+  #screen .mgd-detail-card{padding:12px}
+}
+@media(max-width:340px){
+  #screen .mgd-identity-metrics{grid-template-columns:repeat(2,minmax(0,1fr))}
+  #screen .mgd-tabs button{font-size:9px}
+  #screen .mgd-tabs button svg{display:none}
+  #screen .mgd-draw-nav button{min-width:76px;padding-inline:8px}
+}
+@media(prefers-reduced-motion:reduce){
+  #screen .mgd-draw-panel{animation:none}
+}
