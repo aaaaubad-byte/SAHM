@@ -87,8 +87,6 @@
 #screen .mgd-bulk-reminder label{display:flex;flex:1;min-width:0;flex-direction:column;gap:5px;color:#68778d;font-size:11px;font-weight:750}
 #screen .mgd-bulk-reminder select{width:100%;min-height:39px;border:1px solid #dce3ed;border-radius:9px;background:#fff;padding:7px;color:#26364f;font:inherit;font-size:12px}
 #screen .mgd-bulk-reminder button{background:#3158d6;color:#fff;border-color:#3158d6;white-space:nowrap}
-#screen .mgd-utilities{display:flex;flex-wrap:wrap;justify-content:center;gap:7px;margin:16px 0 5px;padding:10px 0;border-top:1px solid #e7ebf2}
-#screen .mgd-utilities button{min-height:34px;padding:6px 10px;border:1px solid #e0e6ef;border-radius:9px;background:#fff;color:#68778d;font-size:11px;font-weight:750}
 
 #screen .mgd-feed-list,#screen .mgd-audit-list{display:flex;flex-direction:column;gap:8px}
 #screen .mgd-feed-card,#screen .mgd-audit-item{display:flex;align-items:flex-start;gap:10px;padding:12px;border:1px solid #e3e8f0;border-radius:12px;background:#fff}
