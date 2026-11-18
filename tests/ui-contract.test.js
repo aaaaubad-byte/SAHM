@@ -543,9 +543,13 @@ test('association workspace tabs consume the correct role-specific data contract
   assert.match(managed, /pct===100\?'waiting':'collecting'/);
   assert.match(managed, /value=\"waiting\">بانتظار الموعد/);
   assert.match(managed, /memberStatement\(g\.id,ownMemberId\(g\)\)/);
-  assert.match(managed, /تفاصيل رقم كل سهم وحالته غير متاحة/);
+  assert.match(managed, /SahmApp\.myShareList\(g\.id/);
+  assert.doesNotMatch(managed, /تفاصيل رقم كل سهم وحالته غير متاحة/);
   assert.match(managed, /Number\(statement\.shares\|\|0\)/);
-  assert.match(managed, /remote=!!\(root\.SahmSupabaseData&&root\.SahmSupabaseData\.isRemote&&root\.SahmSupabaseData\.isRemote\(\)\)/);
+  assert.match(app, /'myShareList'/);
+  assert.match(data, /function myShareList\(db, viewer, gid, opts\)/);
+  assert.match(remote, /invoke\('get_my_association_shares'/);
+  assert.match(remote, /app\.myShareList=myShareList/);
 });
 
 test('managed workspace external stylesheet has balanced responsive rules and visible focus states', () => {
