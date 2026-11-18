@@ -3900,7 +3900,7 @@ async function handleAppAction(action,el){
  }
  if(action==='record-paid-confirm'){
   const root=$('#modal-root'),r=await SahmApp.recordPaid({groupId:g.id,memberId:root.dataset.memberId,cycle:Number(root.dataset.cycle),no:Number(root.dataset.installmentNo)});
-  if(r&&r.ok){const id=r.receipt&&r.receipt.id;closeModal();refreshData();installments();toast('تم تسجيل الاستلام'+(id?' · '+id:''))}return;
+  if(r&&r.ok){const id=r.receipt&&r.receipt.id;closeModal();refreshData();if(screenName==='group-detail')groupDetail();else installments();toast('تم تسجيل الاستلام'+(id?' · '+id:''))}return;
  }
  if(action==='installment-filter'){
   selectedInstallmentStatus=el.dataset.filter||'all';syncNavigationContext();installments();return;
@@ -3920,14 +3920,14 @@ async function handleAppAction(action,el){
  if(action==='send-reminder-confirm'&&reminderRequest){const r=await SahmApp.sendReminder(Object.assign({},reminderRequest,{confirmRepeat:true}));if(r&&r.ok){closeModal();refreshData();installments();toast('تم إرسال التذكير')}return}
  if(action==='schedule-draw'){
   if(!g||!isManager())return;const value=document.getElementById('drawScheduledAt')&&document.getElementById('drawScheduledAt').value,utc=adenDateTimeToUtc(value);if(!utc){toast('حدد موعدًا صحيحًا بتوقيت اليمن');return}
-  const result=await SahmApp.setDrawScheduledAt(g.id,utc);if(result&&result.ok){toast('تم حفظ الموعد بتوقيت اليمن');drawRoom()}return;
+  const result=await SahmApp.setDrawScheduledAt(g.id,utc);if(result&&result.ok){toast('تم حفظ الموعد بتوقيت اليمن');if(screenName==='group-detail')groupDetail();else drawRoom()}return;
  }
  if(action==='run-draw'){
-  if(!g||!isManager())return;const result=await SahmApp.performDraw(g.id);if(result&&result.ok){refreshData();drawAnimationPending=true;await drawRoom()}return;
+  if(!g||!isManager())return;const result=await SahmApp.performDraw(g.id);if(result&&result.ok){refreshData();drawAnimationPending=true;if(screenName==='group-detail')await groupDetail();else await drawRoom()}return;
  }
  if(action==='draw-presentation-completed'||action==='draw-presentation-failed'){
   if(!g||!isManager())return;const roomResult=await SahmApp.getDrawRoom(g.id),round=roomResult&&roomResult.ok&&roomResult.room&&roomResult.room.round_no;if(!round){toast('لا توجد نتيجة محفوظة لتحديث حالة العرض');return}
-  const status=action==='draw-presentation-completed'?'completed':'failed',result=await SahmApp.setDrawPresentationStatus(g.id,round,status);if(result&&result.ok){toast(status==='completed'?'تم تسجيل اكتمال العرض':'تم تسجيل فشل العرض');drawRoom()}return;
+  const status=action==='draw-presentation-completed'?'completed':'failed',result=await SahmApp.setDrawPresentationStatus(g.id,round,status);if(result&&result.ok){toast(status==='completed'?'تم تسجيل اكتمال العرض':'تم تسجيل فشل العرض');if(screenName==='group-detail')await groupDetail();else drawRoom()}return;
  }
  if(action==='notification-open'){
   const id=el.dataset.id;if(id){const marked=await SahmApp.markNotificationsRead([id]);if(!marked||!marked.ok){toast(marked&&marked.message||'تعذر تحديث حالة الإشعار');return}}
