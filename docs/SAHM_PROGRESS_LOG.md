@@ -386,3 +386,14 @@
 - أضيف اختبار SQL ثابت يتحقق من انتقال الحد إلى اليوم الأخير.
 - إزالة بطاقة معلومات عامة زائدة من تبويب القرعات لصالح قائمة القرعات وبطاقات تقدمها.
 - **لم يطبق الترحيل على قاعدة Supabase الحية** لأن اتصال Supabase المرتبط رفض صلاحية الوصول. لا تُعتبر هذه القاعدة محدثة حتى تطبيق الترحيل والتحقق منه على المشروع الأصلي.
+
+
+## 2026-11-18 — Unified association workspace UI (implementation start)
+- Created branch `feat/complete-association-workspace` from `SAHM-SUPABASE`.
+- Replaced the legacy group-detail screen with the shared managed-group workspace entry point for both manager and participant roles.
+- Added participant-facing workspace tabs for overview, own installments, own shares, draw history, and member communication, reusing existing read models only.
+- Refined the shared association header to show role, share value, member/share/round counts, overall progress, and manager current-round collection progress.
+- Added participant share outcome and installment views; preserved manager-specific tabs and action handlers.
+- Corrected manager identity wording so a manager is only described as a participating member when manager participation is enabled and they hold shares.
+- No Supabase schema, SQL migrations, RPCs, business rules, or Render deployments were changed in this UI phase.
+- Validation still required: run JavaScript/static tests, inspect all legacy navigation entry points, and verify mobile rendering before merging.

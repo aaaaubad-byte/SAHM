@@ -3116,38 +3116,12 @@ function showCreatedGroup(g){
  if(canInvite)bindInviteePicker();
 }
 function groupDetail(){
- const g=currentGroup();if(!g){shell('الجمعية','groups','<div class="card empty"><b>لا توجد جمعية محددة</b><button class="btn primary" data-go="groups">عرض الجمعيات</button></div>');return}
- const d=SahmApp.groupDetail(g.id);if(!d||!d.ok){toast(d&&d.message||'تعذر تحميل الجمعية');return}
- const manager=!!d.role.manager,shares=d.role.shares||0,plan=d.plan||{};
- if(manager&&window.SahmManagedGroup){SahmManagedGroup.render(g,d);return;}
- const lockNotice=d.agreementLocked?'<div class="card"><b>الاتفاق مقفل</b><small>تم بلوغ تاريخ بداية الجمعية أو تثبيت أول قرعة؛ لذلك توقفت تعديلات الاتفاق والأعضاء والأسهم والدعوات. تظل إعدادات الأخبار والمحادثة متاحة للمدير.</small></div>':'';
- const tabs='<div class="tabs"><button class="'+(groupDetailTab==='overview'?'active':'')+'" data-action="detail-tab" data-tab="overview">'+(manager?'لوحة الإدارة':'مشاركتي')+'</button><button class="'+(groupDetailTab==='cycles'?'active':'')+'" data-action="detail-tab" data-tab="cycles">الدورات والقرعات</button><button class="'+(groupDetailTab==='tools'?'active':'')+'" data-action="detail-tab" data-tab="tools">'+(manager?'إعدادات الجمعية':'التواصل')+'</button></div>';
- const top='<div class="card group-identity '+(manager?'manager-identity':'member-identity')+'"><div class="between"><span class="role-chip '+(manager?'manager-chip':'member-chip')+'">'+(manager?'أنت مدير الجمعية':'أنت مشارك في الجمعية')+'</span>'+pill(g.status)+'</div><div class="hero-num">'+money(g.share,g.currency)+'</div><div class="eyebrow">حصة السهم الكاملة في الدورة</div><div class="between" style="margin-top:12px"><small>'+d.members+' مشاركين</small><small>'+escapeHtml(g.period)+'</small></div></div>'+tabs;
- let body='';
- if(groupDetailTab==='overview'){
-  if(manager){const counts=d.counts||{paid:0,due:0,late:0},pendingRequests=(db.joinRequests||[]).filter(x=>x.groupId===g.id&&x.status==='pending').length;
-   body='<div class="grid2"><div class="stat"><span>الأسهم المسجلة</span><b>'+g.shares+(g.total==null?' سهم':' / '+g.total)+'</b></div><div class="stat"><span>الجولات المتبقية</span><b>'+Math.max(0,(d.rounds||0)-(d.drawn||0))+'</b></div><div class="stat"><span>أقساط مدفوعة</span><b>'+counts.paid+'</b></div><div class="stat"><span>أقساط متأخرة</span><b>'+counts.late+'</b></div></div>'+
-   '<div class="card manager-panel"><div class="section-head"><h3>إدارة الجمعية</h3></div><div class="manager-action-grid"><button class="manager-action" data-go="member-reception"><span>'+uiIcon('users',22)+'</span><b>استقبال الأعضاء'+(pendingRequests?' · '+pendingRequests+' طلبات معلقة':'')+'</b></button><button class="manager-action" data-go="installments"><span>'+uiIcon('receipt',22)+'</span><b>أقساط الدورة</b></button><button class="manager-action" data-go="draw-room"><span>'+uiIcon('layers',22)+'</span><b>غرفة القرعة</b></button><button class="manager-action" data-go="news"><span>'+uiIcon('wall',22)+'</span><b>أخبار الجمعية</b></button></div></div>'+
-   '<div class="card"><div class="keyvalue"><span>تاريخ البداية</span><b>'+dateLabel(g.start)+'</b></div><div class="keyvalue"><span>أول قرعة محسوبة</span><b>'+dateLabel(g.first)+'</b></div><div class="keyvalue"><span>حصة السهم في الدورة</span><b>'+money(g.share,g.currency)+'</b></div><div class="keyvalue"><span>الأقساط داخل الدورة</span><b>'+g.installments+'</b></div><div class="keyvalue"><span>المدة المقدرة</span><b>'+((plan.durationDays)||'—')+' يومًا</b></div><div class="keyvalue"><span>جائزة الجولة المستهدفة</span><b>'+minorMoney(plan.prizeTarget||0,g.currency)+'</b></div></div>';
-  }else{const progress=d.myProgress||{};
-   body='<div class="grid2"><div class="stat"><span>أسهم مشاركتك</span><b>'+shares+'</b></div><div class="stat"><span>مجموع التزامك في الدورة</span><b>'+money(g.share*shares,g.currency)+'</b></div></div>'+
-   '<div class="card member-panel"><div class="section-head"><h3>التزاماتك</h3></div><div class="keyvalue"><span>الأقساط في الدورة</span><b>'+g.installments+'</b></div><div class="keyvalue"><span>إجمالي الالتزام لكل جولة</span><b>'+money(g.share*shares,g.currency)+'</b></div><div class="keyvalue"><span>التقدم في الدورة الحالية</span><b>'+(progress.paid||0)+' من '+(progress.total||g.installments)+'</b></div><button class="btn primary full" data-go="installments">عرض أقساطي</button></div>'+
-   '<div class="member-action-grid"><button class="member-action" data-go="draw-room"><span>'+uiIcon('layers',22)+'</span><b>غرفة القرعة</b></button><button class="member-action" data-go="draw-history"><span>'+uiIcon('layers',22)+'</span><b>نتائج القرعة</b></button><button class="member-action" data-go="receipts"><span>'+uiIcon('receipt',22)+'</span><b>سجلات الاستلام</b></button><button class="member-action" data-go="chat"><span>'+uiIcon('messages',22)+'</span><b>محادثة الجمعية</b></button><button class="member-action" data-go="news"><span>'+uiIcon('wall',22)+'</span><b>أخبار الجمعية</b></button></div><div class="card"><div class="keyvalue"><span>مدير الجمعية</span><b>'+escapeHtml(g.admin)+'</b></div><div class="keyvalue"><span>بداية الجمعية</span><b>'+dateLabel(g.start)+'</b></div><div class="keyvalue"><span>موعد أول قرعة</span><b>'+dateLabel(g.first)+'</b></div></div>';
-  }
- }else if(groupDetailTab==='cycles'){
-  const history=SahmApp.getDrawHistory(g.id),draws=history&&history.ok?history.history:[];
-  body='<div class="card"><div class="between"><b>الدورات والقرعات</b><span class="pill">'+draws.length+' نتائج</span></div>'+(draws.map(x=>'<div class="listrow"><div class="avatar gold">'+x.round_no+'</div><div class="grow"><strong>الجولة '+x.round_no+' · '+escapeHtml(x.winner_owner_name||'—')+' · السهم '+escapeHtml(String(x.winner_share_no||'—'))+'</strong><small>'+dateLabel(x.scheduled_on)+'</small><small>الجائزة المستهدفة: '+minorMoney(x.prize_target_minor||0,x.currency||g.currency)+'</small></div><span class="pill green">مثبتة</span></div>').join('')||'<div class="empty"><b>لا توجد نتائج قرعة بعد</b></div>')+'</div><button class="btn outline full" data-go="draw-history">فتح سجل القرعة</button>';
- }else if(manager){
-  const channel=(key,label,map)=>'<div class="card"><b>'+label+'</b>'+SahmApp.notifyTypes().map(t=>'<div class="listrow"><div class="grow"><strong>'+escapeHtml(t.label)+'</strong></div><input type="checkbox" data-action="notify-channel-toggle" data-channel="'+key+'" data-type="'+escapeHtml(t.id)+'" '+(map&&map[t.id]?'checked':'')+'></div>').join('')+'</div>';
-  const channels=channel('feed','نشر الأحداث في أخبار الجمعية',d.group.notify)+channel('chat','نشر الأحداث في محادثة الجمعية',d.group.notifyChat)+channel('names','السماح بإظهار اسم العضو في الخبر',d.group.notifyNames);
-  const canInvite=!!(d.permissions&&d.permissions.canInvite);
-  body='<div class="card manager-panel"><div class="section-head"><h3>إدارة الجمعية</h3></div><button class="btn outline full" data-go="member-reception">إدارة استقبال الأعضاء</button><button class="btn soft full" data-go="audit">سجل العمليات الإداري</button></div><h3>إعدادات نشر الأحداث</h3>'+channels;
- }else{
-  const mute=SahmApp.prefs().mute&&SahmApp.prefs().mute[g.id]||{};
-  body='<div class="card"><div class="section-head"><h3>تفضيلات الإشعارات</h3></div><div class="listrow"><div class="grow"><strong>كتم إشعارات المجموعة</strong></div><input type="checkbox" data-action="mute-toggle" data-kind="group" '+(mute.group?'checked':'')+'></div><div class="listrow"><div class="grow"><strong>كتم تذكيرات الأقساط</strong></div><input type="checkbox" data-action="mute-toggle" data-kind="reminders" '+(mute.reminders?'checked':'')+'></div></div>';
- }
- shell(g.name,'groups',lockNotice+top+body);
- 
+ const g=currentGroup();
+ if(!g){shell('الجمعية','groups','<div class="mgd-empty">لا توجد جمعية محددة</div>');return}
+ const d=SahmApp.groupDetail(g.id);
+ if(!d||!d.ok){shell('الجمعية','groups','<div class="mgd-empty">'+escapeHtml(d&&d.message||'تعذر تحميل بيانات الجمعية')+'</div>');return}
+ if(window.SahmManagedGroup){SahmManagedGroup.render(g,d);return}
+ shell('الجمعية','groups','<div class="mgd-empty">تعذر تحميل مساحة الجمعية</div>');
 }
 async function loadAssociationPublicLinkStatus(associationId,canInvite){
  const target=document.getElementById('association-link-status');
