@@ -294,7 +294,7 @@ test('role separation, draw room, publication channels and personal notification
   assert.match(html, /adenDateTimeToUtc/);
   assert.match(html, /Asia\/Aden/);
   assert.match(managed, /requestAnimationFrame\(/);
-  assert.match(managed, /subject_visible===true&&x\.subject_name/);
+  assert.match(managed, /subject_visible\s*===\s*true\s*&&\s*x\.subject_name/);
   assert.doesNotMatch(workspace, /SahmApp\.eventLog\(g\.id/);
   assert.match(remote, /channel\('sahm-user-'\+user\.id\)/);
   assert.match(remote, /table:'chat_messages'/);
