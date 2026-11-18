@@ -337,7 +337,7 @@
   }
   function memberOverview(g,d) {
     const st=SahmApp.memberStatement(g.id,ownMemberId(g)); if(!st||!st.ok)return '<div class="mgd-empty">تعذر تحميل ملخص مشاركتك</div>';
-    const cycle=(st.cycles||[]).slice(-1)[0],p=cycle&&cycle.progress||d.myProgress||{},remote=!!(root.SahmSupabaseData&&root.SahmSupabaseData.isRemote&&root.SahmSupabaseData.isRemote()),r=remote?null:SahmApp.shareList(g.id,{status:'all'}),shares=r&&r.ok?r.shares||[]:[];
+    const cycle=(st.cycles||[]).slice(-1)[0],p=cycle&&cycle.progress||d.myProgress||{},r=SahmApp.myShareList(g.id,{status:'all'}),shares=r&&r.ok?r.shares||[]:[];
     return '<section class="mgd-detail-card"><div class="mgd-list-head"><b>مشاركتك في الجمعية</b><span>'+esc(st.memberName)+'</span></div><div class="mgd-member-stat-grid"><div><small>أسهمك</small><b>'+Number(st.shares||0)+'</b></div><div><small>فائزة</small><b>'+ (r&&r.ok?shares.filter(x=>x.status==='won').length:'—') +'</b></div><div><small>مؤهلة</small><b>'+ (r&&r.ok?shares.filter(x=>x.status==='eligible').length:'—') +'</b></div></div><div class="mgd-detail-heading"><b>التزامات القرعة الحالية</b><span>'+(p.paid||0)+' / '+(p.total||0)+'</span></div><div class="mgd-round-progress"><i style="width:'+(p.total?Math.round((p.paid||0)/p.total*100):0)+'%"></i></div><div class="mgd-summary-stats"><span>إجمالي الالتزام <b>'+esc(moneyValue(st.commitment&&st.commitment.overall,st.currency))+'</b></span><span>الأقساط <b>'+(p.paid||0)+' من '+(p.total||0)+'</b></span></div></section><section class="mgd-detail-card">'+row('user','مدير الجمعية',g.admin||'—')+row('calendar','بداية الجمعية',dateLabel(g.start||g.startDate))+'</section>';
   }
   function memberInstallments(g) {
@@ -345,14 +345,11 @@
     return (st.cycles||[]).slice().reverse().map(c=>{const paid=(c.rows||[]).filter(x=>x.status==='paid').length;return '<section class="mgd-detail-card"><div class="mgd-detail-heading"><b>القرعة '+c.cycle+'</b><span>'+paid+' من '+(c.rows||[]).length+' مدفوع</span></div><div class="mgd-round-progress"><i style="width:'+(c.rows&&c.rows.length?Math.round(paid/c.rows.length*100):0)+'%"></i></div>'+(c.rows||[]).map(x=>'<div class="mgd-simple-row"><span><b>القسط '+x.no+'</b><small>'+esc(dateLabel(x.periodStart))+' – '+esc(dateLabel(x.periodEnd))+'</small></span>'+pill(x.status)+'<b>'+esc(moneyValue(x.total,st.currency))+'</b></div>').join('')+'</section>';}).join('')||'<div class="mgd-empty">لا توجد أقساط مسجلة لمشاركتك بعد</div>';
   }
   function memberShares(g) {
-    const remote=!!(root.SahmSupabaseData&&root.SahmSupabaseData.isRemote&&root.SahmSupabaseData.isRemote()),r=remote?null:SahmApp.shareList(g.id,{status:'all'}),list=r&&r.ok?r.shares||[]:[];
-    if(!r||!r.ok){
-      const statement=SahmApp.memberStatement(g.id,ownMemberId(g));
-      if(!statement||!statement.ok)return '<div class="mgd-empty">تعذر تحميل بيانات أسهمك</div>';
-      return '<section class="mgd-detail-card"><div class="mgd-list-head"><b>أسهمك</b><span>'+Number(statement.shares||0)+' سهم</span></div><div class="mgd-member-stat-grid"><div><small>إجمالي الأسهم</small><b>'+Number(statement.shares||0)+'</b></div><div><small>إجمالي الالتزام</small><b>'+esc(moneyValue(statement.commitment&&statement.commitment.overall,statement.currency))+'</b></div><div><small>القرعات المسجلة</small><b>'+(statement.cycles||[]).length+'</b></div></div><div class="mgd-empty">تفاصيل رقم كل سهم وحالته غير متاحة ضمن صلاحية عرض بيانات العضو الحالية</div></section>';
-    }
-    const won=list.filter(x=>x.status==='won').length;
-    return '<div class="mgd-list-head"><b>أسهمك</b><span>'+list.length+' سهم · '+won+' فائزة</span></div><div class="mgd-list">'+(list.map(x=>'<article class="mgd-installment-card"><div class="mgd-installment-top"><b>السهم '+esc(x.shareNo)+'</b><span class="mgd-share-state '+(x.status==='won'?'won':'eligible')+'">'+(x.status==='won'?'فائز':'مؤهل')+'</span></div><div class="mgd-installment-meta"><span>'+(x.status==='won'?'فاز في القرعة رقم '+esc(x.winnerRound):'ما زال مؤهلاً للقرعات المتبقية')+'</span></div></article>').join('')||'<div class="mgd-empty">لا توجد أسهم مرتبطة بحسابك</div>')+'</div>';
+    const result=SahmApp.myShareList(g.id,{status:'all'});
+    if(!result||!result.ok)return '<div class="mgd-empty">'+esc(result&&result.message||'تعذر تحميل أسهمك')+'</div>';
+    const list=result.shares||[],won=list.filter(x=>x.status==='won').length;
+    return '<div class="mgd-list-head"><b>أسهمك</b><span>'+list.length+' سهم · '+won+' فائزة</span></div><div class="mgd-list">'+
+      (list.map(x=>'<article class="mgd-installment-card"><div class="mgd-installment-top"><b>السهم '+esc(x.shareNo)+'</b><span class="mgd-share-state '+(x.status==='won'?'won':'eligible')+'">'+(x.status==='won'?'فائز':'مؤهل')+'</span></div><div class="mgd-installment-meta"><span>'+(x.status==='won'?'فاز في القرعة رقم '+esc(x.winnerRound):'ما زال مؤهلاً للقرعات المتبقية')+'</span></div></article>').join('')||'<div class="mgd-empty">لا توجد أسهم مرتبطة بحسابك</div>')+'</div>';
   }
   async function memberDraws(g) {
     const r=await cachedRead('history:'+g.id,()=>SahmApp.drawHistory(g.id),15000),history=r&&r.ok?(r.history||r.draws||[]):[];
