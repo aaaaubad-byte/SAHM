@@ -3600,12 +3600,17 @@ function profileSetup(){
  </form></div>`)
 }
 function logout(){auth(`<div class="auth-brand"><div class="brand-mark">✓</div><h1>تم تسجيل الخروج</h1></div><div class="auth-card"><button class="btn primary full" data-go="welcome">العودة لتسجيل الدخول</button></div>`)}
+function openAssociationWorkspace(tab, view) {
+ const g=currentGroup(); if(!g){go('groups');return}
+ const nextParams=view?{managedView:'draw',managedDrawView:view}:{};
+ go('group-detail',nextParams,{currentGroupId:g.id,groupDetailTab:tab});
+}
 const ALL_SCREEN_REGISTRY={
  welcome:welcome,register:register,'account-login':accountLogin,'profile-setup':profileSetup,'reset-password':resetPasswordScreen,'logged-out':logout,
  home:home,groups:groups,'managed-groups':managedGroups,'joined-groups':joinedGroups,'create-group':createGroup,'created-group':createdGroup,'group-detail':groupDetail,
- members:members,'member-reception':memberReception,invite:invite,invites:invites,'invite-detail':inviteDetail,'join-group':joinGroup,'join-request-status':joinRequestStatus,'join-requests':joinRequests,'join-request-detail':joinRequestDetail,installments:installments,
- 'draw-room':drawRoom,'draw-history':drawHistory,receipts:receipts,'receipt-detail':receiptDetail,
- chat:chat,wall:wall,news:news,notifications:notifications,audit:audit,profile:profile,'edit-profile':editProfile,settings:settings
+ members:()=>openAssociationWorkspace('members'),'member-reception':memberReception,invite:invite,invites:invites,'invite-detail':inviteDetail,'join-group':joinGroup,'join-request-status':joinRequestStatus,'join-requests':joinRequests,'join-request-detail':joinRequestDetail,installments:installments,
+ 'draw-room':()=>openAssociationWorkspace('draws','summary'),'draw-history':()=>openAssociationWorkspace('draws','history'),receipts:receipts,'receipt-detail':receiptDetail,
+ chat:()=>openAssociationWorkspace('chat'),wall:wall,news:()=>openAssociationWorkspace('news'),notifications:notifications,audit:()=>openAssociationWorkspace('audit'),profile:profile,'edit-profile':editProfile,settings:settings
 };
 function render(){
  const screen=ALL_SCREEN_REGISTRY[screenName];

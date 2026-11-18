@@ -188,3 +188,9 @@
 #screen .mgd-settings-grid button svg{flex:none;color:#3158b7}
 #screen .mgd-room-entry{min-height:43px}
 @media(max-width:360px){#screen .mgd-identity-metrics{gap:2px}#screen .mgd-identity-metrics>span{font-size:9px}#screen .mgd-tabs button{font-size:9px}}
+
+#screen .mgd-wheel-wrap{margin:14px auto 18px;max-width:320px}
+#screen .mgd-wheel-wrap .draw-wheel{width:min(72vw,270px);height:min(72vw,270px);max-width:270px;max-height:270px;margin:0 auto;border-radius:50%;border:7px solid #fff;box-shadow:0 8px 24px rgba(18,35,65,.16)}
+#screen .mgd-wheel-wrap .draw-pointer{z-index:2}
+#screen .mgd-member-summary{margin-bottom:10px}
+#screen .mgd-member-shortcuts button:focus-visible,#screen .mgd-settings-grid button:focus-visible{outline:2px solid #3158d6;outline-offset:2px}

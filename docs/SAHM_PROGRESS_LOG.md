@@ -397,3 +397,5 @@
 - Corrected manager identity wording so a manager is only described as a participating member when manager participation is enabled and they hold shares.
 - No Supabase schema, SQL migrations, RPCs, business rules, or Render deployments were changed in this UI phase.
 - Validation still required: run JavaScript/static tests, inspect all legacy navigation entry points, and verify mobile rendering before merging.
+
+- Follow-up UI pass: participant identity now resolves through the role-scoped member list; restored the draw wheel inside the new shared draw room; legacy group routes for member list, installments, draw room/history, news, chat, and audit now open the unified workspace instead of their former duplicate screens.
