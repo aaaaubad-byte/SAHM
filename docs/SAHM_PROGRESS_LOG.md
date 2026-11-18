@@ -386,3 +386,47 @@
 - أضيف اختبار SQL ثابت يتحقق من انتقال الحد إلى اليوم الأخير.
 - إزالة بطاقة معلومات عامة زائدة من تبويب القرعات لصالح قائمة القرعات وبطاقات تقدمها.
 - **لم يطبق الترحيل على قاعدة Supabase الحية** لأن اتصال Supabase المرتبط رفض صلاحية الوصول. لا تُعتبر هذه القاعدة محدثة حتى تطبيق الترحيل والتحقق منه على المشروع الأصلي.
+
+
+## 2026-11-18 — Unified association workspace UI (implementation start)
+- Created branch `feat/complete-association-workspace` from `SAHM-SUPABASE`.
+- Replaced the legacy group-detail screen with the shared managed-group workspace entry point for both manager and participant roles.
+- Added participant-facing workspace tabs for overview, own installments, own shares, draw history, and member communication, reusing existing read models only.
+- Refined the shared association header to show role, share value, member/share/round counts, overall progress, and manager current-round collection progress.
+- Added participant share outcome and installment views; preserved manager-specific tabs and action handlers.
+- Corrected manager identity wording so a manager is only described as a participating member when manager participation is enabled and they hold shares.
+- No Supabase schema, SQL migrations, RPCs, business rules, or Render deployments were changed in this UI phase.
+- Validation still required: run JavaScript/static tests, inspect all legacy navigation entry points, and verify mobile rendering before merging.
+
+- Follow-up UI pass: participant identity now resolves through the role-scoped member list; restored the draw wheel inside the new shared draw room; legacy group routes for member list, installments, draw room/history, news, chat, and audit now open the unified workspace instead of their former duplicate screens.
+
+
+## 2026-11-18 — Shared workspace integration hardening
+- Corrected participant installment reads to resolve the signed-in participant's actual membership ID through the existing member-list read model.
+- Corrected participant draw history to use the existing `SahmApp.drawHistory` query and its `draws` result shape; removed guessed/nonexistent result-field aliases.
+- Added UI contract coverage for the single group-detail entry point, participant tabs, and the existing read-model API names.
+- Backend and database remain unchanged.
+- Tightened participant identity resolution: the workspace now requires the current user's own membership row and never falls back to the first member in the group.
+- Removed display of an internal share UUID as though it were a public share number in draw history.
+
+- Merged the new workspace CSS declarations into their existing selector rules instead of leaving a second override layer; kept only genuinely new selectors and the mobile breakpoint additions.
+- Updated UI contract tests to validate the role-specific tab arrays and the current cycle-card status markup; tests now use the file fixtures already loaded by the suite.
+- Removed the internal winning-share UUID from participant draw-history cards; the existing winner label already identifies the winning share without exposing a database identifier.
+- Updated architecture-sensitive UI contracts: the shared workspace module is included when checking generated buttons/actions/forms, and the member-reception entry is asserted in the workspace settings rather than the removed legacy detail renderer.
+
+## 2026-11-18 — Remove duplicate association sub-screens
+- Routed members, installments, draw room/history, group chat, news, and audit entry points through the shared association workspace.
+- Removed the former standalone renderers for those sections instead of leaving parallel/obsolete screen implementations.
+- Removed the old standalone installment selector state and its event handler; reminder actions now use the installment's own cycle metadata, with the current cycle as fallback.
+- Replaced visible "الدورة/الجولة" terminology with "القرعة" and "فترة التحصيل" where the label refers to the collection window.
+- Kept receipt lists/details and member reception/invitation management as distinct supporting workflows.
+
+
+## 2026-11-18 — Unified association workspace verification
+- Removed the standalone legacy renderers for member lists, installments, draw room/history, group chat, news, and audit; their navigation entries now resolve into the shared workspace.
+- Removed stale installment-screen state, filters, and callback references; post-action refreshes return to the workspace tabs.
+- Replaced visible "الدورة" and "الجولة" labels with "القرعة"; collection duration is labeled "فترة التحصيل".
+- Removed the duplicate top-bar SVG sizing declaration and aligned the UI contracts with the new module-owned screens and the current PWA cache versioning.
+- GitHub Actions Node unit/contract workflow passed on commit `a7744ebf1eff982c7b3ae60b3042d08353432774`: **135 passed, 0 failed**.
+- Pull request #36 remains a draft for review; not merged. No Supabase schema/RPC/migration or Render deployment changes were made.
+- Remaining validation before merge: inspect the actual mobile rendering for both manager and participant accounts, verify all action flows against representative test data, and confirm the draft design with the user.
