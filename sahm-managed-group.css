@@ -128,13 +128,7 @@
 #screen .mgd-tabs{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:2px;margin-bottom:12px}
 #screen .mgd-tabs button{min-width:0;gap:4px;padding:9px 2px;font-size:11px}
 #screen .mgd-tabs button svg{width:16px;height:16px}
-@media(max-width:360px){#screen .mgd-identity-metrics{gap:5px;display:grid;grid-template-columns:repeat(4,minmax(0,1fr));margin:9px 0 8px
-#screen .mgd-identity-metrics{gap:2px}
-
-#screen .mgd-identity-metrics>span{font-size:9px}
-
-#screen .mgd-tabs button{font-size:9px}
-}#screen .mgd-tabs button{font-size:10px;min-width:0;padding:8px 2px;gap:4px}}
+@media(max-width:360px){#screen .mgd-identity-metrics{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:5px;margin:9px 0 8px}#screen .mgd-identity-metrics>span{font-size:9px}#screen .mgd-tabs button{font-size:10px;min-width:0;padding:8px 2px;gap:4px}}
 
 #screen .mgd-room-entry{display:flex;align-items:center;justify-content:center;gap:7px;width:100%;margin:0 0 10px;min-height:43px}
 #screen .mgd-share-state{display:inline-flex;align-items:center;border-radius:7px;padding:4px 8px;font-size:11px;font-weight:800}
@@ -209,3 +203,53 @@
 #screen .mgd-member-summary{margin-bottom:10px}
 
 #screen .mgd-member-shortcuts button:focus-visible,#screen .mgd-settings-grid button:focus-visible{outline:2px solid #3158d6;outline-offset:2px}
+
+
+/* Workspace visual pass: consistent hierarchy, compact controls, and reliable mobile layout. */
+#screen .mgd-tabs button{min-height:44px;color:#68778d;transition:color .18s ease,background .18s ease}
+#screen .mgd-tabs button.active{color:#244fc2}
+#screen .mgd-tabs button.active:after{height:3px;background:#244fc2}
+#screen .mgd-tabs button:focus-visible,
+#screen .mgd-action:focus-visible,
+#screen .mgd-member-card:focus-visible,
+#screen .mgd-cycle-card:focus-visible,
+#screen .mgd-settings-grid button:focus-visible,
+#screen .mgd-member-shortcuts button:focus-visible{outline:2px solid #3158d6;outline-offset:2px}
+#screen .mgd-filterbar{display:flex;align-items:center;gap:8px;margin:0 0 10px;min-width:0}
+#screen .mgd-filterbar .mgd-search{flex:1;min-width:0;margin:0}
+#screen .mgd-filterbar .mgd-select{min-width:0}
+#screen .mgd-installment-summary{box-shadow:0 3px 12px rgba(23,43,79,.045)}
+#screen .mgd-installment-card,
+#screen .mgd-detail-card,
+#screen .mgd-member-card,
+#screen .mgd-cycle-card{box-shadow:0 2px 8px rgba(23,43,79,.035);border-color:#e1e7f0}
+#screen .mgd-installment-card{padding:12px;margin-bottom:8px}
+#screen .mgd-row-actions .mgd-action{min-height:39px}
+#screen .mgd-action.primary{background:#244fc2;border-color:#244fc2}
+#screen .mgd-action:not(.primary):hover,
+#screen .mgd-member-tools button:hover,
+#screen .mgd-settings-grid button:hover{background:#f5f8ff}
+#screen .mgd-empty{line-height:1.8}
+#screen .mgd-cycle-state{max-width:104px;white-space:normal;text-align:center;line-height:1.5}
+#screen .mgd-member-shares{min-width:62px}
+#screen .mgd-member-shares>small:last-child{white-space:nowrap}
+#screen .mgd-feed-time{direction:ltr;text-align:right}
+#screen .mgd-chat-form textarea:focus,
+#screen .mgd-date-field input:focus,
+#screen .mgd-select select:focus{outline:2px solid rgba(49,88,214,.22);border-color:#3158d6}
+@media(max-width:420px){
+  #screen .mgd-identity{padding:11px 12px}
+  #screen .mgd-identity-metrics{gap:7px}
+  #screen .mgd-tabs{gap:0}
+  #screen .mgd-tabs button{font-size:10px;padding-inline:1px}
+  #screen .mgd-tabs button svg{width:15px;height:15px}
+  #screen .mgd-installment-filters{flex-wrap:wrap}
+  #screen .mgd-installment-filters .mgd-select{flex:1 1 28%}
+  #screen .mgd-installment-filters .mgd-reminder-icon{width:36px;height:36px}
+  #screen .mgd-member-card,#screen .mgd-cycle-card{gap:7px;padding:10px}
+  #screen .mgd-cycle-state{display:none}
+}
+@media(prefers-reduced-motion:reduce){
+  #screen .mgd-tabs button{transition:none}
+  #screen .mgd-loading-spinner{animation:none}
+}
