@@ -4,6 +4,32 @@
 (function (root) {
   'use strict';
   const state = { cycle: null, installment: 'all', status: 'all', query: '', drawView: 'summary' };
+  const readCache = new Map();
+  let renderVersion = 0;
+  function cachedRead(key, loader, ttl) {
+    const now = Date.now(), existing = readCache.get(key);
+    if (existing && (existing.promise || existing.expiresAt > now)) return existing.promise || Promise.resolve(existing.value);
+    const entry = { promise: null, value: null, expiresAt: 0 };
+    entry.promise = Promise.resolve().then(loader).then(value => {
+      entry.value = value; entry.expiresAt = Date.now() + (ttl || 12000); entry.promise = null;
+      return value;
+    }).catch(error => { readCache.delete(key); throw error; });
+    readCache.set(key, entry);
+    return entry.promise;
+  }
+  function invalidateReads() { readCache.clear(); }
+  function loadingPanel(label) {
+    return '<div class="mgd-loading" role="status"><span class="mgd-loading-spinner"></span><span>جارٍ تحميل ' + esc(label) + '...</span></div>';
+  }
+  function commitRender(g, d, active, content) {
+    shell('تفاصيل الجمعية', 'groups', identity(g, d) + tabs(active) + '<main class="mgd-content">' + content + '</main>');
+    const activeTab = document.querySelector && document.querySelector('.mgd-tabs button.active');
+    if (activeTab && typeof activeTab.scrollIntoView === 'function') activeTab.scrollIntoView({ block: 'nearest', inline: 'nearest' });
+    if (active === 'members') bindMemberSearch();
+    if (active === 'installments') bindInstallmentFilters(g, d);
+    if (active === 'chat') bindChatComposer();
+  }
+
   const esc = value => escapeHtml(String(value == null ? '' : value));
   const moneyValue = (value, currency) => minorMoney(value, currency);
   const row = (icon, label, value) =>
@@ -68,7 +94,7 @@
     });
   }
   async function cycleCards(g, d) {
-    const historyResult = await SahmApp.getDrawHistory(g.id);
+    const historyResult = await cachedRead('history:' + g.id, () => SahmApp.getDrawHistory(g.id), 15000);
     const history = historyResult && historyResult.ok ? (historyResult.history || []) : [];
     const byRound = new Map(history.map(x => [Number(x.round_no || x.round), x]));
     const total = Math.max(0, Number(d.rounds) || 0), current = Math.min(total, (Number(d.drawn) || 0) + 1);
@@ -131,7 +157,7 @@
       '<button type="button" class="mgd-secondary-link" data-go="receipts">سجل الاستلام والتصحيحات ' + uiIcon('back-screen', 16) + '</button>';
   }
   async function cycleDetail(g, d, round) {
-    const historyResult = await SahmApp.getDrawHistory(g.id), history = historyResult && historyResult.ok ? (historyResult.history || []) : [];
+    const historyResult = await cachedRead('history:' + g.id, () => SahmApp.getDrawHistory(g.id), 15000), history = historyResult && historyResult.ok ? (historyResult.history || []) : [];
     const draw = history.find(x => Number(x.round_no || x.round) === round);
     const rows = SahmApp.installmentRows(g.id, { cycle: round, status: 'all' });
     const obligations = rows && rows.ok ? rows.rows || [] : [];
@@ -146,13 +172,21 @@
   }
   async function drawPanel(g, d) {
     const view = params.managedDrawView || 'summary';
-    const roomResult = await SahmApp.getDrawRoom(g.id);
+    const roomResult = await cachedRead('draw-room:' + g.id, () => SahmApp.getDrawRoom(g.id), 7000);
     if (!roomResult || !roomResult.ok) return '<div class="mgd-empty">' + esc(roomResult && roomResult.message || 'تعذر تحميل غرفة القرعة') + '</div>';
     const room = roomResult.room || {}, cycle = room.cycle || {}, draw = room.draw || null, eligible = room.eligible_shares || [];
-    const readinessResult = await SahmApp.getDrawReadiness(g.id);
-    const financeResult = await SahmApp.getFinancialSummary(g.id);
-    const readiness = readinessResult && readinessResult.ok ? readinessResult : {};
-    const financial = financeResult && financeResult.ok ? financeResult.summary : null;
+    let readiness = {}, financial = null, history = [];
+    if (view === 'summary' || (view === 'result' && !draw)) {
+      const tasks = [cachedRead('draw-ready:' + g.id, () => SahmApp.getDrawReadiness(g.id), 7000)];
+      if (view === 'summary') tasks.push(cachedRead('financial:' + g.id, () => SahmApp.getFinancialSummary(g.id), 7000));
+      const results = await Promise.all(tasks);
+      readiness = results[0] && results[0].ok ? results[0] : {};
+      financial = view === 'summary' && results[1] && results[1].ok ? results[1].summary : null;
+    }
+    if (view === 'history') {
+      const historyResult = await cachedRead('history:' + g.id, () => SahmApp.getDrawHistory(g.id), 15000);
+      history = historyResult && historyResult.ok ? historyResult.history || [] : [];
+    }
     const states = { none: 'لم تبدأ الجولة', pending: 'بانتظار الموعد', scheduled: 'موعد محدد', open: 'مفتوحة', presenting: 'جارٍ عرض النتيجة', completed: 'اكتمل العرض', failed: 'تعذر العرض' };
     const reasons = { NO_SHARES: 'لا توجد أسهم مؤهلة', DRAW_COMPLETE: 'اكتملت جميع جولات القرعة', DRAW_NOT_DUE: 'لم يحن موعد القرعة بعد', INSTALLMENTS_UNPAID: 'توجد أقساط غير مكتملة', FINANCIAL_NOT_READY: 'لم تكتمل المتطلبات المالية' };
     const nav = '<nav class="mgd-draw-nav">' + [['summary','ملخص الجولة'],['eligible','الأسهم المؤهلة'],['schedule','موعد القرعة'],['result','النتيجة'],['history','السجل']].map(([id,label]) =>
@@ -185,14 +219,13 @@
         (draw ? '<div class="mgd-actions">' + actionButton('تسجيل اكتمال العرض', 'draw-presentation-completed', '', 'primary') + actionButton('تسجيل تعذر العرض', 'draw-presentation-failed', '', '') + '</div>' :
           actionButton('تنفيذ القرعة وتثبيت النتيجة', 'run-draw', readiness.canDraw ? '' : 'disabled', 'primary') ) + '</section>';
     } else {
-      const historyResult = await SahmApp.getDrawHistory(g.id), history = historyResult && historyResult.ok ? historyResult.history || [] : [];
       body = '<div class="mgd-list-head"><b>سجل القرعات</b><span>' + history.length + ' نتيجة</span></div><div class="mgd-list">' +
         (history.map(x => '<div class="mgd-simple-row"><span class="mgd-cycle-number">' + esc(x.round_no || x.round) + '</span><span class="mgd-member-main"><b>الجولة ' + esc(x.round_no || x.round) + ' · ' + esc(x.winner_owner_name || x.winnerLabel || '—') + '</b><small>' + esc(dateLabel(x.scheduled_on || x.date)) + '</small></span><span class="mgd-status-ok">مثبتة</span></div>').join('') || '<div class="mgd-empty">لا توجد نتائج مثبتة بعد</div>') + '</div>';
     }
     return nav + body;
   }
   async function newsPanel(g, d) {
-    const result = await SahmApp.getNews(g.id, 50);
+    const result = await cachedRead('news:' + g.id, () => SahmApp.getNews(g.id, 50), 12000);
     if (!result || !result.ok) return '<div class="mgd-empty">' + esc(result && result.message || 'تعذر تحميل أخبار الجمعية') + '</div>';
     const labels = { received:'استلام قسط', completed:'اكتمال الأقساط', late:'تأخر قسط', drawSoon:'اقتراب القرعة', drawDue:'موعد القرعة', drawResult:'نتيجة القرعة', joined:'انضمام عضو', motivate:'خبر الجمعية' };
     const rows = (result.news || []).map(x =>
@@ -226,7 +259,7 @@
       '<button type="submit" class="mgd-action primary">إرسال</button></div></form>';
   }
   async function auditPanel(g) {
-    const result = await SahmApp.getAuditLog(g.id, 100);
+    const result = await cachedRead('audit:' + g.id, () => SahmApp.getAuditLog(g.id, 100), 12000);
     if (!result || !result.ok) return '<div class="mgd-empty">' + esc(result && result.message || 'تعذر تحميل سجل العمليات') + '</div>';
     const labels = { association_created:'إنشاء الجمعية', association_updated:'تعديل الجمعية', member_joined:'انضمام عضو', member_removed:'إزالة عضو', shares_added:'إضافة أسهم', shares_removed:'إزالة أسهم', invitation_created:'إنشاء دعوة', invitation_cancelled:'إلغاء دعوة', receipt_recorded:'تسجيل استلام', installment_received:'استلام قسط', receipt_corrected:'تصحيح استلام', draw_result:'تثبيت نتيجة القرعة', draw_scheduled:'تحديد موعد القرعة', draw_presentation_completed:'اكتمال عرض القرعة', draw_presentation_failed:'فشل عرض القرعة', notification_settings_updated:'تعديل إعدادات النشر', reminders_sent:'إرسال تذكيرات' };
     const items = (result.log || []).map(x =>
@@ -243,9 +276,12 @@
     input.addEventListener('input', () => { count.textContent = input.value.length + ' / ' + SahmApp.maxMessage(); });
   }
   async function render(g, d) {
+    const version = ++renderVersion;
+    const isLatest = () => version === renderVersion;
     const view = params.managedView || '';
-    let active = ['members','cycles','installments','draw-room','news','chat','audit'].includes(groupDetailTab) ? groupDetailTab : 'members';
+    const active = ['members','cycles','installments','draw-room','news','chat','audit'].includes(groupDetailTab) ? groupDetailTab : 'members';
     let content = '';
+
     if (view === 'member') {
       const memberId = String(params.memberId || '');
       const statement = SahmApp.memberStatement(g.id, memberId);
@@ -259,19 +295,26 @@
       return;
     }
     if (view === 'cycle') {
-      content = await cycleDetail(g, d, Number(params.round) || 1);
-      shell('تفاصيل الدورة', 'groups', identity(g, d) + content);
+      shell('تفاصيل الدورة', 'groups', identity(g, d) + loadingPanel('تفاصيل الدورة'));
+      try { content = await cycleDetail(g, d, Number(params.round) || 1); }
+      catch (error) { content = backToTab('cycles') + '<div class="mgd-empty">تعذر تحميل تفاصيل الدورة</div>'; }
+      if (isLatest()) shell('تفاصيل الدورة', 'groups', identity(g, d) + content);
       return;
     }
     if (view) {
-      const sub = await drawPanel(g, d);
-      shell('غرفة القرعة', 'groups', identity(g, d) + backToTab('draw-room') + sub);
+      shell('غرفة القرعة', 'groups', identity(g, d) + backToTab('draw-room') + loadingPanel('غرفة القرعة'));
+      try { content = await drawPanel(g, d); }
+      catch (error) { content = '<div class="mgd-empty">تعذر تحميل غرفة القرعة</div>'; }
+      if (isLatest()) shell('غرفة القرعة', 'groups', identity(g, d) + backToTab('draw-room') + content);
       return;
     }
-    if (active === 'members') { content = memberCards(g) +
-      '<section class="mgd-detail-card mgd-group-extra"><div class="mgd-list-head"><b>إدارة الجمعية</b><span>' + ((db.joinRequests || []).filter(x => x.groupId === g.id && x.status === 'pending').length) + ' طلبات معلقة</span></div>' +
-      '<div class="mgd-member-tools"><button type="button" data-go="member-reception">استقبال الأعضاء</button><button type="button" data-go="invite">دعوة عضو</button></div></section>'; }
-    else if (active === 'cycles') {
+
+    let deferred = null;
+    if (active === 'members') {
+      content = memberCards(g) +
+        '<section class="mgd-detail-card mgd-group-extra"><div class="mgd-list-head"><b>إدارة الجمعية</b><span>' + ((db.joinRequests || []).filter(x => x.groupId === g.id && x.status === 'pending').length) + ' طلبات معلقة</span></div>' +
+        '<div class="mgd-member-tools"><button type="button" data-go="member-reception">استقبال الأعضاء</button><button type="button" data-go="invite">دعوة عضو</button></div></section>';
+    } else if (active === 'cycles') {
       const counts = d.counts || {};
       content = '<section class="mgd-detail-card mgd-group-facts">' +
         row('calendar-days', 'تاريخ البداية', dateLabel(g.start)) +
@@ -280,19 +323,30 @@
         row('receipt', 'الأقساط داخل الدورة', g.installments) +
         row('trophy', 'جائزة الجولة المستهدفة', moneyValue(d.plan && d.plan.prizeTarget || 0, g.currency)) +
         row('check-circle', 'الأقساط المدفوعة', counts.paid || 0) +
-        row('alert', 'الأقساط المتأخرة', counts.late || 0) + '</section>' + await cycleCards(g, d);
+        row('alert', 'الأقساط المتأخرة', counts.late || 0) + '</section>' + loadingPanel('الدورات');
+      deferred = () => cycleCards(g, d);
+    } else if (active === 'installments') {
+      content = installmentsPanel(g, d);
+    } else if (active === 'draw-room') {
+      params.managedDrawView = params.managedDrawView || 'summary';
+      content = loadingPanel('غرفة القرعة');
+      deferred = () => drawPanel(g, d);
+    } else if (active === 'news') {
+      content = loadingPanel('أخبار الجمعية');
+      deferred = () => newsPanel(g, d);
+    } else if (active === 'chat') {
+      content = chatPanel(g);
+    } else if (active === 'audit') {
+      content = loadingPanel('سجل العمليات');
+      deferred = () => auditPanel(g);
     }
-    else if (active === 'installments') { content = installmentsPanel(g, d); }
-    else if (active === 'draw-room') { params.managedDrawView = params.managedDrawView || 'summary'; content = await drawPanel(g, d); }
-    else if (active === 'news') { content = await newsPanel(g, d); }
-    else if (active === 'chat') { content = chatPanel(g); }
-    else if (active === 'audit') { content = await auditPanel(g); }
-    shell('تفاصيل الجمعية', 'groups', identity(g, d) + tabs(active) + '<main class="mgd-content">' + content + '</main>');
-    const activeTab = document.querySelector && document.querySelector('.mgd-tabs button.active');
-    if (activeTab && typeof activeTab.scrollIntoView === 'function') activeTab.scrollIntoView({ block: 'nearest', inline: 'nearest' });
-    if (active === 'members') bindMemberSearch();
-    if (active === 'installments') bindInstallmentFilters(g, d);
-    if (active === 'chat') bindChatComposer();
+
+    commitRender(g, d, active, content);
+    if (deferred) {
+      try { content = await deferred(); }
+      catch (error) { content = '<div class="mgd-empty">تعذر تحميل البيانات. حاول مرة أخرى.</div>'; }
+      if (isLatest()) commitRender(g, d, active, content);
+    }
   }
   function redraw() {
     const g = currentGroup(), d = g && SahmApp.groupDetail(g.id);
@@ -353,7 +407,7 @@
     if (button) { button.disabled = true; button.textContent = 'جارٍ الإرسال...'; }
     try {
       const result = await SahmApp.sendMessage(currentGroupId, message);
-      if (result && result.ok) { refreshData(); redraw(); toast('تم إرسال الرسالة'); }
+      if (result && result.ok) { invalidateReads(); refreshData(); redraw(); toast('تم إرسال الرسالة'); }
       else { toast(result && result.message || 'تعذر إرسال الرسالة'); if (button) { button.disabled = false; button.textContent = 'إرسال'; } }
     } catch (error) { toast(error && error.message || 'تعذر إرسال الرسالة'); if (button) { button.disabled = false; button.textContent = 'إرسال'; } }
   });
