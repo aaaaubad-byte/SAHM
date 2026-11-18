@@ -336,7 +336,7 @@
     return (st.cycles||[]).slice().reverse().map(c=>{const paid=(c.rows||[]).filter(x=>x.status==='paid').length;return '<section class="mgd-detail-card"><div class="mgd-detail-heading"><b>القرعة '+c.cycle+'</b><span>'+paid+' من '+(c.rows||[]).length+' مدفوع</span></div><div class="mgd-round-progress"><i style="width:'+(c.rows&&c.rows.length?Math.round(paid/c.rows.length*100):0)+'%"></i></div>'+(c.rows||[]).map(x=>'<div class="mgd-simple-row"><span><b>القسط '+x.no+'</b><small>'+esc(dateLabel(x.periodStart))+' – '+esc(dateLabel(x.periodEnd))+'</small></span>'+pill(x.status)+'<b>'+esc(moneyValue(x.total,st.currency))+'</b></div>').join('')+'</section>';}).join('')||'<div class="mgd-empty">لا توجد أقساط مسجلة لمشاركتك بعد</div>';
   }
   function memberShares(g) {
-    const r=SahmApp.shareList(g.id,{status:'all'}),list=r&&r.ok?r.shares||[]:[];
+    const remote=!!(root.SahmSupabaseData&&root.SahmSupabaseData.isRemote&&root.SahmSupabaseData.isRemote()),r=remote?null:SahmApp.shareList(g.id,{status:'all'}),list=r&&r.ok?r.shares||[]:[];
     if(!r||!r.ok){
       const statement=SahmApp.memberStatement(g.id,ownMemberId(g));
       if(!statement||!statement.ok)return '<div class="mgd-empty">تعذر تحميل بيانات أسهمك</div>';
