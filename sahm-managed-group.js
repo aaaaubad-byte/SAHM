@@ -169,7 +169,7 @@
       const selected = selectable && state.installmentSelected.has(key);
       const meta = icons[x.status] || ['circle-help',String(x.status||'غير محدد'),'unknown'];
       const attrs = 'data-member="'+esc(x.memberId)+'" data-cycle="'+esc(x.cycle)+'" data-no="'+esc(x.no)+'"';
-      const collect = x.status !== 'paid', remind = x.status === 'due' || x.status === 'late';
+      const collect = x.status === 'due' || x.status === 'late' || x.status === 'upcoming', remind = x.status === 'due' || x.status === 'late';
       const actions = (!manager || state.installmentSelectMode) ? '' : ((collect || remind) ? '<div class="mgd-row-actions">'+
         (collect ? actionButton('تحصيل','record-paid',attrs,'primary') : '')+
         (remind ? actionButton('تذكير','send-reminder',attrs,'') : '')+'</div>' : '');

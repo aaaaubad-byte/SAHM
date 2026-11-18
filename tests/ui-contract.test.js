@@ -485,8 +485,8 @@ test('manager collection screen implements current installment filters, selectiv
   assert.ok(managed.includes('function currentInstallmentNo(rows, g)'), 'current installment is recalculated from the selected cycle');
   assert.ok(managed.includes("state.installment === 'current'"));
   assert.ok(managed.includes("const selectable = state.installmentSelectMode && (x.status === 'due' || x.status === 'late')"));
-  assert.ok(managed.includes("const collect = x.status !== 'paid'"));
-  assert.ok(managed.includes("const remind = x.status === 'due' || x.status === 'late'"));
+  assert.ok(managed.includes("const collect = x.status === 'due' || x.status === 'late' || x.status === 'upcoming'"));
+  assert.ok(managed.includes("remind = x.status === 'due' || x.status === 'late'"));
   assert.ok(managed.includes('mgd-installment-status-icon'));
   assert.ok(managed.includes('aria-label="\'+esc(meta[1])\'"'), 'status wording remains accessible');
   assert.ok(managed.includes('SahmApp.installmentRows(g.id'));
