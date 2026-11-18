@@ -488,12 +488,13 @@ test('manager collection screen implements current installment filters, selectiv
   assert.ok(managed.includes("const collect = x.status === 'due' || x.status === 'late' || x.status === 'upcoming'"));
   assert.ok(managed.includes("remind = x.status === 'due' || x.status === 'late'"));
   assert.ok(managed.includes('mgd-installment-status-icon'));
-  assert.match(managed, /position:absolute;right:11px;top:50%/);
+  const collectionCss = fs.readFileSync(path.join(ROOT, 'sahm-managed-group.css'), 'utf8');
+  assert.match(collectionCss, /position:absolute;right:11px;top:50%/);
   assert.match(managed, /uiIcon\('check',14\).*مدفوع/);
   assert.match(managed, /manager && x\.status === 'paid'/);
-  assert.match(fs.readFileSync(path.join(ROOT, 'sahm-managed-group.css'), 'utf8'), /padding:8px 62px 8px 10px/);
-  assert.match(fs.readFileSync(path.join(ROOT, 'sahm-managed-group.css'), 'utf8'), /width:40px;height:40px/);
-  assert.match(fs.readFileSync(path.join(ROOT, 'sahm-managed-group.css'), 'utf8'), /mgd-paid-state/);
+  assert.match(collectionCss, /padding:8px 62px 8px 10px/);
+  assert.match(collectionCss, /width:40px;height:40px/);
+  assert.match(collectionCss, /mgd-paid-state/);
   assert.ok(managed.includes("uiIcon(meta[0],19)"), 'status glyph uses the activity-card icon scale');
   for (const metric of ["uiIcon('layers',14)","uiIcon('wallet',14)","uiIcon('calendar-days',14)"]) assert.ok(managed.includes(metric), 'installment metric icon '+metric);
   for (const label of ['الأسهم','المبلغ','القسط']) assert.ok(managed.includes('<span>'+label+'</span>'), 'installment metric label '+label);
