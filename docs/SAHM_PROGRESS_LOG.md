@@ -420,3 +420,13 @@
 - Removed the old standalone installment selector state and its event handler; reminder actions now use the installment's own cycle metadata, with the current cycle as fallback.
 - Replaced visible "الدورة/الجولة" terminology with "القرعة" and "فترة التحصيل" where the label refers to the collection window.
 - Kept receipt lists/details and member reception/invitation management as distinct supporting workflows.
+
+
+## 2026-11-18 — Unified association workspace verification
+- Removed the standalone legacy renderers for member lists, installments, draw room/history, group chat, news, and audit; their navigation entries now resolve into the shared workspace.
+- Removed stale installment-screen state, filters, and callback references; post-action refreshes return to the workspace tabs.
+- Replaced visible "الدورة" and "الجولة" labels with "القرعة"; collection duration is labeled "فترة التحصيل".
+- Removed the duplicate top-bar SVG sizing declaration and aligned the UI contracts with the new module-owned screens and the current PWA cache versioning.
+- GitHub Actions Node unit/contract workflow passed on commit `a7744ebf1eff982c7b3ae60b3042d08353432774`: **135 passed, 0 failed**.
+- Pull request #36 remains a draft for review; not merged. No Supabase schema/RPC/migration or Render deployment changes were made.
+- Remaining validation before merge: inspect the actual mobile rendering for both manager and participant accounts, verify all action flows against representative test data, and confirm the draft design with the user.
