@@ -358,15 +358,7 @@
         '<section class="mgd-detail-card mgd-group-extra"><div class="mgd-list-head"><b>إدارة الجمعية</b><span>' + ((db.joinRequests || []).filter(x => x.groupId === g.id && x.status === 'pending').length) + ' طلبات معلقة</span></div>' +
         '<div class="mgd-member-tools"><button type="button" data-go="member-reception">استقبال الأعضاء</button><button type="button" data-go="invite">دعوة عضو</button></div></section>';
     } else if (active === 'draws') {
-      const counts = d.counts || {};
-      content = '<section class="mgd-detail-card mgd-group-facts">' +
-        row('calendar-days', 'تاريخ البداية', dateLabel(g.start)) +
-        row('calendar-days', 'أول قرعة محسوبة', dateLabel(g.first)) +
-        row('wallet', 'حصة السهم في القرعة', money(g.share, g.currency)) +
-        row('receipt', 'الأقساط داخل القرعة', g.installments) +
-        row('trophy', 'جائزة القرعة المستهدفة', moneyValue(d.plan && d.plan.prizeTarget || 0, g.currency)) +
-        row('check-circle', 'الأقساط المدفوعة', counts.paid || 0) +
-        row('alert', 'الأقساط المتأخرة', counts.late || 0) + '</section>' + loadingPanel('القرعات');
+      content = loadingPanel('القرعات');
       deferred = () => cycleCards(g, d);
     } else if (active === 'shares') {
       content = '<div class="mgd-list-head"><b>الأسهم</b><span>حالة كل سهم</span></div><div class="mgd-filterbar"><label class="mgd-select"><select id="mgdShareStatus" aria-label="حالة السهم"><option value="eligible">مؤهل</option><option value="won">فائز</option><option value="all">الكل</option></select></label></div><div id="mgdShareList" class="mgd-list">'+loadingPanel('الأسهم')+'</div>';
