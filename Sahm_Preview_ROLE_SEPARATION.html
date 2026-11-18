@@ -3783,10 +3783,7 @@ async function handleAppAction(action,el){
  }
  if(action==='record-paid-confirm'){
   const root=$('#modal-root'),r=await SahmApp.recordPaid({groupId:g.id,memberId:root.dataset.memberId,cycle:Number(root.dataset.cycle),no:Number(root.dataset.installmentNo)});
-  if(r&&r.ok){const id=r.receipt&&r.receipt.id;closeModal();refreshData();if(screenName==='group-detail')groupDetail();else installments();toast('تم تسجيل الاستلام'+(id?' · '+id:''))}return;
- }
- if(action==='installment-filter'){
-  selectedInstallmentStatus=el.dataset.filter||'all';syncNavigationContext();installments();return;
+  if(r&&r.ok){const id=r.receipt&&r.receipt.id;closeModal();refreshData();if(screenName==='group-detail')groupDetail();else openAssociationWorkspace('installments');toast('تم تسجيل الاستلام'+(id?' · '+id:''))}return;
  }
  if(action==='send-reminder-all'){
   const selectedNo=$('#mgdInstallmentNumber')?.value;
@@ -3808,7 +3805,7 @@ async function handleAppAction(action,el){
   const result=await SahmApp.setDrawScheduledAt(g.id,utc);if(result&&result.ok){toast('تم حفظ الموعد بتوقيت اليمن');if(screenName==='group-detail')groupDetail();else openAssociationWorkspace('draws','summary')}return;
  }
  if(action==='run-draw'){
-  if(!g||!isManager())return;const result=await SahmApp.performDraw(g.id);if(result&&result.ok){refreshData();drawAnimationPending=true;if(screenName==='group-detail')await groupDetail();else await drawRoom()}return;
+  if(!g||!isManager())return;const result=await SahmApp.performDraw(g.id);if(result&&result.ok){refreshData();drawAnimationPending=true;if(screenName==='group-detail')await groupDetail();else openAssociationWorkspace('draws','summary')}return;
  }
  if(action==='draw-presentation-completed'||action==='draw-presentation-failed'){
   if(!g||!isManager())return;const roomResult=await SahmApp.getDrawRoom(g.id),round=roomResult&&roomResult.ok&&roomResult.room&&roomResult.room.round_no;if(!round){toast('لا توجد نتيجة محفوظة لتحديث حالة العرض');return}
