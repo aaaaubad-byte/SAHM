@@ -359,6 +359,64 @@
   }
   function memberCommunication() {return '<div class="mgd-settings-grid"><button type="button" data-action="managed-settings-view" data-view="news">'+uiIcon('wall',18)+'<span>أخبار الجمعية</span></button><button type="button" data-action="managed-settings-view" data-view="chat">'+uiIcon('messages',18)+'<span>محادثة الأعضاء</span></button></div>';}
 
+  function memberDashboard(g, d) {
+    if (dashboardTimer) { clearInterval(dashboardTimer); dashboardTimer = null; }
+    const statement = SahmApp.memberStatement(g.id, ownMemberId(g));
+    if (!statement || !statement.ok) {
+      shell('الجمعية', 'groups', '<main class="mgd-home"><div class="mgd-empty">تعذر تحميل ملخص مشاركتك</div></main>');
+      return;
+    }
+    const cycle = (statement.cycles || []).slice(-1)[0];
+    const progress = cycle && cycle.progress || d.myProgress || {};
+    const shareResult = SahmApp.myShareList(g.id, { status: 'all' });
+    const shares = shareResult && shareResult.ok ? shareResult.shares || [] : [];
+    const paid = Number(progress.paid || 0), total = Number(progress.total || 0);
+    const completion = total ? Math.round(paid / total * 100) : 0;
+    const won = shares.filter(x => x.status === 'won').length;
+    const slides = [
+      { title: 'أسهمك', value: Number(statement.shares || 0), note: 'إجمالي الأسهم المسجلة باسمك', icon: 'layers', tone: 'blue' },
+      { title: 'الأسهم الفائزة', value: won, note: 'الأسهم التي فازت في القرعات', icon: 'trophy', tone: 'gold' },
+      { title: 'إنجاز السداد', value: completion + '%', note: paid + ' من ' + total + ' التزامات مسددة', icon: 'receipt', tone: 'dark' },
+      { title: 'إجمالي التزامك', value: moneyValue(statement.commitment && statement.commitment.overall, statement.currency), note: 'قيمة التزاماتك المسجلة في الجمعية', icon: 'wallet', tone: 'blue' }
+    ];
+    const sections = [
+      ['installments', 'receipt', 'أقساطي'],
+      ['shares', 'layers', 'أسهمي'],
+      ['draws', 'shuffle', 'القرعات'],
+      ['communication', 'messages', 'التواصل']
+    ];
+    const slidesHtml = slides.map((x, i) =>
+      '<article class="mgd-home-slide ' + x.tone + (i === 0 ? ' active' : '') + '" data-mgd-slide="' + i + '" aria-hidden="' + (i !== 0) + '">' +
+      '<span class="mgd-home-slide-icon">' + uiIcon(x.icon, 25) + '</span><span class="mgd-home-slide-copy"><b>' + esc(x.title) + '</b><strong>' + esc(x.value) + '</strong><small>' + esc(x.note) + '</small></span>' +
+      '<span class="mgd-home-slide-index">0' + (i + 1) + ' / 0' + slides.length + '</span></article>'
+    ).join('');
+    const dots = slides.map((x, i) => '<button type="button" data-action="managed-home-slide" class="' + (i === 0 ? 'active' : '') + '" data-mgd-slide-to="' + i + '" aria-label="عرض ' + esc(x.title) + '" aria-pressed="' + (i === 0) + '"></button>').join('');
+    const cards = sections.map(([id, icon, label]) =>
+      '<button type="button" class="mgd-home-section" data-action="managed-home-section" data-section="' + id + '">' +
+      '<span class="mgd-home-section-icon">' + uiIcon(icon, 21) + '</span><span>' + label + '</span></button>'
+    ).join('');
+    shell('الجمعية', 'groups',
+      '<main class="mgd-home">' +
+      '<section class="mgd-home-summary" aria-label="ملخص مشاركتك"><div class="mgd-home-carousel" id="mgdHomeCarousel" aria-live="polite">' + slidesHtml + '</div>' +
+      '<div class="mgd-home-dots" role="group" aria-label="التنقل بين الملخصات">' + dots + '</div></section>' +
+      '<section class="mgd-home-sections" aria-label="أقسام مشاركتك">' + cards + '</section></main>');
+    let active = 0, startX = 0;
+    const carousel = document.getElementById('mgdHomeCarousel');
+    const show = next => {
+      if (!carousel) return;
+      const all = Array.from(carousel.querySelectorAll('[data-mgd-slide]'));
+      active = (next + all.length) % all.length;
+      all.forEach((slide, i) => { slide.classList.toggle('active', i === active); slide.setAttribute('aria-hidden', String(i !== active)); });
+      document.querySelectorAll('.mgd-home-dots [data-mgd-slide-to]').forEach((dot, i) => { dot.classList.toggle('active', i === active); dot.setAttribute('aria-pressed', String(i === active)); });
+    };
+    document.querySelectorAll('.mgd-home-dots [data-mgd-slide-to]').forEach(dot => dot.addEventListener('click', () => show(Number(dot.dataset.mgdSlideTo) || 0)));
+    if (carousel) {
+      carousel.addEventListener('pointerdown', event => { startX = event.clientX; });
+      carousel.addEventListener('pointerup', event => { const delta = event.clientX - startX; if (Math.abs(delta) > 35) show(active + (delta < 0 ? 1 : -1)); });
+    }
+    dashboardTimer = setInterval(() => show(active + 1), 5000);
+  }
+
   function managerDashboard(g, d) {
     if (dashboardTimer) { clearInterval(dashboardTimer); dashboardTimer = null; }
     const rounds = Math.max(0, Number(d.rounds) || 0), drawn = Math.max(0, Number(d.drawn) || 0);
@@ -424,6 +482,10 @@
     const manager = !!(d.role && d.role.manager);
     if (manager && !view && groupDetailTab === 'overview') {
       managerDashboard(g, d);
+      return;
+    }
+    if (!manager && !view && groupDetailTab === 'overview') {
+      memberDashboard(g, d);
       return;
     }
     const managerTabs = ['installments','shares','draws','members','settings','news','chat','audit'];
@@ -548,7 +610,7 @@
         groupDetailTab = 'members';
         params = { managedView: 'information' };
       } else {
-        const allowed = ['installments','draws','shares','members','chat','settings','audit'];
+        const allowed = ['installments','draws','shares','members','chat','communication','settings','audit'];
         if (!allowed.includes(section)) return;
         groupDetailTab = section;
         params = {};
