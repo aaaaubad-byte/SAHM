@@ -513,6 +513,7 @@ test('association workspace tabs consume the correct role-specific data contract
   assert.match(managed, /memberStatement\(g\.id,ownMemberId\(g\)\)/);
   assert.match(managed, /تفاصيل رقم كل سهم وحالته غير متاحة/);
   assert.match(managed, /Number\(statement\.shares\|\|0\)/);
+  assert.match(managed, /remote=!!\(root\.SahmSupabaseData&&root\.SahmSupabaseData\.isRemote&&root\.SahmSupabaseData\.isRemote\(\)\)/);
 });
 
 test('managed workspace external stylesheet has balanced responsive rules and visible focus states', () => {
