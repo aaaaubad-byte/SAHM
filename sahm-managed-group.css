@@ -1,0 +1,78 @@
+/* Isolated managed-group workspace. Every selector is rooted under .mgd-*. */
+#screen .mgd-identity{background:linear-gradient(135deg,#202f53,#365bc0);color:#fff;border:0;border-radius:16px;padding:20px 17px 16px;min-height:210px;margin:0 0 12px;box-shadow:0 10px 25px rgba(24,43,83,.14)}
+#screen .mgd-identity-top,#screen .mgd-progress-head{display:flex;align-items:center;justify-content:space-between;gap:10px}
+#screen .mgd-identity-top>strong{font-size:18px;font-weight:850}
+#screen .mgd-role{display:inline-flex;align-items:center;border-radius:8px;background:#e9efff;color:#294aab;padding:6px 10px;font-size:12px;font-weight:800;white-space:nowrap}
+#screen .mgd-facts{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:16px 12px;margin:22px 0 16px}
+#screen .mgd-fact{display:flex;align-items:center;justify-content:space-between;gap:8px;min-width:0}
+#screen .mgd-fact>span{display:flex;align-items:center;gap:7px;min-width:0;color:inherit;opacity:.86;font-size:12px;font-weight:650}
+#screen .mgd-fact>span svg{flex:none}
+#screen .mgd-fact>b{font-size:13px;font-weight:850;text-align:left;white-space:nowrap}
+#screen .mgd-progress-head{font-size:12px;font-weight:700}
+#screen .mgd-progress{height:8px;border-radius:20px;background:rgba(255,255,255,.2);overflow:hidden;margin-top:8px}
+#screen .mgd-progress>i{display:block;height:100%;border-radius:20px;background:#fff}
+#screen .mgd-tabs{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:5px;padding:5px;background:#edf1f8;border-radius:13px;margin:0 0 14px}
+#screen .mgd-tabs button{display:flex;align-items:center;justify-content:center;flex-direction:column;gap:5px;min-width:0;min-height:58px;padding:7px 3px;border-radius:10px;background:transparent;color:#63728a;font-size:11px;font-weight:750}
+#screen .mgd-tabs button.active{background:#fff;color:#3158d6;box-shadow:0 2px 8px rgba(29,49,83,.09)}
+#screen .mgd-content{min-width:0}
+#screen .mgd-list-head{display:flex;align-items:center;justify-content:space-between;gap:8px;margin:4px 1px 10px;color:#253650}
+#screen .mgd-list-head>b{font-size:15px;font-weight:850}
+#screen .mgd-list-head>span{font-size:12px;color:#7b8799}
+#screen .mgd-search{display:flex;align-items:center;gap:9px;min-height:46px;padding:0 13px;border:1.5px solid #d5deeb;border-radius:11px;background:#fff;color:#718097;margin:0 0 11px}
+#screen .mgd-search:focus-within{border-color:#3158d6;box-shadow:0 0 0 1px #3158d6}
+#screen .mgd-search input{width:100%;min-width:0;border:0;outline:0!important;box-shadow:none!important;background:transparent;color:#172338;font:inherit;font-size:14px}
+#screen .mgd-list{display:flex;flex-direction:column;gap:8px}
+#screen .mgd-member-card,#screen .mgd-cycle-card{display:flex;align-items:center;gap:10px;width:100%;min-height:72px;padding:11px 12px;border:1px solid #e2e8f1;border-radius:13px;background:#fff;color:#26364f;text-align:right;box-shadow:0 3px 10px rgba(23,43,79,.035)}
+#screen .mgd-member-card:active,#screen .mgd-cycle-card:active{transform:scale(.99)}
+#screen .mgd-avatar,#screen .mgd-cycle-number{display:grid;place-items:center;flex:none;width:42px;height:42px;border-radius:11px;background:#edf2ff;color:#3158b7;font-weight:850}
+#screen .mgd-member-main{display:flex;flex:1;min-width:0;flex-direction:column;gap:4px}
+#screen .mgd-member-main>b{font-size:14px;font-weight:850}
+#screen .mgd-member-main>small{font-size:11px;color:#7b8799}
+#screen .mgd-member-shares{display:flex;flex-direction:column;align-items:center;gap:2px;min-width:38px}
+#screen .mgd-member-shares>b{font-size:15px;color:#253650}
+#screen .mgd-member-shares>small{font-size:10px;color:#7b8799}
+#screen .mgd-cycle-main{display:flex;flex:1;min-width:0;flex-direction:column;gap:4px}
+#screen .mgd-cycle-main>b{font-size:14px}
+#screen .mgd-cycle-main>small{font-size:11px;color:#7b8799;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+#screen .mgd-cycle-state{font-size:11px;color:#64748b;white-space:nowrap}
+#screen .mgd-filter-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px;margin-bottom:12px}
+#screen .mgd-filter-grid .mgd-search{grid-column:1/-1;margin:0}
+#screen .mgd-select{display:flex;flex-direction:column;gap:5px;min-width:0;color:#596a82;font-size:11px;font-weight:750}
+#screen .mgd-select select{width:100%;min-height:42px;border:1px solid #dce3ed;border-radius:10px;background:#fff;padding:8px;color:#243650;font:inherit;font-size:13px}
+#screen .mgd-installment-list{display:flex;flex-direction:column;gap:9px}
+#screen .mgd-installment-card,#screen .mgd-detail-card{padding:13px;border:1px solid #e2e8f1;border-radius:13px;background:#fff;box-shadow:0 3px 10px rgba(23,43,79,.035);margin-bottom:9px}
+#screen .mgd-installment-top,#screen .mgd-installment-meta,#screen .mgd-detail-heading{display:flex;align-items:center;justify-content:space-between;gap:9px}
+#screen .mgd-installment-top>b{font-size:14px}
+#screen .mgd-installment-member{margin-top:8px;font-size:13px;font-weight:750;color:#34445e}
+#screen .mgd-installment-meta{margin-top:7px;color:#7b8799;font-size:11px}
+#screen .mgd-installment-meta>b{font-size:13px;color:#26364f}
+#screen .mgd-row-actions,#screen .mgd-actions{display:flex;gap:7px;margin-top:11px}
+#screen .mgd-action{flex:1;min-height:37px;padding:7px 10px;border:1px solid #dce3ed;border-radius:9px;background:#fff;color:#42536d;font-size:12px;font-weight:800}
+#screen .mgd-action.primary{border-color:#3158d6;background:#3158d6;color:#fff}
+#screen .mgd-action:disabled{opacity:.4}
+#screen .mgd-secondary-link{display:flex;align-items:center;justify-content:center;gap:7px;width:100%;min-height:43px;margin-top:10px;background:transparent;color:#3158d6;font-weight:800}
+#screen .mgd-back{display:flex;align-items:center;gap:7px;min-height:38px;margin:0 0 10px;padding:0 3px;background:transparent;color:#3158d6;font-size:13px;font-weight:800}
+#screen .mgd-detail-heading{margin:4px 1px 12px;color:#26364f}
+#screen .mgd-detail-heading>b{font-size:16px;font-weight:850}
+#screen .mgd-detail-card>.mgd-fact{padding:9px 0;border-bottom:1px solid #edf0f5;color:#26364f}
+#screen .mgd-detail-card>.mgd-fact:last-child{border-bottom:0}
+#screen .mgd-detail-card>.mgd-fact>span{color:#75839a;opacity:1}
+#screen .mgd-detail-card>.mgd-fact>b{color:#26364f}
+#screen .mgd-simple-row{display:flex;align-items:center;gap:10px;padding:10px 0;border-bottom:1px solid #edf0f5}
+#screen .mgd-simple-row:last-child{border-bottom:0}
+#screen .mgd-simple-row>span:first-child:not(.mgd-member-main){display:flex;flex-direction:column;gap:3px;flex:1;min-width:0}
+#screen .mgd-simple-row small{font-size:11px;color:#7b8799}
+#screen .mgd-share-no{display:grid!important;place-items:center;flex:none!important;width:38px;height:38px;border-radius:10px;background:#edf2ff;color:#3158b7;font-weight:850}
+#screen .mgd-status-ok{font-size:11px;font-weight:800;color:#18744f;white-space:nowrap}
+#screen .mgd-reason{padding:9px 0;border-bottom:1px solid #edf0f5;color:#8b6427;font-size:12px}
+#screen .mgd-date-field{display:flex;flex-direction:column;gap:7px;margin:12px 0;color:#68778d;font-size:12px;font-weight:750}
+#screen .mgd-date-field input{min-height:44px;border:1px solid #dce3ed;border-radius:10px;padding:9px 11px;font:inherit;color:#26364f}
+#screen .mgd-winner{display:flex;align-items:center;flex-direction:column;gap:7px;padding:22px 10px;color:#26364f}
+#screen .mgd-winner>span{color:#c18a2d}
+#screen .mgd-winner>b{font-size:19px;font-weight:850}
+#screen .mgd-winner>small{color:#718097}
+#screen .mgd-draw-nav{display:flex;gap:5px;overflow-x:auto;margin:0 0 12px;padding:4px;background:#edf1f8;border-radius:11px;scrollbar-width:none}
+#screen .mgd-draw-nav button{flex:1;min-height:37px;padding:6px 9px;border-radius:8px;background:transparent;color:#65748a;font-size:11px;font-weight:750;white-space:nowrap}
+#screen .mgd-draw-nav button.active{background:#fff;color:#3158d6;box-shadow:0 2px 7px rgba(29,49,83,.08)}
+#screen .mgd-empty{padding:20px 12px;text-align:center;color:#7b8799;font-size:13px;background:#fff;border:1px dashed #dce3ed;border-radius:12px}
+@media(max-width:360px){#screen .mgd-tabs button{font-size:10px}#screen .mgd-facts{gap:13px 8px}#screen .mgd-fact>span{font-size:11px}}
