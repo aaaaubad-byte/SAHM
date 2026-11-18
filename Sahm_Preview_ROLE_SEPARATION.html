@@ -3917,7 +3917,7 @@ async function handleAppAction(action,el){
   reminderRequest={groupId:g.id,cycle:Number(el.dataset.cycle),no:Number(el.dataset.no),memberId:el.dataset.member||undefined};
   const r=await SahmApp.sendReminder(reminderRequest);if(r&&r.ok){refreshData();toast('تم إرسال التذكير')}else if(r&&r.code==='REMINDER_REPEAT'){showModal('تأكيد تكرار التذكير',escapeHtml(r.message),[['إرسال مرة أخرى','send-reminder-confirm','primary'],['إلغاء','close','outline']])}return;
  }
- if(action==='send-reminder-confirm'&&reminderRequest){const r=await SahmApp.sendReminder(Object.assign({},reminderRequest,{confirmRepeat:true}));if(r&&r.ok){closeModal();refreshData();installments();toast('تم إرسال التذكير')}return}
+ if(action==='send-reminder-confirm'&&reminderRequest){const r=await SahmApp.sendReminder(Object.assign({},reminderRequest,{confirmRepeat:true}));if(r&&r.ok){closeModal();refreshData();if(screenName==='group-detail')groupDetail();else installments();toast('تم إرسال التذكير')}return}
  if(action==='schedule-draw'){
   if(!g||!isManager())return;const value=document.getElementById('drawScheduledAt')&&document.getElementById('drawScheduledAt').value,utc=adenDateTimeToUtc(value);if(!utc){toast('حدد موعدًا صحيحًا بتوقيت اليمن');return}
   const result=await SahmApp.setDrawScheduledAt(g.id,utc);if(result&&result.ok){toast('تم حفظ الموعد بتوقيت اليمن');if(screenName==='group-detail')groupDetail();else drawRoom()}return;
