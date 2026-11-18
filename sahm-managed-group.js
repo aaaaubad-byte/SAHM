@@ -6,6 +6,7 @@
   const state = { cycle: null, installment: 'all', status: 'all', query: '', drawView: 'summary' };
   const readCache = new Map();
   let renderVersion = 0;
+  let dashboardTimer = null;
   function cachedRead(key, loader, ttl) {
     const now = Date.now(), existing = readCache.get(key);
     if (existing && (existing.promise || existing.expiresAt > now)) return existing.promise || Promise.resolve(existing.value);
@@ -213,6 +214,7 @@
   }
   async function drawPanel(g, d) {
     const manager = !!(d.role && d.role.manager);
+    if (manager && !view) { managerDashboard(g, d); return; }
     const allowedViews = manager ? ['summary','eligible','schedule','result','history'] : ['summary','eligible','result','history'];
     const requestedView = params.managedDrawView || 'summary';
     const view = allowedViews.includes(requestedView) ? requestedView : 'summary';
@@ -356,6 +358,63 @@
     return '<section class="mgd-detail-card mgd-member-draw-entry"><div class="mgd-detail-heading"><b>غرفة القرعة</b><span>'+history.length+' نتيجة مثبتة</span></div><p>تابع حالة القرعة والأسهم المؤهلة والنتيجة المعتمدة من داخل الغرفة.</p><button type="button" class="mgd-action primary mgd-room-entry" data-action="managed-draw-view" data-view="summary">'+uiIcon('shuffle',17)+' فتح غرفة القرعة</button></section>';
   }
   function memberCommunication() {return '<div class="mgd-settings-grid"><button type="button" data-action="managed-settings-view" data-view="news">'+uiIcon('wall',18)+'<span>أخبار الجمعية</span></button><button type="button" data-action="managed-settings-view" data-view="chat">'+uiIcon('messages',18)+'<span>محادثة الأعضاء</span></button></div>';}
+
+  function managerDashboard(g, d) {
+    if (dashboardTimer) { clearInterval(dashboardTimer); dashboardTimer = null; }
+    const rounds = Math.max(0, Number(d.rounds) || 0), drawn = Math.max(0, Number(d.drawn) || 0);
+    const current = Math.min(rounds || 1, Math.max(1, Number(d.cycle || 1)));
+    const snapshot = SahmApp.installmentRows(g.id, { cycle: current, status: 'all' });
+    const obligations = snapshot && snapshot.ok ? snapshot.rows || [] : [];
+    const paid = obligations.filter(x => x.status === 'paid').length;
+    const collection = obligations.length ? Math.round(paid / obligations.length * 100) : 0;
+    const slides = [
+      { title: 'أعضاء الجمعية', value: Number(d.members || 0), note: 'إجمالي الأعضاء', icon: 'users', tone: 'blue' },
+      { title: 'إجمالي الأسهم', value: Number(g.shares || d.totalShares || 0), note: 'الأسهم المسجلة في الجمعية', icon: 'layers', tone: 'gold' },
+      { title: 'إنجاز القرعات', value: drawn + ' / ' + rounds, note: 'القرعات المكتملة من الإجمالي', icon: 'shuffle', tone: 'dark' },
+      { title: 'تحصيل القرعة الحالية', value: collection + '%', note: paid + ' من ' + obligations.length + ' التزاماً مسدداً', icon: 'wallet', tone: 'blue' }
+    ];
+    const sections = [
+      ['installments','receipt','التحصيل'],
+      ['draws','shuffle','القرعات'],
+      ['shares','layers','الأسهم'],
+      ['members','users','الأعضاء'],
+      ['invites','user-plus','الدعوات'],
+      ['chat','messages','الدردشة'],
+      ['room','door-open','الغرفة'],
+      ['information','info','المعلومات'],
+      ['settings','settings','الإعدادات'],
+      ['audit','history','السجل']
+    ];
+    const slidesHtml = slides.map((x, i) =>
+      '<article class="mgd-home-slide ' + x.tone + (i === 0 ? ' active' : '') + '" data-mgd-slide="' + i + '" aria-hidden="' + (i !== 0) + '">' +
+      '<span class="mgd-home-slide-icon">' + uiIcon(x.icon, 25) + '</span><span class="mgd-home-slide-copy"><b>' + esc(x.title) + '</b><strong>' + esc(x.value) + '</strong><small>' + esc(x.note) + '</small></span>' +
+      '<span class="mgd-home-slide-index">0' + (i + 1) + ' / 0' + slides.length + '</span></article>'
+    ).join('');
+    const dots = slides.map((x, i) => '<button type="button" class="' + (i === 0 ? 'active' : '') + '" data-mgd-slide-to="' + i + '" aria-label="عرض ' + esc(x.title) + '" aria-pressed="' + (i === 0) + '"></button>').join('');
+    const cards = sections.map(([id, icon, label]) =>
+      '<button type="button" class="mgd-home-section" data-action="managed-home-section" data-section="' + id + '">' +
+      '<span class="mgd-home-section-icon">' + uiIcon(icon, 21) + '</span><span>' + label + '</span></button>'
+    ).join('');
+    shell('الجمعية', 'groups',
+      '<main class="mgd-home">' +
+      '<section class="mgd-home-summary" aria-label="ملخص الجمعية"><div class="mgd-home-carousel" id="mgdHomeCarousel" aria-live="polite">' + slidesHtml + '</div>' +
+      '<div class="mgd-home-dots" role="group" aria-label="التنقل بين الملخصات">' + dots + '</div></section>' +
+      '<section class="mgd-home-sections" aria-label="أقسام الجمعية">' + cards + '</section></main>');
+    let active = 0, startX = 0;
+    const carousel = document.getElementById('mgdHomeCarousel');
+    const show = next => {
+      const all = Array.from(carousel.querySelectorAll('[data-mgd-slide]'));
+      active = (next + all.length) % all.length;
+      all.forEach((slide, i) => { slide.classList.toggle('active', i === active); slide.setAttribute('aria-hidden', String(i !== active)); });
+      document.querySelectorAll('.mgd-home-dots [data-mgd-slide-to]').forEach((dot, i) => { dot.classList.toggle('active', i === active); dot.setAttribute('aria-pressed', String(i === active)); });
+    };
+    document.querySelectorAll('.mgd-home-dots [data-mgd-slide-to]').forEach(dot => dot.addEventListener('click', () => show(Number(dot.dataset.mgdSlideTo) || 0)));
+    if (carousel) {
+      carousel.addEventListener('pointerdown', event => { startX = event.clientX; });
+      carousel.addEventListener('pointerup', event => { const delta = event.clientX - startX; if (Math.abs(delta) > 35) show(active + (delta < 0 ? 1 : -1)); });
+    }
+    dashboardTimer = setInterval(() => show(active + 1), 5000);
+  }
   async function render(g, d) {
     const version = ++renderVersion;
     const isLatest = () => version === renderVersion;
@@ -380,6 +439,19 @@
       return;
     }
 
+    if (view === 'information') {
+      content = backToTab('members') + '<div class="mgd-list-head"><b>معلومات الجمعية</b></div>' +
+        '<section class="mgd-detail-card">' +
+        row('calendar', 'بداية الجمعية', dateLabel(g.start || g.startDate)) +
+        row('calendar-days', 'أول موعد للقرعة', dateLabel(g.first || g.firstDrawOn)) +
+        row('wallet', 'قيمة السهم', money(g.share, g.currency)) +
+        row('receipt', 'عدد الأقساط', g.installments || '—') +
+        row('clock', 'مدة فترة التحصيل', (g.cycleDays || g.periodDays || '—') + ' يوم') +
+        row('trophy', 'الجائزة المستهدفة', moneyValue(d.plan && d.plan.prizeTarget || 0, g.currency)) +
+        '</section>';
+      shell('معلومات الجمعية', 'groups', identity(g, d) + content);
+      return;
+    }
     if (view === 'member') {
       const memberId = String(params.memberId || '');
       const statement = SahmApp.memberStatement(g.id, memberId);
@@ -461,6 +533,25 @@
     event.preventDefault();
     event.stopImmediatePropagation();
 
+    if (action === 'managed-home-section') {
+      const section = el.dataset.section || '';
+      if (section === 'invites') { go('invites'); return; }
+      if (section === 'room') {
+        groupDetailTab = 'draws';
+        params = { managedView: 'draw', managedDrawView: 'summary' };
+      } else if (section === 'information') {
+        groupDetailTab = 'members';
+        params = { managedView: 'information' };
+      } else {
+        const allowed = ['installments','draws','shares','members','chat','settings','audit'];
+        if (!allowed.includes(section)) return;
+        groupDetailTab = section;
+        params = {};
+      }
+      syncNavigationContext();
+      redraw();
+      return;
+    }
     if (action === 'managed-tab') {
       const allowed = ['installments','shares','draws','members','settings','news','chat','audit','overview','communication'];
       groupDetailTab = allowed.includes(el.dataset.tab) ? el.dataset.tab : (isManager()?'members':'overview');

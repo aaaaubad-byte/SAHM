@@ -579,3 +579,14 @@ test('association workspace visual refinement preserves a calm, responsive hiera
   assert.match(css, /#screen \.mgd-tabs button:focus-visible/);
   assert.match(css, /@media\(max-width:340px\)/);
 });
+
+test('managed association landing uses animated summary cards and exactly ten section cards', () => {
+  assert.match(managed, /function managerDashboard\(g, d\)/);
+  assert.match(managed, /class="mgd-home-summary"/);
+  assert.match(managed, /class="mgd-home-sections"/);
+  assert.equal((managed.match(/\['(?:installments|draws|shares|members|invites|chat|room|information|settings|audit)'\s*,/g) || []).length, 10);
+  assert.match(managed, /if \(manager && !view\) \{ managerDashboard\(g, d\); return; \}/);
+  assert.match(managed, /section === 'invites'\) \{ go\('invites'\); return; \}/);
+  assert.match(managed, /section === 'room'/);
+  assert.match(managed, /view === 'information'/);
+});
