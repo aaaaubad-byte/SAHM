@@ -469,6 +469,42 @@ test('managed association tabs follow the approved five-section order', () => {
   assert.match(managed,/x\.status === 'upcoming'/);
 });
 
+
+test('manager collection screen implements current installment filters, selective reminders and live data actions', () => {
+  const panelStart = managed.indexOf('function installmentsPanel(g,d)');
+  const panelEnd = managed.indexOf('async function cycleDetail(g, d, round)', panelStart);
+  assert.ok(panelStart >= 0 && panelEnd > panelStart, 'one installment panel exists');
+  const panel = managed.slice(panelStart, panelEnd);
+  assert.match(managed, /active === 'installments' && manager[\\s\\S]*?shell\\('التحصيل'/, 'manager collection uses a dedicated screen');
+  assert.match(panel, /value="current"/, 'current installment is the default');
+  assert.match(panel, /value="all"/, 'all installments option exists');
+  for (const id of ['mgdInstallmentSearch','mgdInstallmentNumber','mgdInstallmentStatus','mgdInstallmentFilterToggle','mgdInstallmentSelectToggle','mgdInstallmentBulkReminder']) {
+    assert.ok(panel.includes('id="'+id+'"'), 'collection control '+id);
+  }
+  assert.match(managed, /function currentInstallmentNo\\(rows, g\\)/);
+  assert.match(managed, /state\\.installment === 'current'/);
+  assert.match(managed, /const selectable = state\\.installmentSelectMode && \\(x\\.status === 'due' \\|\\| x\\.status === 'late'\\)/);
+  assert.match(managed, /x\\.status !== 'paid'/);
+  assert.match(managed, /x\\.status === 'due' \\|\\| x\\.status === 'late'/);
+  assert.match(managed, /mgd-installment-status-icon/);
+  assert.match(managed, /meta\\[1\\].*aria-label=/, 'status text is accessible but not displayed');
+  assert.match(managed, /SahmApp\\.installmentRows\\(g\\.id/);
+  assert.match(managed, /SahmApp\\.sendReminder\\(/);
+  assert.match(managed, /skipRefresh:true/);
+  assert.match(app, /api\\.refreshStore = function/);
+  assert.match(remote, /invoke\\('record_installment_receipt'/);
+  assert.match(remote, /invoke\\('send_installment_reminders'/);
+  assert.match(remote, /if\\(!\\(p&&p\\.skipRefresh\\)\\)/);
+  assert.match(remote, /app\\.recordPaid=recordPaid/);
+  assert.match(remote, /app\\.sendReminder=sendReminder/);
+  assert.match(html, /const id=r\\.receipt&&r\\.receipt\\.id\\|\\|r\\.receiptId/);
+  assert.doesNotMatch(html, /send-reminder-all|reminderInstallment/, 'retired bulk reminder handler is removed');
+  assert.doesNotMatch(managed, /selectedInstallmentCycle|send-reminder-all/, 'retired selection and reminder hooks are removed');
+  const css = fs.readFileSync(path.join(ROOT, 'sahm-managed-group.css'), 'utf8');
+  assert.match(css, /#screen \\.mgd-collection-page \\.mgd-installment-toolbar/);
+  assert.doesNotMatch(css, /#screen \\.mgd-installment-toolbar/);
+});
+
 test('draw and member tabs expose round progress and member win/eligibility filters', () => {
   assert.match(managed,/data-action="managed-open-cycle"/);
   assert.match(managed,/data-status=/);

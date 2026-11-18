@@ -39,6 +39,12 @@
     return db;
   };
   api.clearStore = function () { db = null; };
+  api.refreshStore = function () {
+    var remote = root.SahmSupabaseData;
+    if (remote && typeof remote.isRemote === 'function' && remote.isRemote() && typeof remote.refresh === 'function') return remote.refresh();
+    db = D().load();
+    return db;
+  };
   ACTOR_OPS.forEach(function (n) { api[n] = function () { var a = [init(), viewer()].concat([].slice.call(arguments)); return report(n, D()[n].apply(null, a)); }; });
   VIEW_QUERIES.forEach(function (n) { api[n] = function () { var a = [init(), viewer()].concat([].slice.call(arguments)); return D()[n].apply(null, a); }; });
   PLAIN.forEach(function (n) { api[n] = function () { var a = [init()].concat([].slice.call(arguments)); return D()[n].apply(null, a); }; });

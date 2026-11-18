@@ -471,45 +471,63 @@
   #screen .mgd-home-slide,#screen .mgd-home-dots button,#screen .mgd-home-section{transition:none}
 }
 
-/* Installments screen — aligned with the approved SAHM home surfaces. */
-#screen .mgd-installment-toolbar{display:flex;align-items:center;gap:5px;min-width:0;margin:0 0 10px}
-#screen .mgd-installment-toolbar .mgd-installment-search{flex:1 1 auto;min-width:0;height:40px;min-height:40px;margin:0;padding:0 10px;border:1px solid #dfe5ee;border-radius:10px;background:#fbfcfe;color:#68778d;transition:flex .18s ease,border-color .18s ease}
-#screen .mgd-installment-toolbar .mgd-installment-search input{min-width:0;width:100%;font-size:12px}
-#screen .mgd-tool-icon{display:inline-flex;align-items:center;justify-content:center;flex:0 0 36px;width:36px;height:38px;padding:0;border:0;border-radius:9px;background:transparent;color:#3158d6;transition:background .16s ease,color .16s ease}
-#screen .mgd-tool-icon svg{width:19px;height:19px;stroke:currentColor;stroke-width:1.9}
-#screen .mgd-tool-icon.active{background:#eaf0ff;color:#244bb4}
-#screen .mgd-installment-filter-fields{display:none;align-items:center;gap:4px;min-width:0;flex:0 1 auto}
-#screen .mgd-installment-toolbar.filters-open .mgd-installment-search{flex:1 1 48px}
-#screen .mgd-installment-toolbar.filters-open .mgd-installment-filter-fields{display:flex}
-#screen .mgd-installment-filter-fields .mgd-select{flex:0 1 74px;min-width:0}
-#screen .mgd-installment-filter-fields .mgd-select:first-child{flex-basis:62px}
-#screen .mgd-installment-filter-fields .mgd-select select{width:100%;min-width:0;height:37px;min-height:37px;padding:5px 3px;border:1px solid #dfe5ee;border-radius:9px;background:#fff;color:#34445e;font-size:10px;text-overflow:ellipsis}
-#screen .mgd-bulk-reminder-action{display:inline-flex;align-items:center;justify-content:center;gap:5px;flex:0 0 auto;min-height:36px;padding:6px 9px;border:1px solid #3158d6;border-radius:9px;background:#3158d6;color:#fff;font-size:11px;font-weight:800;white-space:nowrap;box-shadow:0 4px 10px rgba(49,88,214,.14)}
-#screen .mgd-bulk-reminder-action:disabled{opacity:.42;box-shadow:none}
-#screen .mgd-bulk-reminder-action[hidden]{display:none!important}
-#screen .mgd-installment-toolbar.selection-open .mgd-installment-search{min-width:48px}
-#screen .mgd-installment-list{gap:8px}
-#screen .mgd-installment-card{position:relative;padding:12px 13px 11px;margin:0;border:1px solid rgba(39,62,99,.08);border-radius:12px;background:#fff;color:#172338;box-shadow:0 4px 10px rgba(27,48,84,.055),0 9px 18px rgba(27,48,84,.035);transition:border-color .16s ease,background .16s ease,box-shadow .16s ease,transform .16s ease}
-#screen .mgd-installment-top{justify-content:flex-start;gap:9px;min-height:23px}
-#screen .mgd-installment-top>b{flex:1;min-width:0;color:#172338;font-size:14px;font-weight:800}
-#screen .mgd-installment-status-icon{display:inline-flex;align-items:center;justify-content:center;flex:none;width:25px;height:25px;color:#718097}
-#screen .mgd-installment-status-icon svg{width:19px;height:19px;stroke:currentColor;stroke-width:1.9}
-#screen .mgd-installment-status-icon.paid{color:#23815b}
-#screen .mgd-installment-status-icon.due{color:#3158d6}
-#screen .mgd-installment-status-icon.late{color:#c05a43}
-#screen .mgd-installment-status-icon.upcoming{color:#8b96a8}
-#screen .mgd-installment-meta{display:flex;align-items:center;gap:7px;flex-wrap:nowrap;min-width:0;margin-top:8px;color:#68778d;font-size:11px;white-space:nowrap}
-#screen .mgd-installment-meta>span{min-width:0}
-#screen .mgd-installment-meta>i{color:#c0c9d6;font-style:normal}
-#screen .mgd-installment-meta>b{min-width:0;margin-inline-start:auto;color:#26364f;font-size:12px;font-weight:800}
-#screen .mgd-row-actions{gap:7px;margin-top:10px}
-#screen .mgd-row-actions .mgd-action{min-height:35px;border-radius:9px;font-size:12px}
-#screen .mgd-row-actions .mgd-action.primary{background:#3158d6;border-color:#3158d6;box-shadow:0 4px 9px rgba(49,88,214,.13)}
-#screen .mgd-installment-card.is-selectable{cursor:pointer;padding-inline-end:13px}
-#screen .mgd-installment-card.is-selectable:active{transform:scale(.992)}
-#screen .mgd-installment-card.is-selected{border-color:#3158d6;background:#f7f9ff;box-shadow:0 0 0 1px rgba(49,88,214,.16),0 4px 12px rgba(27,48,84,.06)}
-#screen .mgd-select-mark{display:inline-flex;align-items:center;justify-content:center;flex:none;color:#9aa6b8}
-#screen .mgd-installment-card.is-selected .mgd-select-mark{color:#3158d6}
-#screen .mgd-installment-card.is-selected .mgd-select-mark svg{fill:#eaf0ff}
-#screen .mgd-installment-toolbar button:focus-visible,#screen .mgd-installment-card.is-selectable:focus-visible{outline:2px solid rgba(49,88,214,.42);outline-offset:2px}
-@media(max-width:380px){#screen .mgd-installment-toolbar{gap:3px}#screen .mgd-tool-icon{flex-basis:32px;width:32px}#screen .mgd-installment-filter-fields{gap:3px}#screen .mgd-installment-filter-fields .mgd-select{flex-basis:66px}#screen .mgd-installment-filter-fields .mgd-select:first-child{flex-basis:54px}#screen .mgd-installment-filter-fields .mgd-select select{font-size:9px;padding-inline:2px}#screen .mgd-installment-meta{gap:5px;font-size:10px}#screen .mgd-installment-meta>b{font-size:11px}}
+/* Collection workspace: single-row controls and compact installment cards. */
+#screen .mgd-collection-page .mgd-installment-toolbar{display:flex;align-items:center;gap:4px;min-width:0;width:100%;margin:0 0 10px}
+#screen .mgd-collection-page .mgd-installment-search{display:flex;flex:1 1 auto;min-width:0;height:40px;min-height:40px;margin:0;padding:0 9px;border:1px solid #dfe5ee;border-radius:10px;background:#fbfcfe;color:#68778d;transition:flex .18s ease,border-color .18s ease}
+#screen .mgd-collection-page .mgd-installment-search input{min-width:0;width:100%;font-size:12px}
+#screen .mgd-collection-page .mgd-tool-icon{display:inline-flex;align-items:center;justify-content:center;flex:0 0 34px;width:34px;height:36px;padding:0;border:0;border-radius:9px;background:transparent;color:#3158d6;transition:background .16s ease,color .16s ease}
+#screen .mgd-collection-page .mgd-tool-icon svg{width:19px;height:19px;stroke:currentColor;stroke-width:1.9}
+#screen .mgd-collection-page .mgd-tool-icon.active{background:#eaf0ff;color:#244bb4}
+#screen .mgd-collection-page .mgd-installment-filter-fields{display:none;align-items:center;gap:3px;flex:0 1 172px;min-width:0}
+#screen .mgd-collection-page .mgd-installment-toolbar.filters-open .mgd-installment-search{flex:1 1 42px;min-width:32px}
+#screen .mgd-collection-page .mgd-installment-toolbar.filters-open .mgd-installment-filter-fields{display:flex}
+#screen .mgd-collection-page .mgd-installment-filter-fields .mgd-select{flex:1 1 0;min-width:0}
+#screen .mgd-collection-page .mgd-installment-filter-fields .mgd-select select{width:100%;min-width:0;height:36px;min-height:36px;padding:4px 2px;border:1px solid #dfe5ee;border-radius:8px;background:#fff;color:#34445e;font-size:9px;text-overflow:ellipsis}
+#screen .mgd-collection-page .mgd-bulk-reminder-action{display:inline-flex;align-items:center;justify-content:center;gap:3px;flex:0 0 auto;min-width:54px;min-height:34px;padding:5px 6px;border:1px solid #3158d6;border-radius:9px;background:#3158d6;color:#fff;font-size:10px;font-weight:800;white-space:nowrap;box-shadow:0 4px 10px rgba(49,88,214,.14)}
+#screen .mgd-collection-page .mgd-bulk-reminder-action:disabled{opacity:.42;box-shadow:none}
+#screen .mgd-collection-page .mgd-bulk-reminder-action[hidden]{display:none!important}
+#screen .mgd-collection-page .mgd-installment-list{display:flex;flex-direction:column;gap:8px}
+#screen .mgd-collection-page .mgd-installment-card{position:relative;padding:12px 13px 11px;margin:0;border:1px solid rgba(39,62,99,.08);border-radius:12px;background:#fff;color:#172338;box-shadow:0 4px 10px rgba(27,48,84,.055),0 9px 18px rgba(27,48,84,.035);transition:border-color .16s ease,background .16s ease,box-shadow .16s ease,transform .16s ease}
+#screen .mgd-collection-page .mgd-installment-top{display:flex;align-items:center;justify-content:flex-start;gap:9px;min-height:23px}
+#screen .mgd-collection-page .mgd-installment-top>b{flex:1;min-width:0;color:#172338;font-size:14px;font-weight:800}
+#screen .mgd-collection-page .mgd-installment-status-icon{display:inline-flex;align-items:center;justify-content:center;flex:none;width:25px;height:25px;color:#718097}
+#screen .mgd-collection-page .mgd-installment-status-icon svg{width:19px;height:19px;stroke:currentColor;stroke-width:1.9}
+#screen .mgd-collection-page .mgd-installment-status-icon.paid{color:#23815b}
+#screen .mgd-collection-page .mgd-installment-status-icon.due{color:#3158d6}
+#screen .mgd-collection-page .mgd-installment-status-icon.late{color:#c05a43}
+#screen .mgd-collection-page .mgd-installment-status-icon.upcoming{color:#8b96a8}
+#screen .mgd-collection-page .mgd-installment-meta{display:flex;align-items:center;gap:7px;flex-wrap:nowrap;min-width:0;margin-top:8px;color:#68778d;font-size:11px;white-space:nowrap}
+#screen .mgd-collection-page .mgd-installment-meta>span{min-width:0}
+#screen .mgd-collection-page .mgd-installment-meta>i{color:#c0c9d6;font-style:normal}
+#screen .mgd-collection-page .mgd-installment-meta>b{min-width:0;margin-inline-start:auto;color:#26364f;font-size:12px;font-weight:800}
+#screen .mgd-collection-page .mgd-row-actions{display:flex;gap:7px;margin-top:10px}
+#screen .mgd-collection-page .mgd-row-actions .mgd-action{flex:1;min-height:36px;border-radius:9px;font-size:12px}
+#screen .mgd-collection-page .mgd-row-actions .mgd-action.primary{background:#3158d6;border-color:#3158d6;box-shadow:0 4px 9px rgba(49,88,214,.13)}
+#screen .mgd-collection-page .mgd-installment-card.is-selectable{cursor:pointer}
+#screen .mgd-collection-page .mgd-installment-card.is-selectable:active{transform:scale(.992)}
+#screen .mgd-collection-page .mgd-installment-card.is-selected{border-color:#3158d6;background:#f7f9ff;box-shadow:0 0 0 1px rgba(49,88,214,.16),0 4px 12px rgba(27,48,84,.06)}
+#screen .mgd-collection-page .mgd-select-mark{display:inline-flex;align-items:center;justify-content:center;flex:none;color:#9aa6b8}
+#screen .mgd-collection-page .mgd-installment-card.is-selected .mgd-select-mark{color:#3158d6}
+#screen .mgd-collection-page .mgd-installment-card.is-selected .mgd-select-mark svg{fill:#eaf0ff}
+#screen .mgd-collection-page .mgd-installment-toolbar button:focus-visible,#screen .mgd-collection-page .mgd-installment-card.is-selectable:focus-visible{outline:2px solid rgba(49,88,214,.42);outline-offset:2px}
+@media(max-width:380px){
+ #screen .mgd-collection-page .mgd-installment-toolbar{gap:3px}
+ #screen .mgd-collection-page .mgd-tool-icon{flex-basis:29px;width:29px;height:34px}
+ #screen .mgd-collection-page .mgd-installment-filter-fields{flex:0 1 150px;gap:2px}
+ #screen .mgd-collection-page .mgd-installment-filter-fields .mgd-select:first-child{flex:0 1 44px}
+ #screen .mgd-collection-page .mgd-installment-filter-fields .mgd-select:nth-child(2){flex:0 1 57px}
+ #screen .mgd-collection-page .mgd-installment-filter-fields .mgd-select:nth-child(3){flex:0 1 48px}
+ #screen .mgd-collection-page .mgd-installment-filter-fields .mgd-select select{height:34px;min-height:34px;font-size:8px;padding-inline:1px}
+ #screen .mgd-collection-page .mgd-bulk-reminder-action{min-width:49px;padding-inline:4px;font-size:9px}
+ #screen .mgd-collection-page .mgd-installment-meta{gap:5px;font-size:10px}
+ #screen .mgd-collection-page .mgd-installment-meta>b{font-size:11px}
+}
+@media(max-width:340px){
+ #screen .mgd-collection-page .mgd-installment-search{padding-inline:5px}
+ #screen .mgd-collection-page .mgd-tool-icon{flex-basis:27px;width:27px}
+ #screen .mgd-collection-page .mgd-installment-filter-fields{flex-basis:128px}
+ #screen .mgd-collection-page .mgd-installment-filter-fields .mgd-select:first-child{flex-basis:38px}
+ #screen .mgd-collection-page .mgd-installment-filter-fields .mgd-select:nth-child(2){flex-basis:48px}
+ #screen .mgd-collection-page .mgd-installment-filter-fields .mgd-select:nth-child(3){flex-basis:42px}
+ #screen .mgd-collection-page .mgd-bulk-reminder-action{min-width:46px}
+}

@@ -2650,7 +2650,7 @@ function uiIcon(name,size=20){
    Applies to inner screens only; the home screen, top bar and bottom bar are left untouched. */
 const IC_GLYPH={'⌁':'scroll','★':'trophy','✓':'check-circle','!':'alert','♧':'bell'};
 const IC_GO={'create-group':'plus-circle','join-group':'link','invite':'user-plus','invites':'send','group-detail':'landmark','groups':'landmark','members':'users','member-reception':'users','join-requests':'inbox','join-request-detail':'inbox','installments':'receipt','receipts':'file-text','audit':'scroll','draw-room':'shuffle','draw-history':'trophy','chat':'messages','news':'wall','home':'home','settings':'settings','edit-profile':'edit','notifications':'bell','profile':'user','welcome':'user','register':'user-plus'};
-const IC_ACTION={'copy-group-link':'copy','copy-new-invite':'copy','copy-bulk-invite-link':'copy','share-group-link':'share','share-bulk-invite-link':'share','pick-device-contacts':'contact','submit-bulk-invites':'send','record-paid':'check-circle','send-reminder':'bell','send-reminder-all':'bell','schedule-draw':'calendar-days','run-draw':'shuffle','create-group-link':'link','rotate-group-link':'refresh','pause-group-link':'pause','resume-group-link':'play','revoke-group-link':'x','approve-join-request':'check-circle','reject-join-request':'x','cancel-join-request':'x','cancel-invite':'x','invitation-interested':'check-circle','invitation-declined':'x','invitation-deferred':'clock','accept-legacy-invite-detail':'check-circle','continue-invitation-join':'arrow','receipt-correct':'edit','switch-account':'refresh','add-account':'user-plus','logout-confirm':'exit-screen','close':'x','confirm-public-link-action':'alert','join-confirm':'check-circle','draw-presentation-completed':'check-circle','draw-presentation-failed':'alert'};
+const IC_ACTION={'copy-group-link':'copy','copy-new-invite':'copy','copy-bulk-invite-link':'copy','share-group-link':'share','share-bulk-invite-link':'share','pick-device-contacts':'contact','submit-bulk-invites':'send','record-paid':'check-circle','send-reminder':'bell','schedule-draw':'calendar-days','run-draw':'shuffle','create-group-link':'link','rotate-group-link':'refresh','pause-group-link':'pause','resume-group-link':'play','revoke-group-link':'x','approve-join-request':'check-circle','reject-join-request':'x','cancel-join-request':'x','cancel-invite':'x','invitation-interested':'check-circle','invitation-declined':'x','invitation-deferred':'clock','accept-legacy-invite-detail':'check-circle','continue-invitation-join':'arrow','receipt-correct':'edit','switch-account':'refresh','add-account':'user-plus','logout-confirm':'exit-screen','close':'x','confirm-public-link-action':'alert','join-confirm':'check-circle','draw-presentation-completed':'check-circle','draw-presentation-failed':'alert'};
 const IC_TRAILING=['continue-invitation-join'];
 const IC_TEXT=[[/^إنشاء الجمعية$/,'check'],[/^(إغلاق|إلغاء)$/,'x'],[/^تأكيد/,'check'],[/^حفظ/,'check'],[/^تعديل/,'edit'],[/إنشاء حساب/,'user-plus'],[/تسجيل الخروج/,'exit-screen'],[/عرض/,'eye']];
 const IC_HEAD=[[/السداد/,'wallet'],[/رابط/,'link'],[/إعدادات|إدارة/,'settings'],[/القرعة|الدورات/,'shuffle'],[/نشر الأحداث|الأخبار|أخبار/,'wall'],[/الإشعارات/,'bell'],[/المدير/,'user-check'],[/ملخص/,'clipboard-list'],[/إضافة يدوية/,'user-plus'],[/الأعضاء|العضوية|المشارك/,'users'],[/دعوة|دعوات/,'send'],[/طلب/,'inbox'],[/التزام|الأقساط|القسط/,'wallet'],[/سجل|عمليات/,'scroll'],[/استلام/,'receipt'],[/كلمة المرور|الأمان/,'lock'],[/الحساب|الملف|بيانات/,'user'],[/جمعية|الجمعية/,'landmark']];
@@ -3783,17 +3783,7 @@ async function handleAppAction(action,el){
  }
  if(action==='record-paid-confirm'){
   const root=$('#modal-root'),r=await SahmApp.recordPaid({groupId:g.id,memberId:root.dataset.memberId,cycle:Number(root.dataset.cycle),no:Number(root.dataset.installmentNo)});
-  if(r&&r.ok){const id=r.receipt&&r.receipt.id;closeModal();refreshData();if(screenName==='group-detail')groupDetail();else openAssociationWorkspace('installments');toast('تم تسجيل الاستلام'+(id?' · '+id:''))}return;
- }
- if(action==='send-reminder-all'){
-  const selectedNo=$('#mgdInstallmentNumber')?.value;
-  if(screenName==='group-detail'&&(!selectedNo||selectedNo==='all')){toast('حدد رقم القسط لإرسال التذكير');return}
-  const no=Number(selectedNo||$('#reminderInstallment')?.value||1);
-  const reminderDetail=SahmApp.groupDetail(g.id);reminderRequest={groupId:g.id,cycle:Number(el.dataset.cycle||reminderDetail&&reminderDetail.cycle||1),no:no};
-  const r=await SahmApp.sendReminder(reminderRequest);
-  if(r&&r.ok){refreshData();toast('تم إرسال التذكير إلى '+r.recipients+' مشاركين')}
-  else if(r&&r.code==='REMINDER_REPEAT'){showModal('تأكيد تكرار التذكير',escapeHtml(r.message),[['إرسال مرة أخرى','send-reminder-confirm','primary'],['إلغاء','close','outline']])}
-  return;
+  if(r&&r.ok){const id=r.receipt&&r.receipt.id||r.receiptId;closeModal();refreshData();if(screenName==='group-detail')groupDetail();else openAssociationWorkspace('installments');toast('تم تسجيل الاستلام'+(id?' · '+id:''))}return;
  }
  if(action==='send-reminder'){
   reminderRequest={groupId:g.id,cycle:Number(el.dataset.cycle),no:Number(el.dataset.no),memberId:el.dataset.member||undefined};

@@ -3,7 +3,7 @@
    No database, Supabase, engine, or shared-screen behavior is changed here. */
 (function (root) {
   'use strict';
-  const state = { cycle: null, installment: 'all', status: 'all', query: '', drawView: 'summary', installmentFiltersOpen: false, installmentSelectMode: false, installmentSelected: new Set(), installmentSelectionGroupId: null };
+  const state = { cycle: null, installment: 'current', status: 'all', query: '', drawView: 'summary', installmentFiltersOpen: false, installmentSelectMode: false, installmentSelected: new Set(), installmentSelectionGroupId: null };
   const readCache = new Map();
   let renderVersion = 0;
   let dashboardTimer = null;
@@ -134,28 +134,50 @@
       '<button type="button" class="mgd-action primary mgd-room-entry" data-action="managed-draw-view" data-view="summary">'+uiIcon('shuffle',17)+' دخول غرفة القرعة</button>'+
       '<div class="mgd-list" id="mgdDrawList">'+(cards||'<div class="mgd-empty">لا توجد قرعات لعرضها</div>')+'</div>';
   }
+  function currentInstallmentNo(rows, g) {
+    const list = Array.isArray(rows) ? rows : [];
+    const today = SahmApp.todayIn(g.tz || 'Asia/Aden');
+    const inRange = list.find(x => String(today) >= String(x.periodStart) && String(today) <= String(x.periodEnd));
+    const fallback = inRange || list.find(x => x.status === 'due' || x.status === 'late') || list[0];
+    return fallback && Number.isInteger(Number(fallback.no)) ? Number(fallback.no) : null;
+  }
   function installmentRows(g, d, opts) {
     opts = opts || {};
     const cycle = Number(opts.cycle || state.cycle || d.cycle || 1);
-    const result = SahmApp.installmentRows(g.id, {cycle, status: opts.status || state.status,
-      installment: opts.installment || (state.installment === 'all' ? null : Number(state.installment)),
-      query: opts.query == null ? state.query : opts.query});
+    let installment;
+    if (Object.prototype.hasOwnProperty.call(opts, 'installment')) {
+      installment = opts.installment;
+    } else if (state.installment === 'all') {
+      installment = null;
+    } else if (state.installment === 'current') {
+      const current = SahmApp.installmentRows(g.id, {cycle, status: 'all'});
+      installment = currentInstallmentNo(current && current.ok ? current.rows : [], g);
+    } else {
+      installment = Number(state.installment);
+    }
+    const result = SahmApp.installmentRows(g.id, {
+      cycle, status: opts.status == null ? state.status : opts.status,
+      installment: installment == null && state.installment !== 'all' ? -1 : installment || null,
+      query: opts.query == null ? state.query : opts.query
+    });
     if (!result || !result.ok) return '<div class="mgd-empty">' + esc(result && result.message || 'تعذر تحميل الأقساط') + '</div>';
-    const rows = result.rows || [], members = SahmApp.memberList(g.id), manager = !!(d.role && d.role.manager);
-    const memberMap = new Map(((members && members.ok && members.members) || []).map(x => [String(x.memberId), Number(x.shares || 0)]));
+    const rows = result.rows || [], manager = !!(d.role && d.role.manager);
     const icons = {paid:['check-circle','مدفوع','paid'],due:['clock-3','مستحق','due'],late:['alert-circle','متأخر','late'],upcoming:['calendar-clock','لم يحن موعده','upcoming']};
     return rows.map(x => {
-      const key = String(x.memberId)+'|'+String(x.cycle)+'|'+String(x.no), selected = state.installmentSelected.has(key);
+      const key = String(x.memberId)+'|'+String(x.cycle)+'|'+String(x.no);
+      const selectable = state.installmentSelectMode && (x.status === 'due' || x.status === 'late');
+      const selected = selectable && state.installmentSelected.has(key);
       const meta = icons[x.status] || ['circle-help',String(x.status||'غير محدد'),'unknown'];
       const attrs = 'data-member="'+esc(x.memberId)+'" data-cycle="'+esc(x.cycle)+'" data-no="'+esc(x.no)+'"';
       const collect = x.status !== 'paid', remind = x.status === 'due' || x.status === 'late';
       const actions = (!manager || state.installmentSelectMode) ? '' : ((collect || remind) ? '<div class="mgd-row-actions">'+
         (collect ? actionButton('تحصيل','record-paid',attrs,'primary') : '')+
         (remind ? actionButton('تذكير','send-reminder',attrs,'') : '')+'</div>' : '');
-      return '<article class="mgd-installment-card'+(state.installmentSelectMode?' is-selectable':'')+(selected?' is-selected':'')+'" role="'+(state.installmentSelectMode?'checkbox':'group')+'" data-installment-key="'+esc(key)+'" data-selectable="'+(state.installmentSelectMode?'true':'false')+'" tabindex="'+(state.installmentSelectMode?'0':'-1')+'" aria-checked="'+(selected?'true':'false')+'">'+
+      const accessibility = selectable ? ' role="checkbox" aria-checked="'+(selected?'true':'false')+'"' : ' role="group"';
+      return '<article class="mgd-installment-card'+(selectable?' is-selectable':'')+(selected?' is-selected':'')+'"'+accessibility+' data-installment-key="'+esc(key)+'" data-selectable="'+(selectable?'true':'false')+'" tabindex="'+(selectable?'0':'-1')+'">'+
         '<div class="mgd-installment-top"><b>'+esc(x.memberName)+'</b><span class="mgd-installment-status-icon '+meta[2]+'" title="'+esc(meta[1])+'" aria-label="'+esc(meta[1])+'">'+uiIcon(meta[0],19)+'</span>'+
-        (state.installmentSelectMode?'<span class="mgd-select-mark">'+uiIcon(selected?'check-circle-2':'circle',20)+'</span>':'')+'</div>'+
-        '<div class="mgd-installment-meta"><span>'+ (memberMap.get(String(x.memberId))||0) +' سهم</span><i>|</i><b>'+esc(moneyValue(x.total,g.currency))+'</b><i>|</i><span>القسط '+esc(x.no)+'</span></div>'+actions+'</article>';
+        (selectable?'<span class="mgd-select-mark">'+uiIcon(selected?'check-circle-2':'circle',20)+'</span>':'')+'</div>'+
+        '<div class="mgd-installment-meta"><span>'+esc(x.shares||0)+' سهم</span><i>|</i><b>'+esc(moneyValue(x.total,g.currency))+'</b><i>|</i><span>القسط '+esc(x.no)+'</span></div>'+actions+'</article>';
     }).join('') || '<div class="mgd-empty">لا توجد أقساط مطابقة للبحث والفلترة</div>';
   }
   function bindInstallmentFilters(g, d) {
@@ -167,69 +189,126 @@
     const update=()=>{
       state.query=search?search.value.trim():'';
       state.cycle=cycle?Number(cycle.value):Number(d.cycle||1);
-      state.installment=number?number.value:state.installment;
-      const all=(SahmApp.installmentRows(g.id,{cycle:state.cycle,status:'all'})||{}).rows||[];
-      const scoped=state.installment==='all'?all:all.filter(x=>Number(x.no)===Number(state.installment));
+      if(number) state.installment=number.value;
+      const snapshot=SahmApp.installmentRows(g.id,{cycle:state.cycle,status:'all'});
+      const all=snapshot&&snapshot.ok?snapshot.rows||[]:[];
+      const currentNo=currentInstallmentNo(all,g);
+      const selectedNo=state.installment==='all'?null:state.installment==='current'?currentNo:Number(state.installment);
+      const scoped=state.installment==='all'?all:selectedNo==null?[]:all.filter(x=>Number(x.no)===selectedNo);
       const valid=scoped.map(x=>x.status);
-      const opts=[['all','كل الحالات'],['due','مستحق'],['late','متأخر'],['paid','مدفوع'],['upcoming','لم يحن موعده']].filter(([v])=>v==='all'||valid.includes(v));
-      if(!opts.some(([v])=>v===state.status)) state.status='all';
-      if(status){const old=status.value||state.status;status.innerHTML=opts.map(([v,l])=>'<option value="'+v+'">'+l+'</option>').join('');status.value=opts.some(([v])=>v===old)?old:state.status;state.status=status.value;}
-      selectedInstallmentCycle=state.cycle;
-      if(list) list.innerHTML=installmentRows(g,d);
+      const options=[['all','كل الحالات'],['due','مستحق'],['late','متأخر'],['paid','مدفوع'],['upcoming','لم يحن موعده']].filter(([value])=>value==='all'||valid.includes(value));
+      const previousStatus=status?status.value:state.status;
+      if(!options.some(([value])=>value===state.status)) state.status='all';
+      if(status){
+        status.innerHTML=options.map(([value,label])=>'<option value="'+value+'">'+label+'</option>').join('');
+        status.value=options.some(([value])=>value===previousStatus)?previousStatus:state.status;
+        state.status=status.value;
+      }
+      if(list) list.innerHTML=installmentRows(g,d,{cycle:state.cycle,installment:selectedNo==null&&state.installment!=='all'?-1:selectedNo,status:state.status,query:state.query});
       const summary=document.querySelector('.mgd-installment-summary'),stats=summary&&summary.querySelector('.mgd-summary-stats');
-      if(stats){const paid=scoped.filter(x=>x.status==='paid').length,late=scoped.filter(x=>x.status==='late').length,pending=scoped.filter(x=>x.status==='due'||x.status === 'upcoming').length;
-        stats.innerHTML='<span>الإجمالي <b>'+scoped.length+'</b></span><span>مدفوعة <b>'+paid+'</b></span><span>معلقة <b>'+pending+'</b></span><span>متأخرة <b>'+late+'</b></span>';}
+      if(stats){
+        const paid=scoped.filter(x=>x.status==='paid').length,late=scoped.filter(x=>x.status==='late').length,pending=scoped.filter(x=>x.status==='due'||x.status==='upcoming').length;
+        stats.innerHTML='<span>الإجمالي <b>'+scoped.length+'</b></span><span>مدفوعة <b>'+paid+'</b></span><span>معلقة <b>'+pending+'</b></span><span>متأخرة <b>'+late+'</b></span>';
+      }
       if(toolbar){toolbar.classList.toggle('filters-open',state.installmentFiltersOpen);toolbar.classList.toggle('selection-open',state.installmentSelectMode);}
       if(filterToggle)filterToggle.setAttribute('aria-expanded',state.installmentFiltersOpen?'true':'false');
-      if(selectToggle){selectToggle.classList.toggle('active',state.installmentSelectMode);selectToggle.setAttribute('aria-pressed',state.installmentSelectMode?'true':'false');selectToggle.title=state.installmentSelectMode?'إنهاء التحديد':'تحديد الأقساط';}
-      if(bulk){bulk.hidden=!state.installmentSelectMode;bulk.disabled=!state.installmentSelected.size;bulk.innerHTML=uiIcon('bell',16)+'<span>تذكير ('+state.installmentSelected.size+')</span>';}
+      if(selectToggle){
+        selectToggle.classList.toggle('active',state.installmentSelectMode);
+        selectToggle.setAttribute('aria-pressed',state.installmentSelectMode?'true':'false');
+        selectToggle.title=state.installmentSelectMode?'إنهاء التحديد · '+state.installmentSelected.size+' محدد':'تحديد الأقساط';
+      }
+      if(bulk){
+        bulk.hidden=!state.installmentSelectMode;
+        bulk.disabled=!state.installmentSelected.size;
+        bulk.setAttribute('aria-label','تذكير جماعي لعدد '+state.installmentSelected.size+' من الأقساط المحددة');
+        bulk.title='تذكير جماعي · '+state.installmentSelected.size+' محدد';
+        bulk.innerHTML=uiIcon('bell',15)+'<span>تذكير</span>';
+      }
     };
     [search,status,cycle,number].forEach(el=>el&&el.addEventListener(el===search?'input':'change',update));
     if(filterToggle)filterToggle.addEventListener('click',()=>{state.installmentFiltersOpen=!state.installmentFiltersOpen;update();});
     if(selectToggle)selectToggle.addEventListener('click',()=>{state.installmentSelectMode=!state.installmentSelectMode;if(!state.installmentSelectMode)state.installmentSelected.clear();update();});
     if(list){
-      const toggle=card=>{const key=card.dataset.installmentKey;if(!key)return;if(state.installmentSelected.has(key))state.installmentSelected.delete(key);else state.installmentSelected.add(key);update();};
+      const toggle=card=>{
+        const key=card.dataset.installmentKey;
+        if(!key||card.dataset.selectable!=='true')return;
+        if(state.installmentSelected.has(key))state.installmentSelected.delete(key);else state.installmentSelected.add(key);
+        update();
+      };
       list.addEventListener('click',e=>{if(e.target.closest('button'))return;const card=e.target.closest('.mgd-installment-card[data-selectable="true"]');if(card)toggle(card);});
       list.addEventListener('keydown',e=>{if(e.key!=='Enter'&&e.key!==' ')return;const card=e.target.closest('.mgd-installment-card[data-selectable="true"]');if(card){e.preventDefault();toggle(card);}});
     }
     if(bulk)bulk.addEventListener('click',async()=>{
-      if(!state.installmentSelected.size)return;
-      const selected=Array.from(state.installmentSelected).map(k=>{const p=k.split('|');return{memberId:p[0],cycle:Number(p[1]),no:Number(p[2])};});
-      const eligible=selected.filter(item=>{const rows=(SahmApp.installmentRows(g.id,{cycle:item.cycle,status:'all'})||{}).rows||[];const row=rows.find(x=>String(x.memberId)===item.memberId&&Number(x.no)===item.no);return row&&(row.status==='due'||row.status==='late');});
+      if(!state.installmentSelected.size||bulk.disabled)return;
+      const selected=Array.from(state.installmentSelected).map(key=>{
+        const parts=key.split('|');
+        return {memberId:parts[0],cycle:Number(parts[1]),no:Number(parts[2])};
+      });
+      const rowsByCycle=new Map();
+      selected.forEach(item=>{
+        if(rowsByCycle.has(item.cycle))return;
+        const result=SahmApp.installmentRows(g.id,{cycle:item.cycle,status:'all'});
+        rowsByCycle.set(item.cycle,result&&result.ok?result.rows||[]:[]);
+      });
+      const eligible=selected.filter(item=>{
+        const row=(rowsByCycle.get(item.cycle)||[]).find(x=>String(x.memberId)===item.memberId&&Number(x.no)===item.no);
+        return row&&(row.status==='due'||row.status==='late');
+      });
       if(!eligible.length){toast('لا توجد أقساط مستحقة للتذكير ضمن التحديد');return;}
-      if(!window.confirm('سيتم إرسال تذكير إلى '+eligible.length+' من الأقساط المحددة. هل تريد المتابعة؟'))return;
-      bulk.disabled=true;let sent=0,failed=0;
-      for(const item of eligible){
-        let r=await SahmApp.sendReminder({groupId:g.id,memberId:item.memberId,cycle:item.cycle,no:item.no});
-        if(r&&r.code==='REMINDER_REPEAT'){
-          if(window.confirm(r.message+'\nهل تريد إعادة إرسال هذا التذكير؟'))r=await SahmApp.sendReminder({groupId:g.id,memberId:item.memberId,cycle:item.cycle,no:item.no,confirmRepeat:true});
-          else {failed++;continue;}
+      if(!window.confirm('سيتم إرسال تذكير إلى '+eligible.length+' من الأعضاء عن الأقساط المحددة. هل تريد المتابعة؟'))return;
+      bulk.disabled=true;
+      let sent=0,failed=0,skipped=0,refreshFailed=false;
+      try{
+        for(const item of eligible){
+          let result=await SahmApp.sendReminder({groupId:g.id,memberId:item.memberId,cycle:item.cycle,no:item.no,skipRefresh:true});
+          if(result&&result.code==='REMINDER_REPEAT'){
+            if(window.confirm(result.message+'\nهل تريد إعادة إرسال هذا التذكير؟')){
+              result=await SahmApp.sendReminder({groupId:g.id,memberId:item.memberId,cycle:item.cycle,no:item.no,confirmRepeat:true,skipRefresh:true});
+            }else{skipped++;continue;}
+          }
+          if(result&&result.ok)sent++;else failed++;
         }
-        if(r&&r.ok)sent++;else failed++;
+        try{await SahmApp.refreshStore();}catch(error){refreshFailed=true;}
+        state.installmentSelected.clear();
+        state.installmentSelectMode=false;
+        invalidateReads();
+        refreshData();
+        const summary='تم إرسال '+sent+' تذكير'+(skipped?'، تخطّي '+skipped:'')+(failed?'، تعذر '+failed:'');
+        toast(summary+(refreshFailed?' · تعذر تحديث البيانات المعروضة':''));
+        redraw();
+      }catch(error){
+        toast(error&&error.message||'تعذر إكمال التذكيرات المحددة');
+        if(bulk.isConnected)bulk.disabled=false;
       }
-      state.installmentSelected.clear();state.installmentSelectMode=false;invalidateReads();refreshData();
-      toast('تم إرسال '+sent+' تذكير'+(failed?'، وتعذر '+failed:''));redraw();
     });
     update();
   }
   function installmentsPanel(g,d) {
-    if(state.installmentSelectionGroupId!==g.id){state.installmentSelectionGroupId=g.id;state.installmentSelected.clear();state.installmentSelectMode=false;state.installmentFiltersOpen=false;state.installment='all';state.status='all';state.query='';state.cycle=null;}
+    if(state.installmentSelectionGroupId!==g.id){
+      state.installmentSelectionGroupId=g.id;
+      state.installmentSelected.clear();
+      state.installmentSelectMode=false;
+      state.installmentFiltersOpen=false;
+      state.installment='current';
+      state.status='all';
+      state.query='';
+      state.cycle=null;
+    }
     const manager=!!(d.role&&d.role.manager),totalCycles=Math.max(1,Number(d.rounds)||1),cycle=Math.min(totalCycles,Math.max(1,Number(state.cycle||d.cycle||1)));
     const snap=SahmApp.installmentRows(g.id,{cycle,status:'all'})||{},all=snap.ok?snap.rows||[]:[];
-    const today=SahmApp.todayIn(g.tz||'Asia/Aden'),inRange=all.find(x=>String(today)>=String(x.periodStart)&&String(today)<=String(x.periodEnd));
-    if(state.installment==='all'){const current=inRange||all.find(x=>x.status==='due'||x.status==='late')||all[0];state.installment=current?String(current.no):'all';}
-    const chosen=state.installment==='all'?null:Number(state.installment),shown=chosen?all.filter(x=>Number(x.no)===chosen):all;
+    const currentNo=currentInstallmentNo(all,g);
+    const chosen=state.installment==='all'?null:state.installment==='current'?currentNo:Number(state.installment);
+    const shown=state.installment==='all'?all:chosen==null?[]:all.filter(x=>Number(x.no)===chosen);
     const paid=shown.filter(x=>x.status==='paid').length,late=shown.filter(x=>x.status==='late').length,pending=shown.filter(x=>x.status==='due'||x.status==='upcoming').length,first=shown[0]||{};
     const cycleOptions=Array.from({length:totalCycles},(_,i)=>'<option value="'+(i+1)+'" '+(cycle===i+1?'selected':'')+'>القرعة '+(i+1)+'</option>').join('');
-    const currentNo=(inRange||all.find(x=>x.status==='due'||x.status==='late')||all[0]||{}).no;
-    const installmentOptions='<option value="'+(currentNo||'all')+'" '+(String(state.installment)===String(currentNo||'all')?'selected':'')+'>القسط الحالي</option><option value="all" '+(state.installment==='all'?'selected':'')+'>جميع الأقساط</option>'+
-      Array.from({length:Math.max(1,Number(g.installments)||1)},(_,i)=>'<option value="'+(i+1)+'" '+(String(state.installment)===String(i+1)?'selected':'')+'>القسط '+(i+1)+'</option>').join('');
+    const installmentOptions='<option value="current" '+(state.installment==='current'?'selected':'')+'>القسط الحالي</option><option value="all" '+(state.installment==='all'?'selected':'')+'>جميع الأقساط</option>'+
+      Array.from({length:Math.max(1,Number(g.installments)||1)},(_,i)=>i+1).filter(no=>currentNo==null||no!==currentNo).map(no=>'<option value="'+no+'" '+(String(state.installment)===String(no)?'selected':'')+'>القسط '+no+'</option>').join('');
     return (manager?'':'<section class="mgd-installment-summary"><div class="mgd-summary-top"><b>القرعة '+cycle+'</b><span>'+esc(first.periodStart?dateLabel(first.periodStart):'—')+' – '+esc(first.periodEnd?dateLabel(first.periodEnd):'—')+'</span></div><div class="mgd-summary-stats"><span>الإجمالي <b>'+shown.length+'</b></span><span>مدفوعة <b>'+paid+'</b></span><span>معلقة <b>'+pending+'</b></span><span>متأخرة <b>'+late+'</b></span></div></section>')+
       '<div class="mgd-installment-toolbar" id="mgdInstallmentToolbar"><label class="mgd-search mgd-installment-search">'+uiIcon('search',17)+'<input id="mgdInstallmentSearch" type="search" placeholder="ابحث باسم العضو" autocomplete="off"></label>'+
       (manager?'<button type="button" class="mgd-tool-icon" data-action="managed-installment-select" id="mgdInstallmentSelectToggle" aria-label="تحديد الأقساط" aria-pressed="'+(state.installmentSelectMode?'true':'false')+'">'+uiIcon('list-checks',19)+'</button>':'')+
       '<button type="button" class="mgd-tool-icon" data-action="managed-installment-filter" id="mgdInstallmentFilterToggle" aria-label="الفلاتر" aria-expanded="'+(state.installmentFiltersOpen?'true':'false')+'">'+uiIcon('sliders-horizontal',19)+'</button>'+
       '<div class="mgd-installment-filter-fields"><label class="mgd-select"><select id="mgdInstallmentCycle" aria-label="القرعة">'+cycleOptions+'</select></label><label class="mgd-select"><select id="mgdInstallmentNumber" aria-label="رقم القسط">'+installmentOptions+'</select></label><label class="mgd-select"><select id="mgdInstallmentStatus" aria-label="حالة القسط"><option value="all">كل الحالات</option></select></label></div>'+
-      (manager?'<button type="button" class="mgd-bulk-reminder-action" data-action="managed-installment-bulk-reminder" id="mgdInstallmentBulkReminder" hidden disabled>'+uiIcon('bell',16)+'<span>تذكير (0)</span></button>':'')+'</div>'+
+      (manager?'<button type="button" class="mgd-bulk-reminder-action" data-action="managed-installment-bulk-reminder" id="mgdInstallmentBulkReminder" hidden disabled>'+uiIcon('bell',15)+'<span>تذكير</span></button>':'')+'</div>'+
       '<div id="mgdInstallmentList" class="mgd-installment-list"></div><button type="button" class="mgd-secondary-link" data-go="receipts">سجل الاستلام والتصحيحات '+uiIcon('back-screen',16)+'</button>';
   }
   async function cycleDetail(g, d, round) {
@@ -638,7 +717,7 @@
     if (!el) return;
     const action = el.dataset.action;
     if (['managed-installment-select','managed-installment-filter','managed-installment-bulk-reminder'].includes(action)) { event.preventDefault(); event.stopImmediatePropagation(); return; }
-    if (['record-paid','send-reminder','send-reminder-all','schedule-draw','run-draw','draw-presentation-completed','draw-presentation-failed','notify-channel-toggle'].includes(action)) invalidateReads();
+    if (['record-paid','send-reminder','schedule-draw','run-draw','draw-presentation-completed','draw-presentation-failed','notify-channel-toggle'].includes(action)) invalidateReads();
     if (!['managed-home-slide','managed-home-section','managed-tab','managed-open-member','managed-open-cycle','managed-back','managed-draw-view','managed-settings-view'].includes(action)) return;
     event.preventDefault();
     event.stopImmediatePropagation();

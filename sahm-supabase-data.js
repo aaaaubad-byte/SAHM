@@ -504,7 +504,8 @@
         p_cycle_id:cyc.id,p_installment_no:Number(p.no),p_membership_id:member,
         p_confirm_repeat:!!(p&&p.confirmRepeat)
       });
-      await refresh();return {ok:true,recipients:count};
+      if(!(p&&p.skipRefresh)) await refresh();
+      return {ok:true,recipients:count};
     }catch(e){return fail(e);}
   }
   async function performDraw(groupId){
