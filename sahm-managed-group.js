@@ -136,7 +136,7 @@
       installment: opts.installment || (state.installment === 'all' ? null : Number(state.installment)),
       query: opts.query == null ? state.query : opts.query});
     if (!result || !result.ok) return '<div class="mgd-empty">' + esc(result && result.message || 'تعذر تحميل الأقساط') + '</div>';
-    const rows = result.rows || [], members = SahmApp.memberList(g.id);
+    const rows = result.rows || [], members = SahmApp.memberList(g.id), manager = !!(d.role && d.role.manager);
     const memberMap = new Map(((members && members.ok && members.members) || []).map(x => [String(x.memberId), Number(x.shares || 0)]));
     const icons = {paid:['check-circle','مدفوع','paid'],due:['clock-3','مستحق','due'],late:['alert-circle','متأخر','late'],upcoming:['calendar-clock','لم يحن موعده','upcoming']};
     return rows.map(x => {
@@ -144,7 +144,7 @@
       const meta = icons[x.status] || ['circle-help',String(x.status||'غير محدد'),'unknown'];
       const attrs = 'data-member="'+esc(x.memberId)+'" data-cycle="'+esc(x.cycle)+'" data-no="'+esc(x.no)+'"';
       const collect = x.status !== 'paid', remind = x.status === 'due' || x.status === 'late';
-      const actions = state.installmentSelectMode ? '' : ((collect || remind) ? '<div class="mgd-row-actions">'+
+      const actions = (!manager || state.installmentSelectMode) ? '' : ((collect || remind) ? '<div class="mgd-row-actions">'+
         (collect ? actionButton('تحصيل','record-paid',attrs,'primary') : '')+
         (remind ? actionButton('تذكير','send-reminder',attrs,'') : '')+'</div>' : '');
       return '<article class="mgd-installment-card'+(state.installmentSelectMode?' is-selectable':'')+(selected?' is-selected':'')+'" role="'+(state.installmentSelectMode?'checkbox':'group')+'" data-installment-key="'+esc(key)+'" data-selectable="'+(state.installmentSelectMode?'true':'false')+'" tabindex="'+(state.installmentSelectMode?'0':'-1')+'" aria-checked="'+(selected?'true':'false')+'">'+
@@ -209,7 +209,7 @@
   }
   function installmentsPanel(g,d) {
     if(state.installmentSelectionGroupId!==g.id){state.installmentSelectionGroupId=g.id;state.installmentSelected.clear();state.installmentSelectMode=false;state.installmentFiltersOpen=false;state.installment='all';state.status='all';state.query='';state.cycle=null;}
-    const totalCycles=Math.max(1,Number(d.rounds)||1),cycle=Math.min(totalCycles,Math.max(1,Number(state.cycle||d.cycle||1)));
+    const manager=!!(d.role&&d.role.manager),totalCycles=Math.max(1,Number(d.rounds)||1),cycle=Math.min(totalCycles,Math.max(1,Number(state.cycle||d.cycle||1)));
     const snap=SahmApp.installmentRows(g.id,{cycle,status:'all'})||{},all=snap.ok?snap.rows||[]:[];
     const today=SahmApp.todayIn(g.tz||'Asia/Aden'),inRange=all.find(x=>String(today)>=String(x.periodStart)&&String(today)<=String(x.periodEnd));
     if(state.installment==='all'){const current=inRange||all.find(x=>x.status==='due'||x.status==='late')||all[0];state.installment=current?String(current.no):'all';}
@@ -221,10 +221,10 @@
       Array.from({length:Math.max(1,Number(g.installments)||1)},(_,i)=>'<option value="'+(i+1)+'" '+(String(state.installment)===String(i+1)?'selected':'')+'>القسط '+(i+1)+'</option>').join('');
     return '<section class="mgd-installment-summary"><div class="mgd-summary-top"><b>القرعة '+cycle+'</b><span>'+esc(first.periodStart?dateLabel(first.periodStart):'—')+' – '+esc(first.periodEnd?dateLabel(first.periodEnd):'—')+'</span></div><div class="mgd-summary-stats"><span>الإجمالي <b>'+shown.length+'</b></span><span>مدفوعة <b>'+paid+'</b></span><span>معلقة <b>'+pending+'</b></span><span>متأخرة <b>'+late+'</b></span></div></section>'+
       '<div class="mgd-installment-toolbar" id="mgdInstallmentToolbar"><label class="mgd-search mgd-installment-search">'+uiIcon('search',17)+'<input id="mgdInstallmentSearch" type="search" placeholder="ابحث باسم العضو" autocomplete="off"></label>'+
-      '<button type="button" class="mgd-tool-icon" data-action="managed-installment-select" id="mgdInstallmentSelectToggle" aria-label="تحديد الأقساط" aria-pressed="'+(state.installmentSelectMode?'true':'false')+'">'+uiIcon('list-checks',19)+'</button>'+
+      (manager?'<button type="button" class="mgd-tool-icon" data-action="managed-installment-select" id="mgdInstallmentSelectToggle" aria-label="تحديد الأقساط" aria-pressed="'+(state.installmentSelectMode?'true':'false')+'">'+uiIcon('list-checks',19)+'</button>':'')+
       '<button type="button" class="mgd-tool-icon" data-action="managed-installment-filter" id="mgdInstallmentFilterToggle" aria-label="الفلاتر" aria-expanded="'+(state.installmentFiltersOpen?'true':'false')+'">'+uiIcon('sliders-horizontal',19)+'</button>'+
       '<div class="mgd-installment-filter-fields"><label class="mgd-select"><select id="mgdInstallmentCycle" aria-label="القرعة">'+cycleOptions+'</select></label><label class="mgd-select"><select id="mgdInstallmentNumber" aria-label="رقم القسط">'+installmentOptions+'</select></label><label class="mgd-select"><select id="mgdInstallmentStatus" aria-label="حالة القسط"><option value="all">كل الحالات</option></select></label></div>'+
-      '<button type="button" class="mgd-bulk-reminder-action" data-action="managed-installment-bulk-reminder" id="mgdInstallmentBulkReminder" hidden disabled>'+uiIcon('bell',16)+'<span>تذكير (0)</span></button></div>'+
+      (manager?'<button type="button" class="mgd-bulk-reminder-action" data-action="managed-installment-bulk-reminder" id="mgdInstallmentBulkReminder" hidden disabled>'+uiIcon('bell',16)+'<span>تذكير (0)</span></button>':'')+'</div>'+
       '<div id="mgdInstallmentList" class="mgd-installment-list"></div><button type="button" class="mgd-secondary-link" data-go="receipts">سجل الاستلام والتصحيحات '+uiIcon('back-screen',16)+'</button>';
   }
   async function cycleDetail(g, d, round) {
