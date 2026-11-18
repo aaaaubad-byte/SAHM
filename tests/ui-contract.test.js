@@ -290,8 +290,8 @@ test('every rendered button, route, form, and modal action is connected to a han
       'data-action is handled by click or change logic: ' + action);
   }
 
-  assert.match(html, /document\.addEventListener\('click',[\\s\\S]*?handleAppAction\(action,el\)/);
-  assert.match(html, /dialog\.addEventListener\('click',[\\s\\S]*?handleAppAction\(actionButton\.dataset\.action,actionButton\)/);
+  assert.match(html, /document\.addEventListener\('click',[\s\S]*?handleAppAction\(action,el\)/);
+  assert.match(html, /dialog\.addEventListener\('click',[\s\S]*?handleAppAction\(actionButton\.dataset\.action,actionButton\)/);
   assert.match(html, /buttons\.map\(\(\[label,act/);
 
   const formIds = new Set([...templates.matchAll(/<form\b[^>]*\bid=["']([^"']+)["']/gi)].map(x => x[1]));
