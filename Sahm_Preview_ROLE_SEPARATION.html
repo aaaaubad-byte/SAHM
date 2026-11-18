@@ -3809,7 +3809,7 @@ async function handleAppAction(action,el){
  }
  if(action==='draw-presentation-completed'||action==='draw-presentation-failed'){
   if(!g||!isManager())return;const roomResult=await SahmApp.getDrawRoom(g.id),round=roomResult&&roomResult.ok&&roomResult.room&&roomResult.room.round_no;if(!round){toast('لا توجد نتيجة محفوظة لتحديث حالة العرض');return}
-  const status=action==='draw-presentation-completed'?'completed':'failed',result=await SahmApp.setDrawPresentationStatus(g.id,round,status);if(result&&result.ok){toast(status==='completed'?'تم تسجيل اكتمال العرض':'تم تسجيل فشل العرض');if(screenName==='group-detail')await groupDetail();else drawRoom()}return;
+  const status=action==='draw-presentation-completed'?'completed':'failed',result=await SahmApp.setDrawPresentationStatus(g.id,round,status);if(result&&result.ok){toast(status==='completed'?'تم تسجيل اكتمال العرض':'تم تسجيل فشل العرض');if(screenName==='group-detail')await groupDetail();else openAssociationWorkspace('draws','summary')}return;
  }
  if(action==='notification-open'){
   const id=el.dataset.id;if(id){const marked=await SahmApp.markNotificationsRead([id]);if(!marked||!marked.ok){toast(marked&&marked.message||'تعذر تحديث حالة الإشعار');return}}
