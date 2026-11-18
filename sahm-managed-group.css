@@ -129,3 +129,8 @@
 #screen .mgd-tabs button{min-width:0;gap:4px;padding:9px 2px;font-size:11px}
 #screen .mgd-tabs button svg{width:16px;height:16px}
 @media(max-width:360px){#screen .mgd-identity-metrics{gap:9px}#screen .mgd-tabs button{font-size:10px}}
+
+#screen .mgd-room-entry{display:flex;align-items:center;justify-content:center;gap:7px;width:100%;margin:0 0 10px}
+#screen .mgd-share-state{display:inline-flex;align-items:center;border-radius:7px;padding:4px 8px;font-size:11px;font-weight:800}
+#screen .mgd-share-state.won{background:#eaf5ef;color:#28734a}
+#screen .mgd-share-state.eligible{background:#edf2ff;color:#3158b7}

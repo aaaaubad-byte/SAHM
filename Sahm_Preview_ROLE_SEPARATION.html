@@ -3906,7 +3906,9 @@ async function handleAppAction(action,el){
   selectedInstallmentStatus=el.dataset.filter||'all';syncNavigationContext();installments();return;
  }
  if(action==='send-reminder-all'){
-  const no=Number($('#reminderInstallment')?.value||1);
+  const selectedNo=$('#mgdInstallmentNumber')?.value;
+  if(screenName==='group-detail'&&(!selectedNo||selectedNo==='all')){toast('حدد رقم القسط لإرسال التذكير');return}
+  const no=Number(selectedNo||$('#reminderInstallment')?.value||1);
   reminderRequest={groupId:g.id,cycle:selectedInstallmentCycle,no:no};
   const r=await SahmApp.sendReminder(reminderRequest);
   if(r&&r.ok){refreshData();toast('تم إرسال التذكير إلى '+r.recipients+' مشاركين')}
