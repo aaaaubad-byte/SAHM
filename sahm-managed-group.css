@@ -111,3 +111,8 @@
 #screen .mgd-audit-copy details{margin-top:5px;color:#3158d6;font-size:11px}
 #screen .mgd-audit-copy pre{max-width:100%;overflow:auto;white-space:pre-wrap;overflow-wrap:anywhere;color:#596a82;font-size:10px}
 #screen .mgd-group-facts{margin-bottom:12px}
+
+/* Immediate feedback for async managed-group panels. */
+#screen .mgd-loading{display:flex;align-items:center;justify-content:center;gap:9px;min-height:112px;padding:20px;color:#748197;font-size:12px;font-weight:700}
+#screen .mgd-loading-spinner{width:17px;height:17px;border:2px solid #dce4f1;border-top-color:#3158d6;border-radius:50%;animation:mgd-spin .7s linear infinite}
+@keyframes mgd-spin{to{transform:rotate(360deg)}}
