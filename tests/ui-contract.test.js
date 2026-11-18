@@ -238,7 +238,7 @@ test('every rendered button, route, form, and modal action is connected to a han
   for (const route of staticRoutes) assert.ok(routes.has(route), 'button route resolves: ' + route);
 
   const buttons = [...templates.matchAll(/<button\b([^>]*)>/gi)].map(x => x[1]);
-  assert.ok(buttons.length >= 100, 'all screen templates contribute their buttons');
+  assert.ok(buttons.length >= 90, 'screen templates retain a substantial set of actionable controls after duplicate removal');
   for (const attrs of buttons) {
     assert.match(attrs, /data-action|data-go|type=["']submit["']/, 'button has a delegated action, route, or form-submit role: ' + attrs);
   }
@@ -537,8 +537,9 @@ test('association subroutes all resolve to the shared workspace and retired dupl
 test('association workspace tabs consume the correct role-specific data contracts', () => {
   assert.match(managed, /history\.map\(x=>\[Number\(x\.round_no\|\|x\.round\),x\]\)/);
   assert.match(managed, /r&&r\.ok\?\(r\.history\|\|r\.draws\|\|\[\]\):\[\]/);
-  assert.match(managed, /winner_owner_name\|\|x\.winnerLabel/);
-  assert.match(managed, /winner_share_no\|\|x\.winnerShareId/);
+  assert.match(managed, /draw\.winner_owner_name \|\| draw\.winnerLabel/);
+  assert.match(managed, /draw\.winner_share_no \|\| '—'/);
+  assert.doesNotMatch(managed, /winner_share_no\s*\|\|\s*[a-zA-Z]\w*\.winnerShareId/, 'internal share UUID is never presented as a share number');
   assert.match(managed, /pct===100\?'waiting':'collecting'/);
   assert.match(managed, /value=\"waiting\">بانتظار الموعد/);
   assert.match(managed, /memberStatement\(g\.id,ownMemberId\(g\)\)/);
