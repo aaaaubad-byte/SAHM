@@ -106,7 +106,7 @@
     ]);
     const history=historyResult&&historyResult.ok?(historyResult.history||[]):[];
     const ready=!!(readinessResult&&readinessResult.ok&&readinessResult.canDraw);
-    const byRound=new Map(history.map(x=>[Number(x.round_no||x.round),x]));
+    const byRound=new Map(history.map(x=>[Number(x.round),x]));
     const total=Math.max(0,Number(d.rounds)||0),current=Math.min(total,(Number(d.drawn)||0)+1);
     const cards=Array.from({length:total},(_,i)=>{
       const n=i+1,draw=byRound.get(n);
@@ -331,7 +331,7 @@
     return '<section class="mgd-detail-card"><div class="mgd-list-head"><b>مشاركتك في الجمعية</b><span>'+esc(st.memberName)+'</span></div><div class="mgd-member-stat-grid"><div><small>أسهمك</small><b>'+shares.length+'</b></div><div><small>فائزة</small><b>'+won+'</b></div><div><small>مؤهلة</small><b>'+(shares.length-won)+'</b></div></div><div class="mgd-detail-heading"><b>التزامات القرعة الحالية</b><span>'+(p.paid||0)+' / '+(p.total||0)+'</span></div><div class="mgd-round-progress"><i style="width:'+(p.total?Math.round((p.paid||0)/p.total*100):0)+'%"></i></div><div class="mgd-summary-stats"><span>إجمالي الالتزام <b>'+esc(moneyValue(st.commitment&&st.commitment.overall,st.currency))+'</b></span><span>الأقساط <b>'+(p.paid||0)+' من '+(p.total||0)+'</b></span></div></section><div class="mgd-member-shortcuts"><button data-action="managed-tab" data-tab="installments">'+uiIcon('receipt',17)+' أقساطي</button><button data-action="managed-tab" data-tab="shares">'+uiIcon('layers',17)+' أسهمي</button><button data-action="managed-tab" data-tab="draws">'+uiIcon('shuffle',17)+' القرعات</button></div><section class="mgd-detail-card">'+row('user','مدير الجمعية',g.admin||'—')+row('calendar','بداية الجمعية',dateLabel(g.start||g.startDate))+'</section>';
   }
   function memberInstallments(g) {
-    const st=SahmApp.memberStatement(g.id,db.user&&db.user.id); if(!st||!st.ok)return '<div class="mgd-empty">تعذر تحميل أقساطك</div>';
+    const st=SahmApp.memberStatement(g.id,ownMemberId(g)); if(!st||!st.ok)return '<div class="mgd-empty">تعذر تحميل أقساطك</div>';
     return (st.cycles||[]).slice().reverse().map(c=>{const paid=(c.rows||[]).filter(x=>x.status==='paid').length;return '<section class="mgd-detail-card"><div class="mgd-detail-heading"><b>القرعة '+c.cycle+'</b><span>'+paid+' من '+(c.rows||[]).length+' مدفوع</span></div><div class="mgd-round-progress"><i style="width:'+(c.rows&&c.rows.length?Math.round(paid/c.rows.length*100):0)+'%"></i></div>'+(c.rows||[]).map(x=>'<div class="mgd-simple-row"><span><b>القسط '+x.no+'</b><small>'+esc(dateLabel(x.periodStart))+' – '+esc(dateLabel(x.periodEnd))+'</small></span>'+pill(x.status)+'<b>'+esc(moneyValue(x.total,st.currency))+'</b></div>').join('')+'</section>';}).join('')||'<div class="mgd-empty">لا توجد أقساط مسجلة لمشاركتك بعد</div>';
   }
   function memberShares(g) {
@@ -339,8 +339,8 @@
     return '<div class="mgd-list-head"><b>أسهمك</b><span>'+list.length+' سهم · '+won+' فائزة</span></div><div class="mgd-list">'+(list.map(x=>'<article class="mgd-installment-card"><div class="mgd-installment-top"><b>السهم '+esc(x.shareNo)+'</b><span class="mgd-share-state '+(x.status==='won'?'won':'eligible')+'">'+(x.status==='won'?'فائز':'مؤهل')+'</span></div><div class="mgd-installment-meta"><span>'+(x.status==='won'?'فاز في القرعة رقم '+esc(x.winnerRound):'ما زال مؤهلاً للقرعات المتبقية')+'</span></div></article>').join('')||'<div class="mgd-empty">لا توجد أسهم مرتبطة بحسابك</div>')+'</div>';
   }
   async function memberDraws(g) {
-    const r=await cachedRead('history:'+g.id,()=>SahmApp.getDrawHistory(g.id),15000),history=r&&r.ok?r.history||[]:[];
-    return '<div class="mgd-list-head"><b>القرعات ونتائجها</b><span>'+history.length+' نتيجة</span></div><button type="button" class="mgd-action primary mgd-room-entry" data-action="managed-draw-view" data-view="summary">'+uiIcon('shuffle',17)+' دخول غرفة القرعة للمشاهدة</button><div class="mgd-list">'+(history.map(x=>'<article class="mgd-installment-card"><div class="mgd-installment-top"><b>القرعة '+esc(x.round_no||x.round)+'</b><span class="mgd-share-state won">نتيجة مثبتة</span></div><div class="mgd-installment-member">'+esc(x.winner_owner_name||x.winnerLabel||'—')+'</div><div class="mgd-installment-meta"><span>السهم '+esc(x.winner_share_no||'—')+'</span><span>'+esc(dateLabel(x.scheduled_on||x.date))+'</span></div></article>').join('')||'<div class="mgd-empty">لم تنفذ قرعات بعد</div>')+'</div>';
+    const r=await cachedRead('history:'+g.id,()=>SahmApp.drawHistory(g.id),15000),history=r&&r.ok?r.draws||[]:[];
+    return '<div class="mgd-list-head"><b>القرعات ونتائجها</b><span>'+history.length+' نتيجة</span></div><button type="button" class="mgd-action primary mgd-room-entry" data-action="managed-draw-view" data-view="summary">'+uiIcon('shuffle',17)+' دخول غرفة القرعة للمشاهدة</button><div class="mgd-list">'+(history.map(x=>'<article class="mgd-installment-card"><div class="mgd-installment-top"><b>القرعة '+esc(x.round_no||x.round)+'</b><span class="mgd-share-state won">نتيجة مثبتة</span></div><div class="mgd-installment-member">'+esc(x.winnerLabel||'—')+'</div><div class="mgd-installment-meta"><span>السهم '+esc(x.winnerShareId||'—')+'</span><span>'+esc(dateLabel(x.date))+'</span></div></article>').join('')||'<div class="mgd-empty">لم تنفذ قرعات بعد</div>')+'</div>';
   }
   function memberCommunication() {return '<div class="mgd-settings-grid"><button type="button" data-action="managed-settings-view" data-view="news">'+uiIcon('wall',18)+'<span>أخبار الجمعية</span></button><button type="button" data-action="managed-settings-view" data-view="chat">'+uiIcon('messages',18)+'<span>محادثة الأعضاء</span></button></div>';}
   async function render(g, d) {

@@ -399,3 +399,10 @@
 - Validation still required: run JavaScript/static tests, inspect all legacy navigation entry points, and verify mobile rendering before merging.
 
 - Follow-up UI pass: participant identity now resolves through the role-scoped member list; restored the draw wheel inside the new shared draw room; legacy group routes for member list, installments, draw room/history, news, chat, and audit now open the unified workspace instead of their former duplicate screens.
+
+
+## 2026-11-18 — Shared workspace integration hardening
+- Corrected participant installment reads to resolve the signed-in participant's actual membership ID through the existing member-list read model.
+- Corrected participant draw history to use the existing `SahmApp.drawHistory` query and its `draws` result shape; removed guessed/nonexistent result-field aliases.
+- Added UI contract coverage for the single group-detail entry point, participant tabs, and the existing read-model API names.
+- Backend and database remain unchanged.
