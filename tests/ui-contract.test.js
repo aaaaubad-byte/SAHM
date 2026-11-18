@@ -545,7 +545,7 @@ test('association workspace tabs consume the correct role-specific data contract
   assert.match(managed, /memberStatement\(g\.id,ownMemberId\(g\)\)/);
   assert.match(managed, /SahmApp\.myShareList\(g\.id/);
   assert.doesNotMatch(managed, /تفاصيل رقم كل سهم وحالته غير متاحة/);
-  assert.match(managed, /Number\(statement\.shares\|\|0\)/);
+  assert.match(managed, /Number\(st\.shares\|\|0\)/);
   assert.match(app, /'myShareList'/);
   assert.match(data, /function myShareList\(db, viewer, gid, opts\)/);
   assert.match(remote, /invoke\('get_my_association_shares'/);
