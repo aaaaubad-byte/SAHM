@@ -492,6 +492,10 @@ test('manager collection screen implements current installment filters, selectiv
   assert.ok(managed.includes('SahmApp.installmentRows(g.id'));
   assert.ok(managed.includes('SahmApp.sendReminder('));
   assert.ok(managed.includes('skipRefresh:true'));
+  assert.ok(managed.includes('id="mgdMemberFilterToggle"') && managed.includes('id="mgdDrawFilterToggle"'), 'member and draw lists use inline filter toggles');
+  assert.ok(managed.includes("bindInlineFilterToggle('mgdMemberToolbar','mgdMemberFilterToggle','memberFiltersOpen')"));
+  assert.ok(managed.includes("bindInlineFilterToggle('mgdDrawToolbar','mgdDrawFilterToggle','drawFiltersOpen')"));
+  assert.ok(managed.includes('class="mgd-filter-fields"'), 'secondary filter controls are collapsed inside the toolbar');
   assert.ok(app.includes('api.refreshStore = function'));
   assert.ok(remote.includes("invoke('record_installment_receipt'"));
   assert.ok(remote.includes("invoke('send_installment_reminders'"));

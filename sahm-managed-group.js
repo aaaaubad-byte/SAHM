@@ -3,7 +3,7 @@
    No database, Supabase, engine, or shared-screen behavior is changed here. */
 (function (root) {
   'use strict';
-  const state = { cycle: null, installment: 'current', status: 'all', query: '', drawView: 'summary', installmentFiltersOpen: false, installmentSelectMode: false, installmentSelected: new Set(), installmentSelectionGroupId: null };
+  const state = { cycle: null, installment: 'current', status: 'all', query: '', drawView: 'summary', memberFiltersOpen: false, drawFiltersOpen: false, installmentFiltersOpen: false, installmentSelectMode: false, installmentSelected: new Set(), installmentSelectionGroupId: null };
   const readCache = new Map();
   let renderVersion = 0;
   let dashboardTimer = null;
@@ -76,9 +76,22 @@
     target.innerHTML = list.map(s => '<article class="mgd-installment-card"><div class="mgd-installment-top"><b>السهم ' + esc(s.shareNo) + '</b>' + '<span class="mgd-share-state ' + (s.status === 'won' ? 'won' : 'eligible') + '">' + (s.status === 'won' ? 'فائز' : 'مؤهل') + '</span>' + '</div><div class="mgd-installment-member">' + esc(s.ownerName) + '</div><div class="mgd-installment-meta"><span>' + (s.status === 'won' ? 'فائز بالقرعة رقم ' + esc(s.winnerRound) : 'مؤهل للقرعات المتبقية') + '</span></div></article>').join('') || '<div class="mgd-empty">لا توجد أسهم بهذه الحالة</div>';
     return target.innerHTML;
   }
+  function bindInlineFilterToggle(toolbarId,toggleId,stateKey) {
+    const toolbar=document.getElementById(toolbarId),toggle=document.getElementById(toggleId);
+    if(!toolbar||!toggle)return;
+    const apply=()=>{
+      const open=!!state[stateKey];
+      toolbar.classList.toggle('filters-open',open);
+      toggle.setAttribute('aria-expanded',open?'true':'false');
+      toggle.title=open?'إخفاء الفلترة':'إظهار الفلترة';
+    };
+    toggle.addEventListener('click',()=>{state[stateKey]=!state[stateKey];apply();});
+    apply();
+  }
   function bindDrawFilters() {
     const search=document.getElementById('mgdDrawSearch'), status=document.getElementById('mgdDrawStatus'), list=document.getElementById('mgdDrawList');
     if(!list)return;
+    bindInlineFilterToggle('mgdDrawToolbar','mgdDrawFilterToggle','drawFiltersOpen');
     const apply=()=>{const q=search?search.value.trim():'';const st=status?status.value:'all';list.querySelectorAll('.mgd-cycle-card').forEach(card=>{card.hidden=(q&&!card.dataset.round.includes(q))||(st!=='all'&&card.dataset.status!==st);});};
     if(search)search.addEventListener('input',apply);if(status)status.addEventListener('change',apply);apply();
   }
@@ -93,14 +106,16 @@
       '<span class="mgd-member-shares"><b>' + Number(m.shares || 0) + '</b><small>أسهم</small><small>' + Number(m.wonShares||0) + ' فاز · ' + Number(m.eligibleShares==null?m.shares:m.eligibleShares) + ' مؤهل</small><small class="mgd-member-state">' + (m.memberStatus==='won'?'فائز بكل أسهمه':'مؤهل') + '</small></span>' + uiIcon('back-screen', 18) + '</button>'
     ).join('');
     return '<div class="mgd-list-head"><b>الأعضاء</b><span>' + list.length + ' عضو</span></div>' +
-      '<div class="mgd-filterbar mgd-member-filters"><label class="mgd-search">' + uiIcon('search',18) + '<input id="mgdMemberSearch" type="search" placeholder="اسم العضو" autocomplete="off"></label>' +
-      '<label class="mgd-select"><select id="mgdMemberStatus" aria-label="حالة العضو"><option value="all">كل الحالات</option><option value="eligible">مؤهل</option><option value="won">فائز بكل أسهمه</option></select></label>' +
+      '<div class="mgd-filterbar mgd-member-filters'+(state.memberFiltersOpen?' filters-open':'')+'" id="mgdMemberToolbar"><label class="mgd-search">' + uiIcon('search',18) + '<input id="mgdMemberSearch" type="search" placeholder="اسم العضو" autocomplete="off"></label>' +
+      '<button type="button" class="mgd-inline-filter-toggle" id="mgdMemberFilterToggle" aria-label="فلترة الأعضاء" aria-controls="mgdMemberFilters" aria-expanded="'+(state.memberFiltersOpen?'true':'false')+'">' + uiIcon('sliders-horizontal',18) + '</button>' +
+      '<div class="mgd-filter-fields" id="mgdMemberFilters"><label class="mgd-select"><select id="mgdMemberStatus" aria-label="حالة العضو"><option value="all">كل الحالات</option><option value="eligible">مؤهل</option><option value="won">فائز بكل أسهمه</option></select></label></div>' +
       '<button type="button" class="mgd-reminder-icon" data-go="invite" title="دعوة عضو">' + uiIcon('user-plus',17) + '</button></div>' +
       '<div class="mgd-list" id="mgdMemberList">' + (rows || '<div class="mgd-empty">لا يوجد أعضاء مسجلون</div>') + '</div>';
   }
   function bindMemberSearch() {
     const input=document.getElementById('mgdMemberSearch'),status=document.getElementById('mgdMemberStatus'),list=document.getElementById('mgdMemberList');
     if(!list)return;
+    bindInlineFilterToggle('mgdMemberToolbar','mgdMemberFilterToggle','memberFiltersOpen');
     const apply=()=>{const q=input?input.value.trim().toLocaleLowerCase():'';const st=status?status.value:'all';list.querySelectorAll('.mgd-member-card').forEach(card=>{const name=card.querySelector('.mgd-member-main b').textContent.toLocaleLowerCase();const memberState=card.dataset.memberStatus||'eligible';card.hidden=(!name.includes(q))||(st!=='all'&&memberState!==st);});};
     if(input)input.addEventListener('input',apply);if(status)status.addEventListener('change',apply);apply();
   }
@@ -129,8 +144,9 @@
         '<span class="mgd-cycle-state">'+esc(label)+'</span>'+uiIcon('back-screen',18)+'</button>';
     }).join('');
     return '<div class="mgd-list-head"><b>القرعات</b><span>'+total+' قرعة</span></div>'+
-      '<div class="mgd-filterbar mgd-draw-filters"><label class="mgd-search">'+uiIcon('search',16)+'<input id="mgdDrawSearch" type="search" placeholder="رقم القرعة" inputmode="numeric"></label>'+
-      '<label class="mgd-select"><select id="mgdDrawStatus" aria-label="حالة القرعة"><option value="all">كل الحالات</option><option value="completed">مكتملة</option><option value="collecting">قيد التحصيل</option><option value="ready">جاهزة</option><option value="waiting">بانتظار الموعد</option><option value="upcoming">قادمة</option></select></label></div>'+
+      '<div class="mgd-filterbar mgd-draw-filters'+(state.drawFiltersOpen?' filters-open':'')+'" id="mgdDrawToolbar"><label class="mgd-search">'+uiIcon('search',16)+'<input id="mgdDrawSearch" type="search" placeholder="رقم القرعة" inputmode="numeric"></label>'+
+      '<button type="button" class="mgd-inline-filter-toggle" id="mgdDrawFilterToggle" aria-label="فلترة القرعات" aria-controls="mgdDrawFilters" aria-expanded="'+(state.drawFiltersOpen?'true':'false')+'">'+uiIcon('sliders-horizontal',18)+'</button>'+
+      '<div class="mgd-filter-fields" id="mgdDrawFilters"><label class="mgd-select"><select id="mgdDrawStatus" aria-label="حالة القرعة"><option value="all">كل الحالات</option><option value="completed">مكتملة</option><option value="collecting">قيد التحصيل</option><option value="ready">جاهزة</option><option value="waiting">بانتظار الموعد</option><option value="upcoming">قادمة</option></select></label></div></div>'+
       '<button type="button" class="mgd-action primary mgd-room-entry" data-action="managed-draw-view" data-view="summary">'+uiIcon('shuffle',17)+' دخول غرفة القرعة</button>'+
       '<div class="mgd-list" id="mgdDrawList">'+(cards||'<div class="mgd-empty">لا توجد قرعات لعرضها</div>')+'</div>';
   }

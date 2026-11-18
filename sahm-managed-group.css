@@ -531,3 +531,23 @@
  #screen .mgd-collection-page .mgd-installment-filter-fields .mgd-select:nth-child(3){flex-basis:42px}
  #screen .mgd-collection-page .mgd-bulk-reminder-action{min-width:46px}
 }
+
+/* Unified inline search/filter row for member and draw listings. */
+#screen .mgd-filterbar.mgd-member-filters,#screen .mgd-filterbar.mgd-draw-filters{display:flex;align-items:center;gap:5px;min-width:0;width:100%}
+#screen .mgd-filterbar.mgd-member-filters .mgd-search,#screen .mgd-filterbar.mgd-draw-filters .mgd-search{flex:1 1 auto;min-width:0;margin:0;transition:flex .18s ease}
+#screen .mgd-inline-filter-toggle{display:inline-flex;align-items:center;justify-content:center;flex:0 0 36px;width:36px;height:38px;padding:0;border:1px solid #dce3ed;border-radius:9px;background:#fff;color:#3158d6}
+#screen .mgd-inline-filter-toggle svg{width:18px;height:18px;stroke:currentColor;stroke-width:1.9}
+#screen .mgd-member-filters .mgd-filter-fields,#screen .mgd-draw-filters .mgd-filter-fields{display:none;align-items:center;flex:0 1 126px;min-width:0}
+#screen .mgd-member-filters.filters-open .mgd-filter-fields,#screen .mgd-draw-filters.filters-open .mgd-filter-fields{display:flex}
+#screen .mgd-member-filters.filters-open .mgd-search,#screen .mgd-draw-filters.filters-open .mgd-search{flex:1 1 42px;min-width:38px}
+#screen .mgd-member-filters .mgd-filter-fields .mgd-select,#screen .mgd-draw-filters .mgd-filter-fields .mgd-select{flex:1 1 0;min-width:0}
+#screen .mgd-member-filters .mgd-filter-fields .mgd-select select,#screen .mgd-draw-filters .mgd-filter-fields .mgd-select select{width:100%;min-width:0;min-height:38px;height:38px;padding:6px 5px;border:1px solid #dce3ed;border-radius:9px;background:#fff;color:#34445e;font-size:10px}
+#screen .mgd-filterbar .mgd-inline-filter-toggle:focus-visible{outline:2px solid rgba(49,88,214,.42);outline-offset:2px}
+#screen .mgd-member-filters .mgd-reminder-icon{width:36px;height:36px}
+@media(max-width:380px){
+ #screen .mgd-filterbar.mgd-member-filters,#screen .mgd-filterbar.mgd-draw-filters{gap:3px}
+ #screen .mgd-inline-filter-toggle{flex-basis:30px;width:30px;height:34px}
+ #screen .mgd-member-filters .mgd-filter-fields,#screen .mgd-draw-filters .mgd-filter-fields{flex:0 1 112px}
+ #screen .mgd-member-filters .mgd-filter-fields .mgd-select select,#screen .mgd-draw-filters .mgd-filter-fields .mgd-select select{min-height:34px;height:34px;padding-inline:2px;font-size:9px}
+ #screen .mgd-member-filters .mgd-reminder-icon{width:31px;height:31px}
+}
