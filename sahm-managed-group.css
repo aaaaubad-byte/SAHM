@@ -147,3 +147,14 @@
 #screen .mgd-installment-filters .mgd-select select{min-height:38px;padding:6px 5px;font-size:11px}
 #screen .mgd-reminder-icon{display:grid;place-items:center;flex:none;width:38px;height:38px;border:1px solid #dce3ed;border-radius:9px;background:#fff;color:#3158d6}
 #screen .mgd-installment-search{min-height:39px;margin-bottom:9px}
+
+#screen .mgd-member-filters .mgd-search{flex:1;min-width:0;margin:0}
+#screen .mgd-member-filters .mgd-select{flex:0 1 118px}
+#screen .mgd-member-filters .mgd-select select{min-height:38px;padding:6px 5px;font-size:11px}
+#screen .mgd-member-state{font-weight:800;color:#3158b7}
+#screen .mgd-cycle-main{gap:4px}
+#screen .mgd-cycle-progress{display:block;overflow:hidden;height:4px;border-radius:8px;background:#e8edf5}
+#screen .mgd-cycle-progress i{display:block;height:100%;border-radius:8px;background:#3158d6}
+#screen .mgd-draw-filters .mgd-search{flex:1;min-width:0;min-height:38px;margin:0}
+#screen .mgd-draw-filters .mgd-select{flex:0 1 118px}
+#screen .mgd-draw-filters .mgd-select select{min-height:38px;padding:6px 5px;font-size:11px}

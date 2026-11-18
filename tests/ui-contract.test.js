@@ -575,3 +575,12 @@ test('managed association tabs follow the approved five-section order', () => {
   assert.match(managed,/SahmApp\.shareList\(g\.id/);
   assert.match(managed,/x\.status === 'upcoming'/);
 });
+
+test('draw and member tabs expose round progress and member win/eligibility filters', () => {
+  assert.match(managed,/data-action="managed-open-cycle"/);
+  assert.match(managed,/data-status="\'+status/);
+  assert.match(managed,/mgdDrawSearch/);
+  assert.match(managed,/mgdMemberStatus/);
+  assert.match(managed,/memberStatus==='won'/);
+  assert.match(managed,/backToTab\('draws'\)/);
+});
