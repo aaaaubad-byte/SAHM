@@ -185,7 +185,8 @@
       const meta = icons[x.status] || ['circle-help',String(x.status||'غير محدد'),'unknown'];
       const attrs = 'data-member="'+esc(x.memberId)+'" data-cycle="'+esc(x.cycle)+'" data-no="'+esc(x.no)+'"';
       const collect = x.status === 'due' || x.status === 'late' || x.status === 'upcoming', remind = x.status === 'due' || x.status === 'late';
-      const actions = manager && (collect || remind) ? '<div class="mgd-row-actions">'+
+      const actions = manager && x.status === 'paid' ? '<div class="mgd-row-actions"><span class="mgd-paid-state" role="status">'+uiIcon('check',14)+'<span>مدفوع</span></span></div>' :
+        manager && (collect || remind) ? '<div class="mgd-row-actions">'+
         (collect ? actionButton('تحصيل','record-paid',attrs,'primary') : '')+
         (remind ? actionButton('تذكير','send-reminder',attrs,'') : '')+'</div>' : '';
       const accessibility = state.installmentSelectMode && selectable ? ' role="checkbox" aria-checked="'+(selected?'true':'false')+'"' : ' role="group"';
