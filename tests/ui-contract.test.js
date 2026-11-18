@@ -595,3 +595,9 @@ test('shared association workspace routes both roles through one detail componen
   assert.match(managed, /SahmApp\.drawHistory\(g\.id\)/);
   assert.doesNotMatch(managed, /getDrawHistory/);
 });
+
+test('participant workspace never guesses another member when own membership is missing', () => {
+  assert.match(managed, /const own=members\.find\(x=>x\.isMe\);/);
+  assert.doesNotMatch(managed, /members\.find\(x=>x\.isMe\)\s*\|\|\s*members\[0\]/);
+  assert.match(managed, /SahmApp\.memberStatement\(g\.id,ownMemberId\(g\)\)/);
+});

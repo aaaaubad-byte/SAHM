@@ -322,7 +322,7 @@
   }
   function ownMemberId(g) {
     const result=SahmApp.memberList(g.id), members=result&&result.ok?result.members||[]:[];
-    const own=members.find(x=>x.isMe)||members[0];
+    const own=members.find(x=>x.isMe);
     return own&&own.memberId||'';
   }
   function memberOverview(g,d) {

@@ -406,3 +406,5 @@
 - Corrected participant draw history to use the existing `SahmApp.drawHistory` query and its `draws` result shape; removed guessed/nonexistent result-field aliases.
 - Added UI contract coverage for the single group-detail entry point, participant tabs, and the existing read-model API names.
 - Backend and database remain unchanged.
+- Tightened participant identity resolution: the workspace now requires the current user's own membership row and never falls back to the first member in the group.
+- Removed display of an internal share UUID as though it were a public share number in draw history.
