@@ -2549,6 +2549,7 @@ body {
 }
 </style>
 
+<link rel="stylesheet" href="/sahm-managed-group.css">
 </head>
 <body><noscript><main dir="rtl" style="font-family:'IBM Plex Sans Arabic',sans-serif;padding:24px;color:#142f39"><h1>سهم</h1></main></noscript><div class="workspace"><div class="phone" id="app">
 <div id="topbar" class="topbar" style="display:none"></div><main id="screen" class="auth-screen">
@@ -2568,6 +2569,7 @@ body {
 <script src="/sahm-app.js"></script>
 <script src="/sahm-supabase-data.js"></script>
 <script src="/sahm-navigation.js"></script>
+<script src="/sahm-managed-group.js"></script>
 <script>
 const $=s=>document.querySelector(s);
 const money=(n,c='YER')=>{const cur=SahmCore.CURRENCIES[c]||SahmCore.CURRENCIES.YER;const minor=Math.round(Number(n||0)*cur.minor);return SahmCore.fmtMoney(minor,c in SahmCore.CURRENCIES?c:'YER')};
@@ -3117,6 +3119,7 @@ function groupDetail(){
  const g=currentGroup();if(!g){shell('الجمعية','groups','<div class="card empty"><b>لا توجد جمعية محددة</b><button class="btn primary" data-go="groups">عرض الجمعيات</button></div>');return}
  const d=SahmApp.groupDetail(g.id);if(!d||!d.ok){toast(d&&d.message||'تعذر تحميل الجمعية');return}
  const manager=!!d.role.manager,shares=d.role.shares||0,plan=d.plan||{};
+ if(manager&&window.SahmManagedGroup){SahmManagedGroup.render(g,d);return;}
  const lockNotice=d.agreementLocked?'<div class="card"><b>الاتفاق مقفل</b><small>تم بلوغ تاريخ بداية الجمعية أو تثبيت أول قرعة؛ لذلك توقفت تعديلات الاتفاق والأعضاء والأسهم والدعوات. تظل إعدادات الأخبار والمحادثة متاحة للمدير.</small></div>':'';
  const tabs='<div class="tabs"><button class="'+(groupDetailTab==='overview'?'active':'')+'" data-action="detail-tab" data-tab="overview">'+(manager?'لوحة الإدارة':'مشاركتي')+'</button><button class="'+(groupDetailTab==='cycles'?'active':'')+'" data-action="detail-tab" data-tab="cycles">الدورات والقرعات</button><button class="'+(groupDetailTab==='tools'?'active':'')+'" data-action="detail-tab" data-tab="tools">'+(manager?'إعدادات الجمعية':'التواصل')+'</button></div>';
  const top='<div class="card group-identity '+(manager?'manager-identity':'member-identity')+'"><div class="between"><span class="role-chip '+(manager?'manager-chip':'member-chip')+'">'+(manager?'أنت مدير الجمعية':'أنت مشارك في الجمعية')+'</span>'+pill(g.status)+'</div><div class="hero-num">'+money(g.share,g.currency)+'</div><div class="eyebrow">حصة السهم الكاملة في الدورة</div><div class="between" style="margin-top:12px"><small>'+d.members+' مشاركين</small><small>'+escapeHtml(g.period)+'</small></div></div>'+tabs;
