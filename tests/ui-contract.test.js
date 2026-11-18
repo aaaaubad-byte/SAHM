@@ -10,6 +10,7 @@ const html = fs.readFileSync(path.join(ROOT, 'Sahm_Preview_ROLE_SEPARATION.html'
 const app = fs.readFileSync(path.join(ROOT, 'sahm-app.js'), 'utf8');
 const data = fs.readFileSync(path.join(ROOT, 'sahm-data.js'), 'utf8');
 const core = fs.readFileSync(path.join(ROOT, 'sahm-core.js'), 'utf8');
+const managed = fs.readFileSync(path.join(ROOT, 'sahm-managed-group.js'), 'utf8');
 const sw = fs.readFileSync(path.join(ROOT, 'sw.js'), 'utf8');
 const auth = fs.readFileSync(path.join(ROOT, 'sahm-supabase.js'), 'utf8');
 const remote = fs.readFileSync(path.join(ROOT, 'sahm-supabase-data.js'), 'utf8');
@@ -563,4 +564,14 @@ test('inner screens and dialogs share one standard type scale; home, top bar and
   assert.deepEqual(weights, [400, 500, 600, 700], 'only the four loaded font weights are used');
   assert.doesNotMatch(layer, /font-size:\s*\d/, 'sizes come from tokens, never literals');
   assert.match(html, /family=IBM\+Plex\+Sans\+Arabic:wght@400;500;600;700/, 'every weight in the scale is loaded');
+});
+
+test('managed association tabs follow the approved five-section order', () => {
+  const block = managed.match(/const items = \[([\s\S]*?)\];/);
+  assert.ok(block);
+  const ids = [...block[1].matchAll(/\['(installments|shares|draws|members|settings)'/g)].map(x=>x[1]);
+  assert.deepEqual(ids,['installments','shares','draws','members','settings']);
+  assert.match(managed,/async function shareCards/);
+  assert.match(managed,/SahmApp\.shareList\(g\.id/);
+  assert.match(managed,/x\.status === 'upcoming'/);
 });

@@ -1211,11 +1211,27 @@
   function memberList(db, viewer, gid) {
     var v = guardView(db, viewer, gid); if (v.err) return v.err; var K = C();
     var list = K.groupMembers(db, gid).filter(function (m) { return K.memberShares(db, m.id).length; }).map(function (m) {
-      var row = { memberId: m.id, name: m.name, shares: K.memberShares(db, m.id).length, isManager: !!m.isManager, isMe: m.userId === viewer };
+      var owned = K.memberShares(db, m.id), won = owned.filter(function (s) { return db.draws.some(function (d) { return d.winnerShareId === s.id; }); }).length;
+      var row = { memberId: m.id, name: m.name, shares: owned.length, wonShares: won, eligibleShares: owned.length - won, memberStatus: owned.length > 0 && won === owned.length ? 'won' : 'eligible', isManager: !!m.isManager, isMe: m.userId === viewer };
       if (v.role.manager) { row.joinedAt = m.joinedAt; row.linkedUser = !!m.userId; }
       return row;
     });
     return { ok: true, groupId: gid, scope: v.role.manager ? 'manager' : 'participant', members: list };
+  }
+  function shareList(db, viewer, gid, opts) {
+    var v = guardView(db, viewer, gid); if (v.err) return v.err; opts = opts || {}; var K = C();
+    if (!v.role.manager && !v.role.member) return fail('FORBIDDEN', 'قائمة الأسهم غير متاحة');
+    var shares = db.shares.filter(function (s) {
+      if (s.groupId !== gid) return false;
+      if (!v.role.manager && s.memberId !== v.role.member.id) return false;
+      return true;
+    }).map(function (s) {
+      var m = db.members.find(function (x) { return x.id === s.memberId; });
+      var win = db.draws.find(function (x) { return x.winnerShareId === s.id; });
+      return { id:s.id, shareNo:s.no, memberId:s.memberId, ownerName:m ? m.name : '—', status:win ? 'won' : 'eligible', winnerRound:win ? win.round : null };
+    });
+    if (opts.status && opts.status !== 'all') shares = shares.filter(function (s) { return s.status === opts.status; });
+    return { ok:true, groupId:gid, shares:shares, total:shares.length };
   }
   function drawHistory(db, viewer, gid) {
     var v = guardView(db, viewer, gid); if (v.err) return v.err; var K = C();
@@ -1271,6 +1287,6 @@
     sendMessage: sendMessage, markChatRead: markChatRead, setNotifyType: setNotifyType, setMute: setMute, isMuted: isMuted, markNotificationsRead: markNotificationsRead,
     /* queries */
     groupDetail: groupDetail, installmentRows: installmentRows, memberStatement: memberStatement, receiptList: receiptList, receiptDetail: receiptDetail,
-    eventLog: eventLog, memberList: memberList, inviteList: inviteList, myInvitations: myInvitations, drawHistory: drawHistory, notificationList: notificationList, chatView: chatView
+    eventLog: eventLog, memberList: memberList, shareList: shareList, inviteList: inviteList, myInvitations: myInvitations, drawHistory: drawHistory, notificationList: notificationList, chatView: chatView
   };
 })(typeof window !== 'undefined' ? window : globalThis);
