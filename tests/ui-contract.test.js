@@ -486,7 +486,7 @@ test('draw room sub-tabs are role-aware and participants never call manager-only
   assert.match(draw, /const manager = !!\(d\.role && d\.role\.manager\)/);
   assert.match(draw, /manager && \(view === 'summary' \|\| view === 'result'\)[\s\S]*?SahmApp\.getDrawReadiness/);
   assert.match(draw, /manager && view === 'summary'[\s\S]*?SahmApp\.getFinancialSummary/);
-  assert.match(draw, /const drawTabs = manager[\s\S]*?\['summary','eligible','schedule','result','history'\][\s\S]*?: \[\['summary','الملخص'\],\['eligible','الأسهم المؤهلة'\],\['result','النتيجة'\],\['history','السجل'\]\]/);
+  assert.match(draw, /const drawTabs = manager\s*\? \[\['summary','الملخص'\],\['eligible','الأسهم المؤهلة'\],\['schedule','الموعد'\],\['result','النتيجة'\],\['history','السجل'\]\]\s*:\s*\[\['summary','الملخص'\],\['eligible','الأسهم المؤهلة'\],\['result','النتيجة'\],\['history','السجل'\]\]/);
   assert.match(draw, /role="tablist"/);
   assert.match(draw, /role="tab"/);
   assert.match(draw, /aria-selected=/);
