@@ -148,9 +148,9 @@
 #screen .mgd-summary-stats{flex-wrap:wrap;margin-top:9px;gap:7px 12px}
 #screen .mgd-summary-stats span{font-size:10px;color:#7b8799}
 #screen .mgd-summary-stats b{color:#26364f;font-size:12px}
-#screen .mgd-installment-filters{display:flex;align-items:center;gap:6px}
-#screen .mgd-installment-filters .mgd-select{flex:1;min-width:0}
-#screen .mgd-installment-filters .mgd-select select{min-height:38px;padding:6px 5px;font-size:11px}
+
+
+
 #screen .mgd-reminder-icon{display:grid;place-items:center;flex:none;width:38px;height:38px;border:1px solid #dce3ed;border-radius:9px;background:#fff;color:#3158d6}
 #screen .mgd-installment-search{min-height:39px;margin-bottom:9px}
 
@@ -249,8 +249,8 @@
   #screen .mgd-tabs{gap:0}
   #screen .mgd-tabs button{font-size:10px;padding-inline:1px}
   #screen .mgd-tabs button svg{width:15px;height:15px}
-  #screen .mgd-installment-filters{flex-wrap:wrap}
-  #screen .mgd-installment-filters .mgd-select{flex:1 1 28%}
+  
+  
   #screen .mgd-installment-filters .mgd-reminder-icon{width:36px;height:36px}
   #screen .mgd-member-card,#screen .mgd-cycle-card{gap:7px;padding:10px}
   #screen .mgd-cycle-state{display:none}
