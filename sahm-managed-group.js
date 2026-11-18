@@ -303,6 +303,7 @@
     const el = event.target.closest('[data-action]');
     if (!el) return;
     const action = el.dataset.action;
+    if (['record-paid','send-reminder','send-reminder-all','schedule-draw','run-draw','draw-presentation-completed','draw-presentation-failed','notify-channel-toggle'].includes(action)) invalidateReads();
     if (!['managed-tab', 'managed-open-member', 'managed-open-cycle', 'managed-back', 'managed-draw-view'].includes(action)) return;
     event.preventDefault();
     event.stopPropagation();
