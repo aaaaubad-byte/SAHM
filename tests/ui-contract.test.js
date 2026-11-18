@@ -567,3 +567,15 @@ test('managed workspace external stylesheet has balanced responsive rules and vi
   }
   assert.equal(depth, 0, 'all managed workspace CSS blocks are balanced');
 });
+
+
+test('association workspace visual refinement preserves a calm, responsive hierarchy', () => {
+  const css = fs.readFileSync(path.join(ROOT, 'sahm-managed-group.css'), 'utf8');
+  assert.match(css, /SAHM workspace visual cleanup/);
+  assert.match(css, /#screen \.mgd-identity\{[\s\S]*?background:#fff/);
+  assert.match(css, /#screen \.mgd-identity-metrics\{[\s\S]*?grid-template-columns:repeat\(4,minmax\(0,1fr\)\)/);
+  assert.match(css, /#screen \.mgd-tabs button\.active\{[\s\S]*?color:#3158b7/);
+  assert.match(css, /#screen \.mgd-draw-nav button\.active/);
+  assert.match(css, /#screen \.mgd-tabs button:focus-visible/);
+  assert.match(css, /@media\(max-width:340px\)/);
+});
