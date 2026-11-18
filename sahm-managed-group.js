@@ -235,16 +235,42 @@
     const el = event.target.closest('[data-action]');
     if (!el) return;
     const action = el.dataset.action;
+    if (!['managed-tab', 'managed-open-member', 'managed-open-cycle', 'managed-back', 'managed-draw-view'].includes(action)) return;
+    event.preventDefault();
+    event.stopPropagation();
+
     if (action === 'managed-tab') {
-      back();
-    } else if (action === 'managed-open-member') {
-      go('group-detail', { managedView: 'member', memberId: el.dataset.memberId }, { currentGroupId: currentGroupId, groupDetailTab: 'members' });
-    } else if (action === 'managed-open-cycle') {
-      go('group-detail', { managedView: 'cycle', round: el.dataset.round }, { currentGroupId: currentGroupId, groupDetailTab: 'cycles' });
-    } else if (action === 'managed-back') {
-      groupDetailTab = el.dataset.tab || 'members'; params = {}; syncNavigationContext(); redraw();
-    } else if (action === 'managed-draw-view') {
-      params = { managedView: 'draw', managedDrawView: el.dataset.view || 'summary' }; syncNavigationContext(); redraw();
+      const allowed = ['members', 'cycles', 'installments', 'draw-room'];
+      groupDetailTab = allowed.includes(el.dataset.tab) ? el.dataset.tab : 'members';
+      params = {};
+      syncNavigationContext();
+      redraw();
+      return;
+    }
+    if (action === 'managed-open-member') {
+      go('group-detail', { managedView: 'member', memberId: el.dataset.memberId }, {
+        currentGroupId: currentGroupId, groupDetailTab: 'members'
+      });
+      return;
+    }
+    if (action === 'managed-open-cycle') {
+      go('group-detail', { managedView: 'cycle', round: el.dataset.round }, {
+        currentGroupId: currentGroupId, groupDetailTab: 'cycles'
+      });
+      return;
+    }
+    if (action === 'managed-back') {
+      const allowed = ['members', 'cycles', 'installments', 'draw-room'];
+      groupDetailTab = allowed.includes(el.dataset.tab) ? el.dataset.tab : 'members';
+      params = {};
+      syncNavigationContext();
+      redraw();
+      return;
+    }
+    if (action === 'managed-draw-view') {
+      params = { managedView: 'draw', managedDrawView: el.dataset.view || 'summary' };
+      syncNavigationContext();
+      redraw();
     }
   });
   root.SahmManagedGroup = { render, redraw };
