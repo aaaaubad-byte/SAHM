@@ -173,14 +173,14 @@
       body = '<div class="mgd-list-head"><b>الأسهم المؤهلة</b><span>' + eligible.length + ' سهم</span></div><div class="mgd-list">' +
         (eligible.map(x => '<div class="mgd-simple-row"><span class="mgd-share-no">' + esc(x.share_no || '—') + '</span><span class="mgd-member-main"><b>' + esc(x.owner_name || 'مشارك') + '</b><small>السهم ' + esc(x.share_no || '—') + '</small></span><span class="mgd-status-ok">مؤهل</span></div>').join('') || '<div class="mgd-empty">لا توجد أسهم مؤهلة حاليًا</div>') + '</div>';
     } else if (view === 'schedule') {
-      body = '<section class="mgd-detail-card"><b>موعد القرعة · توقيت اليمن</b><label class="mgd-date-field"><span>تاريخ ووقت التنفيذ</span><input id="mgdDrawScheduledAt" type="datetime-local" value="' + esc(utcToAdenDateTime(cycle.draw_scheduled_at)) + '" ' + (draw ? 'disabled' : '') + '></label>' +
+      body = '<section class="mgd-detail-card"><b>موعد القرعة · توقيت اليمن</b><label class="mgd-date-field"><span>تاريخ ووقت التنفيذ</span><input id="drawScheduledAt" type="datetime-local" value="' + esc(utcToAdenDateTime(cycle.draw_scheduled_at)) + '" ' + (draw ? 'disabled' : '') + '></label>' +
         (draw ? '<div class="mgd-reason">تم تثبيت نتيجة هذه الجولة؛ لا يمكن تغيير موعدها.</div>' : actionButton('حفظ موعد القرعة', 'schedule-draw', '', 'primary')) + '</section>';
     } else if (view === 'result') {
       body = '<section class="mgd-detail-card"><div class="mgd-detail-heading"><b>تنفيذ نتيجة الجولة</b>' + pill(room.state || 'pending') + '</div>' +
         (draw ? '<div class="mgd-winner"><span>' + uiIcon('trophy', 25) + '</span><b>' + esc(draw.winner_owner_name || 'الفائز') + '</b><small>السهم ' + esc(draw.winner_share_no || '—') + '</small></div>' :
           '<div class="mgd-empty">لم تُثبت نتيجة القرعة بعد</div>') +
         (draw ? '<div class="mgd-actions">' + actionButton('تسجيل اكتمال العرض', 'draw-presentation-completed', '', 'primary') + actionButton('تسجيل تعذر العرض', 'draw-presentation-failed', '', '') + '</div>' :
-          actionButton('تنفيذ القرعة وتثبيت النتيجة', 'run-draw', '', 'primary ' + (readiness.canDraw ? '' : 'disabled')) ) + '</section>';
+          actionButton('تنفيذ القرعة وتثبيت النتيجة', 'run-draw', readiness.canDraw ? '' : 'disabled', 'primary') ) + '</section>';
     } else {
       const historyResult = SahmApp.getDrawHistory(g.id), history = historyResult && historyResult.ok ? historyResult.history || [] : [];
       body = '<div class="mgd-list-head"><b>سجل القرعات</b><span>' + history.length + ' نتيجة</span></div><div class="mgd-list">' +
