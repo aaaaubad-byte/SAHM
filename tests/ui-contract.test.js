@@ -590,7 +590,7 @@ test('shared association workspace routes both roles through one detail componen
   const managed = read('sahm-managed-group.js');
   assert.match(html, /function groupDetail\(\)[\s\S]*SahmManagedGroup\.render\(g,d\)/);
   assert.doesNotMatch(html, /function legacyGroupDetail|legacy-group-detail/);
-  for (const tab of ['overview','installments','shares','draws','communication']) assert.ok(managed.includes("data-tab=\\""+tab+"\\"") || managed.includes("['"+tab+"'"), 'missing participant tab '+tab);
+  for (const tab of ['overview','installments','shares','draws','communication']) assert.ok(managed.includes("['"+tab+"'"), 'missing participant tab '+tab);
   assert.match(managed, /SahmApp\.memberStatement\(g\.id,ownMemberId\(g\)\)/);
   assert.match(managed, /SahmApp\.drawHistory\(g\.id\)/);
   assert.doesNotMatch(managed, /getDrawHistory/);
