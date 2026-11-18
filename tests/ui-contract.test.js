@@ -478,6 +478,37 @@ test('draw and member tabs expose round progress and member win/eligibility filt
   assert.match(managed,/backToTab\('draws'\)/);
 });
 
+test('draw room sub-tabs are role-aware and participants never call manager-only readiness RPCs', () => {
+  const start = managed.indexOf('async function drawPanel(g, d)');
+  const end = managed.indexOf('async function newsPanel(g, d)', start);
+  assert.ok(start >= 0 && end > start, 'draw room renderer exists');
+  const draw = managed.slice(start, end);
+  assert.match(draw, /const manager = !!\(d\.role && d\.role\.manager\)/);
+  assert.match(draw, /manager && \(view === 'summary' \|\| view === 'result'\)[\s\S]*?SahmApp\.getDrawReadiness/);
+  assert.match(draw, /manager && view === 'summary'[\s\S]*?SahmApp\.getFinancialSummary/);
+  assert.match(draw, /const drawTabs = manager[\s\S]*?\['summary','eligible','schedule','result','history'\][\s\S]*?: \[\['summary','الملخص'\],\['eligible','الأسهم المؤهلة'\],\['result','النتيجة'\],\['history','السجل'\]\]/);
+  assert.match(draw, /role="tablist"/);
+  assert.match(draw, /role="tab"/);
+  assert.match(draw, /aria-selected=/);
+  assert.match(draw, /role="tabpanel"/);
+  assert.match(draw, /manager \? \(draw \?/);
+  assert.match(managed, /event\.stopImmediatePropagation\(\)/, 'workspace tab actions are not dispatched twice');
+  assert.match(managed, /if \(!allowedViews\.includes\(requested\)\)/, 'invalid or manager-only sub-tabs are rejected');
+});
+
+test('participant draw entry does not repeat the full draw history already available inside the room', () => {
+  const start = managed.indexOf('async function memberDraws(g)');
+  const end = managed.indexOf('function memberCommunication()', start);
+  const panel = managed.slice(start, end);
+  assert.match(panel, /mgd-room-entry/);
+  assert.match(panel, /فتح غرفة القرعة/);
+  assert.doesNotMatch(panel, /history\.map\(/);
+  assert.match(managed, /function notificationSettingsPanel\(d\)/);
+  const newsStart = managed.indexOf('async function newsPanel(g, d)');
+  const newsEnd = managed.indexOf('function notificationSettingsPanel(d)', newsStart);
+  assert.doesNotMatch(managed.slice(newsStart, newsEnd), /إعدادات النشر/);
+});
+
 test('shared association workspace routes both roles through one detail component', () => {
   assert.match(html, /function groupDetail\(\)[\s\S]*SahmManagedGroup\.render\(g,d\)/);
   assert.doesNotMatch(html, /function legacyGroupDetail|legacy-group-detail/);
