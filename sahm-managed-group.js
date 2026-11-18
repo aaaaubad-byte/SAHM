@@ -140,7 +140,7 @@
         row('hash', 'رقم السهم', draw.winner_share_no || draw.winnerShareId || '—') +
         row('calendar-days', 'تاريخ القرعة', dateLabel(draw.scheduled_on || draw.date)) +
         row('coins', 'الجائزة المستهدفة', moneyValue(draw.prize_target_minor || draw.prize || 0, draw.currency || g.currency)) +
-        row('monitor', 'حالة العرض', draw.presentation_status || draw.presentation || '—') + '</section>' : '') +
+        row('monitor', 'حالة العرض', draw.presentation_status || '—') + '</section>' : '') +
       '<div class="mgd-list-head"><b>أقساط الدورة</b><span>' + obligations.length + ' سجل</span></div>' +
       '<div class="mgd-list">' + (obligations.map(x => '<div class="mgd-simple-row"><span><b>' + esc(x.memberName) + '</b><small>القسط ' + x.no + '</small></span>' + pill(x.status) + '</div>').join('') || '<div class="mgd-empty">لا توجد بيانات أقساط لهذه الدورة</div>') + '</div>';
   }
@@ -236,11 +236,11 @@
     if (!el) return;
     const action = el.dataset.action;
     if (action === 'managed-tab') {
-      groupDetailTab = el.dataset.tab || 'members'; params = {}; syncNavigationContext(); redraw();
+      back();
     } else if (action === 'managed-open-member') {
-      params = { managedView: 'member', memberId: el.dataset.memberId }; syncNavigationContext(); redraw();
+      go('group-detail', { managedView: 'member', memberId: el.dataset.memberId }, { currentGroupId: currentGroupId, groupDetailTab: 'members' });
     } else if (action === 'managed-open-cycle') {
-      params = { managedView: 'cycle', round: el.dataset.round }; syncNavigationContext(); redraw();
+      go('group-detail', { managedView: 'cycle', round: el.dataset.round }, { currentGroupId: currentGroupId, groupDetailTab: 'cycles' });
     } else if (action === 'managed-back') {
       groupDetailTab = el.dataset.tab || 'members'; params = {}; syncNavigationContext(); redraw();
     } else if (action === 'managed-draw-view') {
