@@ -23,7 +23,12 @@
     return '<div class="mgd-loading" role="status"><span class="mgd-loading-spinner"></span><span>جارٍ تحميل ' + esc(label) + '...</span></div>';
   }
   function commitRender(g, d, active, content) {
-    shell('تفاصيل الجمعية', 'groups', identity(g, d) + tabs(active, !!(d.role&&d.role.manager)) + '<main class="mgd-content">' + content + '</main>');
+    const manager = !!(d.role && d.role.manager);
+    if (active === 'installments' && manager) {
+      shell('التحصيل', 'groups', '<main class="mgd-content mgd-collection-page">' + content + '</main>');
+    } else {
+      shell('تفاصيل الجمعية', 'groups', identity(g, d) + tabs(active, manager) + '<main class="mgd-content">' + content + '</main>');
+    }
     const activeTab = document.querySelector && document.querySelector('.mgd-tabs button.active');
     if (activeTab && typeof activeTab.scrollIntoView === 'function') activeTab.scrollIntoView({ block: 'nearest', inline: 'nearest' });
     if (active === 'members') bindMemberSearch();
@@ -219,7 +224,7 @@
     const currentNo=(inRange||all.find(x=>x.status==='due'||x.status==='late')||all[0]||{}).no;
     const installmentOptions='<option value="'+(currentNo||'all')+'" '+(String(state.installment)===String(currentNo||'all')?'selected':'')+'>القسط الحالي</option><option value="all" '+(state.installment==='all'?'selected':'')+'>جميع الأقساط</option>'+
       Array.from({length:Math.max(1,Number(g.installments)||1)},(_,i)=>'<option value="'+(i+1)+'" '+(String(state.installment)===String(i+1)?'selected':'')+'>القسط '+(i+1)+'</option>').join('');
-    return '<section class="mgd-installment-summary"><div class="mgd-summary-top"><b>القرعة '+cycle+'</b><span>'+esc(first.periodStart?dateLabel(first.periodStart):'—')+' – '+esc(first.periodEnd?dateLabel(first.periodEnd):'—')+'</span></div><div class="mgd-summary-stats"><span>الإجمالي <b>'+shown.length+'</b></span><span>مدفوعة <b>'+paid+'</b></span><span>معلقة <b>'+pending+'</b></span><span>متأخرة <b>'+late+'</b></span></div></section>'+
+    return (manager?'':'<section class="mgd-installment-summary"><div class="mgd-summary-top"><b>القرعة '+cycle+'</b><span>'+esc(first.periodStart?dateLabel(first.periodStart):'—')+' – '+esc(first.periodEnd?dateLabel(first.periodEnd):'—')+'</span></div><div class="mgd-summary-stats"><span>الإجمالي <b>'+shown.length+'</b></span><span>مدفوعة <b>'+paid+'</b></span><span>معلقة <b>'+pending+'</b></span><span>متأخرة <b>'+late+'</b></span></div></section>')+
       '<div class="mgd-installment-toolbar" id="mgdInstallmentToolbar"><label class="mgd-search mgd-installment-search">'+uiIcon('search',17)+'<input id="mgdInstallmentSearch" type="search" placeholder="ابحث باسم العضو" autocomplete="off"></label>'+
       (manager?'<button type="button" class="mgd-tool-icon" data-action="managed-installment-select" id="mgdInstallmentSelectToggle" aria-label="تحديد الأقساط" aria-pressed="'+(state.installmentSelectMode?'true':'false')+'">'+uiIcon('list-checks',19)+'</button>':'')+
       '<button type="button" class="mgd-tool-icon" data-action="managed-installment-filter" id="mgdInstallmentFilterToggle" aria-label="الفلاتر" aria-expanded="'+(state.installmentFiltersOpen?'true':'false')+'">'+uiIcon('sliders-horizontal',19)+'</button>'+
