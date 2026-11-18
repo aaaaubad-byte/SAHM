@@ -11,6 +11,8 @@ const APP_SHELL = [
   '/sahm-core.js',
   '/sahm-data.js',
   '/sahm-navigation.js',
+  '/sahm-managed-group.js',
+  '/sahm-managed-group.css',
   '/manifest.webmanifest',
   '/icons/sahm.svg'
 ];
