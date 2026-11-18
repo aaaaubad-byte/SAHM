@@ -422,6 +422,10 @@
     const view = params.managedView || '';
     if (state.groupId !== g.id) { state.groupId=g.id; state.cycle=null; state.installment='all'; state.status='all'; state.query=''; state.shareStatus='eligible'; state.memberStatus='all'; }
     const manager = !!(d.role && d.role.manager);
+    if (manager && !view && groupDetailTab === 'overview') {
+      managerDashboard(g, d);
+      return;
+    }
     const managerTabs = ['installments','shares','draws','members','settings','news','chat','audit'];
     const memberTabs = ['overview','installments','shares','draws','communication','news','chat'];
     const active = (manager ? managerTabs : memberTabs).includes(groupDetailTab) ? groupDetailTab : (manager ? 'members' : 'overview');
