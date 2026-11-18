@@ -172,14 +172,17 @@
   }
   async function drawPanel(g, d) {
     const view = params.managedDrawView || 'summary';
-    const roomResult = await cachedRead('draw-room:' + g.id, () => SahmApp.getDrawRoom(g.id), 7000);
+    const roomPromise = cachedRead('draw-room:' + g.id, () => SahmApp.getDrawRoom(g.id), 7000);
+    const readinessPromise = (view === 'summary' || view === 'result')
+      ? cachedRead('draw-ready:' + g.id, () => SahmApp.getDrawReadiness(g.id), 7000) : null;
+    const financialPromise = view === 'summary'
+      ? cachedRead('financial:' + g.id, () => SahmApp.getFinancialSummary(g.id), 7000) : null;
+    const roomResult = await roomPromise;
     if (!roomResult || !roomResult.ok) return '<div class="mgd-empty">' + esc(roomResult && roomResult.message || 'تعذر تحميل غرفة القرعة') + '</div>';
     const room = roomResult.room || {}, cycle = room.cycle || {}, draw = room.draw || null, eligible = room.eligible_shares || [];
     let readiness = {}, financial = null, history = [];
-    if (view === 'summary' || (view === 'result' && !draw)) {
-      const tasks = [cachedRead('draw-ready:' + g.id, () => SahmApp.getDrawReadiness(g.id), 7000)];
-      if (view === 'summary') tasks.push(cachedRead('financial:' + g.id, () => SahmApp.getFinancialSummary(g.id), 7000));
-      const results = await Promise.all(tasks);
+    if (readinessPromise && (view === 'summary' || !draw)) {
+      const results = await Promise.all([readinessPromise, financialPromise].filter(Boolean));
       readiness = results[0] && results[0].ok ? results[0] : {};
       financial = view === 'summary' && results[1] && results[1].ok ? results[1].summary : null;
     }
