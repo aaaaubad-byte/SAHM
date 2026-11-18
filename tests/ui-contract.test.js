@@ -657,4 +657,5 @@ test('managed installment selection starts with long press and bulk reminder is 
   assert.match(managed, /actionButton\('تحصيل','record-paid'/);
   assert.match(managed, /mgd-installment-status-icon/);
   assert.match(fs.readFileSync(path.join(ROOT, 'sahm-managed-group.css'), 'utf8'), /mgd-selection-bar/);
+  assert.doesNotMatch(fs.readFileSync(path.join(ROOT, 'sahm-managed-group.css'), 'utf8'), /mgd-bulk-reminder-action/);
 });

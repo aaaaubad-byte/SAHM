@@ -499,10 +499,6 @@
 #screen .mgd-collection-page .mgd-installment-status-icon.due{background:#edf2ff;color:#3158d6}
 #screen .mgd-collection-page .mgd-installment-status-icon.late{background:#fbefec;color:#c05a43}
 #screen .mgd-collection-page .mgd-installment-status-icon.upcoming{background:#f0f2f6;color:#8b96a8}
-#screen .mgd-collection-page .mgd-installment-status-icon.paid{color:#23815b}
-#screen .mgd-collection-page .mgd-installment-status-icon.due{color:#3158d6}
-#screen .mgd-collection-page .mgd-installment-status-icon.late{color:#c05a43}
-#screen .mgd-collection-page .mgd-installment-status-icon.upcoming{color:#8b96a8}
 #screen .mgd-collection-page .mgd-installment-meta{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));align-items:stretch;gap:0;min-width:0;margin-top:10px;padding:9px 0 2px;border-top:1px solid #edf0f5;direction:rtl}
 #screen .mgd-collection-page .mgd-installment-stat{display:flex;flex-direction:column;align-items:center;justify-content:flex-start;gap:5px;min-width:0;padding:0 4px;text-align:center}
 #screen .mgd-collection-page .mgd-installment-stat+.mgd-installment-stat{border-inline-start:1px solid #edf0f5}
@@ -527,7 +523,6 @@
  #screen .mgd-collection-page .mgd-installment-filter-fields .mgd-select:nth-child(2){flex:0 1 57px}
  #screen .mgd-collection-page .mgd-installment-filter-fields .mgd-select:nth-child(3){flex:0 1 48px}
  #screen .mgd-collection-page .mgd-installment-filter-fields .mgd-select select{height:34px;min-height:34px;font-size:8px;padding-inline:1px}
- #screen .mgd-collection-page .mgd-bulk-reminder-action{min-width:49px;padding-inline:4px;font-size:9px}
  #screen .mgd-collection-page .mgd-installment-meta{gap:5px;font-size:10px}
  #screen .mgd-collection-page .mgd-installment-meta>b{font-size:11px}
 }
@@ -538,7 +533,6 @@
  #screen .mgd-collection-page .mgd-installment-filter-fields .mgd-select:first-child{flex-basis:38px}
  #screen .mgd-collection-page .mgd-installment-filter-fields .mgd-select:nth-child(2){flex-basis:48px}
  #screen .mgd-collection-page .mgd-installment-filter-fields .mgd-select:nth-child(3){flex-basis:42px}
- #screen .mgd-collection-page .mgd-bulk-reminder-action{min-width:46px}
 }
 
 /* Unified inline search/filter row for member and draw listings. */
