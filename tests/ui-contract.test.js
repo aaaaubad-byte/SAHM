@@ -479,18 +479,18 @@ test('manager collection screen implements current installment filters, selectiv
   assert.ok(managed.includes("shell('التحصيل'"), 'manager collection title is present');
   assert.ok(panel.includes('value="current"'), 'current installment is the default');
   assert.ok(panel.includes('value="all"'), 'all installments option exists');
-  for (const id of ['mgdInstallmentSearch','mgdInstallmentNumber','mgdInstallmentStatus','mgdInstallmentFilterToggle','mgdInstallmentSelectToggle','mgdInstallmentBulkReminder']) {
+  for (const id of ['mgdInstallmentSearch','mgdInstallmentNumber','mgdInstallmentStatus','mgdInstallmentFilterToggle','mgdInstallmentSelectionBar','mgdInstallmentBulkReminder','mgdInstallmentCancelSelection','mgdInstallmentSelectVisible']) {
     assert.ok(panel.includes('id="'+id+'"'), 'collection control '+id);
   }
   assert.ok(managed.includes('function currentInstallmentNo(rows, g)'), 'current installment is recalculated from the selected cycle');
   assert.ok(managed.includes("state.installment === 'current'"));
-  assert.ok(managed.includes("const selectable = state.installmentSelectMode && (x.status === 'due' || x.status === 'late')"));
+  assert.ok(managed.includes("const selectable = manager && (x.status === 'due' || x.status === 'late')"));
   assert.ok(managed.includes("const collect = x.status === 'due' || x.status === 'late' || x.status === 'upcoming'"));
   assert.ok(managed.includes("remind = x.status === 'due' || x.status === 'late'"));
   assert.ok(managed.includes('mgd-installment-status-icon'));
-  assert.ok(managed.includes("uiIcon(meta[0],22)"), 'installment status icon matches 22px home activity icon');
+  assert.ok(managed.includes("uiIcon(meta[0],19)"), 'status glyph uses the activity-card icon scale');
   for (const metric of ["uiIcon('layers',14)","uiIcon('wallet',14)","uiIcon('calendar-days',14)"]) assert.ok(managed.includes(metric), 'installment metric icon '+metric);
-  for (const label of ['الأسهم','المبلغ','رقم القسط']) assert.ok(managed.includes('<span>'+label+'</span>'), 'installment metric label '+label);
+  for (const label of ['الأسهم','المبلغ','القسط']) assert.ok(managed.includes('<span>'+label+'</span>'), 'installment metric label '+label);
   assert.ok(managed.includes('mgd-installment-stat-label') && managed.includes('mgd-installment-stat'), 'each metric has a label row and a value below');
   assert.ok(managed.includes('data-action="managed-inline-filter-toggle"'), 'member and draw filter toggles expose delegated action semantics');
 

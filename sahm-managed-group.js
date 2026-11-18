@@ -368,7 +368,7 @@
       '<div class="mgd-installment-toolbar" id="mgdInstallmentToolbar"><label class="mgd-search mgd-installment-search">'+uiIcon('search',17)+'<input id="mgdInstallmentSearch" type="search" placeholder="ابحث باسم العضو" autocomplete="off"></label>'+
       '<button type="button" class="mgd-tool-icon" data-action="managed-installment-filter" id="mgdInstallmentFilterToggle" aria-label="الفلاتر" aria-expanded="'+(state.installmentFiltersOpen?'true':'false')+'">'+uiIcon('sliders-horizontal',19)+'</button>'+
       '<div class="mgd-installment-filter-fields"><label class="mgd-select"><select id="mgdInstallmentCycle" aria-label="القرعة">'+cycleOptions+'</select></label><label class="mgd-select"><select id="mgdInstallmentNumber" aria-label="القسط">'+installmentOptions+'</select></label><label class="mgd-select"><select id="mgdInstallmentStatus" aria-label="حالة القسط"><option value="all">كل الحالات</option></select></label></div></div>'+
-      (manager?'<div class="mgd-selection-bar" id="mgdInstallmentSelectionBar" hidden><span class="mgd-selection-count" id="mgdInstallmentSelectionCount">0 محدد</span><button type="button" class="mgd-selection-secondary" id="mgdInstallmentSelectVisible">تحديد الظاهر</button><button type="button" class="mgd-selection-reminder" id="mgdInstallmentBulkReminder" disabled>'+uiIcon('bell',15)+'<span>تذكير</span></button><button type="button" class="mgd-selection-cancel" id="mgdInstallmentCancelSelection" aria-label="إلغاء التحديد">'+uiIcon('x',17)+'</button></div>':'')+
+      (manager?'<div class="mgd-selection-bar" id="mgdInstallmentSelectionBar" hidden><span class="mgd-selection-count" id="mgdInstallmentSelectionCount">0 محدد</span><button type="button" class="mgd-selection-secondary" data-action="managed-installment-select-visible" id="mgdInstallmentSelectVisible">تحديد الظاهر</button><button type="button" class="mgd-selection-reminder" data-action="managed-installment-bulk-reminder" id="mgdInstallmentBulkReminder" disabled>'+uiIcon('bell',15)+'<span>تذكير</span></button><button type="button" class="mgd-selection-cancel" data-action="managed-installment-cancel-selection" id="mgdInstallmentCancelSelection" aria-label="إلغاء التحديد">'+uiIcon('x',17)+'</button></div>':'')+
       '<div id="mgdInstallmentList" class="mgd-installment-list"></div><button type="button" class="mgd-secondary-link" data-go="receipts">سجل الاستلام والتصحيحات '+uiIcon('back-screen',16)+'</button>';
   }
   async function cycleDetail(g, d, round) {
@@ -776,7 +776,7 @@
     const el = event.target.closest('[data-action]');
     if (!el) return;
     const action = el.dataset.action;
-    if (['managed-installment-filter'].includes(action)) { event.preventDefault(); event.stopImmediatePropagation(); return; }
+    if (['managed-installment-filter','managed-installment-select-visible','managed-installment-cancel-selection','managed-installment-bulk-reminder'].includes(action)) { event.preventDefault(); event.stopImmediatePropagation(); return; }
     if (['record-paid','send-reminder','schedule-draw','run-draw','draw-presentation-completed','draw-presentation-failed','notify-channel-toggle'].includes(action)) invalidateReads();
     if (!['managed-home-slide','managed-home-section','managed-tab','managed-open-member','managed-open-cycle','managed-back','managed-draw-view','managed-settings-view','managed-inline-filter-toggle'].includes(action)) return;
     event.preventDefault();
