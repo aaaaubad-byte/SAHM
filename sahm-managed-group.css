@@ -11,9 +11,13 @@
 #screen .mgd-progress-head{font-size:12px;font-weight:700}
 #screen .mgd-progress{height:8px;border-radius:20px;background:rgba(255,255,255,.2);overflow:hidden;margin-top:8px}
 #screen .mgd-progress>i{display:block;height:100%;border-radius:20px;background:#fff}
-#screen .mgd-tabs{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:5px;padding:5px;background:#edf1f8;border-radius:13px;margin:0 0 14px}
-#screen .mgd-tabs button{display:flex;align-items:center;justify-content:center;flex-direction:column;gap:5px;min-width:0;min-height:58px;padding:7px 3px;border-radius:10px;background:transparent;color:#63728a;font-size:11px;font-weight:750}
-#screen .mgd-tabs button.active{background:#fff;color:#3158d6;box-shadow:0 2px 8px rgba(29,49,83,.09)}
+#screen .mgd-tabs{display:flex;align-items:stretch;gap:0;overflow-x:auto;overflow-y:hidden;white-space:nowrap;scrollbar-width:none;border-bottom:1px solid #e3e8f0;margin:0 0 14px;padding:0 2px;background:transparent}
+#screen .mgd-tabs::-webkit-scrollbar{display:none}
+#screen .mgd-tabs button{position:relative;display:inline-flex;align-items:center;justify-content:center;flex:1 0 auto;gap:6px;min-width:0;min-height:42px;padding:8px 10px 10px;border-radius:0;background:transparent;color:#758197;font-size:11px;font-weight:700;white-space:nowrap}
+#screen .mgd-tabs button svg{flex:none;width:16px;height:16px;opacity:.82}
+#screen .mgd-tabs button.active{background:transparent;color:#3158d6;font-weight:850;box-shadow:none}
+#screen .mgd-tabs button.active svg{opacity:1}
+#screen .mgd-tabs button.active:after{content:"";position:absolute;right:8px;left:8px;bottom:-1px;height:2px;border-radius:2px;background:#3158d6}
 #screen .mgd-content{min-width:0}
 #screen .mgd-list-head{display:flex;align-items:center;justify-content:space-between;gap:8px;margin:4px 1px 10px;color:#253650}
 #screen .mgd-list-head>b{font-size:15px;font-weight:850}
@@ -85,3 +89,27 @@
 #screen .mgd-bulk-reminder button{background:#3158d6;color:#fff;border-color:#3158d6;white-space:nowrap}
 #screen .mgd-utilities{display:flex;flex-wrap:wrap;justify-content:center;gap:7px;margin:16px 0 5px;padding:10px 0;border-top:1px solid #e7ebf2}
 #screen .mgd-utilities button{min-height:34px;padding:6px 10px;border:1px solid #e0e6ef;border-radius:9px;background:#fff;color:#68778d;font-size:11px;font-weight:750}
+
+#screen .mgd-feed-list,#screen .mgd-audit-list{display:flex;flex-direction:column;gap:8px}
+#screen .mgd-feed-card,#screen .mgd-audit-item{display:flex;align-items:flex-start;gap:10px;padding:12px;border:1px solid #e3e8f0;border-radius:12px;background:#fff}
+#screen .mgd-feed-icon,#screen .mgd-audit-icon{display:grid;place-items:center;flex:none;width:34px;height:34px;border-radius:9px;background:#edf2ff;color:#3158d6}
+#screen .mgd-feed-copy,#screen .mgd-audit-copy{display:flex;flex:1;min-width:0;flex-direction:column;gap:5px;color:#283750}
+#screen .mgd-feed-copy>b,#screen .mgd-audit-copy>b{font-size:13px;font-weight:850}
+#screen .mgd-feed-copy>p{margin:0;color:#596a82;font-size:12px;line-height:1.7;white-space:pre-wrap}
+#screen .mgd-feed-copy>small,#screen .mgd-audit-copy>small{font-size:10px;color:#7b8799}
+#screen .mgd-settings-heading{margin-top:18px}
+#screen .mgd-toggle-row{display:flex;align-items:center;justify-content:space-between;gap:12px;min-height:39px;padding:7px 0;border-bottom:1px solid #edf0f5;color:#53627a;font-size:12px}
+#screen .mgd-toggle-row:last-child{border-bottom:0}
+#screen .mgd-toggle-row input{width:18px;height:18px;accent-color:#3158d6;flex:none}
+#screen .mgd-chat-list{display:flex;flex-direction:column;gap:8px;min-height:180px;padding:10px;border:1px solid #e3e8f0;border-radius:12px;background:#f8faff}
+#screen .mgd-chat-list .chatbubble{max-width:88%;margin:0}
+#screen .mgd-chat-list .chatbubble.mine{align-self:flex-start}
+#screen .mgd-chat-form{margin-top:12px;padding:12px;border:1px solid #e3e8f0;border-radius:12px;background:#fff}
+#screen .mgd-chat-form>label{display:block;margin-bottom:7px;color:#53627a;font-size:12px;font-weight:800}
+#screen .mgd-chat-form textarea{display:block;width:100%;min-height:82px;resize:vertical;border:1px solid #dce3ed;border-radius:10px;padding:10px;color:#26364f;font:inherit;font-size:13px}
+#screen .mgd-chat-footer{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-top:8px}
+#screen .mgd-chat-footer>small{color:#7b8799;font-size:10px}
+#screen .mgd-chat-footer .mgd-action{flex:0 0 auto;min-width:82px}
+#screen .mgd-audit-copy details{margin-top:5px;color:#3158d6;font-size:11px}
+#screen .mgd-audit-copy pre{max-width:100%;overflow:auto;white-space:pre-wrap;overflow-wrap:anywhere;color:#596a82;font-size:10px}
+#screen .mgd-group-facts{margin-bottom:12px}
