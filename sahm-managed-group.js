@@ -390,7 +390,7 @@
       '<span class="mgd-home-slide-icon">' + uiIcon(x.icon, 25) + '</span><span class="mgd-home-slide-copy"><b>' + esc(x.title) + '</b><strong>' + esc(x.value) + '</strong><small>' + esc(x.note) + '</small></span>' +
       '<span class="mgd-home-slide-index">0' + (i + 1) + ' / 0' + slides.length + '</span></article>'
     ).join('');
-    const dots = slides.map((x, i) => '<button type="button" class="' + (i === 0 ? 'active' : '') + '" data-mgd-slide-to="' + i + '" aria-label="عرض ' + esc(x.title) + '" aria-pressed="' + (i === 0) + '"></button>').join('');
+    const dots = slides.map((x, i) => '<button type="button" data-action="managed-home-slide" class="' + (i === 0 ? 'active' : '') + '" data-mgd-slide-to="' + i + '" aria-label="عرض ' + esc(x.title) + '" aria-pressed="' + (i === 0) + '"></button>').join('');
     const cards = sections.map(([id, icon, label]) =>
       '<button type="button" class="mgd-home-section" data-action="managed-home-section" data-section="' + id + '">' +
       '<span class="mgd-home-section-icon">' + uiIcon(icon, 21) + '</span><span>' + label + '</span></button>'
