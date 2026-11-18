@@ -54,7 +54,8 @@
     ).join('');
     return '<div class="mgd-list-head"><b>الأعضاء</b><span>' + list.length + ' عضو</span></div>' +
       '<label class="mgd-search">' + uiIcon('search', 18) + '<input id="mgdMemberSearch" type="search" placeholder="البحث باسم العضو" autocomplete="off"></label>' +
-      '<div class="mgd-list" id="mgdMemberList">' + (rows || '<div class="mgd-empty">لا يوجد أعضاء مسجلون</div>') + '</div>';
+      '<div class="mgd-list" id="mgdMemberList">' + (rows || '<div class="mgd-empty">لا يوجد أعضاء مسجلون</div>') + '</div>' +
+      '<div class="mgd-member-tools"><button type="button" data-go="member-reception">إدارة استقبال الأعضاء</button><button type="button" data-go="invite">دعوة عضو</button></div>';
   }
   function bindMemberSearch() {
     const input = document.getElementById('mgdMemberSearch'), list = document.getElementById('mgdMemberList');
@@ -110,6 +111,7 @@
       state.status = status ? status.value : 'all';
       state.cycle = cycle ? Number(cycle.value) : 1;
       state.installment = number ? number.value : 'all';
+      selectedInstallmentCycle = state.cycle;
       if (list) list.innerHTML = installmentRows(g, d);
     };
     [search, status, cycle, number].forEach(el => el && el.addEventListener(el === search ? 'input' : 'change', update));
@@ -125,6 +127,7 @@
       '<label class="mgd-select"><span>رقم القسط</span><select id="mgdInstallmentNumber"><option value="all">كل الأقساط</option>' + installmentOptions + '</select></label>' +
       '<label class="mgd-select"><span>حالة القسط</span><select id="mgdInstallmentStatus"><option value="all">جميع الحالات</option><option value="due">مستحق</option><option value="paid">مدفوع</option><option value="late">متأخر</option><option value="upcoming">لم يحن موعده</option></select></label></div>' +
       '<div id="mgdInstallmentList" class="mgd-installment-list"></div>' +
+      '<section class="mgd-bulk-reminder"><label>تذكير جماعي بالقسط<select id="reminderInstallment">' + installmentOptions + '</select></label><button type="button" data-action="send-reminder-all">إرسال للمستحقين والمتأخرين</button></section>' +
       '<button type="button" class="mgd-secondary-link" data-go="receipts">سجل الاستلام والتصحيحات ' + uiIcon('chevron-left', 16) + '</button>';
   }
   function cycleDetail(g, d, round) {
@@ -218,7 +221,8 @@
     else if (active === 'cycles') { content = cycleCards(g, d); }
     else if (active === 'installments') { content = installmentsPanel(g, d); }
     else { params.managedDrawView = params.managedDrawView || 'summary'; content = await drawPanel(g, d); }
-    shell('تفاصيل الجمعية', 'groups', identity(g, d) + tabs(active) + '<main class="mgd-content">' + content + '</main>');
+    shell('تفاصيل الجمعية', 'groups', identity(g, d) + tabs(active) + '<main class="mgd-content">' + content + '</main>' +
+      '<nav class="mgd-utilities" aria-label="روابط الجمعية"><button data-go="news">أخبار الجمعية</button><button data-go="chat">محادثة الجمعية</button><button data-go="audit">سجل العمليات</button></nav>');
     if (active === 'members') bindMemberSearch();
     if (active === 'installments') bindInstallmentFilters(g, d);
   }
