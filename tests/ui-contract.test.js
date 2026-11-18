@@ -488,6 +488,12 @@ test('manager collection screen implements current installment filters, selectiv
   assert.ok(managed.includes("const collect = x.status === 'due' || x.status === 'late' || x.status === 'upcoming'"));
   assert.ok(managed.includes("remind = x.status === 'due' || x.status === 'late'"));
   assert.ok(managed.includes('mgd-installment-status-icon'));
+  assert.ok(managed.includes("uiIcon(meta[0],22)"), 'installment status icon matches 22px home activity icon');
+  for (const metric of ["uiIcon('layers',14)","uiIcon('wallet',14)","uiIcon('calendar-days',14)"]) assert.ok(managed.includes(metric), 'installment metric icon '+metric);
+  for (const label of ['الأسهم','المبلغ','رقم القسط']) assert.ok(managed.includes('<span>'+label+'</span>'), 'installment metric label '+label);
+  assert.ok(managed.includes('mgd-installment-stat-label') && managed.includes('mgd-installment-stat'), 'each metric has a label row and a value below');
+  assert.ok(managed.includes('data-action="managed-inline-filter-toggle"'), 'member and draw filter toggles expose delegated action semantics');
+
   assert.ok(managed.includes("title=\"'+esc(meta[1])+'\" aria-label=\"'+esc(meta[1])+'\">"), 'status wording remains accessible');
   assert.ok(managed.includes('SahmApp.installmentRows(g.id'));
   assert.ok(managed.includes('SahmApp.sendReminder('));

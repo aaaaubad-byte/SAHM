@@ -490,16 +490,18 @@
 #screen .mgd-collection-page .mgd-installment-card{position:relative;padding:12px 13px 11px;margin:0;border:1px solid rgba(39,62,99,.08);border-radius:12px;background:#fff;color:#172338;box-shadow:0 4px 10px rgba(27,48,84,.055),0 9px 18px rgba(27,48,84,.035);transition:border-color .16s ease,background .16s ease,box-shadow .16s ease,transform .16s ease}
 #screen .mgd-collection-page .mgd-installment-top{display:flex;align-items:center;justify-content:flex-start;gap:9px;min-height:23px}
 #screen .mgd-collection-page .mgd-installment-top>b{flex:1;min-width:0;color:#172338;font-size:14px;font-weight:800}
-#screen .mgd-collection-page .mgd-installment-status-icon{display:inline-flex;align-items:center;justify-content:center;flex:none;width:25px;height:25px;color:#718097}
-#screen .mgd-collection-page .mgd-installment-status-icon svg{width:19px;height:19px;stroke:currentColor;stroke-width:1.9}
+#screen .mgd-collection-page .mgd-installment-status-icon{display:inline-flex;align-items:center;justify-content:center;flex:none;width:22px;height:22px;color:#718097}
+#screen .mgd-collection-page .mgd-installment-status-icon svg{width:22px;height:22px;stroke:currentColor;stroke-width:2}
 #screen .mgd-collection-page .mgd-installment-status-icon.paid{color:#23815b}
 #screen .mgd-collection-page .mgd-installment-status-icon.due{color:#3158d6}
 #screen .mgd-collection-page .mgd-installment-status-icon.late{color:#c05a43}
 #screen .mgd-collection-page .mgd-installment-status-icon.upcoming{color:#8b96a8}
-#screen .mgd-collection-page .mgd-installment-meta{display:flex;align-items:center;gap:7px;flex-wrap:nowrap;min-width:0;margin-top:8px;color:#68778d;font-size:11px;white-space:nowrap}
-#screen .mgd-collection-page .mgd-installment-meta>span{min-width:0}
-#screen .mgd-collection-page .mgd-installment-meta>i{color:#c0c9d6;font-style:normal}
-#screen .mgd-collection-page .mgd-installment-meta>b{min-width:0;margin-inline-start:auto;color:#26364f;font-size:12px;font-weight:800}
+#screen .mgd-collection-page .mgd-installment-meta{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));align-items:stretch;gap:0;min-width:0;margin-top:10px;padding:9px 0 2px;border-top:1px solid #edf0f5;direction:rtl}
+#screen .mgd-collection-page .mgd-installment-stat{display:flex;flex-direction:column;align-items:center;justify-content:flex-start;gap:5px;min-width:0;padding:0 4px;text-align:center}
+#screen .mgd-collection-page .mgd-installment-stat+.mgd-installment-stat{border-inline-start:1px solid #edf0f5}
+#screen .mgd-collection-page .mgd-installment-stat-label{display:flex;align-items:center;justify-content:center;gap:4px;min-width:0;color:#758198;font-size:10px;font-weight:600;white-space:nowrap}
+#screen .mgd-collection-page .mgd-installment-stat-label svg{width:14px;height:14px;flex:none;stroke:currentColor;stroke-width:1.9}
+#screen .mgd-collection-page .mgd-installment-stat>b{display:block;max-width:100%;min-width:0;color:#26364f;font-size:12px;font-weight:800;line-height:1.35;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;font-variant-numeric:tabular-nums}
 #screen .mgd-collection-page .mgd-row-actions{display:flex;gap:7px;margin-top:10px}
 #screen .mgd-collection-page .mgd-row-actions .mgd-action{flex:1;min-height:36px;border-radius:9px;font-size:12px}
 #screen .mgd-collection-page .mgd-row-actions .mgd-action.primary{background:#3158d6;border-color:#3158d6;box-shadow:0 4px 9px rgba(49,88,214,.13)}
@@ -550,4 +552,11 @@
  #screen .mgd-member-filters .mgd-filter-fields,#screen .mgd-draw-filters .mgd-filter-fields{flex:0 1 112px}
  #screen .mgd-member-filters .mgd-filter-fields .mgd-select select,#screen .mgd-draw-filters .mgd-filter-fields .mgd-select select{min-height:34px;height:34px;padding-inline:2px;font-size:9px}
  #screen .mgd-member-filters .mgd-reminder-icon{width:31px;height:31px}
+}
+
+@media(max-width:380px){
+ #screen .mgd-collection-page .mgd-installment-stat{padding-inline:2px;gap:4px}
+ #screen .mgd-collection-page .mgd-installment-stat-label{gap:3px;font-size:9px}
+ #screen .mgd-collection-page .mgd-installment-stat-label svg{width:13px;height:13px}
+ #screen .mgd-collection-page .mgd-installment-stat>b{font-size:11px}
 }

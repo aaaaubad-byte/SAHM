@@ -107,7 +107,7 @@
     ).join('');
     return '<div class="mgd-list-head"><b>الأعضاء</b><span>' + list.length + ' عضو</span></div>' +
       '<div class="mgd-filterbar mgd-member-filters'+(state.memberFiltersOpen?' filters-open':'')+'" id="mgdMemberToolbar"><label class="mgd-search">' + uiIcon('search',18) + '<input id="mgdMemberSearch" type="search" placeholder="اسم العضو" autocomplete="off"></label>' +
-      '<button type="button" class="mgd-inline-filter-toggle" id="mgdMemberFilterToggle" aria-label="فلترة الأعضاء" aria-controls="mgdMemberFilters" aria-expanded="'+(state.memberFiltersOpen?'true':'false')+'">' + uiIcon('sliders-horizontal',18) + '</button>' +
+      '<button type="button" class="mgd-inline-filter-toggle" data-action="managed-inline-filter-toggle" id="mgdMemberFilterToggle" aria-label="فلترة الأعضاء" aria-controls="mgdMemberFilters" aria-expanded="'+(state.memberFiltersOpen?'true':'false')+'">' + uiIcon('sliders-horizontal',18) + '</button>' +
       '<div class="mgd-filter-fields" id="mgdMemberFilters"><label class="mgd-select"><select id="mgdMemberStatus" aria-label="حالة العضو"><option value="all">كل الحالات</option><option value="eligible">مؤهل</option><option value="won">فائز بكل أسهمه</option></select></label></div>' +
       '<button type="button" class="mgd-reminder-icon" data-go="invite" title="دعوة عضو">' + uiIcon('user-plus',17) + '</button></div>' +
       '<div class="mgd-list" id="mgdMemberList">' + (rows || '<div class="mgd-empty">لا يوجد أعضاء مسجلون</div>') + '</div>';
@@ -145,7 +145,7 @@
     }).join('');
     return '<div class="mgd-list-head"><b>القرعات</b><span>'+total+' قرعة</span></div>'+
       '<div class="mgd-filterbar mgd-draw-filters'+(state.drawFiltersOpen?' filters-open':'')+'" id="mgdDrawToolbar"><label class="mgd-search">'+uiIcon('search',16)+'<input id="mgdDrawSearch" type="search" placeholder="رقم القرعة" inputmode="numeric"></label>'+
-      '<button type="button" class="mgd-inline-filter-toggle" id="mgdDrawFilterToggle" aria-label="فلترة القرعات" aria-controls="mgdDrawFilters" aria-expanded="'+(state.drawFiltersOpen?'true':'false')+'">'+uiIcon('sliders-horizontal',18)+'</button>'+
+      '<button type="button" class="mgd-inline-filter-toggle" data-action="managed-inline-filter-toggle" id="mgdDrawFilterToggle" aria-label="فلترة القرعات" aria-controls="mgdDrawFilters" aria-expanded="'+(state.drawFiltersOpen?'true':'false')+'">'+uiIcon('sliders-horizontal',18)+'</button>'+
       '<div class="mgd-filter-fields" id="mgdDrawFilters"><label class="mgd-select"><select id="mgdDrawStatus" aria-label="حالة القرعة"><option value="all">كل الحالات</option><option value="completed">مكتملة</option><option value="collecting">قيد التحصيل</option><option value="ready">جاهزة</option><option value="waiting">بانتظار الموعد</option><option value="upcoming">قادمة</option></select></label></div></div>'+
       '<button type="button" class="mgd-action primary mgd-room-entry" data-action="managed-draw-view" data-view="summary">'+uiIcon('shuffle',17)+' دخول غرفة القرعة</button>'+
       '<div class="mgd-list" id="mgdDrawList">'+(cards||'<div class="mgd-empty">لا توجد قرعات لعرضها</div>')+'</div>';
@@ -191,9 +191,13 @@
         (remind ? actionButton('تذكير','send-reminder',attrs,'') : '')+'</div>' : '');
       const accessibility = selectable ? ' role="checkbox" aria-checked="'+(selected?'true':'false')+'"' : ' role="group"';
       return '<article class="mgd-installment-card'+(selectable?' is-selectable':'')+(selected?' is-selected':'')+'"'+accessibility+' data-installment-key="'+esc(key)+'" data-selectable="'+(selectable?'true':'false')+'" tabindex="'+(selectable?'0':'-1')+'">'+
-        '<div class="mgd-installment-top"><b>'+esc(x.memberName)+'</b><span class="mgd-installment-status-icon '+meta[2]+'" title="'+esc(meta[1])+'" aria-label="'+esc(meta[1])+'">'+uiIcon(meta[0],19)+'</span>'+
+        '<div class="mgd-installment-top"><b>'+esc(x.memberName)+'</b><span class="mgd-installment-status-icon '+meta[2]+'" title="'+esc(meta[1])+'" aria-label="'+esc(meta[1])+'">'+uiIcon(meta[0],22)+'</span>'+
         (selectable?'<span class="mgd-select-mark">'+uiIcon(selected?'check-circle-2':'circle',20)+'</span>':'')+'</div>'+
-        '<div class="mgd-installment-meta"><span>'+esc(x.shares||0)+' سهم</span><i>|</i><b>'+esc(moneyValue(x.total,g.currency))+'</b><i>|</i><span>القسط '+esc(x.no)+'</span></div>'+actions+'</article>';
+        '<div class="mgd-installment-meta">'+
+          '<div class="mgd-installment-stat"><div class="mgd-installment-stat-label">'+uiIcon('layers',14)+'<span>الأسهم</span></div><b>'+esc(x.shares||0)+'</b></div>'+
+          '<div class="mgd-installment-stat"><div class="mgd-installment-stat-label">'+uiIcon('wallet',14)+'<span>المبلغ</span></div><b>'+esc(moneyValue(x.total,g.currency))+'</b></div>'+
+          '<div class="mgd-installment-stat"><div class="mgd-installment-stat-label">'+uiIcon('calendar-days',14)+'<span>رقم القسط</span></div><b>'+esc(x.no)+'</b></div>'+
+        '</div>'+actions+'</article>';
     }).join('') || '<div class="mgd-empty">لا توجد أقساط مطابقة للبحث والفلترة</div>';
   }
   function bindInstallmentFilters(g, d) {
