@@ -29,14 +29,14 @@
   }
   function tabs(active) {
     const items = [
-      ['members', 'users', 'الأعضاء'],
-      ['cycles', 'calendar-days', 'الدورات'],
-      ['installments', 'receipt', 'الأقساط'],
-      ['draw-room', 'shuffle', 'غرفة القرعة']
+      ['members', 'users', 'الأعضاء'], ['cycles', 'calendar-days', 'الدورات'],
+      ['installments', 'receipt', 'الأقساط'], ['draw-room', 'shuffle', 'القرعة'],
+      ['news', 'wall', 'الأخبار'], ['chat', 'messages', 'المحادثة'],
+      ['audit', 'clipboard-list', 'السجل']
     ];
-    return '<nav class="mgd-tabs" aria-label="إدارة الجمعية">' + items.map(([id, icon, label]) =>
-      '<button type="button" class="' + (active === id ? 'active' : '') + '" data-action="managed-tab" data-tab="' + id + '">' +
-      uiIcon(icon, 19) + '<span>' + label + '</span></button>').join('') + '</nav>';
+    return '<nav class="mgd-tabs" aria-label="أقسام الجمعية" role="tablist">' + items.map(([id, icon, label]) =>
+      '<button type="button" role="tab" aria-selected="' + (active === id ? 'true' : 'false') + '" class="' + (active === id ? 'active' : '') + '" data-action="managed-tab" data-tab="' + id + '">' +
+      uiIcon(icon, 17) + '<span>' + label + '</span></button>').join('') + '</nav>';
   }
   function backToTab(tab) {
     return '<button type="button" class="mgd-back" data-action="managed-back" data-tab="' + (tab || 'members') + '">' +
@@ -191,9 +191,60 @@
     }
     return nav + body;
   }
+  async function newsPanel(g, d) {
+    const result = await SahmApp.getNews(g.id, 50);
+    if (!result || !result.ok) return '<div class="mgd-empty">' + esc(result && result.message || 'تعذر تحميل أخبار الجمعية') + '</div>';
+    const labels = { received:'استلام قسط', completed:'اكتمال الأقساط', late:'تأخر قسط', drawSoon:'اقتراب القرعة', drawDue:'موعد القرعة', drawResult:'نتيجة القرعة', joined:'انضمام عضو', motivate:'خبر الجمعية' };
+    const rows = (result.news || []).map(x =>
+      '<article class="mgd-feed-card"><div class="mgd-feed-icon">' + uiIcon(x.type === 'drawResult' ? 'trophy' : 'wall', 18) + '</div><div class="mgd-feed-copy"><b>' + esc(x.title || labels[x.type] || 'خبر الجمعية') + '</b>' +
+      (x.body ? '<p>' + esc(x.body) + '</p>' : '') +
+      (x.subject_visible === true && x.subject_name ? '<small>' + esc(x.subject_name) + '</small>' : '') +
+      '<small class="mgd-feed-time">' + esc(x.occurred_at || '') + '</small></div></article>'
+    ).join('');
+    const channel = (key, label, map) => '<section class="mgd-detail-card"><b>' + label + '</b>' +
+      SahmApp.notifyTypes().map(t => '<label class="mgd-toggle-row"><span>' + esc(t.label) + '</span><input type="checkbox" data-action="notify-channel-toggle" data-channel="' + key + '" data-type="' + esc(t.id) + '" ' + (map && map[t.id] ? 'checked' : '') + '></label>').join('') + '</section>';
+    return '<div class="mgd-list-head"><b>أخبار الجمعية</b><span>' + (result.news || []).length + ' خبر</span></div>' +
+      '<div class="mgd-feed-list">' + (rows || '<div class="mgd-empty">لا توجد أخبار منشورة</div>') + '</div>' +
+      '<div class="mgd-list-head mgd-settings-heading"><b>إعدادات النشر</b><span>تحكم بما يظهر في الأخبار والمحادثة</span></div>' +
+      channel('feed', 'النشر في أخبار الجمعية', d.group && d.group.notify) +
+      channel('chat', 'النشر في محادثة الجمعية', d.group && d.group.notifyChat) +
+      channel('names', 'إظهار أسماء الأعضاء في الأخبار', d.group && d.group.notifyNames);
+  }
+  function chatPanel(g) {
+    const result = SahmApp.chatView(g.id);
+    if (!result || !result.ok) return '<div class="mgd-empty">' + esc(result && result.message || 'تعذر تحميل محادثة الجمعية') + '</div>';
+    SahmApp.markChatRead(g.id);
+    const rows = (result.messages || []).map(x =>
+      '<article class="chatbubble ' + (x.kind === 'member' && x.mine ? 'mine' : '') + '"><b>' +
+      (x.kind === 'system' ? 'سهم' : esc(x.senderName || 'مشارك')) + '</b><div>' + esc(x.text) + '</div><small class="eyebrow">' +
+      esc(x.timeLabel || SahmApp.chatTime(x.at)) + '</small></article>'
+    ).join('');
+    return '<div class="mgd-chat-list" id="mgdChatMessages">' + (rows || '<div class="mgd-empty">لا توجد رسائل بعد</div>') + '</div>' +
+      '<form id="mgdChatForm" class="mgd-chat-form"><label for="mgdChatInput">رسالتك</label>' +
+      '<textarea id="mgdChatInput" name="text" maxlength="' + SahmApp.maxMessage() + '" placeholder="اكتب رسالة..." required></textarea>' +
+      '<div class="mgd-chat-footer"><small id="mgdChatCount">0 / ' + SahmApp.maxMessage() + '</small>' +
+      '<button type="submit" class="mgd-action primary">إرسال</button></div></form>';
+  }
+  async function auditPanel(g) {
+    const result = await SahmApp.getAuditLog(g.id, 100);
+    if (!result || !result.ok) return '<div class="mgd-empty">' + esc(result && result.message || 'تعذر تحميل سجل العمليات') + '</div>';
+    const labels = { association_created:'إنشاء الجمعية', association_updated:'تعديل الجمعية', member_joined:'انضمام عضو', member_removed:'إزالة عضو', shares_added:'إضافة أسهم', shares_removed:'إزالة أسهم', invitation_created:'إنشاء دعوة', invitation_cancelled:'إلغاء دعوة', receipt_recorded:'تسجيل استلام', installment_received:'استلام قسط', receipt_corrected:'تصحيح استلام', draw_result:'تثبيت نتيجة القرعة', draw_scheduled:'تحديد موعد القرعة', draw_presentation_completed:'اكتمال عرض القرعة', draw_presentation_failed:'فشل عرض القرعة', notification_settings_updated:'تعديل إعدادات النشر', reminders_sent:'إرسال تذكيرات' };
+    const items = (result.log || []).map(x =>
+      '<article class="mgd-audit-item"><div class="mgd-audit-icon">' + uiIcon('clipboard-list', 17) + '</div><div class="mgd-audit-copy"><b>' + esc(labels[x.event_type] || x.event_type || 'عملية إدارية') +
+      '</b><small>' + esc(x.actor_name || 'سهم') + ' · ' + esc(x.entity_type || '') + '</small><small>' + esc(x.occurred_at || '') + '</small>' +
+      (x.after_data ? '<details><summary>تفاصيل العملية</summary><pre>' + esc(JSON.stringify(x.after_data, null, 2)) + '</pre></details>' : '') + '</div></article>'
+    ).join('');
+    return '<div class="mgd-list-head"><b>سجل العمليات</b><span>' + (result.log || []).length + ' عملية</span></div>' +
+      '<div class="mgd-audit-list">' + (items || '<div class="mgd-empty">لا توجد عمليات مسجلة</div>') + '</div>';
+  }
+  function bindChatComposer() {
+    const input = document.getElementById('mgdChatInput'), count = document.getElementById('mgdChatCount');
+    if (!input || !count) return;
+    input.addEventListener('input', () => { count.textContent = input.value.length + ' / ' + SahmApp.maxMessage(); });
+  }
   async function render(g, d) {
     const view = params.managedView || '';
-    let active = ['members','cycles','installments','draw-room'].includes(groupDetailTab) ? groupDetailTab : 'members';
+    let active = ['members','cycles','installments','draw-room','news','chat','audit'].includes(groupDetailTab) ? groupDetailTab : 'members';
     let content = '';
     if (view === 'member') {
       const memberId = String(params.memberId || '');
@@ -217,14 +268,29 @@
       shell('غرفة القرعة', 'groups', identity(g, d) + backToTab('draw-room') + sub);
       return;
     }
-    if (active === 'members') { content = memberCards(g); }
-    else if (active === 'cycles') { content = await cycleCards(g, d); }
+    if (active === 'members') { content = memberCards(g) +
+      '<section class="mgd-detail-card mgd-group-extra"><div class="mgd-list-head"><b>إدارة الجمعية</b><span>' + ((db.joinRequests || []).filter(x => x.groupId === g.id && x.status === 'pending').length) + ' طلبات معلقة</span></div>' +
+      '<div class="mgd-member-tools"><button type="button" data-go="member-reception">استقبال الأعضاء</button><button type="button" data-go="invite">دعوة عضو</button></div></section>'; }
+    else if (active === 'cycles') {
+      const counts = d.counts || {};
+      content = '<section class="mgd-detail-card mgd-group-facts">' +
+        row('calendar-days', 'تاريخ البداية', dateLabel(g.start)) +
+        row('calendar-days', 'أول قرعة محسوبة', dateLabel(g.first)) +
+        row('wallet', 'حصة السهم في الدورة', money(g.share, g.currency)) +
+        row('receipt', 'الأقساط داخل الدورة', g.installments) +
+        row('trophy', 'جائزة الجولة المستهدفة', moneyValue(d.plan && d.plan.prizeTarget || 0, g.currency)) +
+        row('check-circle', 'الأقساط المدفوعة', counts.paid || 0) +
+        row('alert', 'الأقساط المتأخرة', counts.late || 0) + '</section>' + await cycleCards(g, d);
+    }
     else if (active === 'installments') { content = installmentsPanel(g, d); }
-    else { params.managedDrawView = params.managedDrawView || 'summary'; content = await drawPanel(g, d); }
-    shell('تفاصيل الجمعية', 'groups', identity(g, d) + tabs(active) + '<main class="mgd-content">' + content + '</main>' +
-      '<nav class="mgd-utilities" aria-label="روابط الجمعية"><button data-go="news">أخبار الجمعية</button><button data-go="chat">محادثة الجمعية</button><button data-go="audit">سجل العمليات</button></nav>');
+    else if (active === 'draw-room') { params.managedDrawView = params.managedDrawView || 'summary'; content = await drawPanel(g, d); }
+    else if (active === 'news') { content = await newsPanel(g, d); }
+    else if (active === 'chat') { content = chatPanel(g); }
+    else if (active === 'audit') { content = await auditPanel(g); }
+    shell('تفاصيل الجمعية', 'groups', identity(g, d) + tabs(active) + '<main class="mgd-content">' + content + '</main>');
     if (active === 'members') bindMemberSearch();
     if (active === 'installments') bindInstallmentFilters(g, d);
+    if (active === 'chat') bindChatComposer();
   }
   function redraw() {
     const g = currentGroup(), d = g && SahmApp.groupDetail(g.id);
@@ -240,7 +306,7 @@
     event.stopPropagation();
 
     if (action === 'managed-tab') {
-      const allowed = ['members', 'cycles', 'installments', 'draw-room'];
+      const allowed = ['members', 'cycles', 'installments', 'draw-room', 'news', 'chat', 'audit'];
       groupDetailTab = allowed.includes(el.dataset.tab) ? el.dataset.tab : 'members';
       params = {};
       syncNavigationContext();
@@ -260,7 +326,7 @@
       return;
     }
     if (action === 'managed-back') {
-      const allowed = ['members', 'cycles', 'installments', 'draw-room'];
+      const allowed = ['members', 'cycles', 'installments', 'draw-room', 'news', 'chat', 'audit'];
       groupDetailTab = allowed.includes(el.dataset.tab) ? el.dataset.tab : 'members';
       params = {};
       syncNavigationContext();
@@ -272,6 +338,21 @@
       syncNavigationContext();
       redraw();
     }
+  });
+  document.addEventListener('submit', async event => {
+    const form = event.target;
+    if (!form || form.id !== 'mgdChatForm') return;
+    event.preventDefault();
+    const input = form.querySelector('[name="text"]');
+    const message = String(input && input.value || '').trim();
+    if (!message || message.length > SahmApp.maxMessage()) { toast('تحقق من نص الرسالة وطولها'); return; }
+    const button = form.querySelector('button[type="submit"]');
+    if (button) { button.disabled = true; button.textContent = 'جارٍ الإرسال...'; }
+    try {
+      const result = await SahmApp.sendMessage(currentGroupId, message);
+      if (result && result.ok) { refreshData(); redraw(); toast('تم إرسال الرسالة'); }
+      else { toast(result && result.message || 'تعذر إرسال الرسالة'); if (button) { button.disabled = false; button.textContent = 'إرسال'; } }
+    } catch (error) { toast(error && error.message || 'تعذر إرسال الرسالة'); if (button) { button.disabled = false; button.textContent = 'إرسال'; } }
   });
   root.SahmManagedGroup = { render, redraw };
 })(window);
