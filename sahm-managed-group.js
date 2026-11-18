@@ -180,22 +180,22 @@
     const icons = {paid:['check-circle','مدفوع','paid'],due:['clock-3','مستحق','due'],late:['alert-circle','متأخر','late'],upcoming:['calendar-clock','لم يحن موعده','upcoming']};
     return rows.map(x => {
       const key = String(x.memberId)+'|'+String(x.cycle)+'|'+String(x.no);
-      const selectable = state.installmentSelectMode && (x.status === 'due' || x.status === 'late');
-      const selected = selectable && state.installmentSelected.has(key);
+      const selectable = manager && (x.status === 'due' || x.status === 'late');
+      const selected = state.installmentSelectMode && selectable && state.installmentSelected.has(key);
       const meta = icons[x.status] || ['circle-help',String(x.status||'غير محدد'),'unknown'];
       const attrs = 'data-member="'+esc(x.memberId)+'" data-cycle="'+esc(x.cycle)+'" data-no="'+esc(x.no)+'"';
       const collect = x.status === 'due' || x.status === 'late' || x.status === 'upcoming', remind = x.status === 'due' || x.status === 'late';
-      const actions = (!manager || state.installmentSelectMode) ? '' : ((collect || remind) ? '<div class="mgd-row-actions">'+
+      const actions = manager && (collect || remind) ? '<div class="mgd-row-actions">'+
         (collect ? actionButton('تحصيل','record-paid',attrs,'primary') : '')+
-        (remind ? actionButton('تذكير','send-reminder',attrs,'') : '')+'</div>' : '');
-      const accessibility = selectable ? ' role="checkbox" aria-checked="'+(selected?'true':'false')+'"' : ' role="group"';
-      return '<article class="mgd-installment-card'+(selectable?' is-selectable':'')+(selected?' is-selected':'')+'"'+accessibility+' data-installment-key="'+esc(key)+'" data-selectable="'+(selectable?'true':'false')+'" tabindex="'+(selectable?'0':'-1')+'">'+
-        '<div class="mgd-installment-top"><b>'+esc(x.memberName)+'</b><span class="mgd-installment-status-icon '+meta[2]+'" title="'+esc(meta[1])+'" aria-label="'+esc(meta[1])+'">'+uiIcon(meta[0],22)+'</span>'+
-        (selectable?'<span class="mgd-select-mark">'+uiIcon(selected?'check-circle-2':'circle',20)+'</span>':'')+'</div>'+
+        (remind ? actionButton('تذكير','send-reminder',attrs,'') : '')+'</div>' : '';
+      const accessibility = state.installmentSelectMode && selectable ? ' role="checkbox" aria-checked="'+(selected?'true':'false')+'"' : ' role="group"';
+      return '<article class="mgd-installment-card'+(selectable?' is-selectable':'')+(state.installmentSelectMode&&selected?' is-selected':'')+'"'+accessibility+' data-installment-key="'+esc(key)+'" data-selectable="'+(selectable?'true':'false')+'" tabindex="'+(state.installmentSelectMode&&selectable?'0':'-1')+'">'+
+        '<div class="mgd-installment-top"><span class="mgd-installment-status-icon '+meta[2]+'" title="'+esc(meta[1])+'" aria-label="'+esc(meta[1])+'">'+uiIcon(meta[0],19)+'</span><b>'+esc(x.memberName)+'</b>'+
+        (state.installmentSelectMode&&selectable?'<span class="mgd-select-mark">'+uiIcon(selected?'check-circle-2':'circle',20)+'</span>':'')+'</div>'+
         '<div class="mgd-installment-meta">'+
           '<div class="mgd-installment-stat"><div class="mgd-installment-stat-label">'+uiIcon('layers',14)+'<span>الأسهم</span></div><b>'+esc(x.shares||0)+'</b></div>'+
           '<div class="mgd-installment-stat"><div class="mgd-installment-stat-label">'+uiIcon('wallet',14)+'<span>المبلغ</span></div><b>'+esc(moneyValue(x.total,g.currency))+'</b></div>'+
-          '<div class="mgd-installment-stat"><div class="mgd-installment-stat-label">'+uiIcon('calendar-days',14)+'<span>رقم القسط</span></div><b>'+esc(x.no)+'</b></div>'+
+          '<div class="mgd-installment-stat"><div class="mgd-installment-stat-label">'+uiIcon('calendar-days',14)+'<span>القسط</span></div><b>'+esc(x.no)+'</b></div>'+
         '</div>'+actions+'</article>';
     }).join('') || '<div class="mgd-empty">لا توجد أقساط مطابقة للبحث والفلترة</div>';
   }
@@ -203,7 +203,11 @@
     const search=document.getElementById('mgdInstallmentSearch'), status=document.getElementById('mgdInstallmentStatus');
     const cycle=document.getElementById('mgdInstallmentCycle'), number=document.getElementById('mgdInstallmentNumber');
     const list=document.getElementById('mgdInstallmentList'), toolbar=document.getElementById('mgdInstallmentToolbar');
-    const filterToggle=document.getElementById('mgdInstallmentFilterToggle'), selectToggle=document.getElementById('mgdInstallmentSelectToggle');
+    const filterToggle=document.getElementById('mgdInstallmentFilterToggle');
+    const selectionBar=document.getElementById('mgdInstallmentSelectionBar');
+    const selectionCount=document.getElementById('mgdInstallmentSelectionCount');
+    const selectVisible=document.getElementById('mgdInstallmentSelectVisible');
+    const cancelSelection=document.getElementById('mgdInstallmentCancelSelection');
     const bulk=document.getElementById('mgdInstallmentBulkReminder');
     const update=()=>{
       state.query=search?search.value.trim():'';
@@ -229,15 +233,12 @@
         const paid=scoped.filter(x=>x.status==='paid').length,late=scoped.filter(x=>x.status==='late').length,pending=scoped.filter(x=>x.status==='due'||x.status==='upcoming').length;
         stats.innerHTML='<span>الإجمالي <b>'+scoped.length+'</b></span><span>مدفوعة <b>'+paid+'</b></span><span>معلقة <b>'+pending+'</b></span><span>متأخرة <b>'+late+'</b></span>';
       }
-      if(toolbar){toolbar.classList.toggle('filters-open',state.installmentFiltersOpen);toolbar.classList.toggle('selection-open',state.installmentSelectMode);}
+      if(toolbar)toolbar.classList.toggle('filters-open',state.installmentFiltersOpen);
       if(filterToggle)filterToggle.setAttribute('aria-expanded',state.installmentFiltersOpen?'true':'false');
-      if(selectToggle){
-        selectToggle.classList.toggle('active',state.installmentSelectMode);
-        selectToggle.setAttribute('aria-pressed',state.installmentSelectMode?'true':'false');
-        selectToggle.title=state.installmentSelectMode?'إنهاء التحديد · '+state.installmentSelected.size+' محدد':'تحديد الأقساط';
-      }
+      if(selectionBar)selectionBar.hidden=!state.installmentSelectMode;
+      if(selectionCount)selectionCount.textContent=state.installmentSelected.size+' محدد';
+      if(selectVisible)selectVisible.disabled=!list||!list.querySelector('.mgd-installment-card[data-selectable="true"]');
       if(bulk){
-        bulk.hidden=!state.installmentSelectMode;
         bulk.disabled=!state.installmentSelected.size;
         bulk.setAttribute('aria-label','تذكير جماعي لعدد '+state.installmentSelected.size+' من الأقساط المحددة');
         bulk.title='تذكير جماعي · '+state.installmentSelected.size+' محدد';
@@ -246,16 +247,57 @@
     };
     [search,status,cycle,number].forEach(el=>el&&el.addEventListener(el===search?'input':'change',update));
     if(filterToggle)filterToggle.addEventListener('click',()=>{state.installmentFiltersOpen=!state.installmentFiltersOpen;update();});
-    if(selectToggle)selectToggle.addEventListener('click',()=>{state.installmentSelectMode=!state.installmentSelectMode;if(!state.installmentSelectMode)state.installmentSelected.clear();update();});
+    if(cancelSelection)cancelSelection.addEventListener('click',()=>{state.installmentSelectMode=false;state.installmentSelected.clear();update();});
+    if(selectVisible)selectVisible.addEventListener('click',()=>{
+      if(!list)return;
+      list.querySelectorAll('.mgd-installment-card[data-selectable="true"]').forEach(card=>state.installmentSelected.add(card.dataset.installmentKey));
+      update();
+    });
     if(list){
+      let pressTimer=null,pressCard=null,longPressTriggered=false,pressStartX=0,pressStartY=0,suppressCardClickUntil=0;
+      const clearPress=()=>{if(pressTimer)clearTimeout(pressTimer);pressTimer=null;pressCard=null;};
       const toggle=card=>{
-        const key=card.dataset.installmentKey;
+        const key=card&&card.dataset.installmentKey;
         if(!key||card.dataset.selectable!=='true')return;
         if(state.installmentSelected.has(key))state.installmentSelected.delete(key);else state.installmentSelected.add(key);
         update();
       };
-      list.addEventListener('click',e=>{if(e.target.closest('button'))return;const card=e.target.closest('.mgd-installment-card[data-selectable="true"]');if(card)toggle(card);});
-      list.addEventListener('keydown',e=>{if(e.key!=='Enter'&&e.key!==' ')return;const card=e.target.closest('.mgd-installment-card[data-selectable="true"]');if(card){e.preventDefault();toggle(card);}});
+      list.addEventListener('pointerdown',e=>{
+        const card=e.target.closest('.mgd-installment-card[data-selectable="true"]');
+        if(!card||e.target.closest('button')||e.button!==0)return;
+        clearPress();pressCard=card;longPressTriggered=false;pressStartX=e.clientX;pressStartY=e.clientY;
+        pressTimer=setTimeout(()=>{
+          if(!pressCard)return;
+          longPressTriggered=true;
+          state.installmentSelectMode=true;
+          state.installmentSelected.add(pressCard.dataset.installmentKey);
+        },480);
+      });
+      list.addEventListener('pointermove',e=>{
+        if(!pressTimer)return;
+        if(Math.hypot(e.clientX-pressStartX,e.clientY-pressStartY)>10)clearPress();
+      });
+      list.addEventListener('pointerup',()=>{
+        if(!pressCard&&!longPressTriggered)return;
+        if(pressTimer)clearTimeout(pressTimer);
+        pressTimer=null;
+        if(longPressTriggered){suppressCardClickUntil=Date.now()+650;update();}
+        pressCard=null;
+      });
+      list.addEventListener('pointercancel',clearPress);
+      list.addEventListener('pointerleave',e=>{if(pressTimer&&!e.relatedTarget)clearPress();});
+      list.addEventListener('click',e=>{
+        if(e.target.closest('button'))return;
+        const card=e.target.closest('.mgd-installment-card[data-selectable="true"]');
+        if(!card)return;
+        if(Date.now()<suppressCardClickUntil){e.preventDefault();return;}
+        if(state.installmentSelectMode)toggle(card);
+      });
+      list.addEventListener('keydown',e=>{
+        if(e.key!=='Enter'&&e.key!==' ')return;
+        const card=e.target.closest('.mgd-installment-card[data-selectable="true"]');
+        if(card&&state.installmentSelectMode){e.preventDefault();toggle(card);}
+      });
     }
     if(bulk)bulk.addEventListener('click',async()=>{
       if(!state.installmentSelected.size||bulk.disabled)return;
@@ -324,10 +366,9 @@
       Array.from({length:Math.max(1,Number(g.installments)||1)},(_,i)=>i+1).filter(no=>currentNo==null||no!==currentNo).map(no=>'<option value="'+no+'" '+(String(state.installment)===String(no)?'selected':'')+'>القسط '+no+'</option>').join('');
     return (manager?'':'<section class="mgd-installment-summary"><div class="mgd-summary-top"><b>القرعة '+cycle+'</b><span>'+esc(first.periodStart?dateLabel(first.periodStart):'—')+' – '+esc(first.periodEnd?dateLabel(first.periodEnd):'—')+'</span></div><div class="mgd-summary-stats"><span>الإجمالي <b>'+shown.length+'</b></span><span>مدفوعة <b>'+paid+'</b></span><span>معلقة <b>'+pending+'</b></span><span>متأخرة <b>'+late+'</b></span></div></section>')+
       '<div class="mgd-installment-toolbar" id="mgdInstallmentToolbar"><label class="mgd-search mgd-installment-search">'+uiIcon('search',17)+'<input id="mgdInstallmentSearch" type="search" placeholder="ابحث باسم العضو" autocomplete="off"></label>'+
-      (manager?'<button type="button" class="mgd-tool-icon" data-action="managed-installment-select" id="mgdInstallmentSelectToggle" aria-label="تحديد الأقساط" aria-pressed="'+(state.installmentSelectMode?'true':'false')+'">'+uiIcon('list-checks',19)+'</button>':'')+
       '<button type="button" class="mgd-tool-icon" data-action="managed-installment-filter" id="mgdInstallmentFilterToggle" aria-label="الفلاتر" aria-expanded="'+(state.installmentFiltersOpen?'true':'false')+'">'+uiIcon('sliders-horizontal',19)+'</button>'+
-      '<div class="mgd-installment-filter-fields"><label class="mgd-select"><select id="mgdInstallmentCycle" aria-label="القرعة">'+cycleOptions+'</select></label><label class="mgd-select"><select id="mgdInstallmentNumber" aria-label="رقم القسط">'+installmentOptions+'</select></label><label class="mgd-select"><select id="mgdInstallmentStatus" aria-label="حالة القسط"><option value="all">كل الحالات</option></select></label></div>'+
-      (manager?'<button type="button" class="mgd-bulk-reminder-action" data-action="managed-installment-bulk-reminder" id="mgdInstallmentBulkReminder" hidden disabled>'+uiIcon('bell',15)+'<span>تذكير</span></button>':'')+'</div>'+
+      '<div class="mgd-installment-filter-fields"><label class="mgd-select"><select id="mgdInstallmentCycle" aria-label="القرعة">'+cycleOptions+'</select></label><label class="mgd-select"><select id="mgdInstallmentNumber" aria-label="القسط">'+installmentOptions+'</select></label><label class="mgd-select"><select id="mgdInstallmentStatus" aria-label="حالة القسط"><option value="all">كل الحالات</option></select></label></div></div>'+
+      (manager?'<div class="mgd-selection-bar" id="mgdInstallmentSelectionBar" hidden><span class="mgd-selection-count" id="mgdInstallmentSelectionCount">0 محدد</span><button type="button" class="mgd-selection-secondary" id="mgdInstallmentSelectVisible">تحديد الظاهر</button><button type="button" class="mgd-selection-reminder" id="mgdInstallmentBulkReminder" disabled>'+uiIcon('bell',15)+'<span>تذكير</span></button><button type="button" class="mgd-selection-cancel" id="mgdInstallmentCancelSelection" aria-label="إلغاء التحديد">'+uiIcon('x',17)+'</button></div>':'')+
       '<div id="mgdInstallmentList" class="mgd-installment-list"></div><button type="button" class="mgd-secondary-link" data-go="receipts">سجل الاستلام والتصحيحات '+uiIcon('back-screen',16)+'</button>';
   }
   async function cycleDetail(g, d, round) {
@@ -735,7 +776,7 @@
     const el = event.target.closest('[data-action]');
     if (!el) return;
     const action = el.dataset.action;
-    if (['managed-installment-select','managed-installment-filter','managed-installment-bulk-reminder'].includes(action)) { event.preventDefault(); event.stopImmediatePropagation(); return; }
+    if (['managed-installment-filter'].includes(action)) { event.preventDefault(); event.stopImmediatePropagation(); return; }
     if (['record-paid','send-reminder','schedule-draw','run-draw','draw-presentation-completed','draw-presentation-failed','notify-channel-toggle'].includes(action)) invalidateReads();
     if (!['managed-home-slide','managed-home-section','managed-tab','managed-open-member','managed-open-cycle','managed-back','managed-draw-view','managed-settings-view','managed-inline-filter-toggle'].includes(action)) return;
     event.preventDefault();

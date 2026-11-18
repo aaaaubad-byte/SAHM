@@ -639,3 +639,22 @@ test('managed association landing uses animated summary cards and exactly ten se
   assert.match(managed, /section === 'room'/);
   assert.match(managed, /view === 'information'/);
 });
+
+
+test('managed installment selection starts with long press and bulk reminder is outside the search toolbar', () => {
+  assert.match(managed, /pressTimer=setTimeout\([\s\S]*?state\.installmentSelectMode=true/);
+  assert.match(managed, /state\.installmentSelected\.add\(pressCard\.dataset\.installmentKey\)/);
+  assert.match(managed, /id="mgdInstallmentSelectionBar"/);
+  assert.match(managed, /id="mgdInstallmentBulkReminder"/);
+  assert.match(managed, /id="mgdInstallmentCancelSelection"/);
+  assert.match(managed, /id="mgdInstallmentSelectVisible"/);
+  const panel = managed.slice(managed.indexOf('function installmentsPanel'), managed.indexOf('async function cycleDetail'));
+  const toolbar = panel.slice(panel.indexOf('id="mgdInstallmentToolbar"'), panel.indexOf('id="mgdInstallmentSelectionBar"'));
+  assert.doesNotMatch(toolbar, /mgdInstallmentBulkReminder|managed-installment-select/);
+  assert.match(managed, /<span>القسط<\/span>/);
+  assert.doesNotMatch(managed, /<span>رقم القسط<\/span>/);
+  assert.match(managed, /actionButton\('تذكير','send-reminder'/);
+  assert.match(managed, /actionButton\('تحصيل','record-paid'/);
+  assert.match(managed, /mgd-installment-status-icon/);
+  assert.match(fs.readFileSync(path.join(ROOT, 'sahm-managed-group.css'), 'utf8'), /mgd-selection-bar/);
+});

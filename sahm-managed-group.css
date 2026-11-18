@@ -477,21 +477,28 @@
 #screen .mgd-collection-page .mgd-installment-search input{min-width:0;width:100%;font-size:12px}
 #screen .mgd-collection-page .mgd-tool-icon{display:inline-flex;align-items:center;justify-content:center;flex:0 0 34px;width:34px;height:36px;padding:0;border:0;border-radius:9px;background:transparent;color:#3158d6;transition:background .16s ease,color .16s ease}
 #screen .mgd-collection-page .mgd-tool-icon svg{width:19px;height:19px;stroke:currentColor;stroke-width:1.9}
-#screen .mgd-collection-page .mgd-tool-icon.active{background:#eaf0ff;color:#244bb4}
 #screen .mgd-collection-page .mgd-installment-filter-fields{display:none;align-items:center;gap:3px;flex:0 1 172px;min-width:0}
 #screen .mgd-collection-page .mgd-installment-toolbar.filters-open .mgd-installment-search{flex:1 1 42px;min-width:32px}
 #screen .mgd-collection-page .mgd-installment-toolbar.filters-open .mgd-installment-filter-fields{display:flex}
 #screen .mgd-collection-page .mgd-installment-filter-fields .mgd-select{flex:1 1 0;min-width:0}
 #screen .mgd-collection-page .mgd-installment-filter-fields .mgd-select select{width:100%;min-width:0;height:36px;min-height:36px;padding:4px 2px;border:1px solid #dfe5ee;border-radius:8px;background:#fff;color:#34445e;font-size:9px;text-overflow:ellipsis}
-#screen .mgd-collection-page .mgd-bulk-reminder-action{display:inline-flex;align-items:center;justify-content:center;gap:3px;flex:0 0 auto;min-width:54px;min-height:34px;padding:5px 6px;border:1px solid #3158d6;border-radius:9px;background:#3158d6;color:#fff;font-size:10px;font-weight:800;white-space:nowrap;box-shadow:0 4px 10px rgba(49,88,214,.14)}
-#screen .mgd-collection-page .mgd-bulk-reminder-action:disabled{opacity:.42;box-shadow:none}
-#screen .mgd-collection-page .mgd-bulk-reminder-action[hidden]{display:none!important}
+#screen .mgd-collection-page .mgd-selection-bar{display:flex;align-items:center;gap:6px;min-height:42px;margin:0 0 9px;padding:5px 7px;border:1px solid #e1e7f0;border-radius:10px;background:#f8faff}
+#screen .mgd-collection-page .mgd-selection-bar[hidden]{display:none!important}
+#screen .mgd-collection-page .mgd-selection-count{flex:1;min-width:48px;color:#34445e;font-size:11px;font-weight:800;white-space:nowrap}
+#screen .mgd-collection-page .mgd-selection-bar button{display:inline-flex;align-items:center;justify-content:center;gap:4px;min-height:31px;padding:5px 8px;border:1px solid #dce3ed;border-radius:8px;background:#fff;color:#42536d;font-size:10px;font-weight:800;white-space:nowrap}
+#screen .mgd-collection-page .mgd-selection-bar .mgd-selection-reminder{border-color:#3158d6;background:#3158d6;color:#fff}
+#screen .mgd-collection-page .mgd-selection-bar .mgd-selection-reminder:disabled{opacity:.42}
+#screen .mgd-collection-page .mgd-selection-bar .mgd-selection-cancel{flex:0 0 31px;width:31px;padding:0;color:#748197}
 #screen .mgd-collection-page .mgd-installment-list{display:flex;flex-direction:column;gap:8px}
 #screen .mgd-collection-page .mgd-installment-card{position:relative;padding:12px 13px 11px;margin:0;border:1px solid rgba(39,62,99,.08);border-radius:12px;background:#fff;color:#172338;box-shadow:0 4px 10px rgba(27,48,84,.055),0 9px 18px rgba(27,48,84,.035);transition:border-color .16s ease,background .16s ease,box-shadow .16s ease,transform .16s ease}
-#screen .mgd-collection-page .mgd-installment-top{display:flex;align-items:center;justify-content:flex-start;gap:9px;min-height:23px}
+#screen .mgd-collection-page .mgd-installment-top{display:flex;align-items:center;justify-content:flex-start;gap:9px;min-height:34px}
 #screen .mgd-collection-page .mgd-installment-top>b{flex:1;min-width:0;color:#172338;font-size:14px;font-weight:800}
-#screen .mgd-collection-page .mgd-installment-status-icon{display:inline-flex;align-items:center;justify-content:center;flex:none;width:22px;height:22px;color:#718097}
-#screen .mgd-collection-page .mgd-installment-status-icon svg{width:22px;height:22px;stroke:currentColor;stroke-width:2}
+#screen .mgd-collection-page .mgd-installment-status-icon{display:inline-flex;align-items:center;justify-content:center;flex:none;width:34px;height:34px;border-radius:9px;background:#edf2ff;color:#3158d6}
+#screen .mgd-collection-page .mgd-installment-status-icon svg{width:19px;height:19px;stroke:currentColor;stroke-width:2}
+#screen .mgd-collection-page .mgd-installment-status-icon.paid{background:#eaf5ef;color:#23815b}
+#screen .mgd-collection-page .mgd-installment-status-icon.due{background:#edf2ff;color:#3158d6}
+#screen .mgd-collection-page .mgd-installment-status-icon.late{background:#fbefec;color:#c05a43}
+#screen .mgd-collection-page .mgd-installment-status-icon.upcoming{background:#f0f2f6;color:#8b96a8}
 #screen .mgd-collection-page .mgd-installment-status-icon.paid{color:#23815b}
 #screen .mgd-collection-page .mgd-installment-status-icon.due{color:#3158d6}
 #screen .mgd-collection-page .mgd-installment-status-icon.late{color:#c05a43}
