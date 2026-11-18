@@ -3,7 +3,7 @@
    No database, Supabase, engine, or shared-screen behavior is changed here. */
 (function (root) {
   'use strict';
-  const state = { cycle: 1, installment: 'all', status: 'all', query: '', drawView: 'summary' };
+  const state = { cycle: null, installment: 'all', status: 'all', query: '', drawView: 'summary' };
   const esc = value => escapeHtml(String(value == null ? '' : value));
   const moneyValue = (value, currency) => minorMoney(value, currency);
   const row = (icon, label, value) =>
@@ -122,7 +122,7 @@
     const cycleOptions = Array.from({ length: totalCycles }, (_, i) => '<option value="' + (i + 1) + '" ' + (cycle === i + 1 ? 'selected' : '') + '>الدورة ' + (i + 1) + '</option>').join('');
     const installmentOptions = Array.from({ length: Math.max(1, Number(g.installments) || 1) }, (_, i) => '<option value="' + (i + 1) + '" ' + (String(state.installment) === String(i + 1) ? 'selected' : '') + '>القسط ' + (i + 1) + '</option>').join('');
     return '<div class="mgd-list-head"><b>الأقساط</b><span>إدارة التحصيل</span></div>' +
-      '<div class="mgd-filter-grid"><label class="mgd-search">' + uiIcon('search', 18) + '<input id="mgdInstallmentSearch" type="search" placeholder="اسم العضو أو رقم القسط" autocomplete="off"></label>' +
+      '<div class="mgd-filter-grid"><label class="mgd-search">' + uiIcon('search', 18) + '<input id="mgdInstallmentSearch" type="search" placeholder="ابحث باسم العضو" autocomplete="off"></label>' +
       '<label class="mgd-select"><span>الدورة</span><select id="mgdInstallmentCycle">' + cycleOptions + '</select></label>' +
       '<label class="mgd-select"><span>رقم القسط</span><select id="mgdInstallmentNumber"><option value="all">كل الأقساط</option>' + installmentOptions + '</select></label>' +
       '<label class="mgd-select"><span>حالة القسط</span><select id="mgdInstallmentStatus"><option value="all">جميع الحالات</option><option value="due">مستحق</option><option value="paid">مدفوع</option><option value="late">متأخر</option><option value="upcoming">لم يحن موعده</option></select></label></div>' +
@@ -201,7 +201,7 @@
       const member = (SahmApp.memberList(g.id).members || []).find(x => String(x.memberId) === memberId);
       if (!statement || !statement.ok) content = backToTab('members') + '<div class="mgd-empty">' + esc(statement && statement.message || 'تعذر تحميل ملف العضو') + '</div>';
       else content = backToTab('members') + '<div class="mgd-detail-heading"><b>' + esc(statement.memberName) + '</b><span class="mgd-role">' + (member && member.isManager ? 'مدير الجمعية' : 'عضو') + '</span></div>' +
-        '<section class="mgd-detail-card">' + row('users', 'عدد الأسهم', statement.shares) + row('wallet', 'إجمالي الالتزام', moneyValue(statement.commitment, statement.currency)) + '</section>' +
+        '<section class="mgd-detail-card">' + row('users', 'عدد الأسهم', statement.shares) + row('wallet', 'إجمالي الالتزام', moneyValue(statement.commitment && statement.commitment.overall, statement.currency)) + '</section>' +
         (statement.cycles || []).map(c => '<section class="mgd-detail-card"><div class="mgd-detail-heading"><b>الدورة ' + c.cycle + '</b><span>' + (c.progress.paid || 0) + ' من ' + (c.progress.total || 0) + ' أقساط</span></div>' +
           (c.rows || []).map(x => '<div class="mgd-simple-row"><span><b>القسط ' + x.no + '</b><small>' + esc(dateLabel(x.periodStart)) + ' – ' + esc(dateLabel(x.periodEnd)) + '</small></span>' + pill(x.status) + '<b>' + esc(moneyValue(x.total, statement.currency)) + '</b></div>').join('') + '</section>').join('');
       shell('ملف العضو', 'groups', identity(g, d) + content);
