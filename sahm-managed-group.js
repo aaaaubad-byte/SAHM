@@ -416,6 +416,7 @@
     dashboardTimer = setInterval(() => show(active + 1), 5000);
   }
   async function render(g, d) {
+    if (dashboardTimer) { clearInterval(dashboardTimer); dashboardTimer = null; }
     const version = ++renderVersion;
     const isLatest = () => version === renderVersion;
     const view = params.managedView || '';
