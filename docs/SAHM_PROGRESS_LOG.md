@@ -412,3 +412,4 @@
 - Merged the new workspace CSS declarations into their existing selector rules instead of leaving a second override layer; kept only genuinely new selectors and the mobile breakpoint additions.
 - Updated UI contract tests to validate the role-specific tab arrays and the current cycle-card status markup; tests now use the file fixtures already loaded by the suite.
 - Removed the internal winning-share UUID from participant draw-history cards; the existing winner label already identifies the winning share without exposing a database identifier.
+- Updated architecture-sensitive UI contracts: the shared workspace module is included when checking generated buttons/actions/forms, and the member-reception entry is asserted in the workspace settings rather than the removed legacy detail renderer.

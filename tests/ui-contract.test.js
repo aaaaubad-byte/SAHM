@@ -264,11 +264,11 @@ test('modal dialogs expose ARIA semantics and keyboard focus management', () => 
 
 
 test('every rendered button, route, form, and modal action is connected to a handler', () => {
-  const registry = html.match(/const ALL_SCREEN_REGISTRY\s*=\s*\{([\s\S]*?)\n\};/);
+  const templates = html + managed;\n  const registry = html.match(/const ALL_SCREEN_REGISTRY\s*=\s*\{([\s\S]*?)\n\};/);
   assert.ok(registry, 'central route registry exists');
   const routes = new Set([...registry[1].matchAll(/['"]?([A-Za-z_$][\w$-]*)['"]?\s*:/g)].map(x => x[1]));
 
-  const staticRoutes = new Set([...html.matchAll(/data-go=["']([^"']+)["']/g)]
+  const staticRoutes = new Set([...templates.matchAll(/data-go=["']([^"']+)["']/g)]
     .map(x => x[1]).filter(x => !x.includes('$')));
   for (const route of staticRoutes) assert.ok(routes.has(route), 'button route resolves: ' + route);
 
@@ -278,7 +278,7 @@ test('every rendered button, route, form, and modal action is connected to a han
     assert.match(attrs, /data-action|data-go|type=["']submit["']/, 'button has a delegated action, route, or form-submit role: ' + attrs);
   }
 
-  const actions = new Set([...html.matchAll(/data-action=["']([^"']+)["']/g)]
+  const actions = new Set([...templates.matchAll(/data-action=["']([^"']+)["']/g)]
     .map(x => x[1]).filter(x => !x.includes('$')));
   const actionCases = new Set([...html.matchAll(/action===["']([^"']+)["']/g)].map(x => x[1]));
   const groupedActions = new Set([...html.matchAll(/\[([^\]]+)\]\.includes\(action\)/g)]
@@ -476,7 +476,7 @@ test('public-link lifecycle is managed in one place rather than duplicated acros
   const detailStart = html.indexOf('function groupDetail(){');
   const detailEnd = html.indexOf('async function loadAssociationPublicLinkStatus', detailStart);
   const detail = html.slice(detailStart, detailEnd);
-  assert.match(detail, /data-go="member-reception"/);
+  assert.match(managed, /data-go="member-reception"/);
   assert.doesNotMatch(detail, /association-link-status/);
 
   const createdStart = html.indexOf('function showCreatedGroup(g){');
