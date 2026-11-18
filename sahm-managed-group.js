@@ -85,7 +85,6 @@
       toggle.setAttribute('aria-expanded',open?'true':'false');
       toggle.title=open?'إخفاء الفلترة':'إظهار الفلترة';
     };
-    toggle.addEventListener('click',()=>{state[stateKey]=!state[stateKey];apply();});
     apply();
   }
   function bindDrawFilters() {
@@ -107,7 +106,7 @@
     ).join('');
     return '<div class="mgd-list-head"><b>الأعضاء</b><span>' + list.length + ' عضو</span></div>' +
       '<div class="mgd-filterbar mgd-member-filters'+(state.memberFiltersOpen?' filters-open':'')+'" id="mgdMemberToolbar"><label class="mgd-search">' + uiIcon('search',18) + '<input id="mgdMemberSearch" type="search" placeholder="اسم العضو" autocomplete="off"></label>' +
-      '<button type="button" class="mgd-inline-filter-toggle" data-action="managed-inline-filter-toggle" id="mgdMemberFilterToggle" aria-label="فلترة الأعضاء" aria-controls="mgdMemberFilters" aria-expanded="'+(state.memberFiltersOpen?'true':'false')+'">' + uiIcon('sliders-horizontal',18) + '</button>' +
+      '<button type="button" class="mgd-inline-filter-toggle" data-action="managed-inline-filter-toggle" id="mgdMemberFilterToggle" data-filter-state="memberFiltersOpen" aria-label="فلترة الأعضاء" aria-controls="mgdMemberFilters" aria-expanded="'+(state.memberFiltersOpen?'true':'false')+'">' + uiIcon('sliders-horizontal',18) + '</button>' +
       '<div class="mgd-filter-fields" id="mgdMemberFilters"><label class="mgd-select"><select id="mgdMemberStatus" aria-label="حالة العضو"><option value="all">كل الحالات</option><option value="eligible">مؤهل</option><option value="won">فائز بكل أسهمه</option></select></label></div>' +
       '<button type="button" class="mgd-reminder-icon" data-go="invite" title="دعوة عضو">' + uiIcon('user-plus',17) + '</button></div>' +
       '<div class="mgd-list" id="mgdMemberList">' + (rows || '<div class="mgd-empty">لا يوجد أعضاء مسجلون</div>') + '</div>';
@@ -145,7 +144,7 @@
     }).join('');
     return '<div class="mgd-list-head"><b>القرعات</b><span>'+total+' قرعة</span></div>'+
       '<div class="mgd-filterbar mgd-draw-filters'+(state.drawFiltersOpen?' filters-open':'')+'" id="mgdDrawToolbar"><label class="mgd-search">'+uiIcon('search',16)+'<input id="mgdDrawSearch" type="search" placeholder="رقم القرعة" inputmode="numeric"></label>'+
-      '<button type="button" class="mgd-inline-filter-toggle" data-action="managed-inline-filter-toggle" id="mgdDrawFilterToggle" aria-label="فلترة القرعات" aria-controls="mgdDrawFilters" aria-expanded="'+(state.drawFiltersOpen?'true':'false')+'">'+uiIcon('sliders-horizontal',18)+'</button>'+
+      '<button type="button" class="mgd-inline-filter-toggle" data-action="managed-inline-filter-toggle" id="mgdDrawFilterToggle" data-filter-state="drawFiltersOpen" aria-label="فلترة القرعات" aria-controls="mgdDrawFilters" aria-expanded="'+(state.drawFiltersOpen?'true':'false')+'">'+uiIcon('sliders-horizontal',18)+'</button>'+
       '<div class="mgd-filter-fields" id="mgdDrawFilters"><label class="mgd-select"><select id="mgdDrawStatus" aria-label="حالة القرعة"><option value="all">كل الحالات</option><option value="completed">مكتملة</option><option value="collecting">قيد التحصيل</option><option value="ready">جاهزة</option><option value="waiting">بانتظار الموعد</option><option value="upcoming">قادمة</option></select></label></div></div>'+
       '<button type="button" class="mgd-action primary mgd-room-entry" data-action="managed-draw-view" data-view="summary">'+uiIcon('shuffle',17)+' دخول غرفة القرعة</button>'+
       '<div class="mgd-list" id="mgdDrawList">'+(cards||'<div class="mgd-empty">لا توجد قرعات لعرضها</div>')+'</div>';
@@ -738,10 +737,21 @@
     const action = el.dataset.action;
     if (['managed-installment-select','managed-installment-filter','managed-installment-bulk-reminder'].includes(action)) { event.preventDefault(); event.stopImmediatePropagation(); return; }
     if (['record-paid','send-reminder','schedule-draw','run-draw','draw-presentation-completed','draw-presentation-failed','notify-channel-toggle'].includes(action)) invalidateReads();
-    if (!['managed-home-slide','managed-home-section','managed-tab','managed-open-member','managed-open-cycle','managed-back','managed-draw-view','managed-settings-view'].includes(action)) return;
+    if (!['managed-home-slide','managed-home-section','managed-tab','managed-open-member','managed-open-cycle','managed-back','managed-draw-view','managed-settings-view','managed-inline-filter-toggle'].includes(action)) return;
     event.preventDefault();
     event.stopImmediatePropagation();
 
+    if (action === 'managed-inline-filter-toggle') {
+      const toolbar=el.closest('.mgd-filterbar');
+      const stateKey=el.dataset.filterState;
+      if(!toolbar||!['memberFiltersOpen','drawFiltersOpen'].includes(stateKey))return;
+      state[stateKey]=!state[stateKey];
+      const open=state[stateKey];
+      toolbar.classList.toggle('filters-open',open);
+      el.setAttribute('aria-expanded',open?'true':'false');
+      el.title=open?'إخفاء الفلترة':'إظهار الفلترة';
+      return;
+    }
     if (action === 'managed-home-section') {
       const section = el.dataset.section || '';
       if (section === 'invites') { go('invites'); return; }
