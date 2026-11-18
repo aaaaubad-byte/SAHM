@@ -552,6 +552,17 @@
       return {ok:true,groupId:groupId,total:list.length,shares:list.map(function(x){return {id:x.share_id,shareNo:Number(x.share_no),memberId:x.membership_id,ownerName:x.owner_name||'—',status:x.status,winnerRound:x.winner_round==null?null:Number(x.winner_round)};})};
     }catch(e){return fail(e);}
   }
+  async function myShareList(groupId,opts){
+    try{
+      var rows=await invoke('get_my_association_shares',{p_association_id:groupId})||[];
+      var list=Array.isArray(rows)?rows:[];
+      if(opts&&opts.status&&opts.status!=='all')list=list.filter(function(x){return x.status===opts.status;});
+      return {ok:true,groupId:groupId,total:list.length,shares:list.map(function(x){return {
+        id:x.share_id,shareNo:Number(x.share_no),memberId:null,ownerName:'أنت',
+        status:x.status,winnerRound:x.winner_round==null?null:Number(x.winner_round)
+      };})};
+    }catch(e){return fail(e);}
+  }
   async function getDrawHistory(groupId){
     try{return {ok:true,history:(await invoke('get_draw_history',{p_association_id:groupId}))||[]};}catch(e){return fail(e);}
   }
@@ -772,6 +783,7 @@
     app.setDrawScheduledAt=setDrawScheduledAt;
     app.setDrawPresentationStatus=setDrawPresentationStatus;
     app.shareList=shareList;
+    app.myShareList=myShareList;
     app.getDrawRoom=getDrawRoom;
     app.getDrawHistory=getDrawHistory;
     app.getDrawReadiness=getDrawReadiness;
