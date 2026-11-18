@@ -160,7 +160,7 @@
     let body = '';
     if (view === 'summary') {
       const totals = financial && financial.totals || {}, shares = financial && financial.shares || {};
-      body = '<section class="mgd-detail-card"><div class="mgd-detail-heading"><b>الجولة ' + esc(room.round_no || '—') + ' من ' + esc(room.rounds_total || d.rounds || '—') + '</b>' + pill(room.state || 'pending') + '</div>' +
+      body = '<section class="mgd-detail-card"><div class="mgd-detail-heading"><b>الجولة ' + esc(room.round_no || '—') + ' من ' + esc(room.rounds_total || d.rounds || '—') + '</b><span class="mgd-role">' + esc(states[room.state] || room.state || '—') + '</span></div>' +
         row('calendar-days', 'تاريخ الاستحقاق', dateLabel(cycle.due_on)) +
         row('clock', 'موعد القرعة', cycle.draw_scheduled_at ? SahmCore.fmtDateTime(cycle.draw_scheduled_at, 'Asia/Aden') : 'غير محدد') +
         row('users', 'الأسهم المؤهلة', eligible.length) +
