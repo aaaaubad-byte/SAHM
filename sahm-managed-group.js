@@ -735,12 +735,7 @@
       return;
     }
     if (section === 'members') {
-      mountManagerSection(g, title, memberCards(g) +
-        '<section class="mgd-detail-card mgd-new-member-actions"><b>إجراءات العضوية</b><div class="mgd-actions">' +
-        '<button type="button" class="mgd-action primary" data-go="member-reception">استقبال الأعضاء والطلبات</button>' +
-        '<button type="button" class="mgd-action" data-go="invite">دعوة أعضاء جدد</button>' +
-        '<button type="button" class="mgd-action" data-action="managed-home-section" data-section="invites">إدارة الدعوات</button>' +
-        '</div></section>');
+      mountManagerSection(g, title, memberCards(g));
       bindMemberSearch();
       return;
     }
@@ -757,7 +752,7 @@
         (item.status === 'pending' && item.responseStatus !== 'declined' ? '<button type="button" class="mgd-action" data-action="cancel-invite" data-id="' + esc(item.id) + '">إلغاء الدعوة</button>' : '') + '</article>'
       ).join('');
       mountManagerSection(g, title,
-        '<div class="mgd-new-toolbar"><div><b>' + items.length + ' دعوة</b><small>متابعة حالة الدعوات والردود</small></div><button type="button" class="mgd-action primary" data-go="invite">إنشاء دعوة</button></div>' +
+        '<div class="mgd-new-toolbar"><div><b>' + items.length + ' دعوة</b><small>متابعة حالة الدعوات والردود</small></div></div>' +
         '<div class="mgd-new-invite-list">' + (rows || '<div class="mgd-empty">لا توجد دعوات مسجلة</div>') + '</div>');
       return;
     }

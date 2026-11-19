@@ -614,3 +614,5 @@
 #screen .mgd-draw-all-sections>.mgd-draw-panel+.mgd-draw-panel{padding-top:10px;border-top:1px solid #e5eaf1}
 #screen .mgd-draw-all-sections .mgd-detail-card{margin-bottom:8px}
 #screen .mgd-draw-all-sections .mgd-wheel-wrap{max-width:250px;margin:8px auto 14px}
+
+#screen .mgd-new-member-actions{display:none!important}
