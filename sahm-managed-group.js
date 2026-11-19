@@ -98,13 +98,18 @@
     const result = SahmApp.memberList(g.id);
     if (!result || !result.ok) return '<div class="mgd-empty">تعذر تحميل قائمة الأعضاء</div>';
     const list = result.members || [];
+    const totalShares = list.reduce((sum,m)=>sum+Number(m.shares||0),0);
+    const wonShares = list.reduce((sum,m)=>sum+Number(m.wonShares||0),0);
+    const eligibleShares = list.reduce((sum,m)=>sum+Number(m.eligibleShares==null?m.shares:m.eligibleShares),0);
+    const managerCount = list.filter(m=>m.isManager).length;
     const rows = list.map(m =>
       '<article class="mgd-member-card mgd-member-card-static" data-member-status="' + (m.memberStatus==='won'?'won':'eligible') + '">' +
       '<span class="mgd-avatar">' + esc((m.name || '؟').slice(0, 1)) + '</span><span class="mgd-member-main"><b>' + esc(m.name) + '</b>' +
       '<small>' + (m.isManager ? ((g.managerParticipates && Number(m.shares||0)>0) ? 'مدير وعضو' : 'مدير الجمعية') : 'عضو') + (m.isMe ? ' · حسابك' : '') + '</small></span>' +
       '<span class="mgd-member-shares"><b>' + Number(m.shares || 0) + '</b><small>أسهم</small><small>' + Number(m.wonShares||0) + ' فائز · ' + Number(m.eligibleShares==null?m.shares:m.eligibleShares) + ' مؤهل</small><small class="mgd-member-state">' + (m.memberStatus==='won'?'فائز بكل أسهمه':'مؤهل') + '</small></span></article>'
     ).join('');
-    return '<div class="mgd-list-head"><b>الأعضاء</b><span>' + list.length + ' عضو</span></div>' +
+    return '<div class="mgd-member-overview"><article><small>الأعضاء</small><b>' + list.length + '</b></article><article><small>المديرون</small><b>' + managerCount + '</b></article><article><small>إجمالي الأسهم</small><b>' + totalShares + '</b></article><article><small>فائزة / مؤهلة</small><b>' + wonShares + ' / ' + eligibleShares + '</b></article></div>' +
+      '<div class="mgd-list-head"><b>قائمة الأعضاء</b><span>' + list.length + ' عضو</span></div>' +
       '<div class="mgd-filterbar mgd-member-filters'+(state.memberFiltersOpen?' filters-open':'')+'" id="mgdMemberToolbar"><label class="mgd-search">' + uiIcon('search',18) + '<input id="mgdMemberSearch" type="search" placeholder="اسم العضو" autocomplete="off"></label>' +
       '<button type="button" class="mgd-inline-filter-toggle" data-action="managed-inline-filter-toggle" id="mgdMemberFilterToggle" data-filter-state="memberFiltersOpen" aria-label="فلترة الأعضاء" aria-controls="mgdMemberFilters" aria-expanded="'+(state.memberFiltersOpen?'true':'false')+'">' + uiIcon('sliders-horizontal',18) + '</button>' +
       '<div class="mgd-filter-fields" id="mgdMemberFilters"><label class="mgd-select"><select id="mgdMemberStatus" aria-label="حالة العضو"><option value="all">كل الحالات</option><option value="eligible">مؤهل</option><option value="won">فائز بكل أسهمه</option></select></label></div></div>' +
@@ -795,8 +800,12 @@
       return;
     }
     if (section === 'settings') {
-      mountManagerSection(g, title, '<section class="mgd-detail-card"><div class="mgd-detail-heading"><b>بيانات إعداد الجمعية</b><span>البيانات الحالية</span></div>' +
-        managerInformationContent(g, d) + '</section>' + notificationSettingsPanel(d));
+      const canInvite = !!(d.permissions && d.permissions.canInvite);
+      mountManagerSection(g, title,
+        '<section class="mgd-detail-card"><div class="mgd-detail-heading"><b>حالة إدارة الجمعية</b><span>' + (canInvite ? 'استقبال الأعضاء مفتوح' : 'استقبال الأعضاء مغلق') + '</span></div>' +
+        '<div class="mgd-simple-row"><span>حالة الاتفاق</span><b>' + (d.agreementLocked ? 'مقفل' : 'قابل للتعديل') + '</b></div>' +
+        '<div class="mgd-simple-row"><span>صلاحية استقبال أعضاء جدد</span><b>' + (canInvite ? 'متاحة' : 'غير متاحة') + '</b></div></section>' +
+        notificationSettingsPanel(d));
       return;
     }
     if (section === 'audit' || section === 'news') {

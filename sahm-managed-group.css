@@ -637,3 +637,8 @@
 #screen .mgd-request-actions .mgd-action{padding:6px 9px;min-height:30px;font-size:11px}
 #screen .mgd-new-invite-list{display:flex;flex-direction:column;gap:8px}
 @media(max-width:380px){#screen .mgd-join-request-row{align-items:flex-start;flex-wrap:wrap}#screen .mgd-request-actions{width:100%;flex-direction:row}#screen .mgd-request-actions .mgd-action{flex:1}}
+
+#screen .mgd-member-overview{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px;margin-bottom:12px}
+#screen .mgd-member-overview article{display:flex;flex-direction:column;gap:5px;padding:12px;border:1px solid var(--line,#e6eaf0);border-radius:13px;background:var(--surface,#fff)}
+#screen .mgd-member-overview small{font-size:11px;color:var(--muted,#697586)}
+#screen .mgd-member-overview b{font-size:20px;line-height:1.15}

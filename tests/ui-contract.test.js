@@ -28,6 +28,18 @@ function objectKeys(source, marker) {
 }
 
 
+
+test('manager members section summarizes membership and share totals; settings does not duplicate information screen', () => {
+  assert.match(managed,/mgd-member-overview/);
+  assert.match(managed,/totalShares = list\.reduce/);
+  assert.match(managed,/wonShares = list\.reduce/);
+  const settingsStart = managed.indexOf("if (section === 'settings')");
+  const settingsEnd = managed.indexOf("if (section === 'audit'", settingsStart);
+  const settings = managed.slice(settingsStart, settingsEnd);
+  assert.match(settings,/notificationSettingsPanel\(d\)/);
+  assert.doesNotMatch(settings,/managerInformationContent\(g, d\)/);
+});
+
 test('manager invitations section embeds invite creation and join-request review without legacy page redirects', () => {
   assert.match(managed,/mgd-inline-invite/);
   assert.match(managed,/managedInviteComposerMarkup/);
