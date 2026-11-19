@@ -31,6 +31,17 @@ function objectKeys(source, marker) {
 
 
 
+
+test('manager collection screen displays obligation, collected and remaining totals', () => {
+  assert.match(managed,/const totalAmount=shown\.reduce/);
+  assert.match(managed,/const remainingAmount=shown\.reduce/);
+  assert.match(managed,/const collectedAmount=Math\.max/);
+  assert.match(managed,/المستحق <b>/);
+  assert.match(managed,/المحصّل <b>/);
+  assert.match(managed,/المتبقي <b>/);
+  assert.doesNotMatch(managed,/return \(manager\?'': '<section class="mgd-installment-summary"/);
+});
+
 test('manager draws screen provides an overview of total, completed and remaining rounds', () => {
   assert.match(managed,/mgd-draw-overview/);
   assert.match(managed,/completedCount = Math\.min\(total, Math\.max\(Number\(d\.drawn\)/);
