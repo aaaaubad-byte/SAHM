@@ -33,7 +33,7 @@ function objectKeys(source, marker) {
 
 test('manager draws screen provides an overview of total, completed and remaining rounds', () => {
   assert.match(managed,/mgd-draw-overview/);
-  assert.match(managed,/completedCount = history\.filter/);
+  assert.match(managed,/completedCount = Math\.min\(total, Math\.max\(Number\(d\.drawn\)/);
   assert.match(managed,/القرعات المتبقية/);
   assert.match(managed,/حالة الحالية/);
 });

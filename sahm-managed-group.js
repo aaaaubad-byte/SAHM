@@ -158,8 +158,8 @@
         '<span class="mgd-cycle-progress"><i style="width:'+pct+'%"></i></span><small>'+pct+'% اكتمال الأقساط</small></span>'+
         '<span class="mgd-cycle-state">'+esc(label)+'</span>'+(draw ? '<small class="mgd-cycle-winner">الفائز: '+esc(winner)+'</small>' : '')+'</article>';
     }).join('');
-    const completedCount = history.filter(x => Number(x.round_no || x.round) <= total).length;
-    const currentStatus = ready ? 'جاهزة' : current > total ? 'مكتملة' : 'قيد التحصيل';
+    const completedCount = Math.min(total, Math.max(Number(d.drawn) || 0, history.filter(x => Number(x.round_no || x.round) <= total).length));
+    const currentStatus = !total ? 'غير محددة' : completedCount >= total ? 'اكتملت' : ready ? 'جاهزة' : 'قيد التحصيل';
     return '<div class="mgd-draw-overview"><article><small>إجمالي القرعات</small><b>' + total + '</b></article><article><small>نتائج مثبتة</small><b>' + completedCount + '</b></article><article><small>القرعات المتبقية</small><b>' + Math.max(0,total-completedCount) + '</b></article><article><small>حالة الحالية</small><b>' + currentStatus + '</b></article></div>' +
       '<div class="mgd-list-head"><b>قائمة القرعات</b><span>'+total+' قرعة</span></div>'+
       '<div class="mgd-filterbar mgd-draw-filters'+(state.drawFiltersOpen?' filters-open':'')+'" id="mgdDrawToolbar"><label class="mgd-search">'+uiIcon('search',16)+'<input id="mgdDrawSearch" type="search" placeholder="رقم القرعة" inputmode="numeric"></label>'+
