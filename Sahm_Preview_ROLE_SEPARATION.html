@@ -3706,7 +3706,7 @@ async function handleAppAction(action,el){
   else toast(result&&result.message||'تعذر قبول الدعوة القديمة');
   return;
  }
- if(action==='cancel-invite'){const r=await SahmApp.cancelInvite(el.dataset.id);if(r&&r.ok){refreshData();invites()}return}
+ if(action==='cancel-invite'){const r=await SahmApp.cancelInvite(el.dataset.id);if(r&&r.ok){refreshData();if(screenName==='group-detail'&&params.managedSection==='invites')groupDetail();else invites()}return}
  if(action==='accept-legacy-invite-detail'){
   const id=el.dataset.id;
   showModal('تأكيد قبول الدعوة القديمة','سيتم اعتماد عضويتك بالعدد المسجل في الدعوة القديمة وإنشاء الالتزامات المرتبطة بها.',[['قبول الدعوة','join-confirm','primary'],['إلغاء','close','outline']]);
@@ -3758,7 +3758,7 @@ async function handleAppAction(action,el){
   joinDecisionBusy=true;el.disabled=true;
   try{
    const id=$('#modal-root').dataset.requestId,result=await SahmApp.approveJoinRequest(id);
-   if(result&&result.ok){closeModal();refreshData();toast('تم اعتماد طلب الانضمام');go('join-requests');}
+   if(result&&result.ok){closeModal();refreshData();toast('تم اعتماد طلب الانضمام');if(screenName==='group-detail'&&params.managedSection==='invites')groupDetail();else go('join-requests');}
    else toast(result&&result.message||'تعذرت الموافقة على الطلب');
   }catch(error){toast(SahmSupabase.friendlyError(error));}
   finally{joinDecisionBusy=false;if(el.isConnected)el.disabled=false;}
@@ -3774,7 +3774,7 @@ async function handleAppAction(action,el){
   try{
    const root=$('#modal-root'),id=root.dataset.requestId,reason=$('#joinRejectReason')?.value||'';
    const result=await SahmApp.rejectJoinRequest(id,reason);
-   if(result&&result.ok){closeModal();refreshData();toast('تم رفض طلب الانضمام');go('join-requests');}
+   if(result&&result.ok){closeModal();refreshData();toast('تم رفض طلب الانضمام');if(screenName==='group-detail'&&params.managedSection==='invites')groupDetail();else go('join-requests');}
    else toast(result&&result.message||'تعذر رفض الطلب');
   }catch(error){toast(SahmSupabase.friendlyError(error));}
   finally{joinDecisionBusy=false;if(el.isConnected)el.disabled=false;}

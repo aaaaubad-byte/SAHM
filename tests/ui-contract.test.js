@@ -27,6 +27,18 @@ function objectKeys(source, marker) {
   return [...block.matchAll(/\b([A-Za-z_$][\w$]*)\s*:/g)].map(item => item[1]);
 }
 
+
+test('manager invitations section embeds invite creation and join-request review without legacy page redirects', () => {
+  assert.match(managed,/mgd-inline-invite/);
+  assert.match(managed,/managedInviteComposerMarkup/);
+  assert.match(managed,/mgd-join-request-row/);
+  assert.match(managed,/data-action="approve-join-request"/);
+  assert.match(managed,/data-action="reject-join-request"/);
+  assert.match(html,/function managedInviteComposerMarkup\(\)/);
+  assert.match(html,/if\(screenName==='group-detail'&&params\.managedSection==='invites'\)groupDetail\(\);else go\('join-requests'\)/);
+  assert.match(html,/if\(screenName==='group-detail'&&params\.managedSection==='invites'\)groupDetail\(\);else invites\(\)/);
+});
+
 test('every registered screen has a real renderer and every static route resolves', () => {
   const registryMatch = html.match(/const ALL_SCREEN_REGISTRY=\{([\s\S]*?)\n\};/);
   assert.ok(registryMatch, 'central screen registry exists');
