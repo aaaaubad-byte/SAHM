@@ -3506,6 +3506,14 @@ function profileSetup(){
 function logout(){auth(`<div class="auth-brand"><div class="brand-mark">✓</div><h1>تم تسجيل الخروج</h1></div><div class="auth-card"><button class="btn primary full" data-go="welcome">العودة لتسجيل الدخول</button></div>`)}
 function openAssociationWorkspace(tab, view) {
  const g=currentGroup(); if(!g){go('groups');return}
+ const detail=SahmApp.groupDetail(g.id);
+ if(detail&&detail.ok&&detail.role&&detail.role.manager){
+  const map={installments:'installments',shares:'shares',draws:'draws',members:'members',settings:'settings',chat:'chat',audit:'audit'};
+  const nextParams={managedSection:view?'room':(map[tab]||'members')};
+  if(view)nextParams.managedDrawView=view;
+  go('group-detail',nextParams,{currentGroupId:g.id,groupDetailTab:'overview'});
+  return;
+ }
  const nextParams=view?{managedView:'draw',managedDrawView:view}:{};
  go('group-detail',nextParams,{currentGroupId:g.id,groupDetailTab:tab});
 }

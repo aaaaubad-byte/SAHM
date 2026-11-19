@@ -59,10 +59,10 @@
       (manager?'<div class="mgd-current-round"><div class="mgd-current-round-head"><b>القرعة الحالية · '+current+'</b><span>'+pct+'% تحصيل</span></div><div class="mgd-round-progress"><i style="width:'+pct+'%"></i></div><small>'+paid+' من '+obligations.length+' التزاماً مسدداً</small></div>':'')+'</section>';
   }
   function tabs(active, manager) {
-    const managers=[['installments','receipt','الأقساط'],['shares','layers','الأسهم'],['draws','shuffle','القرعات'],['members','users','الأعضاء'],['settings','settings','الإعدادات']];
+    if (manager) return '';
     const members=[['overview','layout-dashboard','ملخصي'],['installments','receipt','أقساطي'],['shares','layers','أسهمي'],['draws','shuffle','القرعات'],['communication','messages','التواصل']];
-    const items=manager?managers:members, selected=['news','chat','audit'].includes(active)?(manager?'settings':'communication'):active;
-    return '<nav class="mgd-tabs" aria-label="أقسام الجمعية" role="tablist">'+items.map(([id,icon,label])=>'<button type="button" role="tab" aria-selected="'+(selected===id?'true':'false')+'" class="'+(selected===id?'active':'')+'" data-action="managed-tab" data-tab="'+id+'">'+uiIcon(icon,17)+'<span>'+label+'</span></button>').join('')+'</nav>';
+    const selected=['news','chat','audit'].includes(active)?'communication':active;
+    return '<nav class="mgd-tabs" aria-label="أقسام الجمعية" role="tablist">'+members.map(([id,icon,label])=>'<button type="button" role="tab" aria-selected="'+(selected===id?'true':'false')+'" class="'+(selected===id?'active':'')+'" data-action="managed-tab" data-tab="'+id+'">'+uiIcon(icon,17)+'<span>'+label+'</span></button>').join('')+'</nav>';
   }
   function backToTab(tab) {
     const label = tab === 'draws' ? 'القرعات' : tab === 'settings' ? 'الإعدادات' : tab === 'installments' ? 'الأقساط' : 'الأعضاء';
@@ -655,6 +655,165 @@
     }
     dashboardTimer = setInterval(() => show(active + 1), 5000);
   }
+
+  /* Dedicated manager workspaces. The legacy tab-driven manager path is bypassed. */
+  const MANAGER_SECTION_TITLES = Object.freeze({
+    installments: 'التحصيل', draws: 'القرعات', shares: 'الأسهم', members: 'الأعضاء',
+    invites: 'الدعوات', chat: 'الدردشة', room: 'الغرفة', information: 'المعلومات',
+    settings: 'الإعدادات', audit: 'السجل', news: 'أخبار الجمعية'
+  });
+  function managerSectionFrame(g, title, content) {
+    return '<main class="mgd-new-screen"><header class="mgd-new-screen-head">' +
+      '<button type="button" class="mgd-new-screen-back" data-action="managed-section-home" aria-label="العودة إلى لوحة الجمعية">' + uiIcon('arrow-right',18) + '</button>' +
+      '<div class="mgd-new-screen-title"><small>' + esc(g.name || 'الجمعية') + '</small><h1>' + esc(title) + '</h1></div>' +
+      '</header><section class="mgd-new-screen-body">' + content + '</section></main>';
+  }
+  function mountManagerSection(g, title, content) {
+    shell(title, 'groups', managerSectionFrame(g, title, content));
+  }
+  function managerInformationContent(g, d) {
+    return '<section class="mgd-new-info-grid">' +
+      '<article><span>بداية الجمعية</span><b>' + esc(dateLabel(g.start || g.startDate)) + '</b></article>' +
+      '<article><span>أول موعد للقرعة</span><b>' + esc(dateLabel(g.first || g.firstDrawOn)) + '</b></article>' +
+      '<article><span>قيمة السهم</span><b>' + esc(money(g.share, g.currency)) + '</b></article>' +
+      '<article><span>عدد الأقساط</span><b>' + esc(g.installments || '—') + '</b></article>' +
+      '<article><span>مدة فترة التحصيل</span><b>' + esc((g.cycleDays || g.periodDays || '—') + ' يوم') + '</b></article>' +
+      '<article><span>الجائزة المستهدفة</span><b>' + esc(moneyValue(d.plan && d.plan.prizeTarget || 0, g.currency)) + '</b></article>' +
+      '<article><span>عدد الأعضاء</span><b>' + esc(d.members || 0) + '</b></article>' +
+      '<article><span>إجمالي الأسهم</span><b>' + esc(g.shares || d.totalShares || 0) + '</b></article>' +
+    '</section>' +
+    (g.rules ? '<section class="mgd-detail-card mgd-new-rules"><b>قواعد الجمعية</b><p>' + esc(g.rules) + '</p></section>' : '');
+  }
+  async function renderManagerSection(g, d, section, version, isLatest) {
+    const title = MANAGER_SECTION_TITLES[section];
+    if (!title) { managerDashboard(g, d); return; }
+    if (params.managedMemberId && section === 'members') {
+      const memberId = String(params.managedMemberId);
+      mountManagerSection(g, 'ملف العضو', loadingPanel('ملف العضو'));
+      const result = await cachedRead('manager-member:' + g.id + ':' + memberId, () => SahmApp.memberStatement(g.id, memberId), 7000);
+      if (!isLatest()) return;
+      const memberResult = SahmApp.memberList(g.id);
+      const member = memberResult && memberResult.ok ? (memberResult.members || []).find(x => String(x.memberId) === memberId) : null;
+      if (!result || !result.ok) {
+        mountManagerSection(g, 'ملف العضو', '<div class="mgd-empty">' + esc(result && result.message || 'تعذر تحميل ملف العضو') + '</div>');
+        return;
+      }
+      const cycles = (result.cycles || []).map(c =>
+        '<section class="mgd-detail-card"><div class="mgd-detail-heading"><b>القرعة ' + esc(c.cycle) + '</b><span>' + Number(c.progress && c.progress.paid || 0) + ' من ' + Number(c.progress && c.progress.total || 0) + ' أقساط</span></div>' +
+        (c.rows || []).map(x => '<div class="mgd-simple-row"><span><b>القسط ' + esc(x.no) + '</b><small>' + esc(dateLabel(x.periodStart)) + ' – ' + esc(dateLabel(x.periodEnd)) + '</small></span>' + pill(x.status) + '<b>' + esc(moneyValue(x.total, result.currency)) + '</b></div>').join('') +
+        '</section>'
+      ).join('');
+      mountManagerSection(g, 'ملف العضو',
+        '<section class="mgd-detail-card"><div class="mgd-detail-heading"><b>' + esc(result.memberName || 'عضو') + '</b><span class="mgd-role">' + (member && member.isManager ? 'مدير الجمعية' : 'عضو') + '</span></div>' +
+        '<div class="mgd-new-info-grid"><article><span>عدد الأسهم</span><b>' + Number(result.shares || 0) + '</b></article><article><span>إجمالي الالتزام</span><b>' + esc(moneyValue(result.commitment && result.commitment.overall, result.currency)) + '</b></article></div></section>' +
+        (cycles || '<div class="mgd-empty">لا توجد أقساط لهذا العضو</div>'));
+      return;
+    }
+    if (params.managedRoundId && section === 'draws') {
+      mountManagerSection(g, 'تفاصيل القرعة', loadingPanel('تفاصيل القرعة'));
+      let result = '';
+      try { result = await cycleDetail(g, d, Number(params.managedRoundId) || 1); }
+      catch (error) { result = '<div class="mgd-empty">تعذر تحميل تفاصيل القرعة</div>'; }
+      if (isLatest()) mountManagerSection(g, 'تفاصيل القرعة', result);
+      return;
+    }
+    if (section === 'installments') {
+      mountManagerSection(g, title, installmentsPanel(g, d));
+      bindInstallmentFilters(g, d);
+      return;
+    }
+    if (section === 'draws') {
+      mountManagerSection(g, title, loadingPanel(title));
+      let content = '';
+      try { content = await cycleCards(g, d); }
+      catch (error) { content = '<div class="mgd-empty">تعذر تحميل القرعات. تحقق من الاتصال والصلاحيات ثم أعد المحاولة.</div>'; }
+      if (!isLatest()) return;
+      mountManagerSection(g, title, content);
+      bindDrawFilters();
+      return;
+    }
+    if (section === 'shares') {
+      state.shareStatus = state.shareStatus || 'eligible';
+      mountManagerSection(g, title,
+        '<div class="mgd-new-toolbar"><div><b>سجل الأسهم</b><small>حالة الأسهم ومالك كل سهم</small></div>' +
+        '<label class="mgd-select"><select id="mgdShareStatus" aria-label="تصفية الأسهم"><option value="eligible">مؤهلة</option><option value="won">فائزة</option><option value="all">كل الأسهم</option></select></label></div>' +
+        '<div id="mgdShareList" class="mgd-list">' + loadingPanel(title) + '</div>');
+      const filter = document.getElementById('mgdShareStatus');
+      if (filter) {
+        filter.value = state.shareStatus;
+        filter.addEventListener('change', () => {
+          state.shareStatus = filter.value;
+          const target = document.getElementById('mgdShareList');
+          if (target) target.innerHTML = loadingPanel(title);
+          shareCards(g);
+        });
+      }
+      await shareCards(g);
+      return;
+    }
+    if (section === 'members') {
+      mountManagerSection(g, title, memberCards(g) +
+        '<section class="mgd-detail-card mgd-new-member-actions"><b>إجراءات العضوية</b><div class="mgd-actions">' +
+        '<button type="button" class="mgd-action primary" data-go="member-reception">استقبال الأعضاء والطلبات</button>' +
+        '<button type="button" class="mgd-action" data-go="invite">دعوة أعضاء جدد</button>' +
+        '<button type="button" class="mgd-action" data-go="invites">إدارة الدعوات</button>' +
+        '</div></section>');
+      bindMemberSearch();
+      return;
+    }
+    if (section === 'invites') {
+      const result = SahmApp.inviteList(g.id);
+      if (!result || !result.ok) {
+        mountManagerSection(g, title, '<div class="mgd-empty">' + esc(result && result.message || 'تعذر تحميل الدعوات') + '</div>');
+        return;
+      }
+      const items = result.invites || [];
+      const responseLabels = { pending_response: 'بانتظار رد المدعو', interested: 'مهتم بالانضمام', declined: 'رفض الدعوة', deferred: 'أجّل الرد', legacy_accepted: 'دعوة قديمة مقبولة' };
+      const rows = items.map(item =>
+        '<article class="mgd-new-invite-row"><div class="mgd-avatar">' + esc((item.name || '؟').slice(0, 1)) + '</div><div class="mgd-member-main"><b>' + esc(item.name || 'مدعو') + '</b><small>' + esc(item.phone || 'لا يوجد رقم محفوظ') + '</small><small>' + esc(responseLabels[item.responseStatus] || item.responseStatus || '—') + ' · ' + esc(dateLabel(String(item.createdAt || '').slice(0, 10))) + '</small><small>' + (item.isLegacy ? 'دعوة قديمة · ' + Number(item.shares || 0) + ' سهم' : 'يحدد المدعو الأسهم عند تقديم طلب الانضمام') + '</small></div>' +
+        (item.status === 'pending' && item.responseStatus !== 'declined' ? '<button type="button" class="mgd-action" data-action="cancel-invite" data-id="' + esc(item.id) + '">إلغاء الدعوة</button>' : '') + '</article>'
+      ).join('');
+      mountManagerSection(g, title,
+        '<div class="mgd-new-toolbar"><div><b>' + items.length + ' دعوة</b><small>متابعة حالة الدعوات والردود</small></div><button type="button" class="mgd-action primary" data-go="invite">إنشاء دعوة</button></div>' +
+        '<div class="mgd-new-invite-list">' + (rows || '<div class="mgd-empty">لا توجد دعوات مسجلة</div>') + '</div>');
+      return;
+    }
+    if (section === 'chat') {
+      mountManagerSection(g, title, chatPanel(g));
+      bindChatComposer();
+      const list = document.getElementById('mgdChatMessages');
+      if (list) list.scrollTop = list.scrollHeight;
+      return;
+    }
+    if (section === 'room') {
+      params.managedDrawView = params.managedDrawView || 'summary';
+      mountManagerSection(g, title, loadingPanel('غرفة القرعة'));
+      let content = '';
+      try { content = await drawPanel(g, d); }
+      catch (error) { content = '<div class="mgd-empty">تعذر تحميل غرفة القرعة. تحقق من الاتصال والصلاحيات ثم أعد المحاولة.</div>'; }
+      if (isLatest()) mountManagerSection(g, title, content);
+      return;
+    }
+    if (section === 'information') {
+      mountManagerSection(g, title, managerInformationContent(g, d));
+      return;
+    }
+    if (section === 'settings') {
+      mountManagerSection(g, title, '<section class="mgd-detail-card"><div class="mgd-detail-heading"><b>بيانات إعداد الجمعية</b><span>البيانات الحالية</span></div>' +
+        managerInformationContent(g, d) + '</section>' + notificationSettingsPanel(d));
+      return;
+    }
+    if (section === 'audit' || section === 'news') {
+      mountManagerSection(g, title, loadingPanel(title));
+      let content = '';
+      try { content = section === 'audit' ? await auditPanel(g) : await newsPanel(g, d); }
+      catch (error) { content = '<div class="mgd-empty">تعذر تحميل ' + esc(title) + '</div>'; }
+      if (isLatest()) mountManagerSection(g, title, content);
+      return;
+    }
+    managerDashboard(g, d);
+  }
+
   async function render(g, d) {
     if (dashboardTimer) { clearInterval(dashboardTimer); dashboardTimer = null; }
     const version = ++renderVersion;
@@ -662,6 +821,10 @@
     const view = params.managedView || '';
     if (state.groupId !== g.id) { state.groupId=g.id; state.cycle=null; state.installment='all'; state.status='all'; state.query=''; state.shareStatus='eligible'; state.memberStatus='all'; }
     const manager = !!(d.role && d.role.manager);
+    if (manager) {
+      await renderManagerSection(g, d, String(params.managedSection || ''), version, isLatest);
+      return;
+    }
     if (manager && !view && groupDetailTab === 'overview') {
       managerDashboard(g, d);
       return;
@@ -779,7 +942,7 @@
     const action = el.dataset.action;
     if (['managed-installment-filter','managed-installment-select-visible','managed-installment-cancel-selection','managed-installment-bulk-reminder'].includes(action)) { event.preventDefault(); event.stopImmediatePropagation(); return; }
     if (['record-paid','send-reminder','schedule-draw','run-draw','draw-presentation-completed','draw-presentation-failed','notify-channel-toggle'].includes(action)) invalidateReads();
-    if (!['managed-home-slide','managed-home-section','managed-tab','managed-open-member','managed-open-cycle','managed-back','managed-draw-view','managed-settings-view','managed-inline-filter-toggle'].includes(action)) return;
+    if (!['managed-home-slide','managed-home-section','managed-tab','managed-open-member','managed-open-cycle','managed-back','managed-draw-view','managed-settings-view','managed-inline-filter-toggle','managed-section-home'].includes(action)) return;
     event.preventDefault();
     event.stopImmediatePropagation();
 
@@ -796,19 +959,17 @@
     }
     if (action === 'managed-home-section') {
       const section = el.dataset.section || '';
-      if (section === 'invites') { go('invites'); return; }
-      if (section === 'room') {
-        groupDetailTab = 'draws';
-        params = { managedView: 'draw', managedDrawView: 'summary' };
-      } else if (section === 'information') {
-        groupDetailTab = 'members';
-        params = { managedView: 'information' };
-      } else {
-        const allowed = ['installments','draws','shares','members','chat','communication','settings','audit'];
-        if (!allowed.includes(section)) return;
-        groupDetailTab = section;
-        params = {};
-      }
+      if (!MANAGER_SECTION_TITLES[section]) return;
+      params = { managedSection: section };
+      if (section === 'room') params.managedDrawView = 'summary';
+      groupDetailTab = 'overview';
+      syncNavigationContext();
+      redraw();
+      return;
+    }
+    if (action === 'managed-section-home') {
+      params = {};
+      groupDetailTab = 'overview';
       syncNavigationContext();
       redraw();
       return;
@@ -822,21 +983,39 @@
       return;
     }
     if (action === 'managed-open-member') {
-      go('group-detail', { managedView: 'member', memberId: el.dataset.memberId }, {
-        currentGroupId: currentGroupId, groupDetailTab: 'members'
-      });
+      if (isManager()) {
+        go('group-detail', { managedSection: 'members', managedMemberId: el.dataset.memberId }, {
+          currentGroupId: currentGroupId, groupDetailTab: 'overview'
+        });
+      } else {
+        go('group-detail', { managedView: 'member', memberId: el.dataset.memberId }, {
+          currentGroupId: currentGroupId, groupDetailTab: 'members'
+        });
+      }
       return;
     }
     if (action === 'managed-open-cycle') {
-      go('group-detail', { managedView: 'cycle', round: el.dataset.round }, {
-        currentGroupId: currentGroupId, groupDetailTab: 'draws'
-      });
+      if (isManager()) {
+        go('group-detail', { managedSection: 'draws', managedRoundId: el.dataset.round }, {
+          currentGroupId: currentGroupId, groupDetailTab: 'overview'
+        });
+      } else {
+        go('group-detail', { managedView: 'cycle', round: el.dataset.round }, {
+          currentGroupId: currentGroupId, groupDetailTab: 'draws'
+        });
+      }
       return;
     }
     if (action === 'managed-back') {
-      const allowed = ['installments','shares','draws','members','settings','news','chat','audit','overview','communication'];
-      groupDetailTab = allowed.includes(el.dataset.tab) ? el.dataset.tab : (isManager()?'members':'overview');
-      params = {};
+      const tab = el.dataset.tab || '';
+      if (isManager()) {
+        params = { managedSection: ['draws','members','installments','shares','settings','chat','audit','news'].includes(tab) ? tab : 'draws' };
+        groupDetailTab = 'overview';
+      } else {
+        const allowed = ['installments','shares','draws','members','settings','news','chat','audit','overview','communication'];
+        groupDetailTab = allowed.includes(tab) ? tab : 'overview';
+        params = {};
+      }
       syncNavigationContext();
       redraw();
       return;
@@ -846,14 +1025,22 @@
       const allowedViews = manager ? ['summary','eligible','schedule','result','history'] : ['summary','eligible','result','history'];
       const requested = el.dataset.view || 'summary';
       if (!allowedViews.includes(requested)) { toast('هذا القسم متاح لمدير الجمعية فقط'); return; }
-      groupDetailTab = 'draws';
-      params = { managedView: 'draw', managedDrawView: requested };
+      if (manager) {
+        params = { managedSection: 'room', managedDrawView: requested };
+        groupDetailTab = 'overview';
+      } else {
+        groupDetailTab = 'draws';
+        params = { managedView: 'draw', managedDrawView: requested };
+      }
       syncNavigationContext();
       redraw();
       return;
     }
     if (action === 'managed-settings-view') {
-      groupDetailTab = ['news','chat','audit'].includes(el.dataset.view) ? el.dataset.view : 'settings'; params = {}; syncNavigationContext(); redraw();
+      const next = ['news','chat','audit'].includes(el.dataset.view) ? el.dataset.view : 'settings';
+      if (isManager()) { params = { managedSection: next }; groupDetailTab = 'overview'; }
+      else { groupDetailTab = next; params = {}; }
+      syncNavigationContext(); redraw();
     }
   });
   document.addEventListener('submit', async event => {
