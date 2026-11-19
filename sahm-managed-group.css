@@ -602,3 +602,15 @@
  #screen .mgd-new-member-actions>.mgd-actions{grid-template-columns:1fr}
  #screen .mgd-new-member-actions>.mgd-actions .mgd-action:last-child{grid-column:auto}
 }
+
+/* Manager section content is final and self-contained. */
+#screen .mgd-member-card-static{display:flex;align-items:center;cursor:default}
+#screen .mgd-member-card-static:active{transform:none}
+#screen .mgd-cycle-card-static{display:flex;align-items:center;cursor:default}
+#screen .mgd-cycle-card-static:active{transform:none}
+#screen .mgd-cycle-winner{display:block;margin-top:4px;color:#23815b;font-size:10px;font-weight:750}
+#screen .mgd-draw-all-sections{display:flex;flex-direction:column;gap:12px}
+#screen .mgd-draw-all-sections>.mgd-draw-panel{display:block}
+#screen .mgd-draw-all-sections>.mgd-draw-panel+.mgd-draw-panel{padding-top:10px;border-top:1px solid #e5eaf1}
+#screen .mgd-draw-all-sections .mgd-detail-card{margin-bottom:8px}
+#screen .mgd-draw-all-sections .mgd-wheel-wrap{max-width:250px;margin:8px auto 14px}

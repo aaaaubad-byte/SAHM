@@ -3499,7 +3499,6 @@ function openAssociationWorkspace(tab, view) {
  if(detail&&detail.ok&&detail.role&&detail.role.manager){
   const map={installments:'installments',shares:'shares',draws:'draws',members:'members',settings:'settings',chat:'chat',audit:'audit'};
   const nextParams={managedSection:view?'room':(map[tab]||'members')};
-  if(view)nextParams.managedDrawView=view;
   go('group-detail',nextParams,{currentGroupId:g.id,groupDetailTab:'overview'});
   return;
  }
