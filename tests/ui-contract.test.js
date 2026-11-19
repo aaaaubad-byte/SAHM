@@ -459,16 +459,21 @@ test('inner screens and dialogs share one standard type scale; home, top bar and
   assert.match(html, /family=IBM\+Plex\+Sans\+Arabic:wght@400;500;600;700/, 'every weight in the scale is loaded');
 });
 
-test('managed association tabs follow the approved five-section order', () => {
-  const block = managed.match(/const managers=\[([\s\S]*?)\];/);
+test('manager association uses dedicated sections while member tabs retain their five-section order', () => {
+  const block = managed.match(/const members=\[([\s\S]*?)\];/);
   assert.ok(block);
-  const ids = [...block[1].matchAll(/\['(installments|shares|draws|members|settings)'/g)].map(x=>x[1]);
-  assert.deepEqual(ids,['installments','shares','draws','members','settings']);
+  const ids = [...block[1].matchAll(/\['(overview|installments|shares|draws|communication)'/g)].map(x=>x[1]);
+  assert.deepEqual(ids,['overview','installments','shares','draws','communication']);
+  assert.match(managed,/const MANAGER_SECTION_TITLES = Object\.freeze\(\{/);
+  const managerSections = managed.match(/const MANAGER_SECTION_TITLES = Object\.freeze\(\{([\s\S]*?)\}\);/);
+  assert.ok(managerSections);
+  const managerIds = [...managerSections[1].matchAll(/\b(installments|draws|shares|members|invites|chat|room|information|settings|audit):/g)].map(x=>x[1]);
+  assert.deepEqual(managerIds,['installments','draws','shares','members','invites','chat','room','information','settings','audit']);
+  assert.match(managed,/if \(manager\) return ''/);
   assert.match(managed,/async function shareCards/);
   assert.match(managed,/SahmApp\.shareList\(g\.id/);
   assert.match(managed,/x\.status === 'upcoming'/);
 });
-
 
 test('manager collection screen implements current installment filters, selective reminders and live data actions', () => {
   const panelStart = managed.indexOf('function installmentsPanel(g,d)');
@@ -634,19 +639,23 @@ test('association workspace visual refinement preserves a calm, responsive hiera
   assert.match(css, /@media\(max-width:340px\)/);
 });
 
-test('managed association landing uses animated summary cards and exactly ten section cards', () => {
+test('manager landing routes all ten cards to independent screens without the legacy tab renderer', () => {
   assert.match(managed, /function managerDashboard\(g, d\)/);
   assert.match(managed, /class="mgd-home-summary"/);
   assert.match(managed, /class="mgd-home-sections"/);
   const sectionBlock = managed.match(/const sections = \[([\s\S]*?)\n    \];/);
   assert.ok(sectionBlock, 'ten manager sections are declared together');
   assert.equal((sectionBlock[1].match(/\['(?:installments|draws|shares|members|invites|chat|room|information|settings|audit)'\s*,/g) || []).length, 10);
-  assert.match(managed, /if \(manager && !view\) \{ managerDashboard\(g, d\); return; \}/);
-  assert.match(managed, /section === 'invites'\) \{ go\('invites'\); return; \}/);
+  assert.match(managed, /async function renderManagerSection/);
+  assert.match(managed, /params = \{ managedSection: section \}/);
+  assert.match(managed, /if \(manager\) \{\s*await renderManagerSection/);
+  assert.match(managed, /data-action="managed-section-home"/);
+  assert.doesNotMatch(managed, /section === 'invites'\) \{ go\('invites'\); return; \}/);
   assert.match(managed, /section === 'room'/);
-  assert.match(managed, /view === 'information'/);
+  assert.match(managed, /section === 'information'/);
+  assert.match(managed, /if \(manager\) return ''/);
+  assert.match(html, /managedSection:view\?'room':\(map\[tab\]\|\|'members'\)/);
 });
-
 
 test('managed installment selection starts with long press and bulk reminder is outside the search toolbar', () => {
   assert.match(managed, /pressTimer=setTimeout\([\s\S]*?state\.installmentSelectMode=true/);
