@@ -99,3 +99,56 @@
 - New implementation: NOT_STARTED.
 - Tests: لم تُشغّل في هذه المراجعة.
 - Production migration/cutover: NOT_STARTED.
+
+
+## 6. سجل قواعد الأعمال
+
+| ID | القاعدة | المجال | الحالة |
+|---|---|---|---|
+| RULE-001 | الدعوة لا تنشئ عضوية؛ الاعتماد فقط ينشئ membership | العضوية | SPECIFIED |
+| RULE-002 | اعتماد الانضمام ينشئ العضوية والأسهم والتزامات الأقساط ذرياً | العضوية/المالية | SPECIFIED |
+| RULE-003 | تسجيل التحصيل متاح لمدير الجمعية ويتحقق من الالتزام ويقفل صفه | التحصيل | SPECIFIED |
+| RULE-004 | تصحيح الإيصال لا يحذف السجل؛ يلغي الإيصال مع سبب وsnapshot | المالية | SPECIFIED |
+| RULE-005 | لا قرعة قبل اكتمال الالتزامات والموعد ورقم الجولة المتوقع | القرعة | SPECIFIED |
+| RULE-006 | السهم الفائز في جولة سابقة لا يعود مؤهلاً | القرعة | SPECIFIED |
+| RULE-007 | إنشاء الجمعية يهيئ الدورة الأولى وفترات الأقساط والالتزامات في معاملة واحدة | الإنشاء | SPECIFIED |
+| RULE-008 | تحديث إعدادات الجمعية يُمنع بعد القفل أو بدء السجل المالي | دورة الحياة | SPECIFIED |
+| RULE-009 | الرابط العام يخزن hash للرمز ولا يعرض الرمز الخام إلا عند إنشائه | الدعوات | SPECIFIED |
+| RULE-010 | الهاتف لا يعد ملكية مثبتة ما لم يوجد تحقق مستقل؛ التحقق الحالي غير مثبت | الهوية | DISCOVERED |
+| RULE-011 | Realtime إشعار بالتغير وليس مصدراً نهائياً للحقيقة | التكامل | SPECIFIED |
+| RULE-012 | الحضور لم يعد شرطاً للقرعة الحالية | القرعة | SPECIFIED |
+| RULE-013 | مبالغ العملة تحفظ بوحدات minor integer | المالية | SPECIFIED |
+| RULE-014 | إعدادات الإشعارات وكتم المجموعة يجب أن تتبع سياسة موحدة بين القنوات | الإشعارات | DISCOVERED |
+
+## 7. سجل RPC
+
+| ID | RPC | الوظيفة | الحالة |
+|---|---|---|---|
+| RPC-001 | create_association_unified | إنشاء الجمعية وبنيتها التشغيلية | SPECIFIED |
+| RPC-002 | update_association | تحديث الإعدادات ضمن قيود دورة الحياة | SPECIFIED |
+| RPC-003 | submit_join_request | تقديم طلب عبر دعوة أو رابط عام | SPECIFIED |
+| RPC-004 | approve_join_request | اعتماد الطلب وتوليد العضوية والأسهم والالتزامات | SPECIFIED |
+| RPC-005 | reject_join_request | رفض الطلب مع حالة نهائية | DISCOVERED |
+| RPC-006 | create_invitation / create_invitations_bulk | إنشاء الدعوات الفردية/الجماعية | DISCOVERED |
+| RPC-007 | manage_association_public_link | إنشاء/تدوير/إيقاف/استئناف/إلغاء الرابط | SPECIFIED |
+| RPC-008 | record_installment_receipt | تسجيل التحصيل | SPECIFIED |
+| RPC-009 | correct_installment_receipt | تصحيح إيصال موثق | SPECIFIED |
+| RPC-010 | send_installment_reminders | إرسال تذكيرات الأقساط | DISCOVERED |
+| RPC-011 | get_draw_readiness / get_draw_room / get_draw_history | استعلام جاهزية وغرفة وسجل القرعة | DISCOVERED |
+| RPC-012 | perform_draw | تنفيذ القرعة ذرياً | SPECIFIED |
+| RPC-013 | set_draw_scheduled_at / set_draw_presentation_status | الجدولة وحالة العرض | DISCOVERED |
+| RPC-014 | send_chat_message | إرسال رسالة الجمعية | SPECIFIED |
+| RPC-015 | set_association_notification_settings | إعداد قنوات النشر | DISCOVERED |
+| RPC-016 | get_association_audit_log / get_association_financial_summary / get_association_news | تقارير القراءة | DISCOVERED |
+| RPC-017 | update_my_profile / complete_my_profile | الملف الشخصي | SPECIFIED |
+| RPC-018 | accept_invitation / respond_to_invitation / cancel_invitation | دورة استجابة الدعوة | DISCOVERED |
+
+## 8. قرارات المنتج المطلوبة قبل نقل الوظائف المرتبطة بها
+
+- اعتماد حد أعلى لأسهم المدير والعضو وإجمالي الأسهم، أو توثيق عدم وجود حد مع مبررات تشغيلية.
+- تحديد طريقة إثبات ملكية الهاتف قبل استخدامه لمطابقة الدعوات أو قبول دعوة قديمة.
+- تحديد المكان النهائي لإدارة رابط الانضمام العام داخل أقسام المدير العشرة.
+- تقرير ما إذا كانت إضافة/تقليل الأسهم وإزالة العضو ستعود إلى واجهة المدير أم تبقى خارج المنتج.
+- تحديد السلوك المتوقع لكتم المجموعة: هل يشمل إشعارات الأخبار والرسائل والتذكيرات أم لكل قناة سياسة مستقلة؟
+- تحديد ما إذا كان يلزم استمرار خدمتي Render أم اعتماد خدمة معاينة واحدة.
+- اعتماد سياسة خصوصية ومراجعة قانونية لشروط الاستخدام قبل الإطلاق.
