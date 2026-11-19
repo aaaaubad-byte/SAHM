@@ -642,3 +642,8 @@
 #screen .mgd-member-overview article{display:flex;flex-direction:column;gap:5px;padding:12px;border:1px solid var(--line,#e6eaf0);border-radius:13px;background:var(--surface,#fff)}
 #screen .mgd-member-overview small{font-size:11px;color:var(--muted,#697586)}
 #screen .mgd-member-overview b{font-size:20px;line-height:1.15}
+
+#screen .mgd-draw-overview{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px;margin-bottom:12px}
+#screen .mgd-draw-overview article{display:flex;flex-direction:column;gap:5px;padding:12px;border:1px solid var(--line,#e6eaf0);border-radius:13px;background:var(--surface,#fff)}
+#screen .mgd-draw-overview small{font-size:11px;color:var(--muted,#697586)}
+#screen .mgd-draw-overview b{font-size:19px;line-height:1.15}

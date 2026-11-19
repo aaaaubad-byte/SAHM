@@ -158,7 +158,10 @@
         '<span class="mgd-cycle-progress"><i style="width:'+pct+'%"></i></span><small>'+pct+'% اكتمال الأقساط</small></span>'+
         '<span class="mgd-cycle-state">'+esc(label)+'</span>'+(draw ? '<small class="mgd-cycle-winner">الفائز: '+esc(winner)+'</small>' : '')+'</article>';
     }).join('');
-    return '<div class="mgd-list-head"><b>القرعات</b><span>'+total+' قرعة</span></div>'+
+    const completedCount = history.filter(x => Number(x.round_no || x.round) <= total).length;
+    const currentStatus = ready ? 'جاهزة' : current > total ? 'مكتملة' : 'قيد التحصيل';
+    return '<div class="mgd-draw-overview"><article><small>إجمالي القرعات</small><b>' + total + '</b></article><article><small>نتائج مثبتة</small><b>' + completedCount + '</b></article><article><small>القرعات المتبقية</small><b>' + Math.max(0,total-completedCount) + '</b></article><article><small>حالة الحالية</small><b>' + currentStatus + '</b></article></div>' +
+      '<div class="mgd-list-head"><b>قائمة القرعات</b><span>'+total+' قرعة</span></div>'+
       '<div class="mgd-filterbar mgd-draw-filters'+(state.drawFiltersOpen?' filters-open':'')+'" id="mgdDrawToolbar"><label class="mgd-search">'+uiIcon('search',16)+'<input id="mgdDrawSearch" type="search" placeholder="رقم القرعة" inputmode="numeric"></label>'+
       '<button type="button" class="mgd-inline-filter-toggle" data-action="managed-inline-filter-toggle" id="mgdDrawFilterToggle" data-filter-state="drawFiltersOpen" aria-label="فلترة القرعات" aria-controls="mgdDrawFilters" aria-expanded="'+(state.drawFiltersOpen?'true':'false')+'">'+uiIcon('sliders-horizontal',18)+'</button>'+
       '<div class="mgd-filter-fields" id="mgdDrawFilters"><label class="mgd-select"><select id="mgdDrawStatus" aria-label="حالة القرعة"><option value="all">كل الحالات</option><option value="completed">مكتملة</option><option value="collecting">قيد التحصيل</option><option value="ready">جاهزة</option><option value="waiting">بانتظار الموعد</option><option value="upcoming">قادمة</option></select></label></div></div>'+

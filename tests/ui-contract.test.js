@@ -30,6 +30,14 @@ function objectKeys(source, marker) {
 
 
 
+
+test('manager draws screen provides an overview of total, completed and remaining rounds', () => {
+  assert.match(managed,/mgd-draw-overview/);
+  assert.match(managed,/completedCount = history\.filter/);
+  assert.match(managed,/القرعات المتبقية/);
+  assert.match(managed,/حالة الحالية/);
+});
+
 test('manager collection keeps receipt history and receipt correction details inside the final installments screen', () => {
   assert.match(managed,/receiptHistoryPanel\(g\)/);
   assert.match(managed,/data-action="receipt-open"/);
