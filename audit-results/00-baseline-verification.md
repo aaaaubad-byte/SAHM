@@ -3,6 +3,7 @@
 - تاريخ التنفيذ: 2026-11-20
 - الحالة: **مكتملة**
 - طبيعة العمل: قراءة فقط. لم يُعدَّل أي ملف تطبيق، ولا قاعدة Supabase، ولا Render. الإضافة الوحيدة هي ملفات `audit-results/`.
+- تصحيح: النسخة الأولى من هذا الملف ذكرت 42 ملف migration، والصحيح **36** (عُدّت من الشجرة).
 
 ## 1. قيود التنفيذ المطبقة
 
@@ -19,9 +20,9 @@
 | الصلاحيات على المستودع | admin, maintain, push, triage, pull |
 | الفرع المرجعي | `SAHM-SUPABASE` |
 | رأس الفرع وقت الفحص | `69259582c5c7c4660fed3ab53f92e3ee8e755117` (مطابق للمعروف سابقاً) |
-| الـ Commit | `chore(pwa): stamp worker for 7e33e157f63f`، بوت github-actions، 2026-11-19T00:31:42Z |
+| وصف الـ Commit | `chore(pwa): stamp worker for 7e33e157f63f`، بوت github-actions، 2026-11-19T00:31:42Z |
 | آخر Commit بشري | `7e33e157f63f64384a1c9430c70cf48d7746339b` «Rebuild ten final association manager sections»، 2026-11-19T00:31:34Z |
-| المجلد `audit-results/` قبل هذا الـ Commit | غير موجود (HTTP 404) |
+| المجلد `audit-results/` قبل أول Commit تدقيق | غير موجود (HTTP 404) |
 
 ### الفروع الموجودة (10)
 
@@ -64,7 +65,7 @@
 | `index.html` | 459 |
 | `icons/sahm.svg` | 686 |
 
-لا توجد ملفات CSS أو JS أو HTML أخرى في الجذر غير المذكورة أعلاه. الملفات المطلوب قراءتها كاملة في التوجيه موجودة كلها، وأضيف إليها `terms.html` و`manifest.webmanifest` و`icons/sahm.svg`.
+لا توجد ملفات CSS أو JS أو HTML أخرى في الجذر غير المذكورة أعلاه. الملفات المطلوب قراءتها كاملة في التوجيه موجودة كلها، ويضاف إليها `terms.html` و`manifest.webmanifest` و`icons/sahm.svg`.
 
 ### الوثائق (`docs/`)
 
@@ -86,7 +87,7 @@
 ### Supabase في المستودع
 
 - `supabase/SAHM_DATABASE_BASELINE.sql` (88111 بايت).
-- `supabase/migrations/`: 42 ملف migration، من `20261113195243` إلى `20261118202251`.
+- `supabase/migrations/`: **36** ملف migration، من `20261113195243` إلى `20261118202251`.
 
 ## 4. Supabase — CONFIRMED (استعلام قراءة فقط)
 
