@@ -32,6 +32,17 @@ function objectKeys(source, marker) {
 
 
 
+
+test('manager navigation exposes exactly ten final sections and no manager-only news sub-screen', () => {
+  const titlesStart = managed.indexOf('const MANAGER_SECTION_TITLES');
+  const titlesEnd = managed.indexOf('});', titlesStart);
+  const titles = managed.slice(titlesStart, titlesEnd);
+  assert.equal((titles.match(/:\s*'[^']+'/g) || []).length, 10);
+  assert.doesNotMatch(titles,/news:/);
+  assert.match(managed,/if \(section === 'audit'\) \{/);
+  assert.doesNotMatch(managed,/if \(section === 'audit' \|\| section === 'news'\)/);
+});
+
 test('manager collection screen displays obligation, collected and remaining totals', () => {
   assert.match(managed,/const totalAmount=shown\.reduce/);
   assert.match(managed,/const remainingAmount=shown\.reduce/);

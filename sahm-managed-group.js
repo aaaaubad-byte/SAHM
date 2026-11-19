@@ -710,7 +710,7 @@
   const MANAGER_SECTION_TITLES = Object.freeze({
     installments: 'التحصيل', draws: 'القرعات', shares: 'الأسهم', members: 'الأعضاء',
     invites: 'الدعوات', chat: 'الدردشة', room: 'الغرفة', information: 'المعلومات',
-    settings: 'الإعدادات', audit: 'السجل', news: 'أخبار الجمعية'
+    settings: 'الإعدادات', audit: 'السجل'
   });
   function managerSectionFrame(g, title, content) {
     return '<main class="mgd-new-screen"><header class="mgd-new-screen-head">' +
@@ -841,10 +841,10 @@
         notificationSettingsPanel(d));
       return;
     }
-    if (section === 'audit' || section === 'news') {
+    if (section === 'audit') {
       mountManagerSection(g, title, loadingPanel(title));
       let content = '';
-      try { content = section === 'audit' ? await auditPanel(g) : await newsPanel(g, d); }
+      try { content = await auditPanel(g); }
       catch (error) { content = '<div class="mgd-empty">تعذر تحميل ' + esc(title) + '</div>'; }
       if (isLatest()) mountManagerSection(g, title, content);
       return;
@@ -998,7 +998,7 @@
     if (action === 'managed-back') {
       const tab = el.dataset.tab || '';
       if (isManager()) {
-        params = { managedSection: ['draws','members','installments','shares','settings','chat','audit','news'].includes(tab) ? tab : 'draws' };
+        params = { managedSection: ['draws','members','installments','shares','settings','chat','audit'].includes(tab) ? tab : 'draws' };
         groupDetailTab = 'overview';
       } else {
         const allowed = ['installments','shares','draws','members','settings','news','chat','audit','overview','communication'];
