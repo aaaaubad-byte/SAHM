@@ -931,7 +931,7 @@
     if (!el) return;
     const action = el.dataset.action;
     if (['managed-installment-filter','managed-installment-select-visible','managed-installment-cancel-selection','managed-installment-bulk-reminder'].includes(action)) { event.preventDefault(); event.stopImmediatePropagation(); return; }
-    if (['record-paid','send-reminder','schedule-draw','run-draw','draw-presentation-completed','draw-presentation-failed','notify-channel-toggle'].includes(action)) invalidateReads();
+    if (['record-paid','send-reminder','schedule-draw','run-draw','draw-presentation-completed','draw-presentation-failed','notify-channel-toggle','approve-join-request-confirm'].includes(action)) invalidateReads();
     if (!['managed-home-slide','managed-home-section','managed-tab','managed-open-member','managed-open-cycle','managed-back','managed-draw-view','managed-settings-view','managed-inline-filter-toggle','managed-section-home'].includes(action)) return;
     event.preventDefault();
     event.stopImmediatePropagation();
