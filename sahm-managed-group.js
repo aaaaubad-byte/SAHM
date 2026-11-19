@@ -746,14 +746,32 @@
         return;
       }
       const items = result.invites || [];
+      const requests = (db.joinRequests || []).filter(x => x.groupId === g.id)
+        .slice().sort((a,b) => String(b.submittedAt||'').localeCompare(String(a.submittedAt||'')));
+      const pendingRequests = requests.filter(x => x.status === 'pending');
+      const activeInvites = items.filter(x => x.status === 'pending' && !['declined','legacy_accepted'].includes(x.responseStatus));
+      const canInvite = !!(d.permissions && d.permissions.canInvite);
       const responseLabels = { pending_response: 'بانتظار رد المدعو', interested: 'مهتم بالانضمام', declined: 'رفض الدعوة', deferred: 'أجّل الرد', legacy_accepted: 'دعوة قديمة مقبولة' };
-      const rows = items.map(item =>
+      const requestLabels = { pending: 'بانتظار المراجعة', approved: 'مقبول', rejected: 'مرفوض', cancelled: 'ملغى' };
+      const inviteRows = items.map(item =>
         '<article class="mgd-new-invite-row"><div class="mgd-avatar">' + esc((item.name || '؟').slice(0, 1)) + '</div><div class="mgd-member-main"><b>' + esc(item.name || 'مدعو') + '</b><small>' + esc(item.phone || 'لا يوجد رقم محفوظ') + '</small><small>' + esc(responseLabels[item.responseStatus] || item.responseStatus || '—') + ' · ' + esc(dateLabel(String(item.createdAt || '').slice(0, 10))) + '</small><small>' + (item.isLegacy ? 'دعوة قديمة · ' + Number(item.shares || 0) + ' سهم' : 'يحدد المدعو الأسهم عند تقديم طلب الانضمام') + '</small></div>' +
-        (item.status === 'pending' && item.responseStatus !== 'declined' ? '<button type="button" class="mgd-action" data-action="cancel-invite" data-id="' + esc(item.id) + '">إلغاء الدعوة</button>' : '') + '</article>'
+        (item.status === 'pending' && item.responseStatus !== 'declined' ? '<button type="button" class="mgd-action" data-action="cancel-invite" data-id="' + esc(item.id) + '">إلغاء الدعوة</button>' : '<span class="mgd-role">' + esc(item.status === 'cancelled' ? 'ملغاة' : 'مكتملة') + '</span>') + '</article>'
       ).join('');
+      const requestRows = requests.map(request =>
+        '<article class="mgd-join-request-row"><div class="mgd-avatar">' + esc((request.applicantName || 'م').slice(0, 1)) + '</div><div class="mgd-member-main"><b>' + esc(request.applicantName || 'مقدم الطلب') + '</b><small>' + Number(request.requestedShares || 0) + ' أسهم · ' + esc(moneyValue(request.estimatedAmountMinor || 0, request.currency || g.currency)) + '</small><small>' + (request.sourceType === 'invitation' ? 'دعوة شخصية' : 'رابط عام') + ' · ' + esc(dateLabel(String(request.submittedAt || '').slice(0, 10))) + '</small><small>' + esc(requestLabels[request.status] || request.status || '—') + (request.rejectionReason ? ' · ' + esc(request.rejectionReason) : '') + '</small></div>' +
+        (request.status === 'pending' ? (canInvite
+          ? '<div class="mgd-request-actions"><button type="button" class="mgd-action primary" data-action="approve-join-request" data-id="' + esc(request.id) + '">موافقة</button><button type="button" class="mgd-action" data-action="reject-join-request" data-id="' + esc(request.id) + '">رفض</button></div>'
+          : '<span class="mgd-role">الاتفاق مقفل</span>') : '<span class="mgd-role">' + esc(requestLabels[request.status] || request.status) + '</span>') + '</article>'
+      ).join('');
+      const composer = canInvite
+        ? '<details class="mgd-inline-invite"><summary>إضافة دعوات جديدة</summary>' + (typeof root.managedInviteComposerMarkup === 'function' ? root.managedInviteComposerMarkup() : '<div class="mgd-empty">تعذر فتح نموذج الدعوة</div>') + '</details>'
+        : '<div class="mgd-empty">استقبال الأعضاء مغلق؛ يمكنك مراجعة الدعوات والطلبات السابقة فقط.</div>';
       mountManagerSection(g, title,
-        '<div class="mgd-new-toolbar"><div><b>' + items.length + ' دعوة</b><small>متابعة حالة الدعوات والردود</small></div></div>' +
-        '<div class="mgd-new-invite-list">' + (rows || '<div class="mgd-empty">لا توجد دعوات مسجلة</div>') + '</div>');
+        '<div class="mgd-invite-summary"><article><small>دعوات نشطة</small><b>' + activeInvites.length + '</b></article><article><small>كل الدعوات</small><b>' + items.length + '</b></article><article><small>طلبات تنتظر المراجعة</small><b>' + pendingRequests.length + '</b></article><article><small>إجمالي الطلبات</small><b>' + requests.length + '</b></article></div>' +
+        composer +
+        '<section class="mgd-detail-card"><div class="mgd-list-head"><b>طلبات الانضمام</b><span>' + pendingRequests.length + ' قيد المراجعة</span></div><div class="mgd-join-request-list">' + (requestRows || '<div class="mgd-empty">لا توجد طلبات انضمام</div>') + '</div></section>' +
+        '<section class="mgd-detail-card"><div class="mgd-list-head"><b>الدعوات المرسلة</b><span>' + items.length + ' دعوة</span></div><div class="mgd-new-invite-list">' + (inviteRows || '<div class="mgd-empty">لا توجد دعوات مسجلة</div>') + '</div></section>');
+      if (canInvite && typeof root.bindManagedInviteComposer === 'function') root.bindManagedInviteComposer();
       return;
     }
     if (section === 'chat') {

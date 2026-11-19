@@ -616,3 +616,24 @@
 #screen .mgd-draw-all-sections .mgd-wheel-wrap{max-width:250px;margin:8px auto 14px}
 
 #screen .mgd-new-member-actions{display:none!important}
+
+/* Invitations and join requests are managed inline in the final Invitations screen. */
+#screen .mgd-invite-summary{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px;margin-bottom:12px}
+#screen .mgd-invite-summary article{display:flex;flex-direction:column;gap:5px;padding:12px;border:1px solid var(--line,#e6eaf0);border-radius:13px;background:var(--surface,#fff)}
+#screen .mgd-invite-summary small{font-size:11px;color:var(--muted,#697586)}
+#screen .mgd-invite-summary b{font-size:21px;line-height:1.1}
+#screen .mgd-inline-invite{margin:0 0 12px;padding:12px;border:1px solid var(--line,#e6eaf0);border-radius:14px;background:var(--surface,#fff)}
+#screen .mgd-inline-invite>summary{cursor:pointer;list-style:none;font-weight:750;display:flex;align-items:center;justify-content:space-between}
+#screen .mgd-inline-invite>summary::-webkit-details-marker{display:none}
+#screen .mgd-inline-invite>summary:after{content:"+";font-size:20px;color:var(--primary)}
+#screen .mgd-inline-invite[open]>summary:after{content:"−"}
+#screen .mgd-inline-invite-picker{padding-top:12px}
+#screen .mgd-inline-invite-picker .invitee-selection-bar{position:sticky;bottom:8px;z-index:2}
+#screen .mgd-join-request-list{display:flex;flex-direction:column;gap:8px}
+#screen .mgd-join-request-row{display:flex;align-items:center;gap:10px;padding:11px;border:1px solid var(--line,#e6eaf0);border-radius:12px;background:var(--surface,#fff);min-width:0}
+#screen .mgd-join-request-row .mgd-member-main{min-width:0;flex:1}
+#screen .mgd-join-request-row .mgd-member-main small{overflow-wrap:anywhere}
+#screen .mgd-request-actions{display:flex;flex-direction:column;gap:5px;flex-shrink:0}
+#screen .mgd-request-actions .mgd-action{padding:6px 9px;min-height:30px;font-size:11px}
+#screen .mgd-new-invite-list{display:flex;flex-direction:column;gap:8px}
+@media(max-width:380px){#screen .mgd-join-request-row{align-items:flex-start;flex-wrap:wrap}#screen .mgd-request-actions{width:100%;flex-direction:row}#screen .mgd-request-actions .mgd-action{flex:1}}

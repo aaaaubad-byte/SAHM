@@ -3215,6 +3215,14 @@ function bindInviteePicker(){
  $('#inviteeSearch')?.addEventListener('input',renderInviteeSelection);
  renderInviteeSelection();
 }
+function managedInviteComposerMarkup(){
+ pendingInvitees=[];
+ return '<div class="mgd-inline-invite-picker">'+inviteePickerHtml()+inviteeListHtml()+inviteeBarHtml()+'</div>';
+}
+function bindManagedInviteComposer(){
+ bindInviteePicker();
+}
+
 function invite(){
  const g=currentGroup();
  if(!g||!isManager()){toast('إضافة أعضاء متاحة لمدير الجمعية فقط');go('group-detail');return}
