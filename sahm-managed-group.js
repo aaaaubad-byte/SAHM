@@ -755,7 +755,7 @@
         '<section class="mgd-detail-card mgd-new-member-actions"><b>إجراءات العضوية</b><div class="mgd-actions">' +
         '<button type="button" class="mgd-action primary" data-go="member-reception">استقبال الأعضاء والطلبات</button>' +
         '<button type="button" class="mgd-action" data-go="invite">دعوة أعضاء جدد</button>' +
-        '<button type="button" class="mgd-action" data-go="invites">إدارة الدعوات</button>' +
+        '<button type="button" class="mgd-action" data-action="managed-home-section" data-section="invites">إدارة الدعوات</button>' +
         '</div></section>');
       bindMemberSearch();
       return;
