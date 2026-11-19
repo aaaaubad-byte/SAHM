@@ -3215,6 +3215,14 @@ function bindInviteePicker(){
  $('#inviteeSearch')?.addEventListener('input',renderInviteeSelection);
  renderInviteeSelection();
 }
+function managedInviteComposerMarkup(){
+ pendingInvitees=[];
+ return '<div class="mgd-inline-invite-picker">'+inviteePickerHtml()+inviteeListHtml()+inviteeBarHtml()+'</div>';
+}
+function bindManagedInviteComposer(){
+ bindInviteePicker();
+}
+
 function invite(){
  const g=currentGroup();
  if(!g||!isManager()){toast('إضافة أعضاء متاحة لمدير الجمعية فقط');go('group-detail');return}
@@ -3273,17 +3281,6 @@ function inviteDetail(){
   shell('تفاصيل الدعوة','groups',header('تعذر فتح الدعوة')+'<div class="card"><p>'+escapeHtml(error&&error.message||'حدث خطأ أثناء تحميل الدعوة')+'</p><button class="btn outline full" data-go="home">العودة للرئيسية</button></div>');
  });
 }
-function invites(){
- const g=currentGroup();if(!g||!isManager()){toast('إدارة الدعوات متاحة لمدير الجمعية فقط');go('group-detail');return}
- const r=SahmApp.inviteList(g.id);if(!r||!r.ok){toast(r&&r.message||'تعذر تحميل الدعوات');return}
- const items=r.invites||[];
- const rows=items.map(i=>{
-  const response=({pending_response:'بانتظار رد المدعو',interested:'مهتم بالانضمام',declined:'رفض الدعوة',deferred:'أجّل الرد',legacy_accepted:'دعوة قديمة مقبولة'})[i.responseStatus]||i.responseStatus||'—';
-  const shares=i.isLegacy?'دعوة قديمة · '+i.shares+' سهم مسجل':'يحدد المدعو الأسهم عند تقديم طلب الانضمام';
-  return '<div class="listrow"><div class="avatar">'+escapeHtml((i.name||'؟').slice(0,1))+'</div><div class="grow"><strong>'+escapeHtml(i.name||'مدعو')+'</strong><small>'+escapeHtml(i.phone||'لا يوجد رقم محفوظ')+'</small><small>'+shares+'</small><small>'+escapeHtml(response)+' · '+dateLabel(String(i.createdAt||'').slice(0,10))+'</small></div>'+((i.status==='pending'&&i.responseStatus!=='declined')?'<button class="btn outline small" data-action="cancel-invite" data-id="'+i.id+'">إلغاء</button>':'')+'</div>';
- }).join('');
- shell('الدعوات','groups',header('دعوات الجمعية',g.name)+'<div class="card">'+(rows||'<div class="empty"><b>لا توجد دعوات مسجلة</b></div>')+'</div><button class="btn primary full" data-go="invite">دعوة عضو جديد</button><button class="btn outline full" data-go="member-reception">العودة إلى استقبال الأعضاء</button>');
-}
 function memberReception(){
  const g=currentGroup();if(!g){go('groups');return}
  const detail=SahmApp.groupDetail(g.id);
@@ -3299,7 +3296,7 @@ function memberReception(){
   '<div class="card manager-panel"><div class="section-head"><h3>إدارة العضوية</h3></div>'+
   '<button class="btn outline full" data-go="members">عرض الأعضاء والأسهم ('+members.length+')</button>'+
   (canInvite?'<button class="btn primary full" data-go="invite">دعوة أعضاء جدد</button>':'<div class="field-hint">الاتفاق مقفل؛ لا يمكن إرسال دعوات أو تعديل العضوية والأسهم.</div>')+
-  '<button class="btn outline full" data-go="invites">الدعوات الخاصة ('+invitations.length+')</button>'+
+  '<button class="btn outline full" data-action="managed-home-section" data-section="invites">الدعوات الخاصة ('+invitations.length+')</button>'+
   '<button class="btn outline full" data-go="join-requests">طلبات الانضمام ('+pendingRequests.length+')</button>'+
   '</div><div class="card manager-panel"><div class="section-head"><h3>رابط الانضمام العام</h3></div><div id="association-link-status" class="field-hint">جارٍ تحميل حالة الرابط...</div></div>';
  shell('استقبال الأعضاء','groups',header('استقبال الأعضاء',g.name)+(closed?'<div class="card"><b>الاتفاق مقفل</b><small>يمكنك مراجعة الأعضاء والدعوات والطلبات السابقة وإيقاف الرابط العام أو إبطاله؛ لا يمكن استقبال أعضاء جدد.</small></div>':'')+content);
@@ -3506,13 +3503,20 @@ function profileSetup(){
 function logout(){auth(`<div class="auth-brand"><div class="brand-mark">✓</div><h1>تم تسجيل الخروج</h1></div><div class="auth-card"><button class="btn primary full" data-go="welcome">العودة لتسجيل الدخول</button></div>`)}
 function openAssociationWorkspace(tab, view) {
  const g=currentGroup(); if(!g){go('groups');return}
+ const detail=SahmApp.groupDetail(g.id);
+ if(detail&&detail.ok&&detail.role&&detail.role.manager){
+  const map={installments:'installments',shares:'shares',draws:'draws',members:'members',settings:'settings',chat:'chat',audit:'audit'};
+  const nextParams={managedSection:view?'room':(map[tab]||'members')};
+  go('group-detail',nextParams,{currentGroupId:g.id,groupDetailTab:'overview'});
+  return;
+ }
  const nextParams=view?{managedView:'draw',managedDrawView:view}:{};
  go('group-detail',nextParams,{currentGroupId:g.id,groupDetailTab:tab});
 }
 const ALL_SCREEN_REGISTRY={
  welcome:welcome,register:register,'account-login':accountLogin,'profile-setup':profileSetup,'reset-password':resetPasswordScreen,'logged-out':logout,
  home:home,groups:groups,'managed-groups':managedGroups,'joined-groups':joinedGroups,'create-group':createGroup,'created-group':createdGroup,'group-detail':groupDetail,
- members:()=>openAssociationWorkspace('members'),'member-reception':memberReception,invite:invite,invites:invites,'invite-detail':inviteDetail,'join-group':joinGroup,'join-request-status':joinRequestStatus,'join-requests':joinRequests,'join-request-detail':joinRequestDetail,installments:()=>openAssociationWorkspace('installments'),
+ members:()=>openAssociationWorkspace('members'),'member-reception':memberReception,invite:invite,'invite-detail':inviteDetail,'join-group':joinGroup,'join-request-status':joinRequestStatus,'join-requests':joinRequests,'join-request-detail':joinRequestDetail,installments:()=>openAssociationWorkspace('installments'),
  'draw-room':()=>openAssociationWorkspace('draws','summary'),'draw-history':()=>openAssociationWorkspace('draws','history'),receipts:receipts,'receipt-detail':receiptDetail,
  chat:()=>openAssociationWorkspace('chat'),wall:wall,news:()=>openAssociationWorkspace('news'),notifications:notifications,audit:()=>openAssociationWorkspace('audit'),profile:profile,'edit-profile':editProfile,settings:settings
 };
@@ -3702,7 +3706,7 @@ async function handleAppAction(action,el){
   else toast(result&&result.message||'تعذر قبول الدعوة القديمة');
   return;
  }
- if(action==='cancel-invite'){const r=await SahmApp.cancelInvite(el.dataset.id);if(r&&r.ok){refreshData();invites()}return}
+ if(action==='cancel-invite'){const r=await SahmApp.cancelInvite(el.dataset.id);if(r&&r.ok){refreshData();if(screenName==='group-detail'&&params.managedSection==='invites')groupDetail();else invites()}return}
  if(action==='accept-legacy-invite-detail'){
   const id=el.dataset.id;
   showModal('تأكيد قبول الدعوة القديمة','سيتم اعتماد عضويتك بالعدد المسجل في الدعوة القديمة وإنشاء الالتزامات المرتبطة بها.',[['قبول الدعوة','join-confirm','primary'],['إلغاء','close','outline']]);
@@ -3754,7 +3758,7 @@ async function handleAppAction(action,el){
   joinDecisionBusy=true;el.disabled=true;
   try{
    const id=$('#modal-root').dataset.requestId,result=await SahmApp.approveJoinRequest(id);
-   if(result&&result.ok){closeModal();refreshData();toast('تم اعتماد طلب الانضمام');go('join-requests');}
+   if(result&&result.ok){closeModal();refreshData();toast('تم اعتماد طلب الانضمام');if(screenName==='group-detail'&&params.managedSection==='invites')groupDetail();else go('join-requests');}
    else toast(result&&result.message||'تعذرت الموافقة على الطلب');
   }catch(error){toast(SahmSupabase.friendlyError(error));}
   finally{joinDecisionBusy=false;if(el.isConnected)el.disabled=false;}
@@ -3770,7 +3774,7 @@ async function handleAppAction(action,el){
   try{
    const root=$('#modal-root'),id=root.dataset.requestId,reason=$('#joinRejectReason')?.value||'';
    const result=await SahmApp.rejectJoinRequest(id,reason);
-   if(result&&result.ok){closeModal();refreshData();toast('تم رفض طلب الانضمام');go('join-requests');}
+   if(result&&result.ok){closeModal();refreshData();toast('تم رفض طلب الانضمام');if(screenName==='group-detail'&&params.managedSection==='invites')groupDetail();else go('join-requests');}
    else toast(result&&result.message||'تعذر رفض الطلب');
   }catch(error){toast(SahmSupabase.friendlyError(error));}
   finally{joinDecisionBusy=false;if(el.isConnected)el.disabled=false;}
@@ -3805,11 +3809,19 @@ async function handleAppAction(action,el){
   const id=el.dataset.id;if(id){const marked=await SahmApp.markNotificationsRead([id]);if(!marked||!marked.ok){toast(marked&&marked.message||'تعذر تحديث حالة الإشعار');return}}
   if(el.dataset.decision==='true'&&el.dataset.relatedId)go('join-request-status',{id:el.dataset.relatedId});else notifications();return;
  }
- if(action==='open-draw-history'){closeModal();go('draw-history');return}if(action==='receipt-open'){go('receipt-detail',{id:el.dataset.id});return}
+ if(action==='open-draw-history'){closeModal();go('draw-history');return}if(action==='receipt-open'){
+  if(screenName==='group-detail'&&params.managedSection==='installments'){
+   const r=SahmApp.receiptDetail(el.dataset.id);
+   if(!r||!r.ok){toast(r&&r.message||'سجل الاستلام غير موجود');return}
+   const body='<div class="receipt"><div class="receipt-mark">'+(r.voided?'!':'✓')+'</div><div style="text-align:center;margin-top:8px"><b>سجل استلام القسط</b><div class="hero-num" style="color:var(--ink)">'+minorMoney(r.amount,r.currency)+'</div><span class="pill '+(r.voided?'red':'green')+'">'+(r.voided?'تم تصحيحه':'تم تسجيل الاستلام')+'</span></div><div class="keyvalue"><span>اسم المشارك</span><b>'+escapeHtml(r.memberName)+'</b></div><div class="keyvalue"><span>القرعة والقسط</span><b>'+r.cycle+' · '+r.no+'</b></div><div class="keyvalue"><span>الفترة الأصلية</span><b>'+dateLabel(r.periodStart)+' — '+dateLabel(r.periodEnd)+'</b></div><div class="keyvalue"><span>وقت التسجيل</span><b>'+escapeHtml(r.recordedAt||'—')+'</b></div><div class="keyvalue"><span>التسجيل الذاتي</span><b>'+(r.self?'نعم':'لا')+'</b></div></div>'+(r.canCorrect?'<button class="btn danger full" data-action="receipt-correct" data-id="'+escapeHtml(r.id)+'">تصحيح سجل الاستلام</button>':'')+(r.corrections&&r.corrections.length?'<div class="card"><b>سجل التصحيحات</b>'+r.corrections.map(x=>'<div class="listrow"><small>'+escapeHtml(x.reason||'')+'</small></div>').join('')+'</div>':'');
+   showModal('سجل الاستلام',body,[['إغلاق','close','outline']]);return;
+  }
+  go('receipt-detail',{id:el.dataset.id});return;
+ }
  if(action==='receipt-correct'){showModal('تصحيح سجل الاستلام','<p>سيبقى السجل الأصلي محفوظًا في سجل التدقيق.</p><div class="field"><label>سبب التصحيح</label><textarea id="receiptCorrectionReason" rows="3" maxlength="200" required></textarea></div>',[['تأكيد التصحيح','receipt-correct-confirm','danger'],['إلغاء','close','outline']]);$('#modal-root').dataset.receiptId=el.dataset.id;return}
  if(action==='receipt-correct-confirm'){
   const root=$('#modal-root'),reason=$('#receiptCorrectionReason')?.value||'';if(reason.trim().length<3){toast('اكتب سبب التصحيح (3 أحرف على الأقل)');return}
-  const r=await SahmApp.correctReceipt(root.dataset.receiptId,{action:'void',reason});if(r&&r.ok){const id=root.dataset.receiptId;closeModal();refreshData();params={id};receiptDetail();toast('تم توثيق التصحيح')}return;
+  const r=await SahmApp.correctReceipt(root.dataset.receiptId,{action:'void',reason});if(r&&r.ok){const id=root.dataset.receiptId;closeModal();refreshData();if(screenName==='group-detail'&&params.managedSection==='installments')groupDetail();else{params={id};receiptDetail()}toast('تم توثيق التصحيح')}return;
  }
  if(action==='logout-confirm'){showModal('تسجيل الخروج','هل تريد تسجيل الخروج من هذا الحساب؟ ستظل الحسابات الأخرى محفوظة على هذا الجهاز.',[['نعم، تسجيل الخروج','logout-now','danger'],['إلغاء','close','outline']]);return}
  if(action==='logout-now'){
