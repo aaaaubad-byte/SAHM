@@ -33,6 +33,16 @@ function objectKeys(source, marker) {
 
 
 
+
+test('manager information screen includes manager identity, draw progress and manager participation', () => {
+  const start = managed.indexOf('function managerInformationContent');
+  const end = managed.indexOf('async function renderManagerSection', start);
+  const info = managed.slice(start, end);
+  assert.match(info,/مدير الجمعية/);
+  assert.match(info,/القرعات المنجزة/);
+  assert.match(info,/مشاركة المدير بالأسهم/);
+});
+
 test('manager navigation exposes exactly ten final sections and no manager-only news sub-screen', () => {
   const titlesStart = managed.indexOf('const MANAGER_SECTION_TITLES');
   const titlesEnd = managed.indexOf('});', titlesStart);

@@ -729,6 +729,9 @@
       '<article><span>عدد الأقساط</span><b>' + esc(g.installments || '—') + '</b></article>' +
       '<article><span>مدة فترة التحصيل</span><b>' + esc((g.cycleDays || g.periodDays || '—') + ' يوم') + '</b></article>' +
       '<article><span>الجائزة المستهدفة</span><b>' + esc(moneyValue(d.plan && d.plan.prizeTarget || 0, g.currency)) + '</b></article>' +
+      '<article><span>مدير الجمعية</span><b>' + esc(g.admin || '—') + '</b></article>' +
+      '<article><span>القرعات المنجزة</span><b>' + esc(d.drawn || 0) + ' / ' + esc(d.rounds || 0) + '</b></article>' +
+      '<article><span>مشاركة المدير بالأسهم</span><b>' + (g.managerParticipates ? 'مشارك' : 'غير مشارك') + '</b></article>' +
       '<article><span>عدد الأعضاء</span><b>' + esc(d.members || 0) + '</b></article>' +
       '<article><span>إجمالي الأسهم</span><b>' + esc(g.shares || d.totalShares || 0) + '</b></article>' +
     '</section>' +
