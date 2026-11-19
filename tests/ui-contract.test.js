@@ -29,6 +29,15 @@ function objectKeys(source, marker) {
 
 
 
+
+test('manager shares screen summarizes all shares and filters the cached read model locally', () => {
+  assert.match(managed,/mgdShareSummary/);
+  assert.match(managed,/cachedRead\('shares:' \+ g\.id, \(\) => SahmApp\.shareList\(g\.id, \{status: 'all'\}\)/);
+  assert.match(managed,/const list = state\.shareStatus === 'all' \? all : all\.filter/);
+  assert.match(managed,/أسهم مؤهلة/);
+  assert.match(managed,/أسهم فائزة/);
+});
+
 test('manager members section summarizes membership and share totals; settings does not duplicate information screen', () => {
   assert.match(managed,/mgd-member-overview/);
   assert.match(managed,/totalShares = list\.reduce/);

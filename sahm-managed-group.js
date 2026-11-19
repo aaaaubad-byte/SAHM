@@ -69,10 +69,21 @@
     return '<button type="button" class="mgd-back" data-action="managed-back" data-tab="' + (tab || 'members') + '">' + uiIcon('back-screen',18) + '<span>العودة إلى ' + label + '</span></button>';
   }
   async function shareCards(g) {
-    const result = await SahmApp.shareList(g.id, {status: state.shareStatus || 'eligible'});
-    const list = result && result.ok ? result.shares || [] : [];
+    const result = await cachedRead('shares:' + g.id, () => SahmApp.shareList(g.id, {status: 'all'}), 12000);
+    const all = result && result.ok ? result.shares || [] : [];
+    const list = state.shareStatus === 'all' ? all : all.filter(s => s.status === (state.shareStatus || 'eligible'));
     const target = document.getElementById('mgdShareList');
+    const summary = document.getElementById('mgdShareSummary');
+    if (summary) {
+      const won = all.filter(s => s.status === 'won').length;
+      const eligible = all.filter(s => s.status === 'eligible').length;
+      summary.innerHTML = '<article><small>إجمالي الأسهم</small><b>' + all.length + '</b></article><article><small>أسهم مؤهلة</small><b>' + eligible + '</b></article><article><small>أسهم فائزة</small><b>' + won + '</b></article>';
+    }
     if (!target) return '';
+    if (!result || !result.ok) {
+      target.innerHTML = '<div class="mgd-empty">' + esc(result && result.message || 'تعذر تحميل سجل الأسهم') + '</div>';
+      return target.innerHTML;
+    }
     target.innerHTML = list.map(s => '<article class="mgd-installment-card"><div class="mgd-installment-top"><b>السهم ' + esc(s.shareNo) + '</b>' + '<span class="mgd-share-state ' + (s.status === 'won' ? 'won' : 'eligible') + '">' + (s.status === 'won' ? 'فائز' : 'مؤهل') + '</span>' + '</div><div class="mgd-installment-member">' + esc(s.ownerName) + '</div><div class="mgd-installment-meta"><span>' + (s.status === 'won' ? 'فائز بالقرعة رقم ' + esc(s.winnerRound) : 'مؤهل للقرعات المتبقية') + '</span></div></article>').join('') || '<div class="mgd-empty">لا توجد أسهم بهذه الحالة</div>';
     return target.innerHTML;
   }
@@ -723,6 +734,7 @@
     if (section === 'shares') {
       state.shareStatus = state.shareStatus || 'eligible';
       mountManagerSection(g, title,
+        '<div class="mgd-share-overview" id="mgdShareSummary">' + loadingPanel(title) + '</div>' +
         '<div class="mgd-new-toolbar"><div><b>سجل الأسهم</b><small>حالة الأسهم ومالك كل سهم</small></div>' +
         '<label class="mgd-select"><select id="mgdShareStatus" aria-label="تصفية الأسهم"><option value="eligible">مؤهلة</option><option value="won">فائزة</option><option value="all">كل الأسهم</option></select></label></div>' +
         '<div id="mgdShareList" class="mgd-list">' + loadingPanel(title) + '</div>');
