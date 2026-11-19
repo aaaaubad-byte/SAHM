@@ -1,5 +1,5 @@
 /* Sahm PWA worker. BUILD_ID is refreshed automatically for every source commit. */
-const BUILD_ID = '8bc4271c9372';
+const BUILD_ID = 'b4e5fd41192e';
 const CACHE_NAME = `sahm-pwa-${BUILD_ID}`;
 const APP_SHELL = [
   '/',
