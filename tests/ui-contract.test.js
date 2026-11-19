@@ -383,11 +383,11 @@ test('priority UX fixes keep managed/member routes separate and wire visible sea
   assert.doesNotMatch(style, /#bottomnav \.navitem[^{}]*\{[^}]*background:\s*#edf2ff/);
   assert.match(html, /'aria-current="page"'/);
 });
-test('public-link lifecycle is managed in one place rather than duplicated across success and settings screens', () => {
+test('public-link lifecycle remains centralized and manager sections do not link to child screens', () => {
   const detailStart = html.indexOf('function groupDetail(){');
   const detailEnd = html.indexOf('async function loadAssociationPublicLinkStatus', detailStart);
   const detail = html.slice(detailStart, detailEnd);
-  assert.match(managed, /data-go="member-reception"/);
+  assert.doesNotMatch(managed, /data-go="member-reception"|data-go="invite"/);
   assert.doesNotMatch(detail, /association-link-status/);
 
   const createdStart = html.indexOf('function showCreatedGroup(g){');
