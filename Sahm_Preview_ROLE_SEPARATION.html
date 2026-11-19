@@ -3809,11 +3809,19 @@ async function handleAppAction(action,el){
   const id=el.dataset.id;if(id){const marked=await SahmApp.markNotificationsRead([id]);if(!marked||!marked.ok){toast(marked&&marked.message||'تعذر تحديث حالة الإشعار');return}}
   if(el.dataset.decision==='true'&&el.dataset.relatedId)go('join-request-status',{id:el.dataset.relatedId});else notifications();return;
  }
- if(action==='open-draw-history'){closeModal();go('draw-history');return}if(action==='receipt-open'){go('receipt-detail',{id:el.dataset.id});return}
+ if(action==='open-draw-history'){closeModal();go('draw-history');return}if(action==='receipt-open'){
+  if(screenName==='group-detail'&&params.managedSection==='installments'){
+   const r=SahmApp.receiptDetail(el.dataset.id);
+   if(!r||!r.ok){toast(r&&r.message||'سجل الاستلام غير موجود');return}
+   const body='<div class="receipt"><div class="receipt-mark">'+(r.voided?'!':'✓')+'</div><div style="text-align:center;margin-top:8px"><b>سجل استلام القسط</b><div class="hero-num" style="color:var(--ink)">'+minorMoney(r.amount,r.currency)+'</div><span class="pill '+(r.voided?'red':'green')+'">'+(r.voided?'تم تصحيحه':'تم تسجيل الاستلام')+'</span></div><div class="keyvalue"><span>اسم المشارك</span><b>'+escapeHtml(r.memberName)+'</b></div><div class="keyvalue"><span>القرعة والقسط</span><b>'+r.cycle+' · '+r.no+'</b></div><div class="keyvalue"><span>الفترة الأصلية</span><b>'+dateLabel(r.periodStart)+' — '+dateLabel(r.periodEnd)+'</b></div><div class="keyvalue"><span>وقت التسجيل</span><b>'+escapeHtml(r.recordedAt||'—')+'</b></div><div class="keyvalue"><span>التسجيل الذاتي</span><b>'+(r.self?'نعم':'لا')+'</b></div></div>'+(r.canCorrect?'<button class="btn danger full" data-action="receipt-correct" data-id="'+escapeHtml(r.id)+'">تصحيح سجل الاستلام</button>':'')+(r.corrections&&r.corrections.length?'<div class="card"><b>سجل التصحيحات</b>'+r.corrections.map(x=>'<div class="listrow"><small>'+escapeHtml(x.reason||'')+'</small></div>').join('')+'</div>':'');
+   showModal('سجل الاستلام',body,[['إغلاق','close','outline']]);return;
+  }
+  go('receipt-detail',{id:el.dataset.id});return;
+ }
  if(action==='receipt-correct'){showModal('تصحيح سجل الاستلام','<p>سيبقى السجل الأصلي محفوظًا في سجل التدقيق.</p><div class="field"><label>سبب التصحيح</label><textarea id="receiptCorrectionReason" rows="3" maxlength="200" required></textarea></div>',[['تأكيد التصحيح','receipt-correct-confirm','danger'],['إلغاء','close','outline']]);$('#modal-root').dataset.receiptId=el.dataset.id;return}
  if(action==='receipt-correct-confirm'){
   const root=$('#modal-root'),reason=$('#receiptCorrectionReason')?.value||'';if(reason.trim().length<3){toast('اكتب سبب التصحيح (3 أحرف على الأقل)');return}
-  const r=await SahmApp.correctReceipt(root.dataset.receiptId,{action:'void',reason});if(r&&r.ok){const id=root.dataset.receiptId;closeModal();refreshData();params={id};receiptDetail();toast('تم توثيق التصحيح')}return;
+  const r=await SahmApp.correctReceipt(root.dataset.receiptId,{action:'void',reason});if(r&&r.ok){const id=root.dataset.receiptId;closeModal();refreshData();if(screenName==='group-detail'&&params.managedSection==='installments')groupDetail();else{params={id};receiptDetail()}toast('تم توثيق التصحيح')}return;
  }
  if(action==='logout-confirm'){showModal('تسجيل الخروج','هل تريد تسجيل الخروج من هذا الحساب؟ ستظل الحسابات الأخرى محفوظة على هذا الجهاز.',[['نعم، تسجيل الخروج','logout-now','danger'],['إلغاء','close','outline']]);return}
  if(action==='logout-now'){

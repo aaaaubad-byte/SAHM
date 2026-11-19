@@ -30,6 +30,15 @@ function objectKeys(source, marker) {
 
 
 
+test('manager collection keeps receipt history and receipt correction details inside the final installments screen', () => {
+  assert.match(managed,/receiptHistoryPanel\(g\)/);
+  assert.match(managed,/data-action="receipt-open"/);
+  assert.doesNotMatch(managed,/data-go="receipts"/);
+  assert.match(html,/screenName==='group-detail'&&params\.managedSection==='installments'/);
+  assert.match(html,/showModal\('سجل الاستلام',body/);
+  assert.match(html,/params\.managedSection==='installments'\)groupDetail\(\)/);
+});
+
 test('manager shares screen summarizes all shares and filters the cached read model locally', () => {
   assert.match(managed,/mgdShareSummary/);
   assert.match(managed,/cachedRead\('shares:' \+ g\.id, \(\) => SahmApp\.shareList\(g\.id, \{status: 'all'\}\)/);

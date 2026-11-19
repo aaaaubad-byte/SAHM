@@ -361,6 +361,21 @@
     });
     update();
   }
+  function receiptHistoryPanel(g) {
+    const result = SahmApp.receiptList(g.id, {includeVoided: true});
+    if (!result || !result.ok) return '<section class="mgd-detail-card"><div class="mgd-empty">' + esc(result && result.message || 'تعذر تحميل سجل الاستلام') + '</div></section>';
+    const rows = result.receipts || [];
+    const recent = rows.slice(0, 15);
+    return '<details class="mgd-inline-receipts"><summary>سجل الاستلام والتصحيحات <span>' + rows.length + ' سجل</span></summary>' +
+      '<div class="mgd-receipt-list">' + (recent.map(x =>
+        '<button type="button" class="mgd-receipt-row" data-action="receipt-open" data-id="' + esc(x.id) + '">' +
+        '<span class="mgd-receipt-mark ' + (x.voided ? 'voided' : 'valid') + '">' + (x.voided ? '!' : '✓') + '</span>' +
+        '<span class="mgd-member-main"><b>' + esc(x.memberName) + ' · القسط ' + Number(x.no || 0) + '</b><small>القرعة ' + Number(x.cycle || 0) + ' · ' + esc(dateLabel(String(x.recordedAt || '').slice(0,10))) + '</small></span>' +
+        '<span class="mgd-receipt-value"><b>' + esc(minorMoney(x.amount, x.currency || g.currency)) + '</b><small>' + (x.voided ? 'مصحح' : 'مسجل') + '</small></span></button>'
+      ).join('') || '<div class="mgd-empty">لا توجد سجلات استلام</div>') + '</div>' +
+      (rows.length > recent.length ? '<small class="mgd-receipt-note">يعرض آخر ' + recent.length + ' سجلاً من أصل ' + rows.length + '.</small>' : '') +
+      '</details>';
+  }
   function installmentsPanel(g,d) {
     if(state.installmentSelectionGroupId!==g.id){
       state.installmentSelectionGroupId=g.id;
@@ -386,7 +401,7 @@
       '<button type="button" class="mgd-tool-icon" data-action="managed-installment-filter" id="mgdInstallmentFilterToggle" aria-label="الفلاتر" aria-expanded="'+(state.installmentFiltersOpen?'true':'false')+'">'+uiIcon('sliders-horizontal',19)+'</button>'+
       '<div class="mgd-installment-filter-fields"><label class="mgd-select"><select id="mgdInstallmentCycle" aria-label="القرعة">'+cycleOptions+'</select></label><label class="mgd-select"><select id="mgdInstallmentNumber" aria-label="القسط">'+installmentOptions+'</select></label><label class="mgd-select"><select id="mgdInstallmentStatus" aria-label="حالة القسط"><option value="all">كل الحالات</option></select></label></div></div>'+
       (manager?'<div class="mgd-selection-bar" id="mgdInstallmentSelectionBar" hidden><span class="mgd-selection-count" id="mgdInstallmentSelectionCount">0 محدد</span><button type="button" class="mgd-selection-secondary" data-action="managed-installment-select-visible" id="mgdInstallmentSelectVisible">تحديد الظاهر</button><button type="button" class="mgd-selection-reminder" data-action="managed-installment-bulk-reminder" id="mgdInstallmentBulkReminder" disabled>'+uiIcon('bell',15)+'<span>تذكير</span></button><button type="button" class="mgd-selection-cancel" data-action="managed-installment-cancel-selection" id="mgdInstallmentCancelSelection" aria-label="إلغاء التحديد">'+uiIcon('x',17)+'</button></div>':'')+
-      '<div id="mgdInstallmentList" class="mgd-installment-list"></div><button type="button" class="mgd-secondary-link" data-go="receipts">سجل الاستلام والتصحيحات '+uiIcon('back-screen',16)+'</button>';
+      '<div id="mgdInstallmentList" class="mgd-installment-list"></div>' + (manager ? receiptHistoryPanel(g) : '<button type="button" class="mgd-secondary-link" data-go="receipts">سجل الاستلام والتصحيحات '+uiIcon('back-screen',16)+'</button>');
   }
   async function cycleDetail(g, d, round) {
     const historyResult = await cachedRead('history:' + g.id, () => SahmApp.getDrawHistory(g.id), 15000), history = historyResult && historyResult.ok ? (historyResult.history || []) : [];
