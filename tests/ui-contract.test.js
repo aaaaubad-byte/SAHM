@@ -528,34 +528,35 @@ test('manager collection screen implements current installment filters, selectiv
   assert.ok(!css.includes('#screen .mgd-installment-toolbar'), 'collection CSS is scoped to its screen');
 });
 
-test('draw and member tabs expose round progress and member win/eligibility filters', () => {
-  assert.match(managed,/data-action="managed-open-cycle"/);
+test('manager draw and member sections show inline information without opening child screens', () => {
+  assert.match(managed,/mgd-cycle-card-static/);
+  assert.doesNotMatch(managed,/data-action="managed-open-cycle"/);
   assert.match(managed,/data-status=/);
   assert.match(managed,/mgdDrawSearch/);
   assert.match(managed,/mgdMemberStatus/);
   assert.match(managed,/memberStatus==='won'/);
-  assert.match(managed,/backToTab\('draws'\)/);
-});
-
-test('draw room sub-tabs are role-aware and participants never call manager-only readiness RPCs', () => {
-  const start = managed.indexOf('async function drawPanel(g, d)');
+  assert.match(managed,/mgd-member-card-static/);
+  assert.doesNotMatch(managed,/params\.managedMemberId && section === 'members'/);
+  assert.doesNotMatch(managed,/params\.managedRoundId && section === 'draws'/);
+});test('draw room is one final manager screen while participant data access remains role-aware', () => {
+  const start = managed.indexOf('async function drawPanel(g, d, allViews)');
   const end = managed.indexOf('async function newsPanel(g, d)', start);
   assert.ok(start >= 0 && end > start, 'draw room renderer exists');
   const draw = managed.slice(start, end);
-  assert.match(draw, /const manager = !!\(d\.role && d\.role\.manager\)/);
-  assert.match(draw, /manager && \(view === 'summary' \|\| view === 'result'\)[\s\S]*?SahmApp\.getDrawReadiness/);
-  assert.match(draw, /manager && view === 'summary'[\s\S]*?SahmApp\.getFinancialSummary/);
-  assert.match(draw, /const drawTabs = manager\s*\? \[\['summary','الملخص'\],\['eligible','الأسهم المؤهلة'\],\['schedule','الموعد'\],\['result','النتيجة'\],\['history','السجل'\]\]\s*:\s*\[\['summary','الملخص'\],\['eligible','الأسهم المؤهلة'\],\['result','النتيجة'\],\['history','السجل'\]\]/);
-  assert.match(draw, /role="tablist"/);
-  assert.match(draw, /role="tab"/);
-  assert.match(draw, /aria-selected=/);
-  assert.match(draw, /role="tabpanel"/);
-  assert.match(draw, /manager \? \(draw \?/);
-  assert.match(managed, /event\.stopImmediatePropagation\(\)/, 'workspace tab actions are not dispatched twice');
-  assert.match(managed, /if \(!allowedViews\.includes\(requested\)\)/, 'invalid or manager-only sub-tabs are rejected');
-});
-
-test('participant draw entry does not repeat the full draw history already available inside the room', () => {
+  assert.match(draw,/const manager = !!\(d\.role && d\.role\.manager\)/);
+  assert.match(draw,/manager && \(view === 'summary' \|\| view === 'result'\)[\s\S]*?SahmApp\.getDrawReadiness/);
+  assert.match(draw,/manager && view === 'summary'[\s\S]*?SahmApp\.getFinancialSummary/);
+  assert.match(draw,/if \(allViews\)[\s\S]*?\['summary','eligible','schedule','result','history'\]/);
+  assert.match(draw,/drawPanel\(g, d, false\)/);
+  assert.match(draw,/panel\.replace\([\s\S]*?mgd-draw-panel/);
+  assert.match(draw,/const drawTabs = manager\s*\?/);
+  assert.match(draw,/role="tablist"/);
+  assert.match(draw,/role="tab"/);
+  assert.match(draw,/aria-selected=/);
+  assert.match(draw,/role="tabpanel"/);
+  assert.match(managed,/await drawPanel\(g, d, true\)/);
+  assert.match(managed,/event\.stopImmediatePropagation\(\)/);
+});test('participant draw entry does not repeat the full draw history already available inside the room', () => {
   const start = managed.indexOf('async function memberDraws(g)');
   const end = managed.indexOf('function memberCommunication()', start);
   const panel = managed.slice(start, end);
@@ -639,25 +640,30 @@ test('association workspace visual refinement preserves a calm, responsive hiera
   assert.match(css, /@media\(max-width:340px\)/);
 });
 
-test('manager landing routes all ten cards to independent screens without the legacy tab renderer', () => {
-  assert.match(managed, /function managerDashboard\(g, d\)/);
-  assert.match(managed, /class="mgd-home-summary"/);
-  assert.match(managed, /class="mgd-home-sections"/);
-  const sectionBlock = managed.match(/const sections = \[([\s\S]*?)\n    \];/);
-  assert.ok(sectionBlock, 'ten manager sections are declared together');
-  assert.equal((sectionBlock[1].match(/\['(?:installments|draws|shares|members|invites|chat|room|information|settings|audit)'\s*,/g) || []).length, 10);
-  assert.match(managed, /async function renderManagerSection/);
-  assert.match(managed, /params = \{ managedSection: section \}/);
-  assert.match(managed, /if \(manager\) \{\s*await renderManagerSection/);
-  assert.match(managed, /data-action="managed-section-home"/);
-  assert.doesNotMatch(managed, /section === 'invites'\) \{ go\('invites'\); return; \}/);
-  assert.match(managed, /section === 'room'/);
-  assert.match(managed, /section === 'information'/);
-  assert.match(managed, /if \(manager\) return ''/);
-  assert.match(html, /managedSection:view\?'room':\(map\[tab\]\|\|'members'\)/);
-});
-
-test('managed installment selection starts with long press and bulk reminder is outside the search toolbar', () => {
+test('manager landing routes ten cards to final self-contained screens without manager sub-screens', () => {
+  assert.match(managed,/function managerDashboard\(g, d\)/);
+  assert.match(managed,/class="mgd-home-summary"/);
+  assert.match(managed,/class="mgd-home-sections"/);
+  const dashboardStart = managed.indexOf('function managerDashboard(g, d)');
+  const sectionStart = managed.indexOf('const sections = [', dashboardStart);
+  const sectionEnd = managed.indexOf('];', sectionStart);
+  assert.ok(sectionStart > dashboardStart && sectionEnd > sectionStart, 'ten manager sections are declared together');
+  const sectionBlock = managed.slice(sectionStart, sectionEnd);
+  assert.equal((sectionBlock.match(/\['(?:installments|draws|shares|members|invites|chat|room|information|settings|audit)'\s*,/g) || []).length, 10);
+  assert.match(managed,/async function renderManagerSection/);
+  assert.match(managed,/params = \{ managedSection: section \}/);
+  assert.match(managed,/if \(manager\) \{\s*await renderManagerSection/);
+  assert.match(managed,/data-action="managed-section-home"/);
+  assert.match(managed,/section === 'room'/);
+  assert.match(managed,/section === 'information'/);
+  assert.match(managed,/if \(manager\) return ''/);
+  assert.match(managed,/mgd-member-card-static/);
+  assert.match(managed,/mgd-cycle-card-static/);
+  assert.doesNotMatch(managed,/params\.managedMemberId|params\.managedRoundId/);
+  assert.doesNotMatch(managed,/data-go="member-reception"|data-go="invite"/);
+  assert.match(managed,/await drawPanel\(g, d, true\)/);
+  assert.match(html,/managedSection:view\?'room':\(map\[tab\]\|\|'members'\)/);
+});test('managed installment selection starts with long press and bulk reminder is outside the search toolbar', () => {
   assert.match(managed, /pressTimer=setTimeout\([\s\S]*?state\.installmentSelectMode=true/);
   assert.match(managed, /state\.installmentSelected\.add\(pressCard\.dataset\.installmentKey\)/);
   assert.match(managed, /id="mgdInstallmentSelectionBar"/);
