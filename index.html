@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <meta name="theme-color" content="#3158d6">
-<meta name="sahm-build" content="sahm-20261123-wheel-physics-winner-modal-14">
+<meta name="sahm-build" content="sahm-20261123-wheel-smoothstep-celebration-15">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
@@ -1050,8 +1050,8 @@ function spinRoomWheel(){
  const animate=now=>{
   if(!roomWheelSpinning)return;
   const progress=Math.min(1,(now-startTime)/duration);
-  // Constant angular deceleration: high initial speed, smooth falloff, zero speed at rest.
-  const eased=2*progress-progress*progress;
+  // Quintic smoothstep: starts from rest, builds angular speed smoothly, then loses speed gradually and settles at zero.
+  const eased=progress*progress*progress*(progress*(progress*6-15)+10);
   rotor.style.transform=`rotate(${startAngle+distance*eased}deg)`;
   if(progress<1)frame=requestAnimationFrame(animate);
   else{cancelAnimationFrame(frame);finish();}
