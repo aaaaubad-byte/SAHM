@@ -394,6 +394,16 @@ body{background:var(--bg);color:var(--ink)}
 }
 .bottom-item svg{width:21px;height:21px;flex:0 0 21px}
 .screen-body{flex:1 1 0%;min-height:0;overflow-y:auto;overscroll-behavior:contain}
+
+/* Mobile navigation is viewport-anchored so it cannot be clipped by app flex sizing. */
+@media(max-width:680px){
+ .app.has-bottom-nav .bottom-nav{
+  position:fixed;left:0;right:0;bottom:0;z-index:30;flex:none;width:100%;
+ }
+ .app.has-bottom-nav .screen-body{
+  padding-bottom:calc(78px + env(safe-area-inset-bottom,0px));
+ }
+}
 </style>
 </head>
 <body>
@@ -526,6 +536,7 @@ function updateInspector(){}
 function render(){if(carouselTimer){clearInterval(carouselTimer);carouselTimer=null}renderIndex();updateInspector();const app=document.getElementById('app');app.classList.toggle('dark',theme==='dark');app.classList.toggle('has-top',!['001','007'].includes(current));let html='';switch(current){
 case '001':html=renderSplash();break;case '002':html=renderLogin();break;case '003':html=renderRecovery();break;case '004':html=renderRegister();break;case '005':html=renderTerms();break;case '006':html=renderCompleteProfile();break;case '007':html=renderFrame();break;case '008':html=renderHome();break;case '009':html=renderGroups('all');break;case '010':html=renderGroups('manager');break;case '011':html=renderGroups('member');break;case '012':html=renderNotifications();break;case '013':html=renderProfile();break;case '014':html=renderCreateGroup();break;case '015':html=renderCreateSuccess();break;case '016':html=renderJoinLink();break;case '017':html=renderJoinPreview('public');break;case '018':html=renderJoinPreview('invite');break;case '021':html=renderAdminHome();break;case '022':html=renderCollections();break;case '023':html=renderDraws();break;case '024':html=renderShares();break;case '025':html=renderMembers();break;case '026':html=renderInvitations();break;case '027':html=renderChat('manager');break;case '028':html=renderAdminRoom();break;case '029':html=renderGroupInfo();break;case '030':html=renderGroupSettings();break;case '031':html=renderLog();break;case '032':html=renderMemberHome();break;case '033':html=renderMemberDues();break;case '034':html=renderMemberShares();break;case '035':html=renderMemberDraws();break;case '036':html=renderMemberRoom();break;case '037':html=renderNews();break;case '038':html=renderChat('member');break;case '039':html=renderPublicChats();break;case '040':html=renderContacts();break;default:html=renderHome();}
  app.innerHTML=html+`<div class="toast" id="toast">${icon('info')}<span id="toastText"></span></div>`;
+ app.classList.toggle('has-bottom-nav',!!app.querySelector('.bottom-nav'));
  if(['008','021','032'].includes(current)){carouselIndex=0;initCarousel()}if(current==='014')updateAssociationCalc();
 }
 function connection(){return online?'':`<div class="connection-strip">${icon('alert')}<span>لا يوجد اتصال</span></div>`}
