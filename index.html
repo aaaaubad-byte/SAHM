@@ -173,19 +173,27 @@ button:disabled{cursor:not-allowed;opacity:.48}
 /* home */
 .home-body{padding:17px 17px 26px}
 .summary-carousel{position:relative;margin-bottom:12px}
-.summary-window{overflow:hidden;border-radius:21px}
-.summary-track{display:flex;direction:rtl;transition:transform .3s ease;touch-action:pan-y}
-.summary-slide{min-width:100%;height:148px;border-radius:21px;position:relative;padding:26px 24px;background:linear-gradient(118deg,#73501d 0%,#9c6b27 46%,#c18a37 100%);box-shadow:var(--shadow-gold);color:#fff;display:flex;align-items:center;justify-content:space-between;overflow:hidden}
-.summary-slide:before{content:"";position:absolute;width:220px;height:220px;border:1px solid #ffffff25;border-radius:50%;left:-75px;top:-128px}
-.summary-slide:after{content:"";position:absolute;width:160px;height:160px;border:1px solid #ffffff19;border-radius:50%;left:5px;bottom:-122px}
-.summary-info{display:flex;align-items:center;gap:13px;z-index:1}
-.summary-symbol svg{width:42px;height:42px;stroke-width:1.8}
-.summary-title{font-size:18px;font-weight:900;line-height:1.4;text-shadow:0 1px 3px #3e2b145e}
-.summary-number{font-size:32px;line-height:1.15;font-weight:950;margin-top:5px}
-.summary-index{position:absolute;left:23px;bottom:19px;font-size:13px;letter-spacing:1.5px;font-weight:800;color:#ffffffd9;direction:ltr}
-.carousel-controls{height:27px;display:flex;align-items:center;justify-content:center;gap:8px}
-.carousel-dot{width:9px;height:9px;border-radius:20px;border:0;background:#b7c7d4;padding:0;transition:.2s}
-.carousel-dot.active{width:34px;background:#2b5aa7;box-shadow:0 2px 5px #1b4c9838}
+.summary-window{position:relative;height:124px;overflow:hidden;border-radius:var(--radius-card);box-shadow:0 5px 10px rgba(22,42,79,.12),0 16px 30px rgba(22,42,79,.16),inset 0 1px 0 rgba(255,255,255,.35)}
+.summary-track{position:relative;width:100%;height:100%;direction:rtl;touch-action:pan-y}
+.summary-slide{position:absolute;inset:0;display:flex;align-items:center;gap:15px;width:100%;min-width:0;height:100%;padding:16px 18px;overflow:hidden;border:1px solid rgba(255,255,255,.32);border-radius:var(--radius-card);color:#fff;opacity:0;visibility:hidden;transform:translateX(16px) scale(.985);pointer-events:none;box-shadow:inset 0 1px 0 rgba(255,255,255,.22),inset 0 -2px 0 rgba(5,18,43,.15);transition:transform .22s ease,filter .22s ease,box-shadow .22s ease}
+.summary-slide.active{opacity:1;visibility:visible;transform:translateX(0) scale(1);pointer-events:auto}
+.summary-slide:before{content:none}
+.summary-slide:after{content:"";position:absolute;left:-30px;bottom:-95px;width:220px;height:220px;border-radius:50%;background:radial-gradient(circle,rgba(255,255,255,.16),rgba(255,255,255,.035) 62%,transparent 70%);pointer-events:none}
+.summary-slide.blue{background:linear-gradient(118deg,#102c50 0%,#1d447f 48%,#3568d8 100%)}
+.summary-slide.gold{background:linear-gradient(118deg,#513719 0%,#8b602b 50%,#c38f43 100%)}
+.summary-slide.dark{background:linear-gradient(118deg,#17283b 0%,#2b405a 52%,#506985 100%)}
+.summary-icon{position:relative;z-index:1;display:inline-flex;align-items:center;justify-content:center;flex:0 0 28px;width:28px;height:28px;color:#fff;line-height:1}
+.summary-icon svg{display:block;width:28px;height:28px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+.summary-copy{position:relative;z-index:1;display:flex;flex:1;min-width:0;flex-direction:column;gap:5px}
+.summary-copy>strong{color:#fff;font-size:13px;line-height:1;font-weight:900;text-shadow:0 3px 9px rgba(0,0,0,.28)}
+.summary-copy>b{color:#fff;font-size:25px;line-height:1.15;font-weight:750;text-shadow:0 1px 3px rgba(0,0,0,.3);overflow-wrap:anywhere}
+.summary-copy>small{font-size:10px;line-height:1.45;opacity:.82;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.summary-index{position:relative;z-index:1;align-self:flex-end;margin-right:auto;color:#fff;font-size:10px;font-weight:750;letter-spacing:.7px;opacity:.82;white-space:nowrap;direction:ltr}
+.carousel-controls{display:flex;align-items:center;justify-content:center;gap:7px;height:17px;margin-top:7px}
+.carousel-dot{width:7px;height:7px;padding:0;border:0;border-radius:var(--radius-small);background:#aab8ce;box-shadow:0 1px 3px rgba(20,40,75,.18);transition:width .2s ease,background .2s ease}
+.carousel-dot.active{width:24px;background:#3158d6;box-shadow:0 0 0 4px rgba(49,88,214,.08)}
+.carousel-dot:focus-visible{outline:3px solid rgba(49,88,214,.32);outline-offset:3px}
+@media(prefers-reduced-motion:reduce){.summary-slide,.carousel-dot{transition:none}}
 .home-tiles{margin-top:13px}
 .home-section{border-top:1px solid #e1e8ed;margin-top:28px;padding-top:20px}
 .home-section .section-head{margin:4px 2px 14px}
@@ -260,7 +268,7 @@ button:disabled{cursor:not-allowed;opacity:.48}
  .inspector.open{transform:translateX(0)}
  .data-disclaimer{padding:4px 12px;background:#f1f5f8;width:100%;font-size:9px}
 }@media(max-width:680px){}
-@media(max-width:390px){.screen-body{padding:14px 13px 22px}.home-body{padding:14px 13px 23px}.tile{min-height:133px}.summary-slide{height:138px;padding:20px}.summary-title{font-size:16px}.auth-body{padding:20px 15px}.row-fields{gap:7px}}
+@media(max-width:390px){.screen-body{padding:14px 13px 22px}.home-body{padding:14px 13px 23px}.tile{min-height:133px}.summary-window{height:112px}.summary-slide{padding:13px 15px}.auth-body{padding:20px 15px}.row-fields{gap:7px}}
 
 /* Visual tokens and component styling borrowed from the published SAHM reference.
    The new preview shell, screen catalogue, screen names, grouping, renderer
@@ -298,7 +306,7 @@ body{background:var(--bg);color:var(--ink)}
 .list-row,.record-card{box-shadow:0 3px 10px rgba(25,44,78,.04)}
 .tile{box-shadow:var(--shadow)}
 .tile .tile-label{font-size:14px;font-weight:var(--weight-bold)}
-.summary-slide{box-shadow:var(--shadow-gold)}
+
 .auth-card{box-shadow:0 10px 26px rgba(25,44,78,.075)}
 .modal-card{box-shadow:0 16px 42px rgba(6,26,43,.18)}
 .small-note{font-size:var(--font-helper);line-height:var(--leading-body);color:var(--muted)}
@@ -473,10 +481,10 @@ function renderIndex(){const grouped={};screens.forEach(s=>{const key=sectionFor
  document.getElementById('indexScroll').innerHTML=html;
 }
 function updateInspector(){}
-function render(){renderIndex();updateInspector();const app=document.getElementById('app');app.classList.toggle('dark',theme==='dark');app.classList.toggle('has-top',!['001','007'].includes(current));let html='';switch(current){
+function render(){if(carouselTimer){clearInterval(carouselTimer);carouselTimer=null}renderIndex();updateInspector();const app=document.getElementById('app');app.classList.toggle('dark',theme==='dark');app.classList.toggle('has-top',!['001','007'].includes(current));let html='';switch(current){
 case '001':html=renderSplash();break;case '002':html=renderLogin();break;case '003':html=renderRecovery();break;case '004':html=renderRegister();break;case '005':html=renderTerms();break;case '006':html=renderCompleteProfile();break;case '007':html=renderFrame();break;case '008':html=renderHome();break;case '009':html=renderGroups('all');break;case '010':html=renderGroups('manager');break;case '011':html=renderGroups('member');break;case '012':html=renderNotifications();break;case '013':html=renderProfile();break;case '014':html=renderCreateGroup();break;case '015':html=renderCreateSuccess();break;case '016':html=renderJoinLink();break;case '017':html=renderJoinPreview('public');break;case '018':html=renderJoinPreview('invite');break;case '021':html=renderAdminHome();break;case '022':html=renderCollections();break;case '023':html=renderDraws();break;case '024':html=renderShares();break;case '025':html=renderMembers();break;case '026':html=renderInvitations();break;case '027':html=renderChat('manager');break;case '028':html=renderAdminRoom();break;case '029':html=renderGroupInfo();break;case '030':html=renderGroupSettings();break;case '031':html=renderLog();break;case '032':html=renderMemberHome();break;case '033':html=renderMemberDues();break;case '034':html=renderMemberShares();break;case '035':html=renderMemberDraws();break;case '036':html=renderMemberRoom();break;case '037':html=renderNews();break;case '038':html=renderChat('member');break;case '039':html=renderPublicChats();break;case '040':html=renderContacts();break;default:html=renderHome();}
  app.innerHTML=html+`<div class="toast" id="toast">${icon('info')}<span id="toastText"></span></div>`;
- if(current==='008')initCarousel();if(current==='014')updateAssociationCalc();
+ if(['008','021','032'].includes(current)){carouselIndex=0;initCarousel()}if(current==='014')updateAssociationCalc();
 }
 function connection(){return online?'':`<div class="connection-strip">${icon('alert')}<span>لا يوجد اتصال</span></div>`}
 function generalHeader(){return `<div class="app-top home-top"><div class="top-actions"><button class="icon-btn" data-action="profile" aria-label="الحساب الشخصي">${icon('user')}</button></div><div class="top-actions"><button class="icon-btn" data-action="notifications" aria-label="الإشعارات">${icon('bell')}<i class="notice-dot"></i></button></div></div>${connection()}`}
@@ -508,18 +516,45 @@ function renderCompleteProfile(){return `${topHeader('استكمال البيا�
 /* 007 */
 function renderFrame(){return `${topHeader('إطار التطبيق العام')}<main class="screen-body"><div class="page-intro"><h2>إطار التطبيق العام</h2><p></p></div><section class="info-card"><div style="display:flex;align-items:center;gap:10px;font-weight:900">${icon('shield')} الشريط العلوي</div></section><section class="info-card"><div style="font-weight:900;margin-bottom:8px">مساحة المحتوى</div><div class="empty-state"></div></section></main>${bottomNav()}`}
 /* 008 */
-let carouselIndex=0,carouselPointer=null;
+let carouselIndex=0,carouselTimer=null;
 const summarySlides=[
- {title:'جمعيات أديرها',value:'02',icon:'users'},
- {title:'جمعيات أشارك فيها',value:'01',icon:'usercheck'},
- {title:'إجمالي الجمعيات',value:'03',icon:'building'}
+ {title:'جمعيات تديرها',value:'02',icon:'users',tone:'blue'},
+ {title:'جمعيات أشارك فيها',value:'01',icon:'usercheck',tone:'gold'},
+ {title:'إجمالي الجمعيات',value:'03',icon:'building',tone:'dark'}
 ];
+function summaryCarouselMarkup(slides,label){
+ const cards=slides.map((s,i)=>'<article class="summary-slide '+s.tone+' '+(i===0?'active':'')+'" data-summary-slide="'+i+'" aria-hidden="'+(i!==0)+'"><span class="summary-icon">'+icon(s.icon)+'</span><span class="summary-copy"><strong>'+esc(s.title)+'</strong><b>'+esc(s.value)+'</b>'+(s.note?'<small>'+esc(s.note)+'</small>':'')+'</span><span class="summary-index">'+String(i+1).padStart(2,'0')+' / '+String(slides.length).padStart(2,'0')+'</span></article>').join('');
+ const dots=slides.map((s,i)=>'<button type="button" class="carousel-dot '+(i===0?'active':'')+'" data-action="carousel" data-index="'+i+'" aria-label="عرض '+esc(s.title)+'" aria-pressed="'+(i===0)+'"></button>').join('');
+ return '<section class="summary-carousel" aria-label="'+esc(label)+'"><div class="summary-window"><div class="summary-track" id="summaryTrack">'+cards+'</div></div><div class="carousel-controls" role="group" aria-label="التنقل بين الملخصات">'+dots+'</div></section>';
+}
 function renderHome(){return `${generalHeader()}<main class="screen-body home-body">
- <section class="summary-carousel" aria-label="ملخص الجمعيات المتنقل"><div class="summary-window"><div class="summary-track" id="summaryTrack">${summarySlides.map((s,i)=>`<article class="summary-slide"><div class="summary-info"><div class="summary-symbol">${icon(s.icon)}</div><div><div class="summary-title">${s.title}</div><div class="summary-number">${s.value}</div></div></div><div class="summary-index">0${i+1} / 03</div></article>`).join('')}</div></div><div class="carousel-controls">${summarySlides.map((s,i)=>`<button class="carousel-dot ${i===carouselIndex?'active':''}" aria-label="المؤشر ${i+1}" data-action="carousel" data-index="${i}"></button>`).join('')}</div></section>
+ ${summaryCarouselMarkup(summarySlides,'ملخص الجمعيات')}
  <section class="home-tiles"><div class="tile-grid">${tile('جمعيات أديرها','users','010','blue')}${tile('جمعيات أشارك فيها','usercheck','011','gold')}${tile('جمعية جديدة','plus','014','blue')}${tile('الانضمام لجمعية','link','016','gold')}</div></section>
  <section class="home-section"><div class="section-head"><div class="section-title-wrap"><h3>أحدث النشاط</h3>${icon('activity')}</div></div><div class="activity-list">${recentEvents.map(e=>`<button class="activity-item" data-action="activity" data-id="${e.id}"><span class="activity-icon">${icon(e.icon)}</span><span class="activity-copy"><strong>${e.title}</strong><span>${e.group}</span></span><span class="activity-time">${e.time}</span></button>`).join('')}</div></section>
  </main>${bottomNav('home')}`}
-function initCarousel(){const track=document.getElementById('summaryTrack');if(!track)return;track.style.transform=`translateX(${carouselIndex*100}%)`;document.querySelectorAll('.carousel-dot').forEach((d,i)=>d.classList.toggle('active',i===carouselIndex));const windowEl=track.parentElement;windowEl.onpointerdown=e=>{carouselPointer=e.clientX};windowEl.onpointerup=e=>{if(carouselPointer===null)return;const diff=e.clientX-carouselPointer;if(Math.abs(diff)>35){carouselIndex=Math.max(0,Math.min(2,carouselIndex+(diff<0?1:-1)));initCarousel()}carouselPointer=null};windowEl.onpointercancel=()=>carouselPointer=null;}
+function setCarouselSlide(index){
+ const track=document.getElementById('summaryTrack');
+ if(!track)return;
+ const slides=Array.from(track.querySelectorAll('.summary-slide'));
+ if(!slides.length)return;
+ carouselIndex=(index%slides.length+slides.length)%slides.length;
+ slides.forEach((slide,i)=>{const active=i===carouselIndex;slide.classList.toggle('active',active);slide.setAttribute('aria-hidden',String(!active))});
+ const carousel=track.closest('.summary-carousel');
+ if(carousel)carousel.querySelectorAll('.carousel-dot').forEach((dot,i)=>{dot.classList.toggle('active',i===carouselIndex);dot.setAttribute('aria-pressed',String(i===carouselIndex))});
+}
+function initCarousel(){
+ const track=document.getElementById('summaryTrack');
+ if(!track)return;
+ const slides=track.querySelectorAll('.summary-slide');
+ if(!slides.length)return;
+ setCarouselSlide(carouselIndex);
+ const windowEl=track.parentElement;
+ let startX=null;
+ windowEl.onpointerdown=e=>{startX=e.clientX};
+ windowEl.onpointerup=e=>{if(startX===null)return;const diff=e.clientX-startX;if(Math.abs(diff)>35)setCarouselSlide(carouselIndex+(diff<0?1:-1));startX=null};
+ windowEl.onpointercancel=()=>{startX=null};
+ carouselTimer=setInterval(()=>setCarouselSlide(carouselIndex+1),5000);
+}
 /* 009-011 and 039 */
 function renderGroups(kind){const all=kind==='all',manager=kind==='manager';const title=all?'كل الجمعيات':manager?'جمعيات أديرها':'جمعيات أشارك فيها';let items=all?groupFixtures:groupFixtures.filter(g=>manager?g.kind==='manager':g.kind==='member');const cards=items.map(g=>`<button class="list-row" data-action="open-group" data-id="${g.id}" data-filter-text="${esc(g.name)}"><span class="row-icon ${g.kind==='member'?'gold':''}">${icon(g.kind==='member'?'usercheck':'users')}</span><span class="row-main"><span class="row-title">${esc(g.name)}</span></span>${icon('back','row-arrow')}</button>`).join('');return page(title,`${searchBox('ابحث عن جمعية')}<div class="list-stack" id="groupList">${cards}</div><div data-search-empty style="display:none">${empty('لا توجد نتائج مطابقة')}</div>`,{backTo:'008',active:'groups'});}
 function renderPublicChats(){const cards=groupFixtures.map(g=>`<button class="list-row" data-action="open-chat" data-id="${g.id}" data-filter-text="${esc(g.name)}"><span class="row-icon ${g.kind==='member'?'gold':''}">${icon(g.kind==='member'?'usercheck':'users')}</span><span class="row-main"><span class="row-title">${esc(g.name)}</span></span>${icon('back','row-arrow')}</button>`).join('');return page('الدردشات',`${searchBox('ابحث عن جمعية')}<div class="list-stack">${cards}</div><div data-search-empty style="display:none">${empty('لا توجد نتائج مطابقة')}</div>`,{backTo:'008',active:'chats'});}
@@ -554,7 +589,15 @@ function renderJoinPreview(type){joinType=type;const isInvite=type==='invite',ti
 function renderContacts(){const list=contactRecords;const cards=list.map(c=>{let action='';if(c.kind==='registered'&&c.eligible)action=`<button class="btn secondary small" data-action="contact-invite" data-id="${c.id}">دعوة للجمعية</button>`;else if(c.kind==='unregistered')action=`<button class="btn secondary small" data-action="contact-share" data-id="${c.id}">دعوة للتثبيت</button>`;return `<article class="record-card" data-filter-text="${esc(c.name+' '+c.phone+' '+c.status)}"><div class="record-summary"><span class="record-symbol">${icon('user')}</span><span style="flex:1;min-width:0"><span class="record-title">${esc(c.name)}</span><span class="record-subtitle" dir="ltr" style="text-align:right">${esc(c.phone)}</span></span><span class="record-chevron">${icon('right')}</span></div><div class="record-details" style="border-top:0;padding-top:0"><div class="kv-row"><span class="k">حالة الفحص</span><span class="v">${esc(c.status)}</span></div>${action?`<div style="margin-top:10px">${action}</div>`:''}</div></article>`}).join('');return page('نتائج جهات الاتصال',`${searchBox('ابحث بالاسم أو الرقم')}${cards?`<div class="list-stack">${cards}</div><div data-search-empty style="display:none">${empty('لا توجد نتائج مطابقة')}</div>`:empty('لم يتم اختيار جهات اتصال. ارجع إلى نتيجة إنشاء الجمعية ثم افتح منتقي جهات الاتصال.')}`,{backTo:'015'});}
 /* 021 */
 const adminSections=[['التحصيل','wallet','022'],['القرعات','ticket','023'],['الأسهم','coins','024'],['الأعضاء','users','025'],['الدعوات','gift','026'],['الدردشة','chat','027'],['الغرفة','activity','028'],['المعلومات','file','029'],['الإعدادات','settings','030'],['السجل','list','031']];
-function renderAdminHome(){return `<div class="app-top"><button class="top-back" data-action="back" data-fallback="010">${icon('right')}</button><div class="top-title">الرئيسية الإدارية</div></div>${connection()}<main class="screen-body"><section class="group-identity"><div><h2>${esc(activeGroup.name||'جمعية الوفاق')}</h2><p>السياق الإداري للجمعية</p></div>${icon('building')}</section><div class="section-head" style="margin-top:4px"><h3>ملخص الجمعية</h3><span class="status gold"></span></div><div class="tile-grid" style="margin-bottom:13px"><div class="info-card" style="margin:0"><div class="small-note">مؤشرات التحصيل</div><div style="font-size:23px;font-weight:900;margin-top:5px">—</div></div><div class="info-card" style="margin:0"><div class="small-note">مؤشرات القرعات</div><div style="font-size:23px;font-weight:900;margin-top:5px">—</div></div><div class="info-card" style="margin:0"><div class="small-note">الأسهم والأعضاء</div><div style="font-size:23px;font-weight:900;margin-top:5px">—</div></div><div class="info-card" style="margin:0"><div class="small-note">حالة الجمعية والاتفاق</div><div style="margin-top:6px">${statusChip('—','gold')}</div></div></div><div class="section-head"><h3>أقسام الجمعية</h3></div><div class="tile-grid manager-tiles">${adminSections.map(a=>tile(a[0],a[1],a[2],['التحصيل','الأسهم','الغرفة'].includes(a[0])?'gold':'blue')).join('')}</div><div style="margin-top:14px">${unresolved('الشاشة 021 معتمدة جزئياً: محتوى بعض المؤشرات وحالة الجمعية/الاتفاق —، لذلك لا تعرض أرقاماً أو تفاصيل تخمينية.')}</div></main>${bottomNav('groups')}`}
+function renderAdminHome(){
+ const adminSummarySlides=[
+  {title:'أعضاء الجمعية',value:'—',note:'إجمالي الأعضاء',icon:'users',tone:'blue'},
+  {title:'إجمالي الأسهم',value:'—',note:'الأسهم المسجلة في الجمعية',icon:'coins',tone:'gold'},
+  {title:'إنجاز القرعات',value:'—',note:'القرعات المكتملة من الإجمالي',icon:'ticket',tone:'dark'},
+  {title:'تحصيل القرعة الحالية',value:'—',note:'الالتزامات المسددة في القرعة الحالية',icon:'wallet',tone:'blue'}
+ ];
+ return `<div class="app-top"><button class="top-back" data-action="back" data-fallback="010">${icon('right')}</button><div class="top-title">الرئيسية الإدارية</div></div>${connection()}<main class="screen-body"><section class="group-identity"><div><h2>${esc(activeGroup.name||'جمعية الوفاق')}</h2><p>السياق الإداري للجمعية</p></div>${icon('building')}</section><div class="section-head" style="margin-top:4px"><h3>ملخص الجمعية</h3></div>${summaryCarouselMarkup(adminSummarySlides,'ملخص الجمعية')}<div class="section-head"><h3>أقسام الجمعية</h3></div><div class="tile-grid manager-tiles">${adminSections.map(a=>tile(a[0],a[1],a[2],['التحصيل','الأسهم','الغرفة'].includes(a[0])?'gold':'blue')).join('')}</div><div style="margin-top:14px">${unresolved('الشاشة 021 معتمدة جزئياً: محتوى بعض المؤشرات وحالة الجمعية/الاتفاق —، لذلك لا تعرض أرقاماً أو تفاصيل تخمينية.')}</div></main>${bottomNav('groups')}`;
+}
 function statusChip(text,color='blue'){return `<span class="status ${color}">${text}</span>`}
 /* 022 */
 function renderCollections(){const records=collectionRecords.filter(x=>!x.paid),paid=paidRecords;const f=`<div class="filter-row"><select class="filter-select" aria-label="القرعة" data-list-filter="recordRound"><option value="all">كل القرعات</option><option value="القرعة الأولى">القرعة الأولى</option></select><select class="filter-select" data-list-filter="recordInstallment"><option value="all">كل الأقساط</option><option value="القسط الأول">القسط الأول</option></select><select class="filter-select" data-list-filter="recordStatus"><option value="all">كل الحالات</option><option value="مستحق">مستحق</option><option value="متأخر">متأخر</option><option value="مدفوع">مدفوع</option></select></div>`;const cards=records.map(r=>recordCard(r.id,esc(r.name),esc(r.status),`${detailRows([['القرعة / الدورة',r.round],['القسط',r.installment],['تاريخ الاستحقاق',r.due],['عدد الأسهم',r.shares.length]])}<div class="small-note" style="margin-top:8px">تفاصيل الاستحقاقات الفعلية لكل سهم</div>${r.shares.map(s=>`<div class="installment-line"><span>السهم ${s.number}</span><strong>${s.amount} ر.ي</strong></div>`).join('')}${confirmCollectId===r.id?`<div class="unresolved" style="margin-top:10px"></div><div class="record-actions"><button class="btn secondary small" data-action="collect-cancel" data-id="${r.id}">إلغاء</button><button class="btn primary small" data-action="collect-confirm" data-id="${r.id}">تأكيد التحصيل</button></div>`:''}`,{iconName:'wallet',value:`${r.amount} ر.ي`,tag:statusChip(r.status,r.status==='متأخر'?'red':'gold'),recordStatus:r.status,recordRound:r.round,recordInstallment:r.installment,actions:`<button class="btn secondary small" data-action="collect-start" data-id="${r.id}">تحصيل</button><button class="btn ghost small" data-action="remind" data-id="${r.id}">تذكير</button>`})).join('');const paidCards=paid.map(r=>recordCard(r.id,esc(r.name),'مدفوع',`${detailRows([['القرعة / الدورة',r.round],['القسط',r.installment],['تاريخ الاستحقاق',r.due],['تاريخ التحصيل',r.paidAt]])}${r.shares.map(s=>`<div class="installment-line"><span>السهم ${s.number}</span><strong>${s.amount} ر.ي</strong></div>`).join('')}`,{iconName:'check',value:`${r.amount} ر.ي`,tag:statusChip('مدفوع','green'),recordStatus:'مدفوع',recordRound:r.round,recordInstallment:r.installment})).join('');return page('التحصيل',`${f}<div class="record-section-title">الاستحقاقات غير المحصلة</div>${cards||empty('لا توجد استحقاقات غير محصلة') }<div class="record-section-title">الأقساط المحصلة</div>${paidCards||empty('لا توجد أقساط محصلة')}`,{backTo:'021',bottom:false});}
@@ -578,7 +621,15 @@ function renderGroupSettings(){return page('الإعدادات',`<section class=
 function renderLog(){return page('السجل',`<div class="page-intro"><h2>سجل الأنشطة والأحداث</h2><p>يعرض السجلات المرتبطة بهذه الجمعية وفق الصلاحيات.</p></div>${empty('لا توجد سجلات حالياً.')}${unresolved('تصنيف السجلات وأدوات الترشيح وتفاصيل الحدث وطريقة عرضها لم تعتمد تفصيلياً.')}`,{backTo:'021',bottom:false});}
 /* 032 */
 const memberSections=[['الأقساط','wallet','033'],['الأسهم','coins','034'],['القرعات','ticket','035'],['الغرفة','activity','036'],['الأخبار','book','037'],['الدردشات','chat','038']];
-function renderMemberHome(){return `<div class="app-top"><button class="top-back" data-action="back" data-fallback="011">${icon('right')}</button><div class="top-title">الرئيسية العضوية</div></div>${connection()}<main class="screen-body"><section class="group-identity"><div><h2>${esc(activeGroup.name||'جمعية التعاون')}</h2><p>مساحة المشاركة في الجمعية</p></div>${icon('users')}</section><div class="section-head" style="margin-top:4px"><h3>ملخص المشاركة</h3></div><div class="tile-grid" style="margin-bottom:15px"><div class="info-card" style="margin:0"><div class="small-note">عدد الأسهم</div><div style="font-size:22px;font-weight:900;margin-top:5px">01</div></div><div class="info-card" style="margin:0"><div class="small-note">الالتزامات الشخصية</div><div style="font-size:18px;font-weight:900;margin-top:5px">1,200 ر.ي</div></div><div class="info-card" style="margin:0"><div class="small-note">حالة الأقساط</div><div style="font-size:14px;font-weight:900;margin-top:7px">قسط مستحق</div></div><div class="info-card" style="margin:0"><div class="small-note">القرعة القادمة</div><div style="font-size:14px;font-weight:900;margin-top:7px">01/12/2026</div></div></div><div class="section-head"><h3>أقسام المشاركة</h3></div><div class="tile-grid manager-tiles">${memberSections.map(a=>tile(a[0],a[1],a[2],['الأسهم','الغرفة'].includes(a[0])?'gold':'blue')).join('')}</div></main>${bottomNav('groups')}`}
+function renderMemberHome(){
+ const memberSummarySlides=[
+  {title:'أسهمك',value:'01',note:'إجمالي الأسهم المسجلة باسمك',icon:'coins',tone:'blue'},
+  {title:'الأسهم الفائزة',value:'—',note:'الأسهم التي فازت في القرعات',icon:'award',tone:'gold'},
+  {title:'إنجاز السداد',value:'—',note:'الالتزامات المسددة من الإجمالي',icon:'check',tone:'dark'},
+  {title:'إجمالي التزامك',value:'1,200 ر.ي',note:'قيمة التزاماتك المسجلة في الجمعية',icon:'wallet',tone:'blue'}
+ ];
+ return `<div class="app-top"><button class="top-back" data-action="back" data-fallback="011">${icon('right')}</button><div class="top-title">الرئيسية العضوية</div></div>${connection()}<main class="screen-body"><section class="group-identity"><div><h2>${esc(activeGroup.name||'جمعية التعاون')}</h2><p>مساحة المشاركة في الجمعية</p></div>${icon('users')}</section><div class="section-head" style="margin-top:4px"><h3>ملخص المشاركة</h3></div>${summaryCarouselMarkup(memberSummarySlides,'ملخص المشاركة')}<div class="section-head"><h3>أقسام المشاركة</h3></div><div class="tile-grid manager-tiles">${memberSections.map(a=>tile(a[0],a[1],a[2],['الأسهم','الغرفة'].includes(a[0])?'gold':'blue')).join('')}</div></main>${bottomNav('groups')}`;
+}
 /* 033 */
 function renderMemberDues(){const cards=memberDues.map(d=>recordCard(d.id,d.name,d.status,detailRows([['تاريخ الاستحقاق',d.date],['المبلغ',d.amount+' ر.ي'],['الحالة',d.status]]),{iconName:'wallet',value:d.amount+' ر.ي',tag:statusChip(d.status,d.status==='مدفوع'?'green':d.status==='مستحق'?'gold':'blue')})).join('');return page('الأقساط',`<section class="form-card" style="padding:9px 14px"><div class="section-head" style="margin:0 0 6px"><h3>ملخص التزام العضو</h3></div>${row('إجمالي الالتزام','1,200 ر.ي')}${row('المسدّد','200 ر.ي')}${row('المتبقي','1,000 ر.ي')}</section><div class="record-section-title">الأقساط والاستحقاقات</div>${cards}<div class="record-section-title">سجل المدفوعات</div>${recordCard('member-paid','قسط سابق','مدفوع',detailRows([['المبلغ','200 ر.ي'],['التاريخ','2026/10/20']]),{iconName:'check',tag:statusChip('مدفوع','green')})}`,{backTo:'032',bottom:false});}
 /* 034 */
@@ -642,7 +693,7 @@ document.addEventListener('click',e=>{
  if(action==='activity'){const ev=recentEvents.find(x=>x.id===id);if(ev?.route==='012'){go('012')}else{activeGroup=groupFixtures.find(g=>g.name===ev?.group)||groupFixtures[0];go('021')}return}
  if(action==='open-group'){activeGroup=groupFixtures.find(g=>g.id===id)||groupFixtures[0];go(activeGroup.kind==='manager'?'021':'032');return}
  if(action==='open-chat'){activeGroup=groupFixtures.find(g=>g.id===id)||groupFixtures[0];go(activeGroup.kind==='manager'?'027':'038');return}
- if(action==='carousel'){carouselIndex=Math.max(0,Math.min(2,Number(actionEl.dataset.index)||0));initCarousel();return}
+ if(action==='carousel'){setCarouselSlide(Number(actionEl.dataset.index)||0);return}
  if(action==='country-picker'){openModal('اختيار الدولة','اليمن','<button class="btn primary" data-action="modal-close">إغلاق</button>');return}
  if(action==='toggle-pass'){const input=document.getElementById(actionEl.dataset.target);if(input)input.type=input.type==='password'?'text':'password';return}
  if(action==='login'){
