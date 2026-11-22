@@ -4,6 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <meta name="theme-color" content="#3158d6">
+<meta name="sahm-build" content="sahm-20261123-update-notice-01">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
@@ -647,6 +648,13 @@ body{background:var(--bg);color:var(--ink)}
 .app[data-screen="001"] .splash-status{font-size:13px;font-weight:400;line-height:1.6}
 .app[data-screen="005"] .terms-card-title{font-size:14px;font-weight:700;line-height:1.5}
 .app:is([data-screen="002"],[data-screen="003"],[data-screen="004"],[data-screen="005"],[data-screen="006"]) .app-top .top-title{font-size:15px;font-weight:700;line-height:1.5}
+
+/* New deployment notice */
+.update-notice{position:absolute;z-index:50;inset-inline:14px;bottom:calc(14px + env(safe-area-inset-bottom,0px));display:flex;align-items:center;justify-content:space-between;gap:12px;padding:11px 13px;border:1px solid rgba(255,255,255,.78);border-radius:15px;background:rgba(19,48,83,.96);color:#fff;box-shadow:0 9px 28px rgba(7,25,48,.28);font-size:11px;font-weight:700;opacity:0;visibility:hidden;transform:translateY(12px);pointer-events:none;transition:opacity .22s ease,transform .22s ease,visibility .22s}
+.update-notice.visible{opacity:1;visibility:visible;transform:translateY(0);pointer-events:auto}
+.update-notice button{flex:0 0 auto;border:0;border-radius:10px;background:#fff;color:#214d88;padding:9px 13px;font-size:11px;font-weight:900;white-space:nowrap}
+.update-notice button:active{transform:scale(.97)}
+@media(prefers-reduced-motion:reduce){.update-notice{transition:none}}
 </style>
 </head>
 <body>
@@ -659,7 +667,7 @@ body{background:var(--bg);color:var(--ink)}
     <div class="index-scroll" id="indexScroll"></div>
   </aside>
   <main class="stage">
-    <div class="device-frame"><div class="app" id="app"></div></div>
+    <div class="device-frame"><div class="app" id="app"></div><div class="update-notice" id="updateNotice" role="status" aria-live="polite"><span>يتوفر تحديث جديد للتطبيق</span><button type="button" id="updateAppButton">تحديث التطبيق</button></div></div>
   </main>
 </div>
 <div class="overlay hidden" id="modalRoot" role="dialog" aria-modal="true"></div>
@@ -1109,6 +1117,53 @@ render();
 if(current==='001')setTimeout(()=>{if(current==='001'){go('002');showToast('مرحباً بك في سهم')}} ,1450);
 </script>
 
+<script>
+(() => {
+  const buildMeta = document.querySelector('meta[name="sahm-build"]');
+  const notice = document.getElementById('updateNotice');
+  const updateButton = document.getElementById('updateAppButton');
+  if (!buildMeta || !notice || !updateButton) return;
+
+  const currentBuild = buildMeta.content;
+  let checkTimer = null;
+  let showTimer = null;
+  let checking = false;
+
+  async function checkForPublishedUpdate() {
+    if (checking || document.visibilityState === 'hidden') return;
+    checking = true;
+    try {
+      const response = await fetch('./index.html?__sahm_update_check=' + Date.now(), {
+        method: 'GET',
+        cache: 'no-store',
+        credentials: 'same-origin'
+      });
+      if (!response.ok) return;
+      const html = await response.text();
+      const match = html.match(/<meta\\s+name=["']sahm-build["']\\s+content=["']([^"']+)["']/i);
+      if (match && match[1] !== currentBuild) {
+        clearInterval(checkTimer);
+        clearTimeout(showTimer);
+        showTimer = setTimeout(() => notice.classList.add('visible'), 5000);
+      }
+    } catch (_) {
+      // Keep the current app usable when the connection is unavailable.
+    } finally {
+      checking = false;
+    }
+  }
+
+  checkTimer = setInterval(checkForPublishedUpdate, 1000);
+  document.addEventListener('visibilitychange', () => {
+    if (document.visibilityState === 'visible') checkForPublishedUpdate();
+  });
+  updateButton.addEventListener('click', () => {
+    updateButton.disabled = true;
+    updateButton.textContent = 'جارٍ التحديث...';
+    window.location.reload();
+  });
+})();
+</script>
 <script>
 if ('serviceWorker' in navigator) {
   window.addEventListener('load', () => {
