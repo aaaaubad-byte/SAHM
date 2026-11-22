@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <meta name="theme-color" content="#3158d6">
-<meta name="sahm-build" content="sahm-20261123-wheel-smoothstep-celebration-15">
+<meta name="sahm-build" content="sahm-20261123-wheel-attendance-invites-16">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
@@ -296,6 +296,26 @@ button:disabled{cursor:not-allowed;opacity:.48}
 .room-wheel-rotor .wheel-center-label{font-family:var(--font-ui);font-size:16px;font-weight:950;fill:#2856a5;text-anchor:middle;dominant-baseline:middle}
 .room-wheel-pointer{position:absolute;z-index:3;top:-8px;left:50%;transform:translateX(-50%);width:0;height:0;border-left:15px solid transparent;border-right:15px solid transparent;border-top:30px solid #b1813b;filter:drop-shadow(0 3px 3px rgba(35,42,52,.28))}
 .room-wheel-count{font-size:12px;color:var(--muted);font-weight:750;text-align:center}
+.room-session-panel{width:min(100%,430px);display:flex;flex-direction:column;gap:12px;margin:2px auto 0}
+.room-session-top{display:flex;align-items:center;justify-content:space-between;gap:10px}
+.room-session-title{font-size:14px;font-weight:900;color:var(--ink)}
+.room-session-hint{font-size:10px;color:var(--muted);line-height:1.65;margin-top:3px}
+.room-attendance-card{width:100%;border:1px solid var(--line);border-radius:15px;background:var(--paper);padding:12px 13px;box-shadow:var(--shadow-card)}
+.room-attendance-summary{display:flex;align-items:center;justify-content:space-between;gap:10px}
+.room-attendance-number{display:flex;align-items:center;gap:9px}
+.room-attendance-number strong{font-size:22px;line-height:1;color:var(--blue);font-weight:950}
+.room-attendance-number span{font-size:11px;color:var(--muted);font-weight:750}
+.room-attendee-list{display:flex;flex-direction:column;gap:7px;margin-top:11px}
+.room-attendee-row{display:flex;align-items:center;gap:9px;padding:8px 9px;border-radius:10px;background:var(--surface-2);font-size:12px}
+.room-attendee-row .room-person-icon{width:28px;height:28px;border-radius:9px;display:grid;place-items:center;background:var(--soft-blue);color:var(--blue)}
+.room-attendee-row .room-person-name{flex:1;font-weight:800}
+.room-attendee-row .room-person-state{font-size:10px;color:var(--success);font-weight:800}
+.room-attendee-row button{border:1px solid var(--line-2);border-radius:8px;background:var(--paper);color:var(--blue);font-size:10px;font-weight:800;padding:6px 8px}
+.room-invite-list{display:flex;flex-direction:column;gap:7px;max-height:48vh;overflow:auto}
+.room-invite-option{display:flex;align-items:center;gap:10px;padding:10px;border:1px solid var(--line);border-radius:11px;background:var(--paper)}
+.room-invite-option input{width:17px;height:17px;accent-color:var(--blue)}
+.room-invite-option strong{font-size:12px}
+.room-invite-option small{display:block;color:var(--muted);font-size:10px;margin-top:2px}
 .room-wheel-spin{width:min(100%,310px);min-height:52px;border-radius:15px;font-size:15px;font-weight:850;letter-spacing:.1px;box-shadow:0 6px 15px rgba(40,86,165,.20)}
 .room-wheel-spin:disabled{opacity:.72;cursor:default}
 .lottery-winner-modal{position:relative;overflow:hidden;text-align:center;border:1px solid rgba(190,151,77,.36);box-shadow:0 22px 65px rgba(10,25,48,.28)}
@@ -791,6 +811,7 @@ const sectionFor=id=>id<='006'?'دورة الحساب':id==='007'?'إطار ال
 const screenMap=Object.fromEntries(screens.map(s=>[s[0],s]));
 let current='001',historyStack=[],online=true,theme='light',activeGroup={name:'جمعية الوفاق',role:'مدير'},form={name:'',start:'',first:'',share:'',currency:'YER',mode:'count',count:'',installment:'',managerRole:'manager',managerShares:'1'};
 let recoverStep=1,registerAccepted=false,registration={email:'',pass:'',confirm:'',accepted:false},profileName='مستخدم سهم',profileAvatar='user',selectedContacts=[],contactRecords=[],joinShares=1,joinAck=false,joinSubmitted=false,joinType='public',linkValue='',expanded=new Set(),confirmCollectId=null,noticeCurrent=null,requestSearch='',activityPage='';
+let roomInvitedIds=[],roomAttendeeIds=[];
 let groupResult={name:'',start:'',first:'',share:'',currency:'YER',mode:'count',count:'',managerRole:'manager',managerShares:'1',joinLink:''};
 const groupFixtures=[
  {id:'g1',name:'جمعية الوفاق',role:'manager',kind:'manager',tag:'إدارة'},
@@ -1018,11 +1039,20 @@ function roomWheelMarkup(){
  }).join('');
  return `<div class="room-wheel-shell"><span class="room-wheel-pointer" aria-hidden="true"></span><div class="room-wheel-rotor" id="roomWheelRotor"><svg viewBox="0 0 320 320" role="img" aria-label="عجلة القرعة مقسمة إلى ${count} قطاعات">${sectors}<circle class="wheel-center" cx="160" cy="160" r="34"/><text class="wheel-center-label" x="160" y="160">سهم</text></svg></div></div>`;
 }
+function roomAttendanceMarkup(){
+ const invited=memberRecords.filter(m=>roomInvitedIds.includes(m.id)),attending=memberRecords.filter(m=>roomAttendeeIds.includes(m.id));
+ const rows=invited.length?invited.map(m=>`<div class="room-attendee-row"><span class="room-person-icon">${icon('user')}</span><span class="room-person-name">${esc(m.name)}</span>${roomAttendeeIds.includes(m.id)?'<span class="room-person-state">حاضر</span>':'<button type="button" data-action="room-checkin" data-id="${m.id}">تسجيل حضور</button>'}</div>`).join(''):'<div class="small-note" style="text-align:center;padding:8px 2px">لم تُرسل دعوات لهذه الجلسة بعد.</div>';
+ return `<section class="room-session-panel"><div class="room-session-top"><div><div class="room-session-title">حضور جلسة القرعة</div><div class="room-session-hint">الأعضاء يشاهدون فقط، وإدارة العجلة متاحة للمدير وحده.</div></div><button class="btn secondary small" data-action="room-invite">${icon('user-plus')} دعوة الأعضاء</button></div><div class="room-attendance-card"><div class="room-attendance-summary"><div class="room-attendance-number"><strong>${attending.length}</strong><span>حاضر من أصل ${invited.length} مدعو</span></div><span class="status ${attending.length?'green':'gold'}">${attending.length?'يوجد حضور':'بانتظار الحضور'}</span></div><div class="room-attendee-list">${rows}</div></div></section>`;
+}
 function renderAdminRoom(){
  roomWheelSpinning=false;roomWheelFinished=false;
  const count=roomWheelMembers().length;
- const content=`<div class="room-wheel-heading"><h2>عجلة القرعة</h2></div>${roomWheelMarkup()}<div class="room-wheel-count">${count.toLocaleString('en-US')} عضو مؤهل</div><button class="btn primary room-wheel-spin" id="roomWheelSpin" data-action="spin-wheel" ${count?'':'disabled'}>${icon('spark')} ابدأ القرعة</button>`;
+ const content=`<div class="room-wheel-heading"><h2>جلسة القرعة</h2></div>${roomAttendanceMarkup()}<div class="room-wheel-shell-wrap">${roomWheelMarkup()}</div><div class="room-wheel-count">${count.toLocaleString('en-US')} عضو مؤهل للقرعة</div><button class="btn primary room-wheel-spin" id="roomWheelSpin" data-action="spin-wheel" ${count?'':'disabled'}>${icon('spark')} ابدأ القرعة</button>`;
  return page('عجلة القرعة',content,{backTo:'021',bottom:true,active:'groups',bodyClass:'room-screen-body'});
+}
+function openRoomInviteModal(){
+ const options=memberRecords.map(m=>`<label class="room-invite-option"><input type="checkbox" data-room-invite-check="${m.id}" ${roomInvitedIds.includes(m.id)?'checked':''}><span><strong>${esc(m.name)}</strong><small>${roomInvitedIds.includes(m.id)?'سبق دعوته لهذه الجلسة':'عضو في الجمعية'}</small></span></label>`).join('');
+ openModal('دعوة الأعضاء لمشاهدة القرعة',`<p class="small-note">اختر الأعضاء الذين تريد دعوتهم لمشاهدة جلسة القرعة. الدعوة لا تمنحهم صلاحية إدارة العجلة.</p><div class="room-invite-list">${options}</div><p class="small-note" style="margin-top:10px">هذه معاينة تفاعلية؛ تسجيل الدعوات والحضور هنا محلي ولا يرسل إشعارات فعلية للأعضاء.</p>`,`<button class="btn secondary" data-action="modal-close">إلغاء</button><button class="btn primary" data-action="room-invite-confirm">تأكيد الدعوات</button>`);
 }
 function showLotteryWinner(name){
  const confetti=Array.from({length:34},(_,i)=>`<i style="--i:${i};--delay:${(i%9)*.07}s;--rot:${(i*37)%180}deg"></i>`).join('');
@@ -1128,6 +1158,9 @@ document.addEventListener('click',e=>{
  if(!actionEl)return;
  const action=actionEl.dataset.action,id=actionEl.dataset.id,value=actionEl.dataset.value;
  if(action==='spin-wheel'){spinRoomWheel();return}
+ if(action==='room-invite'){openRoomInviteModal();return}
+ if(action==='room-invite-confirm'){const checks=[...document.querySelectorAll('[data-room-invite-check]')];roomInvitedIds=checks.filter(x=>x.checked).map(x=>x.dataset.roomInviteCheck);roomAttendeeIds=roomAttendeeIds.filter(id=>roomInvitedIds.includes(id));closeModal();render();showToast('تم تحديث قائمة المدعوين في المعاينة');return}
+ if(action==='room-checkin'){if(!roomInvitedIds.includes(id)){showToast('يجب دعوة العضو أولاً');return}if(!roomAttendeeIds.includes(id))roomAttendeeIds.push(id);render();return}
  if(action==='modal-close'){closeModal();return}
  if(action==='open-index'){document.getElementById('inspector').classList.add('open');return}
  if(action==='close-index'){document.getElementById('inspector').classList.remove('open');return}
