@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <meta name="theme-color" content="#3158d6">
-<meta name="sahm-build" content="sahm-20261123-global-top-update-banner-09">
+<meta name="sahm-build" content="sahm-20261123-fixed-viewport-top-banner-10">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
@@ -666,16 +666,15 @@ body{background:var(--bg);color:var(--ink)}
 .app:is([data-screen="002"],[data-screen="003"],[data-screen="004"],[data-screen="005"],[data-screen="006"]) .app-top .top-title{font-size:15px;font-weight:700;line-height:1.5}
 
 /* New deployment notice */
-.update-notice{position:absolute;z-index:9999;top:calc(env(safe-area-inset-top,0px) + 9px);bottom:auto;inset-inline:10px;display:flex;align-items:center;justify-content:space-between;gap:10px;min-height:52px;padding:8px 11px;border:1px solid rgba(255,255,255,.72);border-radius:13px;background:rgba(19,48,83,.98);color:#fff;box-shadow:0 8px 24px rgba(7,25,48,.30);font-size:11px;font-weight:800;opacity:0;visibility:hidden;transform:translateY(-10px);pointer-events:none;transition:opacity .2s ease,transform .2s ease,visibility .2s}
-.update-notice.visible{opacity:1;visibility:visible;transform:translateY(0);pointer-events:auto}
+.update-notice{position:fixed!important;z-index:2147483000!important;top:calc(env(safe-area-inset-top,0px) + 8px)!important;bottom:auto!important;left:50%!important;right:auto!important;width:min(calc(100vw - 20px),440px);display:flex;align-items:center;justify-content:space-between;gap:10px;min-height:52px;padding:8px 11px;border:1px solid rgba(255,255,255,.72);border-radius:13px;background:rgba(19,48,83,.98);color:#fff;box-shadow:0 8px 24px rgba(7,25,48,.30);font-size:11px;font-weight:800;opacity:0;visibility:hidden;transform:translate(-50%,-10px);pointer-events:none;transition:opacity .2s ease,transform .2s ease,visibility .2s}
+.update-notice.visible{opacity:1;visibility:visible;transform:translate(-50%,0);pointer-events:auto}
 .update-notice>span{flex:1;min-width:0;line-height:1.5}
 .update-notice-actions{display:flex;align-items:center;gap:6px;flex:0 0 auto}
 .update-notice button{flex:0 0 auto;min-height:34px;border:0;border-radius:9px;background:#fff;color:#214d88;padding:7px 10px;font-size:10px;font-weight:900;white-space:nowrap}
 .update-notice button.later{background:rgba(255,255,255,.13);border:1px solid rgba(255,255,255,.38);color:#fff}
 .update-notice button:active{transform:scale(.97)}
-@media(max-width:360px){.update-notice{inset-inline:7px;padding:7px 8px;gap:6px}.update-notice-actions{gap:4px}.update-notice button{padding:7px 8px;font-size:9px}}
-@media(prefers-reduced-motion:reduce){.update-notice{transition:none}}
-</style>
+@media(max-width:360px){.update-notice{width:calc(100vw - 14px);padding:7px 8px;gap:6px}.update-notice-actions{gap:4px}.update-notice button{padding:7px 8px;font-size:9px}}
+@media(prefers-reduced-motion:reduce){.update-notice{transition:none}}</style>
 </head>
 <body>
 <div class="preview-shell">
@@ -687,9 +686,10 @@ body{background:var(--bg);color:var(--ink)}
     <div class="index-scroll" id="indexScroll"></div>
   </aside>
   <main class="stage">
-    <div class="device-frame"><div class="app" id="app"></div><div class="update-notice" id="updateNotice" role="status" aria-live="polite"><span>تم نشر تحديث جديد للتطبيق</span><div class="update-notice-actions"><button type="button" id="laterAppButton" class="later">لاحقاً</button><button type="button" id="updateAppButton">تحديث الآن</button></div></div></div>
+    <div class="device-frame"><div class="app" id="app"></div></div>
   </main>
 </div>
+<div class="update-notice" id="updateNotice" role="status" aria-live="polite"><span>تم نشر تحديث جديد للتطبيق</span><div class="update-notice-actions"><button type="button" id="laterAppButton" class="later">لاحقاً</button><button type="button" id="updateAppButton">تحديث الآن</button></div></div>
 <div class="overlay hidden" id="modalRoot" role="dialog" aria-modal="true"></div>
 <script>
 const svgPaths={
