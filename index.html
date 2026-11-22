@@ -4,6 +4,11 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <meta name="theme-color" content="#f7f9fb">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<link rel="manifest" href="./manifest.webmanifest">
+<link rel="icon" href="./icon.svg" type="image/svg+xml">
 <title>سهم | إدارة الجمعيات</title>
 <style>
 :root{
@@ -698,6 +703,15 @@ document.getElementById('modalRoot').addEventListener('click',e=>{if(e.target.id
 document.getElementById('brandMark').innerHTML=icon('users');document.getElementById('menuIcon').innerHTML=icon('menu');
 render();
 if(current==='001')setTimeout(()=>{if(current==='001'){go('002');showToast('مرحباً بك في سهم')}} ,1450);
+</script>
+
+<script>
+if ('serviceWorker' in navigator) {
+  window.addEventListener('load', () => {
+    navigator.serviceWorker.register('./sw.js', { scope: './' })
+      .catch(error => console.warn('تعذر تفعيل وضع العمل دون اتصال:', error));
+  });
+}
 </script>
 </body>
 </html>

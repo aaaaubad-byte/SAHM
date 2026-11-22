@@ -1,0 +1,22 @@
+{
+  "id": "./",
+  "name": "سهم | إدارة الجمعيات",
+  "short_name": "سهم",
+  "description": "تطبيق سهم لإدارة الجمعيات",
+  "lang": "ar",
+  "dir": "rtl",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "any",
+  "background_color": "#f3f7fa",
+  "theme_color": "#f7f9fb",
+  "icons": [
+    {
+      "src": "./icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ]
+}
