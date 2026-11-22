@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <meta name="theme-color" content="#3158d6">
-<meta name="sahm-build" content="sahm-20261123-wheel-attendance-invites-16">
+<meta name="sahm-build" content="sahm-20261123-wheel-attendance-invites-16a">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
@@ -1042,7 +1042,7 @@ function roomWheelMarkup(){
 function roomAttendanceMarkup(){
  const invited=memberRecords.filter(m=>roomInvitedIds.includes(m.id)),attending=memberRecords.filter(m=>roomAttendeeIds.includes(m.id));
  const rows=invited.length?invited.map(m=>`<div class="room-attendee-row"><span class="room-person-icon">${icon('user')}</span><span class="room-person-name">${esc(m.name)}</span>${roomAttendeeIds.includes(m.id)?'<span class="room-person-state">حاضر</span>':'<button type="button" data-action="room-checkin" data-id="${m.id}">تسجيل حضور</button>'}</div>`).join(''):'<div class="small-note" style="text-align:center;padding:8px 2px">لم تُرسل دعوات لهذه الجلسة بعد.</div>';
- return `<section class="room-session-panel"><div class="room-session-top"><div><div class="room-session-title">حضور جلسة القرعة</div><div class="room-session-hint">الأعضاء يشاهدون فقط، وإدارة العجلة متاحة للمدير وحده.</div></div><button class="btn secondary small" data-action="room-invite">${icon('user-plus')} دعوة الأعضاء</button></div><div class="room-attendance-card"><div class="room-attendance-summary"><div class="room-attendance-number"><strong>${attending.length}</strong><span>حاضر من أصل ${invited.length} مدعو</span></div><span class="status ${attending.length?'green':'gold'}">${attending.length?'يوجد حضور':'بانتظار الحضور'}</span></div><div class="room-attendee-list">${rows}</div></div></section>`;
+ return `<section class="room-session-panel"><div class="room-session-top"><div><div class="room-session-title">حضور جلسة القرعة</div><div class="room-session-hint">الأعضاء يشاهدون فقط، وإدارة العجلة متاحة للمدير وحده.</div></div><button class="btn secondary small" data-action="room-invite">${icon('users')} دعوة الأعضاء</button></div><div class="room-attendance-card"><div class="room-attendance-summary"><div class="room-attendance-number"><strong>${attending.length}</strong><span>حاضر من أصل ${invited.length} مدعو</span></div><span class="status ${attending.length?'green':'gold'}">${attending.length?'يوجد حضور':'بانتظار الحضور'}</span></div><div class="room-attendee-list">${rows}</div></div></section>`;
 }
 function renderAdminRoom(){
  roomWheelSpinning=false;roomWheelFinished=false;
