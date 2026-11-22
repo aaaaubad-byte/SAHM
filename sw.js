@@ -14,7 +14,11 @@ const APP_SHELL = [
   '/sahm-managed-group.js',
   '/sahm-managed-group.css',
   '/manifest.webmanifest',
-  '/icons/sahm.svg'
+  '/install.html',
+  '/icons/sahm.svg',
+  '/icons/sahm-180.png',
+  '/icons/sahm-192.png',
+  '/icons/sahm-512.png'
 ];
 /* files that define app behaviour: fetched fresh whenever the network is available */
 const APP_CODE = /\.(?:js|html|css|webmanifest)$/i;
