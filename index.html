@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <meta name="theme-color" content="#3158d6">
-<meta name="sahm-build" content="sahm-20261123-layer-glass-06">
+<meta name="sahm-build" content="sahm-20261123-update-notice-immediate-07">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
@@ -662,10 +662,13 @@ body{background:var(--bg);color:var(--ink)}
 .app:is([data-screen="002"],[data-screen="003"],[data-screen="004"],[data-screen="005"],[data-screen="006"]) .app-top .top-title{font-size:15px;font-weight:700;line-height:1.5}
 
 /* New deployment notice */
-.update-notice{position:absolute;z-index:50;inset-inline:14px;bottom:calc(14px + env(safe-area-inset-bottom,0px));display:flex;align-items:center;justify-content:space-between;gap:12px;padding:11px 13px;border:1px solid rgba(255,255,255,.78);border-radius:15px;background:rgba(19,48,83,.96);color:#fff;box-shadow:0 9px 28px rgba(7,25,48,.28);font-size:11px;font-weight:700;opacity:0;visibility:hidden;transform:translateY(12px);pointer-events:none;transition:opacity .22s ease,transform .22s ease,visibility .22s}
+.update-notice{position:absolute;z-index:50;inset-inline:14px;bottom:calc(14px + env(safe-area-inset-bottom,0px));display:flex;align-items:center;justify-content:space-between;gap:12px;padding:11px 13px;border:1px solid rgba(255,255,255,.78);border-radius:15px;background:rgba(19,48,83,.97);color:#fff;box-shadow:0 9px 28px rgba(7,25,48,.28);font-size:11px;font-weight:700;opacity:0;visibility:hidden;transform:translateY(12px);pointer-events:none;transition:opacity .22s ease,transform .22s ease,visibility .22s}
 .update-notice.visible{opacity:1;visibility:visible;transform:translateY(0);pointer-events:auto}
+.update-notice-actions{display:flex;align-items:center;gap:7px;flex:0 0 auto}
 .update-notice button{flex:0 0 auto;border:0;border-radius:10px;background:#fff;color:#214d88;padding:9px 13px;font-size:11px;font-weight:900;white-space:nowrap}
+.update-notice button.later{background:rgba(255,255,255,.13);border:1px solid rgba(255,255,255,.38);color:#fff}
 .update-notice button:active{transform:scale(.97)}
+@media(max-width:420px){.update-notice{align-items:flex-start;flex-direction:column;gap:9px}.update-notice-actions{width:100%}.update-notice-actions button{flex:1}}
 @media(prefers-reduced-motion:reduce){.update-notice{transition:none}}
 </style>
 </head>
@@ -679,7 +682,7 @@ body{background:var(--bg);color:var(--ink)}
     <div class="index-scroll" id="indexScroll"></div>
   </aside>
   <main class="stage">
-    <div class="device-frame"><div class="app" id="app"></div><div class="update-notice" id="updateNotice" role="status" aria-live="polite"><span>يتوفر تحديث جديد للتطبيق</span><button type="button" id="updateAppButton">تحديث التطبيق</button></div></div>
+    <div class="device-frame"><div class="app" id="app"></div><div class="update-notice" id="updateNotice" role="status" aria-live="polite"><span>تم نشر تحديث جديد للتطبيق</span><div class="update-notice-actions"><button type="button" id="laterAppButton" class="later">لاحقاً</button><button type="button" id="updateAppButton">تحديث الآن</button></div></div></div>
   </main>
 </div>
 <div class="overlay hidden" id="modalRoot" role="dialog" aria-modal="true"></div>
@@ -1139,15 +1142,16 @@ if(current==='001')setTimeout(()=>{if(current==='001'){go('002');showToast('مر
   const buildMeta = document.querySelector('meta[name="sahm-build"]');
   const notice = document.getElementById('updateNotice');
   const updateButton = document.getElementById('updateAppButton');
-  if (!buildMeta || !notice || !updateButton) return;
+  const laterButton = document.getElementById('laterAppButton');
+  if (!buildMeta || !notice || !updateButton || !laterButton) return;
 
   const currentBuild = buildMeta.content;
   let checkTimer = null;
-  let showTimer = null;
   let checking = false;
+  let updateFound = false;
 
   async function checkForPublishedUpdate() {
-    if (checking || document.visibilityState === 'hidden') return;
+    if (checking || updateFound || document.visibilityState === 'hidden') return;
     checking = true;
     try {
       const response = await fetch('./index.html?__sahm_update_check=' + Date.now(), {
@@ -1159,9 +1163,9 @@ if(current==='001')setTimeout(()=>{if(current==='001'){go('002');showToast('مر
       const html = await response.text();
       const match = html.match(/<meta\s+name=["']sahm-build["']\s+content=["']([^"']+)["']/i);
       if (match && match[1] !== currentBuild) {
+        updateFound = true;
         clearInterval(checkTimer);
-        clearTimeout(showTimer);
-        showTimer = setTimeout(() => notice.classList.add('visible'), 5000);
+        notice.classList.add('visible');
       }
     } catch (_) {
       // Keep the current app usable when the connection is unavailable.
@@ -1174,6 +1178,11 @@ if(current==='001')setTimeout(()=>{if(current==='001'){go('002');showToast('مر
   document.addEventListener('visibilitychange', () => {
     if (document.visibilityState === 'visible') checkForPublishedUpdate();
   });
+
+  laterButton.addEventListener('click', () => {
+    notice.classList.remove('visible');
+  });
+
   updateButton.addEventListener('click', () => {
     updateButton.disabled = true;
     updateButton.textContent = 'جارٍ التحديث...';
