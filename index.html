@@ -171,7 +171,7 @@ button:disabled{cursor:not-allowed;opacity:.48}
 .progress-line{height:7px;border-radius:20px;background:#e8eef2;overflow:hidden;margin-top:7px}
 .progress-line span{height:100%;display:block;background:linear-gradient(90deg,#2856a5,#6791c7);border-radius:20px}
 /* home */
-.home-body{padding:17px 17px 26px}
+.home-body{padding:12px 14px 8px}
 .summary-carousel{position:relative;margin-bottom:12px}
 .summary-window{position:relative;height:124px;overflow:hidden;border-radius:var(--radius-card);box-shadow:0 5px 10px rgba(22,42,79,.12),0 16px 30px rgba(22,42,79,.16),inset 0 1px 0 rgba(255,255,255,.35)}
 .summary-track{position:relative;width:100%;height:100%;direction:rtl;touch-action:pan-y}
@@ -194,18 +194,43 @@ button:disabled{cursor:not-allowed;opacity:.48}
 .carousel-dot.active{width:24px;background:#3158d6;box-shadow:0 0 0 4px rgba(49,88,214,.08)}
 .carousel-dot:focus-visible{outline:3px solid rgba(49,88,214,.32);outline-offset:3px}
 @media(prefers-reduced-motion:reduce){.summary-slide,.carousel-dot{transition:none}}
-.home-tiles{margin-top:13px}
-.home-section{border-top:1px solid #e1e8ed;margin-top:28px;padding-top:20px}
-.home-section .section-head{margin:4px 2px 14px}
-.home-section .section-head h3{font-size:20px}
-.activity-list{display:flex;flex-direction:column;gap:8px}
-.activity-item{display:flex;gap:11px;align-items:center;background:#fff;border:1px solid var(--line);border-radius:13px;padding:11px 12px;text-align:right;width:100%;color:var(--ink)}
+.home-tiles{margin-top:0;margin-bottom:12px}
+.home-tiles .tile-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
+.home-tiles .tile{
+ min-width:0;min-height:0;width:100%;height:auto;aspect-ratio:1.48/1;
+ display:flex;flex-direction:column;align-items:center;justify-content:center;
+ gap:7px;padding:12px;overflow:hidden;border:1px solid #d4deed;
+ border-radius:var(--radius-card);
+ background:linear-gradient(150deg,#fff 0%,#f9fbff 56%,#edf2fb 100%);
+ color:#172943;
+ box-shadow:0 2px 4px rgba(23,43,78,.06),0 8px 14px rgba(23,43,78,.09),0 16px 26px rgba(23,43,78,.055),inset 0 1px 0 #fff;
+}
+.home-tiles .tile .tile-icon{
+ width:30px;height:30px;display:inline-flex;align-items:center;justify-content:center;flex:0 0 30px;color:#244da9;
+}
+.home-tiles .tile .tile-icon.gold{color:#87591e}
+.home-tiles .tile .tile-icon svg{width:29px;height:29px;stroke-width:2}
+.home-tiles .tile .tile-label{
+ display:block;width:100%;color:#172943;font-size:14px;font-weight:850;line-height:1.4;white-space:nowrap;text-align:center;
+}
+.home-tiles .tile .tile-arrow{
+ position:absolute;left:12px;right:auto;top:87.5%;bottom:auto;transform:translateY(-50%);
+ display:grid;place-items:center;width:18px;height:18px;border-radius:50%;background:#f0f4fb;color:#496b9d;
+}
+.home-tiles .tile .tile-arrow svg{width:15px;height:15px;stroke-width:2.1}
+.home-section{border-top:1px solid var(--line);margin-top:10px;padding:12px 1px 8px}
+.home-section .section-head{display:flex;justify-content:flex-start;margin:0 2px 9px}
+.home-section .section-title-wrap{display:flex;align-items:center;gap:7px}
+.home-section .section-head h3{font-size:var(--font-section-title,18px);font-weight:800;line-height:1.35;margin:0}
+.home-section .section-head svg{width:20px;height:20px;stroke-width:2;color:var(--blue)}
+.activity-list{display:flex;flex-direction:column;gap:8px;min-width:0;min-height:104px;height:clamp(104px,28vh,210px);height:clamp(104px,28dvh,210px);max-height:min(34vh,210px);max-height:min(34dvh,210px);overflow-x:hidden;overflow-y:auto;overscroll-behavior-y:contain;-webkit-overflow-scrolling:touch;touch-action:pan-y;scrollbar-width:thin;scrollbar-color:#aebbd0 transparent;padding:1px 3px 8px}
+.activity-item{display:flex;flex:0 0 auto;gap:11px;align-items:center;min-height:66px;background:#fff;border:1px solid var(--line);border-radius:12px;padding:10px 12px;text-align:right;width:100%;color:var(--ink);box-shadow:0 4px 14px rgba(25,44,78,.045)}
 .activity-icon{width:30px;height:30px;color:var(--blue);display:grid;place-items:center;flex-shrink:0}
-.activity-icon svg{width:23px;height:23px}
+.activity-icon svg{width:22px;height:22px;stroke-width:2}
 .activity-copy{flex:1;min-width:0}
-.activity-copy strong{display:block;font-size:11px;line-height:1.6}
-.activity-copy span{display:block;font-size:9px;color:var(--muted);margin-top:3px}
-.activity-time{font-size:9px;color:#8b9aa6;white-space:nowrap}
+.activity-copy strong{display:block;font-size:14px;font-weight:800;line-height:1.5;white-space:normal}
+.activity-copy span{display:block;font-size:13px;line-height:1.4;color:#8995a6;margin-top:4px}
+.activity-time{font-size:12px;color:#8b9aa6;white-space:nowrap}
 /* auth */
 .auth-body{display:flex;flex-direction:column;justify-content:center;padding:24px 21px 26px;background:linear-gradient(180deg,#f7f9fb,#edf3f7)}
 .auth-heading{text-align:center;font-size:23px;font-weight:900;margin:0 0 18px}
@@ -268,7 +293,9 @@ button:disabled{cursor:not-allowed;opacity:.48}
  .inspector.open{transform:translateX(0)}
  .data-disclaimer{padding:4px 12px;background:#f1f5f8;width:100%;font-size:9px}
 }@media(max-width:680px){}
-@media(max-width:390px){.screen-body{padding:14px 13px 22px}.home-body{padding:14px 13px 23px}.tile{min-height:133px}.summary-window{height:112px}.summary-slide{padding:13px 15px}.auth-body{padding:20px 15px}.row-fields{gap:7px}}
+@media(max-width:390px){.screen-body{padding:14px 13px 22px}.home-body{padding:12px 14px 8px}.tile{min-height:133px}.summary-window{height:112px}.summary-slide{padding:13px 15px}.auth-body{padding:20px 15px}.row-fields{gap:7px}}
+@media(max-width:360px){.home-body{padding-inline:12px}.home-tiles .tile-grid{gap:8px}}
+@media(max-height:740px){.summary-window{height:112px}.home-tiles{margin-bottom:9px}.home-tiles .tile-grid{gap:8px}.home-tiles .tile{aspect-ratio:1.7/1;gap:7px;padding:10px 12px}.activity-item{min-height:59px;padding:8px 10px}}
 
 /* Visual tokens and component styling borrowed from the published SAHM reference.
    The new preview shell, screen catalogue, screen names, grouping, renderer
@@ -319,39 +346,49 @@ body{background:var(--bg);color:var(--ink)}
 @media(min-width:681px){}
 
 
-/* Canonical full-screen app shell: no preview chrome above or below. */
-.stage{display:flex;flex-direction:column;align-items:center;justify-content:flex-start;gap:0;min-width:0;width:100%;height:100dvh;min-height:100dvh}
-.device-frame{display:block;margin:0 auto;width:min(100%,460px);height:100dvh;min-height:0;max-height:none;border:0;border-radius:0;box-shadow:none;overflow:hidden;position:relative;background:#fff}
-.app-top,.app-top.home-top{height:54px;min-height:54px;max-height:54px;flex:0 0 54px;box-sizing:border-box;padding:0 14px;gap:10px}
-.app-top.home-top{justify-content:space-between;padding:0 16px}
-.top-back{width:34px;height:34px}
-.top-back svg{width:21px;height:21px}
-.top-title{font-size:15px;line-height:1.2}
-.icon-btn svg{width:23px;height:23px}
-.top-actions{gap:14px}
-.bottom-nav{height:54px;min-height:54px;max-height:54px;flex:0 0 54px;box-sizing:border-box;padding:3px 8px;margin:0;align-items:center}
-.bottom-item{min-width:0;flex:1;gap:1px;padding:1px 5px;font-size:10px;line-height:1.2}
-.bottom-item svg{width:21px;height:21px}
-.screen-body{min-height:0;overscroll-behavior:contain}
-@media(max-width:680px){.stage{height:100dvh;min-height:100dvh}.device-frame{width:100%;height:100dvh;min-height:0;max-height:none}}
-@media(min-width:681px){.stage{height:100dvh;min-height:100dvh}.device-frame{width:min(100%,460px);height:100dvh;max-height:none}}
+/* Responsive app viewport: legacy vh fallback plus dynamic viewport where supported. */
+:root{--sahm-app-height:100vh}
+@supports (height:100dvh){:root{--sahm-app-height:100dvh}}
+.stage{
+ display:flex;flex-direction:column;align-items:center;justify-content:flex-start;gap:0;
+ min-width:0;width:100%;height:var(--sahm-app-height);min-height:var(--sahm-app-height);
+}
+.device-frame{
+ display:block;margin:0 auto;width:min(100%,460px);max-width:460px;height:var(--sahm-app-height);
+ min-height:0;max-height:none;border:0;border-radius:0;box-shadow:none;overflow:hidden;position:relative;background:#fff;
+}
+@media(max-width:680px){
+ .stage{height:var(--sahm-app-height);min-height:var(--sahm-app-height)}
+ .device-frame{width:100%;max-width:none;height:var(--sahm-app-height);min-height:0;max-height:none}
+}
 
-
-/* Final app-bar layout: persistent flex siblings around the scrollable screen body. */
+/* Persistent app bars; only the content area scrolls. Safe-area insets remain visible. */
 .app{height:100%;min-height:0;display:flex;flex-direction:column;overflow:hidden}
-.app-top{height:54px;min-height:54px;max-height:54px;flex:0 0 54px;display:flex;align-items:center;box-sizing:border-box;padding:0 14px;gap:10px;background:var(--paper);border-bottom:1px solid var(--line);position:relative;z-index:4}
-.app-top.home-top{justify-content:space-between;padding:0 16px}
+.app-top{
+ height:calc(54px + env(safe-area-inset-top,0px));min-height:calc(54px + env(safe-area-inset-top,0px));
+ max-height:none;flex:0 0 calc(54px + env(safe-area-inset-top,0px));
+ display:flex;align-items:center;box-sizing:border-box;padding:env(safe-area-inset-top,0px) 14px 0;gap:10px;
+ background:var(--paper);border-bottom:1px solid var(--line);position:relative;z-index:4;
+}
+.app-top.home-top{justify-content:space-between;padding:env(safe-area-inset-top,0px) 16px 0}
 .top-back{width:34px;height:34px;min-width:34px;display:grid;place-items:center;flex:0 0 34px;padding:0;border:0;border-radius:9px;background:transparent;color:var(--ink)}
 .top-back svg{width:21px;height:21px}
 .top-title{flex:1;min-width:0;text-align:right;font-size:15px;line-height:1.2;font-weight:700;color:var(--ink)}
 .top-actions{display:flex;align-items:center;justify-content:center;gap:0;min-width:34px}
 .icon-btn{width:36px;height:36px;display:grid;place-items:center;position:relative;border:0;border-radius:9px;background:transparent;color:var(--ink);padding:0}
 .icon-btn svg{width:22px;height:22px}
-.bottom-nav{height:54px;min-height:54px;max-height:54px;flex:0 0 54px;display:flex;align-items:stretch;justify-content:space-around;box-sizing:border-box;padding:2px 8px;margin:0;background:var(--paper);border-top:1px solid var(--line);position:relative;z-index:4}
-.bottom-item{height:100%;min-width:0;flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:1px;padding:1px 4px;border:0;background:transparent;color:var(--muted);font-size:10px;line-height:1.2;white-space:nowrap}
+.bottom-nav{
+ display:flex;flex:0 0 auto;align-items:stretch;justify-content:space-around;width:100%;
+ height:auto;min-height:calc(54px + env(safe-area-inset-bottom,0px));max-height:none;
+ box-sizing:border-box;padding:2px 8px calc(2px + env(safe-area-inset-bottom,0px));margin:0;
+ background:var(--paper);border-top:1px solid var(--line);position:relative;z-index:4;
+}
+.bottom-item{
+ height:50px;min-height:50px;min-width:0;flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;
+ gap:1px;padding:1px 4px;border:0;background:transparent;color:var(--muted);font-size:10px;line-height:1.2;white-space:nowrap;
+}
 .bottom-item svg{width:21px;height:21px;flex:0 0 21px}
-.screen-body{flex:1 1 auto;min-height:0;overflow-y:auto;overscroll-behavior:contain}
-
+.screen-body{flex:1 1 0%;min-height:0;overflow-y:auto;overscroll-behavior:contain}
 </style>
 </head>
 <body>
@@ -530,7 +567,7 @@ function summaryCarouselMarkup(slides,label){
 function renderHome(){return `${generalHeader()}<main class="screen-body home-body">
  ${summaryCarouselMarkup(summarySlides,'ملخص الجمعيات')}
  <section class="home-tiles"><div class="tile-grid">${tile('جمعيات أديرها','users','010','blue')}${tile('جمعيات أشارك فيها','usercheck','011','gold')}${tile('جمعية جديدة','plus','014','blue')}${tile('الانضمام لجمعية','link','016','gold')}</div></section>
- <section class="home-section"><div class="section-head"><div class="section-title-wrap"><h3>أحدث النشاط</h3>${icon('activity')}</div></div><div class="activity-list">${recentEvents.map(e=>`<button class="activity-item" data-action="activity" data-id="${e.id}"><span class="activity-icon">${icon(e.icon)}</span><span class="activity-copy"><strong>${e.title}</strong><span>${e.group}</span></span><span class="activity-time">${e.time}</span></button>`).join('')}</div></section>
+ <section class="home-section"><div class="section-head"><div class="section-title-wrap">${icon('activity')}<h3>أحدث النشاط</h3></div></div><div class="activity-list">${recentEvents.map(e=>`<button class="activity-item" data-action="activity" data-id="${e.id}"><span class="activity-icon">${icon(e.icon)}</span><span class="activity-copy"><strong>${e.title}</strong><span>${e.group}</span></span><span class="activity-time">${e.time}</span></button>`).join('')}</div></section>
  </main>${bottomNav('home')}`}
 function setCarouselSlide(index){
  const track=document.getElementById('summaryTrack');
