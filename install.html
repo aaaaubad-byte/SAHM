@@ -1,0 +1,170 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+  <meta name="theme-color" content="#3158d6">
+  <meta name="application-name" content="سهم">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-title" content="سهم">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <link rel="manifest" href="/manifest.webmanifest">
+  <link rel="icon" href="/icons/sahm.svg" type="image/svg+xml">
+  <link rel="apple-touch-icon" href="/icons/sahm-180.png">
+  <title>تثبيت سهم على الهاتف</title>
+  <style>
+    :root{color-scheme:light;--blue:#3158d6;--deep:#203fae;--ink:#18223b;--muted:#65718a;--line:#e6eaf2;--surface:#f4f6fa}
+    *{box-sizing:border-box}
+    body{margin:0;min-height:100vh;background:radial-gradient(ellipse at 50% -18%,#dce5ff 0,transparent 55%),var(--surface);color:var(--ink);font-family:"IBM Plex Sans Arabic",Tahoma,Arial,sans-serif;display:grid;place-items:center;padding:24px}
+    main{width:min(100%,490px);background:#fff;border:1px solid var(--line);border-radius:26px;padding:clamp(24px,6vw,40px);box-shadow:0 22px 70px #23365c12;text-align:center}
+    .brand{width:82px;height:82px;margin:0 auto 20px;border-radius:22px;box-shadow:0 10px 26px #3158d626}
+    .eyebrow{font-size:12px;color:var(--blue);font-weight:700;letter-spacing:.04em}
+    h1{font-size:30px;line-height:1.5;margin:7px 0 10px}
+    .intro{font-size:15px;line-height:2;color:var(--muted);margin:0 auto 25px;max-width:370px}
+    .install-btn,.open-btn{display:flex;align-items:center;justify-content:center;width:100%;min-height:54px;border:0;border-radius:14px;background:linear-gradient(115deg,var(--deep),var(--blue));color:#fff;text-decoration:none;font:inherit;font-weight:700;font-size:15px;cursor:pointer;padding:12px 18px}
+    .install-btn:focus-visible,.open-btn:focus-visible{outline:3px solid #9db3ff;outline-offset:3px}
+    .panel{margin-top:23px;padding:18px;border:1px solid var(--line);border-radius:16px;background:#fbfcff;text-align:right}
+    .panel h2{font-size:15px;margin:0 0 8px}
+    .panel p,.panel li{font-size:13px;line-height:2;color:var(--muted)}
+    .panel p{margin:0}
+    .panel ol{margin:8px 0 0;padding-right:21px}
+    .status{min-height:25px;margin:14px 0 0;font-size:13px;line-height:1.9;color:var(--blue)}
+    .fine{font-size:11px;color:#8993a8;margin:22px 0 0}
+    [hidden]{display:none!important}
+    @media(max-width:420px){body{padding:14px}main{border-radius:21px;padding:25px 19px}h1{font-size:26px}}
+  </style>
+</head>
+<body>
+  <main>
+    <img class="brand" src="/icons/sahm-192.png" alt="شعار سهم" width="82" height="82">
+    <div class="eyebrow">تطبيق سهم</div>
+    <h1>ثبّت سهم على هاتفك</h1>
+    <p class="intro">أضف سهم إلى الشاشة الرئيسية واستخدمه كتطبيق مستقل، دون الحاجة إلى البحث عن رابط الموقع كل مرة.</p>
+
+    <button class="install-btn" id="installButton" type="button" hidden>تثبيت سهم</button>
+    <p class="status" id="installStatus" role="status" aria-live="polite"></p>
+
+    <section class="panel" id="iosHelp" hidden>
+      <h2>التثبيت على iPhone وiPad</h2>
+      <ol>
+        <li>افتح هذه الصفحة في متصفح Safari.</li>
+        <li>اضغط زر المشاركة.</li>
+        <li>اختر «إضافة إلى الشاشة الرئيسية»، ثم اضغط «إضافة».</li>
+      </ol>
+    </section>
+
+    <section class="panel" id="androidHelp" hidden>
+      <h2>التثبيت على Android</h2>
+      <ol>
+        <li>افتح قائمة المتصفح من زر النقاط الثلاث.</li>
+        <li>اختر «تثبيت التطبيق» أو «إضافة إلى الشاشة الرئيسية».</li>
+        <li>أكد التثبيت، ثم افتح سهم من أيقونته.</li>
+      </ol>
+    </section>
+
+    <section class="panel" id="otherHelp" hidden>
+      <h2>تثبيت التطبيق</h2>
+      <p>افتح هذه الصفحة في متصفح يدعم تثبيت تطبيقات الويب. من قائمة المتصفح ابحث عن «تثبيت التطبيق» أو «إضافة إلى الشاشة الرئيسية».</p>
+    </section>
+
+    <section class="panel" id="installedPanel" hidden>
+      <h2>سهم مثبت على هذا الجهاز</h2>
+      <p>افتح التطبيق من أيقونة سهم على الشاشة الرئيسية.</p>
+      <a class="open-btn" id="openApp" href="/Sahm_Preview_ROLE_SEPARATION.html?v=4">فتح تطبيق سهم</a>
+    </section>
+
+    <p class="fine">التثبيت يتم بموافقتك من خلال المتصفح. لا يتم تنزيل ملف APK.</p>
+  </main>
+  <script>
+    (() => {
+      "use strict";
+      const button = document.getElementById("installButton");
+      const status = document.getElementById("installStatus");
+      const iosHelp = document.getElementById("iosHelp");
+      const androidHelp = document.getElementById("androidHelp");
+      const otherHelp = document.getElementById("otherHelp");
+      const installedPanel = document.getElementById("installedPanel");
+      const standalone = window.matchMedia("(display-mode: standalone)").matches || window.navigator.standalone === true;
+      const ua = navigator.userAgent || "";
+      const isIOS = /iPhone|iPad|iPod/i.test(ua) || (navigator.platform === "MacIntel" && navigator.maxTouchPoints > 1);
+      const isAndroid = /Android/i.test(ua);
+      const supportsWebInstall = typeof Navigator !== "undefined" && typeof Navigator.prototype.install === "function";
+      let deferredPrompt = null;
+
+      if (standalone) {
+        installedPanel.hidden = false;
+        status.textContent = "أنت تستخدم نسخة سهم المثبتة.";
+      } else if (supportsWebInstall) {
+        button.hidden = false;
+      } else if (isIOS) {
+        iosHelp.hidden = false;
+        if (!/Safari/i.test(ua) || /CriOS|FxiOS|EdgiOS|OPiOS/i.test(ua)) {
+          status.textContent = "لأفضل نتيجة، افتح هذه الصفحة في Safari ثم اتبع خطوات التثبيت.";
+        }
+      } else if (isAndroid) {
+        androidHelp.hidden = false;
+      } else {
+        otherHelp.hidden = false;
+      }
+
+      window.addEventListener("beforeinstallprompt", event => {
+        event.preventDefault();
+        deferredPrompt = event;
+        button.hidden = false;
+        androidHelp.hidden = true;
+        otherHelp.hidden = true;
+      });
+
+      button.addEventListener("click", async () => {
+        if (supportsWebInstall) {
+          try {
+            await navigator.install();
+            button.hidden = true;
+            status.textContent = "تم تثبيت سهم أو الموافقة على فتحه. استخدم أيقونة سهم على الشاشة الرئيسية.";
+          } catch (error) {
+            if (error && error.name === "AbortError") {
+              status.textContent = "لم يكتمل التثبيت. يمكنك المحاولة مرة أخرى.";
+            } else {
+              status.textContent = "لم يبدأ التثبيت. استخدم تعليمات المتصفح الظاهرة في الصفحة.";
+              if (isAndroid) androidHelp.hidden = false;
+              else otherHelp.hidden = false;
+            }
+          }
+          return;
+        }
+
+        const promptEvent = deferredPrompt;
+        if (!promptEvent) return;
+        deferredPrompt = null;
+        button.hidden = true;
+        try {
+          await promptEvent.prompt();
+          const choice = await promptEvent.userChoice;
+          status.textContent = choice && choice.outcome === "accepted"
+            ? "تمت الموافقة على التثبيت. افتح سهم من أيقونته على الشاشة الرئيسية."
+            : "ألغيت عملية التثبيت. يمكنك تثبيت سهم لاحقاً من قائمة المتصفح.";
+        } catch (_) {
+          status.textContent = "تعذر إكمال التثبيت. استخدم قائمة المتصفح لإضافة سهم إلى الشاشة الرئيسية.";
+          androidHelp.hidden = true;
+          otherHelp.hidden = false;
+        }
+      });
+
+      window.addEventListener("appinstalled", () => {
+        button.hidden = true;
+        androidHelp.hidden = true;
+        otherHelp.hidden = true;
+        status.textContent = "تم تثبيت سهم. افتحه من أيقونته على الشاشة الرئيسية.";
+      });
+
+      if ("serviceWorker" in navigator && location.protocol === "https:") {
+        window.addEventListener("load", () => {
+          navigator.serviceWorker.register("/sw.js", {scope:"/",updateViaCache:"none"}).catch(error => {
+            console.warn("SAHM install-page service worker registration failed", error);
+          });
+        });
+      }
+    })();
+  </script>
+</body>
+</html>
