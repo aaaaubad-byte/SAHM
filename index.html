@@ -173,16 +173,16 @@ button:disabled{cursor:not-allowed;opacity:.48}
 /* home */
 .home-body{padding:12px 14px 8px}
 .summary-carousel{position:relative;margin-bottom:12px}
-.summary-window{position:relative;height:124px;overflow:hidden;border-radius:var(--radius-card);box-shadow:0 5px 10px rgba(22,42,79,.12),0 16px 30px rgba(22,42,79,.16),inset 0 1px 0 rgba(255,255,255,.35)}
+.summary-window{position:relative;height:124px;overflow:hidden;border-radius:18px;box-shadow:0 8px 18px rgba(22,42,79,.14),0 18px 32px rgba(22,42,79,.12),inset 0 1px 0 rgba(255,255,255,.5)}
 .summary-track{position:relative;width:100%;height:100%;direction:rtl;touch-action:pan-y}
-.summary-slide{position:absolute;inset:0;display:flex;align-items:center;gap:15px;width:100%;min-width:0;height:100%;padding:16px 18px;overflow:hidden;border:1px solid rgba(255,255,255,.32);border-radius:var(--radius-card);color:#fff;opacity:0;visibility:hidden;transform:translateX(16px) scale(.985);pointer-events:none;box-shadow:inset 0 1px 0 rgba(255,255,255,.22),inset 0 -2px 0 rgba(5,18,43,.15);transition:transform .22s ease,filter .22s ease,box-shadow .22s ease}
+.summary-slide{position:absolute;isolation:isolate;inset:0;display:flex;align-items:center;gap:15px;width:100%;min-width:0;height:100%;padding:16px 18px;overflow:hidden;border:1px solid rgba(255,255,255,.42);border-radius:18px;color:#fff;opacity:0;visibility:hidden;transform:translateX(16px) scale(.985);pointer-events:none;box-shadow:inset 0 1px 0 rgba(255,255,255,.38),inset 0 -2px 0 rgba(5,18,43,.18),0 5px 12px rgba(12,29,58,.12);transition:transform .22s ease,filter .22s ease,box-shadow .22s ease}
 .summary-slide.active{opacity:1;visibility:visible;transform:translateX(0) scale(1);pointer-events:auto}
-.summary-slide:before{content:none}
-.summary-slide:after{content:"";position:absolute;left:-30px;bottom:-95px;width:220px;height:220px;border-radius:50%;background:radial-gradient(circle,rgba(255,255,255,.16),rgba(255,255,255,.035) 62%,transparent 70%);pointer-events:none}
+.summary-slide:before{content:"";position:absolute;inset:0;z-index:0;background:linear-gradient(135deg,rgba(255,255,255,.2),rgba(255,255,255,.035) 38%,rgba(7,20,42,.12) 100%);border-radius:inherit;pointer-events:none}
+.summary-slide:after{content:"";position:absolute;z-index:0;left:-30px;bottom:-95px;width:220px;height:220px;border-radius:50%;background:radial-gradient(circle,rgba(255,255,255,.22),rgba(255,255,255,.045) 62%,transparent 70%);pointer-events:none}
 .summary-slide.blue{background:linear-gradient(118deg,#102c50 0%,#1d447f 48%,#3568d8 100%)}
 .summary-slide.gold{background:linear-gradient(118deg,#513719 0%,#8b602b 50%,#c38f43 100%)}
 .summary-slide.dark{background:linear-gradient(118deg,#17283b 0%,#2b405a 52%,#506985 100%)}
-.summary-icon{position:relative;z-index:1;display:inline-flex;align-items:center;justify-content:center;flex:0 0 28px;width:28px;height:28px;color:#fff;line-height:1}
+.summary-icon{position:relative;z-index:1;display:inline-flex;align-items:center;justify-content:center;flex:0 0 30px;width:30px;height:30px;color:#fff;line-height:1}
 .summary-icon svg{display:block;width:28px;height:28px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
 .summary-copy{position:relative;z-index:1;display:flex;flex:1;min-width:0;flex-direction:column;gap:5px}
 .summary-copy>strong{color:#fff;font-size:13px;line-height:1;font-weight:900;text-shadow:0 3px 9px rgba(0,0,0,.28)}
@@ -638,7 +638,7 @@ function renderAdminHome(){
   {title:'إنجاز القرعات',value:'—',note:'القرعات المكتملة من الإجمالي',icon:'ticket',tone:'dark'},
   {title:'تحصيل القرعة الحالية',value:'—',note:'الالتزامات المسددة في القرعة الحالية',icon:'wallet',tone:'blue'}
  ];
- return `<div class="app-top"><button class="top-back" data-action="back" data-fallback="010">${icon('right')}</button><div class="top-title">الرئيسية الإدارية</div></div>${connection()}<main class="screen-body"><section class="group-identity"><div><h2>${esc(activeGroup.name||'جمعية الوفاق')}</h2><p>السياق الإداري للجمعية</p></div>${icon('building')}</section><div class="section-head" style="margin-top:4px"><h3>ملخص الجمعية</h3></div>${summaryCarouselMarkup(adminSummarySlides,'ملخص الجمعية')}<div class="section-head"><h3>أقسام الجمعية</h3></div><div class="tile-grid manager-tiles">${adminSections.map(a=>tile(a[0],a[1],a[2],['التحصيل','الأسهم','الغرفة'].includes(a[0])?'gold':'blue')).join('')}</div><div style="margin-top:14px">${unresolved('الشاشة 021 معتمدة جزئياً: محتوى بعض المؤشرات وحالة الجمعية/الاتفاق —، لذلك لا تعرض أرقاماً أو تفاصيل تخمينية.')}</div></main>${bottomNav('groups')}`;
+ return `<div class="app-top"><button class="top-back" data-action="back" data-fallback="010">${icon('right')}</button><div class="top-title">الرئيسية الإدارية</div></div>${connection()}<main class="screen-body">${summaryCarouselMarkup(adminSummarySlides,'ملخص الجمعيات')}<div class="tile-grid manager-tiles">${adminSections.map(a=>tile(a[0],a[1],a[2],['التحصيل','الأسهم','الغرفة'].includes(a[0])?'gold':'blue')).join('')}</div><div style="margin-top:14px">${unresolved('الشاشة 021 معتمدة جزئياً: محتوى بعض المؤشرات وحالة الجمعية/الاتفاق —، لذلك لا تعرض أرقاماً أو تفاصيل تخمينية.')}</div></main>${bottomNav('groups')}`;
 }
 function statusChip(text,color='blue'){return `<span class="status ${color}">${text}</span>`}
 /* 022 */
@@ -670,7 +670,7 @@ function renderMemberHome(){
   {title:'إنجاز السداد',value:'—',note:'الالتزامات المسددة من الإجمالي',icon:'check',tone:'dark'},
   {title:'إجمالي التزامك',value:'1,200 ر.ي',note:'قيمة التزاماتك المسجلة في الجمعية',icon:'wallet',tone:'blue'}
  ];
- return `<div class="app-top"><button class="top-back" data-action="back" data-fallback="011">${icon('right')}</button><div class="top-title">الرئيسية العضوية</div></div>${connection()}<main class="screen-body"><section class="group-identity"><div><h2>${esc(activeGroup.name||'جمعية التعاون')}</h2><p>مساحة المشاركة في الجمعية</p></div>${icon('users')}</section><div class="section-head" style="margin-top:4px"><h3>ملخص المشاركة</h3></div>${summaryCarouselMarkup(memberSummarySlides,'ملخص المشاركة')}<div class="section-head"><h3>أقسام المشاركة</h3></div><div class="tile-grid manager-tiles">${memberSections.map(a=>tile(a[0],a[1],a[2],['الأسهم','الغرفة'].includes(a[0])?'gold':'blue')).join('')}</div></main>${bottomNav('groups')}`;
+ return `<div class="app-top"><button class="top-back" data-action="back" data-fallback="011">${icon('right')}</button><div class="top-title">الرئيسية العضوية</div></div>${connection()}<main class="screen-body">${summaryCarouselMarkup(memberSummarySlides,'ملخص الجمعيات')}<div class="tile-grid manager-tiles">${memberSections.map(a=>tile(a[0],a[1],a[2],['الأسهم','الغرفة'].includes(a[0])?'gold':'blue')).join('')}</div></main>${bottomNav('groups')}`;
 }
 /* 033 */
 function renderMemberDues(){const cards=memberDues.map(d=>recordCard(d.id,d.name,d.status,detailRows([['تاريخ الاستحقاق',d.date],['المبلغ',d.amount+' ر.ي'],['الحالة',d.status]]),{iconName:'wallet',value:d.amount+' ر.ي',tag:statusChip(d.status,d.status==='مدفوع'?'green':d.status==='مستحق'?'gold':'blue')})).join('');return page('الأقساط',`<section class="form-card" style="padding:9px 14px"><div class="section-head" style="margin:0 0 6px"><h3>ملخص التزام العضو</h3></div>${row('إجمالي الالتزام','1,200 ر.ي')}${row('المسدّد','200 ر.ي')}${row('المتبقي','1,000 ر.ي')}</section><div class="record-section-title">الأقساط والاستحقاقات</div>${cards}<div class="record-section-title">سجل المدفوعات</div>${recordCard('member-paid','قسط سابق','مدفوع',detailRows([['المبلغ','200 ر.ي'],['التاريخ','2026/10/20']]),{iconName:'check',tag:statusChip('مدفوع','green')})}`,{backTo:'032',bottom:false});}
