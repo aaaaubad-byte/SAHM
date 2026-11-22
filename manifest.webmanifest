@@ -1,22 +1,22 @@
 {
   "id": "./",
-  "name": "سهم | إدارة الجمعيات",
+  "name": "سهم | إدارة الجمعيات التساهمية",
   "short_name": "سهم",
-  "description": "تطبيق سهم لإدارة الجمعيات",
+  "description": "منصة سهم لإدارة الجمعيات التساهمية",
   "lang": "ar",
   "dir": "rtl",
   "start_url": "./",
   "scope": "./",
   "display": "standalone",
-  "orientation": "any",
-  "background_color": "#f3f7fa",
-  "theme_color": "#f7f9fb",
+  "orientation": "portrait",
+  "background_color": "#f4f6fa",
+  "theme_color": "#f4f6fa",
   "icons": [
     {
       "src": "./icon.svg",
       "sizes": "any",
       "type": "image/svg+xml",
-      "purpose": "any maskable"
+      "purpose": "any"
     }
   ]
 }
