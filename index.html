@@ -441,11 +441,9 @@ body{background:var(--bg);color:var(--ink)}
 .app[data-screen="001"] .splash-screen{
  position:relative;isolation:isolate;display:flex;flex-direction:column;align-items:center;justify-content:center;
  width:100%;height:100%;min-height:100%;overflow:hidden;padding:26px 24px 32px;text-align:center;
- background:radial-gradient(circle at 14% 15%,rgba(119,166,245,.32),transparent 28%),radial-gradient(ellipse at 91% 84%,rgba(193,138,45,.25),transparent 35%),radial-gradient(ellipse at 78% 9%,rgba(141,176,241,.20),transparent 39%),radial-gradient(circle at 1px 1px,rgba(255,255,255,.065) 1px,transparent 1.7px),linear-gradient(145deg,#142b50 0%,#2345b5 54%,#3158d6 100%);background-size:auto,auto,auto,26px 26px,auto;
+ background:linear-gradient(145deg,#142b50 0%,#2345b5 54%,#3158d6 100%);
 }
-.app[data-screen="001"] .splash-screen::before,.app[data-screen="001"] .splash-screen::after{
- content:"";position:absolute;z-index:-1;border-radius:50%;pointer-events:none;filter:blur(2px)
-}
+.app[data-screen="001"] .splash-screen::before,.app[data-screen="001"] .splash-screen::after{display:none}
 .app[data-screen="001"] .splash-screen::before{width:250px;height:250px;top:-118px;right:-104px;border:1px solid rgba(231,241,255,.20);background:radial-gradient(circle,rgba(129,174,245,.27),rgba(129,174,245,.035) 56%,transparent 72%);box-shadow:0 0 0 17px rgba(231,241,255,.045),0 0 0 36px rgba(231,241,255,.025);animation:sahmAmbientFloat 18s ease-in-out infinite alternate}
 .app[data-screen="001"] .splash-screen::after{width:220px;height:220px;bottom:-112px;left:-95px;border:1px solid rgba(240,208,151,.22);background:radial-gradient(circle,rgba(202,157,83,.27),rgba(202,157,83,.035) 55%,transparent 73%);box-shadow:0 0 0 16px rgba(240,208,151,.045),0 0 0 34px rgba(240,208,151,.025);animation:sahmAmbientFloat 22s ease-in-out infinite alternate-reverse}
 .app[data-screen="001"] .splash-glass{
@@ -455,28 +453,26 @@ body{background:var(--bg);color:var(--ink)}
  backdrop-filter:blur(22px) saturate(150%);-webkit-backdrop-filter:blur(22px) saturate(150%);
 }
 .app[data-screen="001"] .splash-glass::before{content:"";position:absolute;top:0;left:17%;right:17%;height:1px;background:linear-gradient(90deg,transparent,rgba(255,255,255,.98),transparent)}
-.app[data-screen="001"] .splash-glass::after{content:"";position:absolute;top:14px;left:15px;width:54px;height:54px;border:1px solid rgba(49,88,214,.12);border-radius:50%;box-shadow:0 0 0 8px rgba(49,88,214,.025),0 0 0 17px rgba(193,138,45,.025);pointer-events:none}
+.app[data-screen="001"] .splash-glass::after{display:none}
 .app[data-screen="001"] .splash-glass>*{position:relative;z-index:1}
 .app[data-screen="001"] .splash-brand{font-size:34px;line-height:1.25;font-weight:950;letter-spacing:.2px;color:#183f78;text-shadow:0 2px 12px rgba(42,82,139,.11)}
 .app[data-screen="001"] .splash-caption{margin-top:7px;color:#526980;font-size:13px;font-weight:600;letter-spacing:.1px}
 .app[data-screen="001"] .splash-progress{width:132px;height:5px;margin:34px auto 0;overflow:hidden;border-radius:20px;background:#dce5f0;box-shadow:inset 0 1px 2px rgba(35,61,94,.1)}
 .app[data-screen="001"] .splash-progress span{display:block;width:35%;height:100%;border-radius:inherit;background:linear-gradient(90deg,#244c91,#477bd0,#b58a4f);animation:sahmBootProgress 1.2s ease-in-out infinite alternate}
 .app[data-screen="001"] .splash-status{margin-top:14px;color:#566d84;font-size:12px;font-weight:500}
-.app[data-screen="001"] .splash-meta{position:relative;margin-top:34px;color:#e0e9fa;font-size:10px;letter-spacing:.2px;text-shadow:0 1px 8px rgba(5,20,45,.28)}
+
 @keyframes sahmBootProgress{from{transform:translateX(0)}to{transform:translateX(245%)}}
-@keyframes sahmAmbientFloat{from{transform:translate3d(0,0,0) rotate(0deg)}to{transform:translate3d(10px,-13px,0) rotate(6deg)}}
+
 
 .app:is([data-screen="002"],[data-screen="003"],[data-screen="004"],[data-screen="006"]){background:linear-gradient(145deg,#142b50 0%,#2345b5 54%,#3158d6 100%)}
 .app:is([data-screen="002"],[data-screen="003"],[data-screen="004"],[data-screen="006"]) .auth-body{
  position:relative;isolation:isolate;align-items:center;gap:0;box-sizing:border-box;width:100%;min-width:0;
  overflow-x:hidden;overflow-y:auto;
  padding:clamp(22px,3.5vh,34px) 20px max(24px,env(safe-area-inset-bottom,0px));
- background:radial-gradient(ellipse at 6% 8%,rgba(122,169,247,.32),transparent 35%),radial-gradient(ellipse at 94% 88%,rgba(194,145,67,.26),transparent 35%),radial-gradient(ellipse at 76% 12%,rgba(164,195,250,.16),transparent 41%),radial-gradient(circle at 1px 1px,rgba(255,255,255,.06) 1px,transparent 1.7px),linear-gradient(150deg,#142b50 0%,#2345b5 54%,#3158d6 100%);background-size:auto,auto,auto,26px 26px,auto;
+ background:linear-gradient(150deg,#142b50 0%,#2345b5 54%,#3158d6 100%);
 }
 .app:is([data-screen="002"],[data-screen="003"],[data-screen="004"],[data-screen="006"]) .auth-body::before,
-.app:is([data-screen="002"],[data-screen="003"],[data-screen="004"],[data-screen="006"]) .auth-body::after{
- content:"";position:absolute;z-index:0;pointer-events:none;border-radius:50%;filter:blur(1px)
-}
+.app:is([data-screen="002"],[data-screen="003"],[data-screen="004"],[data-screen="006"]) .auth-body::after{display:none}
 .app:is([data-screen="002"],[data-screen="003"],[data-screen="004"],[data-screen="006"]) .auth-body::before{width:230px;height:230px;top:5%;right:-118px;border:1px solid rgba(228,239,255,.24);background:radial-gradient(circle at 38% 38%,rgba(165,198,255,.30),rgba(165,198,255,.06) 48%,transparent 72%);box-shadow:inset 0 0 0 18px rgba(255,255,255,.045),0 0 0 13px rgba(255,255,255,.055),0 0 0 34px rgba(255,255,255,.025);animation:sahmAmbientFloat 19s ease-in-out infinite alternate}
 .app:is([data-screen="002"],[data-screen="003"],[data-screen="004"],[data-screen="006"]) .auth-body::after{width:196px;height:196px;bottom:5%;left:-104px;border:1px solid rgba(242,213,164,.25);background:radial-gradient(circle at 60% 40%,rgba(218,170,96,.32),rgba(218,170,96,.06) 52%,transparent 73%);box-shadow:0 0 0 14px rgba(255,255,255,.05),0 0 0 31px rgba(255,255,255,.025);animation:sahmAmbientFloat 23s ease-in-out infinite alternate-reverse}
 .app:is([data-screen="002"],[data-screen="003"],[data-screen="004"],[data-screen="006"]) .auth-body>*{position:relative;z-index:1;min-width:0;max-width:100%}
@@ -498,7 +494,7 @@ body{background:var(--bg);color:var(--ink)}
  width:min(100%,318px);max-width:318px;box-sizing:border-box;margin: -5px auto 15px;color:#e0e9fa;font-size:13px;line-height:1.75;text-shadow:0 1px 8px rgba(5,20,45,.2)
 }
 .app:is([data-screen="002"],[data-screen="003"],[data-screen="004"],[data-screen="006"]) .auth-card{position:relative;isolation:isolate;width:min(100%,318px);max-width:318px;box-sizing:border-box;align-self:center;padding:20px 18px 18px}
-.app:is([data-screen="002"],[data-screen="003"],[data-screen="004"],[data-screen="006"]) .auth-card::before{content:"";position:absolute;z-index:0;top:-46px;left:-42px;width:126px;height:126px;border:1px solid rgba(49,88,214,.11);border-radius:50%;background:radial-gradient(circle,rgba(49,88,214,.07),transparent 68%);box-shadow:0 0 0 12px rgba(49,88,214,.022),0 0 0 26px rgba(193,138,45,.022);pointer-events:none}
+.app:is([data-screen="002"],[data-screen="003"],[data-screen="004"],[data-screen="006"]) .auth-card::before{display:none}
 .app:is([data-screen="002"],[data-screen="003"],[data-screen="004"],[data-screen="006"]) .auth-card::after{content:"";position:absolute;z-index:0;top:0;left:18%;right:18%;height:2px;border-radius:3px;background:linear-gradient(90deg,transparent,rgba(49,88,214,.34),rgba(193,138,45,.28),transparent);pointer-events:none}
 .app:is([data-screen="002"],[data-screen="003"],[data-screen="004"],[data-screen="006"]) .auth-card>*{position:relative;z-index:1}
 .app:is([data-screen="002"],[data-screen="003"],[data-screen="004"],[data-screen="006"]) .field{margin-bottom:17px}
@@ -636,6 +632,33 @@ body{background:var(--bg);color:var(--ink)}
  .app[data-screen="005"] .terms-card{min-height:220px}
 }
 @media(prefers-reduced-motion:reduce){.app[data-screen="001"] .splash-progress span{animation:none;width:100%}.app[data-screen="006"] .avatar-option{transition:none}}
+
+/* Unified typography and restrained surfaces for onboarding screens 001–006 */
+.app:is([data-screen="001"],[data-screen="002"],[data-screen="003"],[data-screen="004"],[data-screen="005"],[data-screen="006"]),
+.app:is([data-screen="001"],[data-screen="002"],[data-screen="003"],[data-screen="004"],[data-screen="005"],[data-screen="006"]) button,
+.app:is([data-screen="001"],[data-screen="002"],[data-screen="003"],[data-screen="004"],[data-screen="005"],[data-screen="006"]) input,
+.app:is([data-screen="001"],[data-screen="002"],[data-screen="003"],[data-screen="004"],[data-screen="005"],[data-screen="006"]) select,
+.app:is([data-screen="001"],[data-screen="002"],[data-screen="003"],[data-screen="004"],[data-screen="005"],[data-screen="006"]) textarea{
+ font-family:'IBM Plex Sans Arabic',sans-serif;
+}
+.app:is([data-screen="001"],[data-screen="002"],[data-screen="003"],[data-screen="004"],[data-screen="005"],[data-screen="006"]) .auth-heading,
+.app[data-screen="005"] .terms-intro h2{font-size:22px;font-weight:800;line-height:1.45;letter-spacing:0}
+.app:is([data-screen="003"],[data-screen="004"],[data-screen="006"]) .auth-description,
+.app[data-screen="005"] .terms-intro p{font-size:13px;font-weight:400;line-height:1.75}
+.app:is([data-screen="002"],[data-screen="003"],[data-screen="004"],[data-screen="006"]) .field label{font-size:12px;font-weight:700;line-height:1.5}
+.app:is([data-screen="002"],[data-screen="003"],[data-screen="004"],[data-screen="006"]) .field input:not([type="checkbox"]),
+.app:is([data-screen="002"],[data-screen="003"],[data-screen="004"],[data-screen="006"]) .field select,
+.app:is([data-screen="002"],[data-screen="003"],[data-screen="004"],[data-screen="006"]) .field textarea{font-size:13px;font-weight:400}
+.app:is([data-screen="002"],[data-screen="003"],[data-screen="004"],[data-screen="005"],[data-screen="006"]) .btn{font-size:13px;font-weight:700;line-height:1.45}
+.app:is([data-screen="002"],[data-screen="003"],[data-screen="004"],[data-screen="005"],[data-screen="006"]) .small-note,
+.app:is([data-screen="002"],[data-screen="003"],[data-screen="004"]) .auth-note,
+.app[data-screen="002"] .helper-links .small-note{font-size:12px;font-weight:400;line-height:1.65}
+.app:is([data-screen="002"],[data-screen="003"],[data-screen="004"],[data-screen="006"]) .field .error{font-size:11px;font-weight:500;line-height:1.55}
+.app[data-screen="001"] .splash-brand{font-size:32px;font-weight:800;line-height:1.3;letter-spacing:0}
+.app[data-screen="001"] .splash-caption{font-size:13px;font-weight:500;line-height:1.6}
+.app[data-screen="001"] .splash-status{font-size:13px;font-weight:400;line-height:1.6}
+.app[data-screen="005"] .terms-card-title{font-size:14px;font-weight:700;line-height:1.5}
+.app:is([data-screen="002"],[data-screen="003"],[data-screen="004"],[data-screen="005"],[data-screen="006"]) .app-top .top-title{font-size:15px;font-weight:700;line-height:1.5}
 </style>
 </head>
 <body>
@@ -786,9 +809,9 @@ function detailRows(rows){return `<div class="kv-list">${rows.map(r=>row(r[0],r[
 function recordCard(id,title,subtitle,details,{iconName='file',value='',tag='',actions='',notice='',recordStatus='',recordRound='',recordInstallment='',recordRole='',recordShares=''}={}){const open=expanded.has(id),plain=(String(title)+' '+String(subtitle)).replace(/<[^>]*>/g,' ');return `<article class="record-card ${open?'open':''}" data-record="${id}" data-filter-text="${esc(plain)}" data-record-status="${esc(recordStatus)}" data-record-round="${esc(recordRound)}" data-record-installment="${esc(recordInstallment)}" data-record-role="${esc(recordRole)}" data-record-shares="${esc(recordShares)}"><button class="record-summary" data-action="expand" data-id="${id}" aria-expanded="${open}"><span class="record-symbol">${icon(iconName)}</span><span style="flex:1;min-width:0"><span class="record-title">${title}</span>${subtitle?`<span class="record-subtitle">${subtitle}</span>`:''}</span>${value?`<span class="record-value">${value}</span>`:''}<span class="record-chevron">${icon('down')}</span></button>${open?`<div class="record-details">${tag?`<div style="margin-bottom:9px">${tag}</div>`:''}${details}${notice?`<div class="small-note" style="margin-top:9px">${notice}</div>`:''}${actions?`<div class="record-actions">${actions}</div>`:''}</div>`:''}</article>`}
 function filterVisible(input){const q=input.value.trim().toLowerCase();const body=input.closest('.screen-body')||document.querySelector('.screen-body');if(!body)return;body.querySelectorAll('[data-filter-text]').forEach(el=>{el.style.display=el.dataset.filterText.toLowerCase().includes(q)?'':'none'});const visible=[...body.querySelectorAll('[data-filter-text]')].some(el=>el.style.display!=='none');const emptyEl=body.querySelector('[data-search-empty]');if(emptyEl)emptyEl.style.display=visible?'none':'';applyListFilters();}
 /* 001 */
-function renderSplash(){return `<main class="splash-screen"><section class="splash-glass"><div class="splash-brand">سهم</div><div class="splash-caption">إدارة الجمعيات</div><div class="splash-progress"><span></span></div><div class="splash-status">جارٍ تهيئة التطبيق...</div></section><div class="splash-meta">A-01 · شاشة نظامية مؤقتة</div></main>`}
+function renderSplash(){return `<main class="splash-screen"><section class="splash-glass"><div class="splash-brand">سهم</div><div class="splash-caption">إدارة الجمعيات</div><div class="splash-progress"><span></span></div><div class="splash-status">جارٍ تهيئة التطبيق...</div></section></main>`}
 /* 002 */
-function renderLogin(){return `${connection()}<main class="screen-body auth-body"><h1 class="auth-heading">تسجيل الدخول</h1><section class="auth-card"><div class="field" id="loginEmailWrap"><label>البريد الإلكتروني</label><input id="loginEmail" type="email" placeholder="أدخل بريدك الإلكتروني"><div class="error">أدخل بريداً إلكترونياً صحيحاً</div></div><div class="field" id="loginPassWrap"><label>كلمة المرور</label><div style="position:relative"><input id="loginPass" type="password" placeholder="أدخل كلمة المرور" style="padding-left:43px"><button class="icon-btn" style="position:absolute;left:9px;top:8px;color:#8093a4" data-action="toggle-pass" data-target="loginPass">${icon('eye')}</button></div><div class="error">أدخل كلمة المرور</div></div><button class="btn primary block" data-action="login">تسجيل الدخول</button><button class="btn secondary block" data-action="nav" data-id="004">إنشاء حساب</button></section><div class="helper-links"><span class="small-note">نسيت كلمة المرور؟</span><button class="text-link" data-action="nav" data-id="003">استعادة الحساب</button></div><div class="auth-note">حساب واحد — والسياق والصلاحيات بحسب الجمعية</div></main>`}
+function renderLogin(){return `${connection()}<main class="screen-body auth-body"><h1 class="auth-heading">تسجيل الدخول</h1><section class="auth-card"><div class="field" id="loginEmailWrap"><label>البريد الإلكتروني</label><input id="loginEmail" type="email" placeholder="أدخل بريدك الإلكتروني"><div class="error">أدخل بريداً إلكترونياً صحيحاً</div></div><div class="field" id="loginPassWrap"><label>كلمة المرور</label><div style="position:relative"><input id="loginPass" type="password" placeholder="أدخل كلمة المرور" style="padding-left:43px"><button class="icon-btn" style="position:absolute;left:9px;top:8px;color:#8093a4" data-action="toggle-pass" data-target="loginPass">${icon('eye')}</button></div><div class="error">أدخل كلمة المرور</div></div><button class="btn primary block" data-action="login">تسجيل الدخول</button><button class="btn secondary block" data-action="nav" data-id="004">إنشاء حساب</button></section><div class="helper-links"><span class="small-note">نسيت كلمة المرور؟</span><button class="text-link" data-action="nav" data-id="003">استعادة الحساب</button></div></main>`}
 /* 003 */
 function renderRecovery(){if(recoverStep===1)return `${topHeader('استعادة الحساب','002')}<main class="screen-body auth-body"><div class="auth-heading">استعادة الحساب</div><p class="auth-description">أدخل بيانات حسابك للمتابعة</p><section class="auth-card"><div class="field" id="recEmailWrap"><label>البريد الإلكتروني</label><input id="recEmail" type="email" placeholder="البريد الإلكتروني"><div class="error">أدخل بريداً إلكترونياً صحيحاً</div></div><div class="field" id="recPhoneWrap"><label>رقم الهاتف</label><div class="field-row"><button type="button" class="country-code" data-action="country-picker" aria-label="اختيار الدولة؛ اليمن محددة افتراضياً">🇾🇪</button><input id="recPhone" type="tel" placeholder="رقم الهاتف المحلي"></div><div class="error">أدخل رقم الهاتف المحلي</div></div><button class="btn primary block" data-action="recover-find">استعادة الحساب</button></section></main>`;
 return `${topHeader('استعادة الحساب','002')}<main class="screen-body auth-body"><div class="auth-heading">استعادة الحساب</div><p class="auth-description">تحقق من حسابك ثم عيّن كلمة مرور جديدة</p><div class="info-card recovery-account-card"><div class="recovery-avatar">${icon('user')}</div><strong>مستخدم سهم</strong><div class="small-note">رقم الهاتف: 7•••••123</div><div class="small-note" style="margin-top:5px">معرّف الحساب: SHM-0001</div></div><section class="auth-card"><div class="field" id="recIdWrap"><label>معرّف الحساب</label><input id="recId" placeholder="أدخل معرّف الحساب"><div class="error">معرّف الحساب غير مطابق</div></div><div class="field" id="recNewWrap"><label>كلمة المرور الجديدة</label><input id="recNew" type="password" placeholder="6 أحرف أو أرقام على الأقل"><div class="error">كلمة المرور غير مستوفية للحد الأدنى</div></div><div class="field" id="recConfirmWrap"><label>تأكيد كلمة المرور</label><input id="recConfirm" type="password" placeholder="أعد إدخال كلمة المرور"><div class="error">تأكيد كلمة المرور غير مطابق</div></div><button class="btn primary block" data-action="recover-reset">متابعة</button></section></main>`}
