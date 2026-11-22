@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <meta name="theme-color" content="#3158d6">
-<meta name="sahm-build" content="sahm-20261123-update-notice-immediate-07">
+<meta name="sahm-build" content="sahm-20261123-auth-footer-contrast-08">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
@@ -521,11 +521,12 @@ body{background:var(--bg);color:var(--ink)}
 .app:is([data-screen="002"],[data-screen="003"],[data-screen="004"],[data-screen="006"]) .btn:focus-visible,
 .app:is([data-screen="002"],[data-screen="003"],[data-screen="004"],[data-screen="006"]) .text-link:focus-visible,
 .app:is([data-screen="006"]) .avatar-option:focus-visible{outline:3px solid rgba(49,88,214,.23);outline-offset:3px}
-.app:is([data-screen="002"],[data-screen="004"]) .auth-note{width:min(100%,330px);max-width:330px;box-sizing:border-box;margin:13px auto 0;color:#d5e2f5;font-size:11px;line-height:1.8;text-shadow:none}
+.app:is([data-screen="002"],[data-screen="004"]) .auth-note{width:min(100%,330px);max-width:330px;box-sizing:border-box;margin:6px auto 0;color:#e5efff;font-size:12px;font-weight:500;line-height:1.65;text-shadow:0 1px 2px rgba(8,24,48,.2)}
+.app:is([data-screen="002"],[data-screen="004"]) .auth-note .text-link,
+.app[data-screen="002"] .helper-links .text-link{color:#fff;font-size:12px;font-weight:700;padding:3px 4px;text-decoration:underline;text-decoration-color:rgba(255,255,255,.48);text-underline-offset:3px}
 .app[data-screen="002"] .auth-body{justify-content:safe center}
-.app[data-screen="002"] .helper-links{width:min(100%,330px);max-width:330px;box-sizing:border-box;margin:13px auto 0;padding:0 3px}
-.app[data-screen="002"] .helper-links .small-note{color:#d5e2f5;font-size:11px}
-.app[data-screen="002"] .auth-note{margin-top:10px}
+.app[data-screen="002"] .helper-links{width:min(100%,330px);max-width:330px;box-sizing:border-box;margin:6px auto 0;padding:0 3px}
+.app[data-screen="002"] .helper-links .small-note{color:#e5efff;font-size:12px;font-weight:500;line-height:1.65}
 .app[data-screen="003"] .auth-body,.app[data-screen="004"] .auth-body,.app[data-screen="006"] .auth-body{justify-content:safe center;padding-top:clamp(20px,3vh,32px)}
 .app[data-screen="003"] .recovery-account-card{
  position:relative;margin:31px auto 20px!important;padding:38px 18px 17px!important;text-align:center;
@@ -592,7 +593,10 @@ body{background:var(--bg);color:var(--ink)}
 }
 .app.dark:is([data-screen="002"],[data-screen="003"],[data-screen="004"],[data-screen="006"]) .auth-heading,.app.dark[data-screen="005"] .terms-intro h2{color:#edf3fa}
 .app.dark:is([data-screen="002"],[data-screen="003"],[data-screen="004"],[data-screen="006"]) .auth-description,.app.dark:is([data-screen="002"],[data-screen="003"],[data-screen="004"],[data-screen="006"]) .auth-note,.app.dark[data-screen="005"] .terms-intro p{color:#aabbd0}
-.app.dark[data-screen="002"] .helper-links .small-note{color:#aabbd0}
+.app.dark:is([data-screen="002"],[data-screen="004"]) .auth-note{color:#dce8f8}
+.app.dark:is([data-screen="002"],[data-screen="004"]) .auth-note .text-link,
+.app.dark[data-screen="002"] .helper-links .text-link{color:#fff;text-decoration-color:rgba(255,255,255,.55)}
+.app.dark[data-screen="002"] .helper-links .small-note{color:#dce8f8}
 .app.dark:is([data-screen="002"],[data-screen="003"],[data-screen="004"],[data-screen="006"]) .field label{color:#d2deeb}
 .app.dark:is([data-screen="002"],[data-screen="003"],[data-screen="004"],[data-screen="006"]) .field input:not([type="checkbox"]),.app.dark:is([data-screen="002"],[data-screen="003"],[data-screen="004"],[data-screen="006"]) .field select,.app.dark:is([data-screen="002"],[data-screen="003"],[data-screen="004"],[data-screen="006"]) .field textarea{
  border-color:#617181;background:linear-gradient(180deg,#151e28,#1b2631);color:#f3f7fc;box-shadow:inset 0 2px 4px rgba(0,0,0,.32),0 1px 0 rgba(255,255,255,.045)
