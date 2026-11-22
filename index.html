@@ -133,27 +133,32 @@ button:disabled{cursor:not-allowed;opacity:.48}
 .list-row .row-title{font-size:13px;font-weight:850;line-height:1.5}
 .list-row .row-meta{font-size:10px;color:var(--muted);margin-top:3px}
 .list-row .row-arrow{width:17px;height:17px;color:#71879b;flex-shrink:0}
-.relationship-list{gap:9px}
+.relationship-list{gap:12px}
 .relationship-card{
- display:flex;align-items:center;gap:13px;width:100%;min-height:69px;padding:12px 14px;
- border:1px solid rgba(132,153,187,.28);border-radius:12px;
- background:linear-gradient(145deg,#fff 0%,#fcfdff 100%);color:var(--ink);text-align:right;
- box-shadow:0 2px 5px rgba(24,47,79,.035),0 6px 12px rgba(24,47,79,.045),inset 0 1px 0 rgba(255,255,255,.98);
- transition:border-color .16s ease,box-shadow .16s ease,background .16s ease,transform .16s ease;
+ position:relative;isolation:isolate;display:flex;align-items:center;gap:14px;width:100%;min-height:78px;padding:14px 16px;
+ overflow:hidden;border:1px solid #e8edf3;border-radius:18px;
+ background:#fff;color:var(--ink);text-align:right;
+ box-shadow:0 1px 2px rgba(19,39,62,.025),0 7px 20px rgba(19,39,62,.055);
+ transition:transform .18s ease,border-color .18s ease,box-shadow .18s ease,background .18s ease;
 }
-.relationship-card:hover{border-color:rgba(94,128,182,.46);background:linear-gradient(145deg,#fff,#f6f9ff);box-shadow:0 4px 8px rgba(24,47,79,.045),0 9px 16px rgba(24,47,79,.065),inset 0 1px 0 #fff}
-.relationship-card:active{transform:scale(.993);background:#f0f5fc}
-.relationship-card:focus-visible{outline:3px solid rgba(49,88,214,.22);outline-offset:2px}
-.relationship-icon{width:29px;height:29px;flex:0 0 29px;display:grid;place-items:center;color:#3158b8}
-.relationship-icon svg{width:25px;height:25px;stroke-width:1.9}
-.relationship-card.is-member .relationship-icon{color:#a67532}
-.relationship-name{flex:1;min-width:0;font-size:14px;line-height:1.5;font-weight:800;color:var(--ink);overflow-wrap:anywhere}
-.relationship-arrow{width:17px;height:17px;flex:0 0 17px;color:#71849b}
-.app.dark .relationship-card{background:linear-gradient(145deg,#1a2a3a,#172635);border-color:#31465a;color:var(--ink);box-shadow:0 3px 9px rgba(0,0,0,.18),inset 0 1px 0 rgba(255,255,255,.035)}
-.app.dark .relationship-card:hover{background:linear-gradient(145deg,#20364d,#1a2c40);border-color:#49617b}
-.app.dark .relationship-icon{color:#9bb9ec}
-.app.dark .relationship-card.is-member .relationship-icon{color:#d1ad72}
-.app.dark .relationship-arrow{color:#95a9bf}
+.relationship-card:before{content:"";position:absolute;z-index:-1;inset:0 auto 0 0;width:4px;background:linear-gradient(180deg,#6f91c5,#3158a8);opacity:.9}
+.relationship-card.is-member:before{background:linear-gradient(180deg,#d9b878,#a87835)}
+.relationship-card:after{content:"";position:absolute;z-index:-1;left:-30px;top:-48px;width:112px;height:112px;border-radius:50%;background:radial-gradient(circle,rgba(49,88,168,.065),transparent 68%);pointer-events:none}
+.relationship-card:hover{transform:translateY(-2px);border-color:#d5e0ed;box-shadow:0 4px 9px rgba(19,39,62,.045),0 13px 26px rgba(19,39,62,.09)}
+.relationship-card:active{transform:scale(.99);background:#f9fbfe}
+.relationship-card:focus-visible{outline:3px solid rgba(49,88,214,.22);outline-offset:3px}
+.relationship-icon{width:44px;height:44px;flex:0 0 44px;display:grid;place-items:center;border-radius:14px;
+ color:#3158a8;background:linear-gradient(145deg,#f0f5fc,#e7eef8);box-shadow:inset 0 1px 0 rgba(255,255,255,.95),0 2px 5px rgba(38,72,119,.07)}
+.relationship-icon svg{width:24px;height:24px;stroke-width:1.85}
+.relationship-card.is-member .relationship-icon{color:#98702f;background:linear-gradient(145deg,#faf4e9,#f1e6d2);box-shadow:inset 0 1px 0 rgba(255,255,255,.9),0 2px 5px rgba(126,91,39,.07)}
+.relationship-name{flex:1;min-width:0;font-size:15px;line-height:1.5;font-weight:800;letter-spacing:-.15px;color:var(--ink);overflow-wrap:anywhere}
+.relationship-arrow{width:30px;height:30px;flex:0 0 30px;padding:7px;border:1px solid #edf1f5;border-radius:11px;color:#71849b;background:#f8fafc}
+.app.dark .relationship-card{background:#172635;border-color:#2b3d4e;color:var(--ink);box-shadow:0 5px 16px rgba(0,0,0,.2)}
+.app.dark .relationship-card:after{background:radial-gradient(circle,rgba(107,145,202,.13),transparent 68%)}
+.app.dark .relationship-card:hover{background:#1b2d3f;border-color:#40566c}
+.app.dark .relationship-icon{color:#a9c1e7;background:linear-gradient(145deg,#263b52,#203248);box-shadow:inset 0 1px 0 rgba(255,255,255,.04)}
+.app.dark .relationship-card.is-member .relationship-icon{color:#dfbd82;background:linear-gradient(145deg,#443923,#342e24)}
+.app.dark .relationship-arrow{color:#a4b4c5;border-color:#33485b;background:#203244}
 .tile-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
 .tile{position:relative;min-height:144px;border:1px solid var(--line);border-radius:19px;background:#fff;box-shadow:var(--shadow);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:11px;padding:15px 12px 22px;text-align:center;color:var(--ink);width:100%}
 .tile:hover{transform:translateY(-1px);box-shadow:0 13px 24px rgba(20,48,74,.1)}
