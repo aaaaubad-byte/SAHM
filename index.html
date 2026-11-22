@@ -133,6 +133,27 @@ button:disabled{cursor:not-allowed;opacity:.48}
 .list-row .row-title{font-size:13px;font-weight:850;line-height:1.5}
 .list-row .row-meta{font-size:10px;color:var(--muted);margin-top:3px}
 .list-row .row-arrow{width:17px;height:17px;color:#71879b;flex-shrink:0}
+.relationship-list{gap:9px}
+.relationship-card{
+ display:flex;align-items:center;gap:13px;width:100%;min-height:69px;padding:12px 14px;
+ border:1px solid rgba(132,153,187,.28);border-radius:12px;
+ background:linear-gradient(145deg,#fff 0%,#fcfdff 100%);color:var(--ink);text-align:right;
+ box-shadow:0 2px 5px rgba(24,47,79,.035),0 6px 12px rgba(24,47,79,.045),inset 0 1px 0 rgba(255,255,255,.98);
+ transition:border-color .16s ease,box-shadow .16s ease,background .16s ease,transform .16s ease;
+}
+.relationship-card:hover{border-color:rgba(94,128,182,.46);background:linear-gradient(145deg,#fff,#f6f9ff);box-shadow:0 4px 8px rgba(24,47,79,.045),0 9px 16px rgba(24,47,79,.065),inset 0 1px 0 #fff}
+.relationship-card:active{transform:scale(.993);background:#f0f5fc}
+.relationship-card:focus-visible{outline:3px solid rgba(49,88,214,.22);outline-offset:2px}
+.relationship-icon{width:29px;height:29px;flex:0 0 29px;display:grid;place-items:center;color:#3158b8}
+.relationship-icon svg{width:25px;height:25px;stroke-width:1.9}
+.relationship-card.is-member .relationship-icon{color:#a67532}
+.relationship-name{flex:1;min-width:0;font-size:14px;line-height:1.5;font-weight:800;color:var(--ink);overflow-wrap:anywhere}
+.relationship-arrow{width:17px;height:17px;flex:0 0 17px;color:#71849b}
+.app.dark .relationship-card{background:linear-gradient(145deg,#1a2a3a,#172635);border-color:#31465a;color:var(--ink);box-shadow:0 3px 9px rgba(0,0,0,.18),inset 0 1px 0 rgba(255,255,255,.035)}
+.app.dark .relationship-card:hover{background:linear-gradient(145deg,#20364d,#1a2c40);border-color:#49617b}
+.app.dark .relationship-icon{color:#9bb9ec}
+.app.dark .relationship-card.is-member .relationship-icon{color:#d1ad72}
+.app.dark .relationship-arrow{color:#95a9bf}
 .tile-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
 .tile{position:relative;min-height:144px;border:1px solid var(--line);border-radius:19px;background:#fff;box-shadow:var(--shadow);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:11px;padding:15px 12px 22px;text-align:center;color:var(--ink);width:100%}
 .tile:hover{transform:translateY(-1px);box-shadow:0 13px 24px rgba(20,48,74,.1)}
@@ -227,13 +248,31 @@ button:disabled{cursor:not-allowed;opacity:.48}
 .home-section .section-head h3{font-size:var(--font-section-title,18px);font-weight:800;line-height:1.35;margin:0}
 .home-section .section-head svg{width:20px;height:20px;stroke-width:2;color:var(--blue)}
 .activity-list{display:flex;flex-direction:column;gap:8px;min-width:0;min-height:104px;height:clamp(104px,28vh,210px);height:clamp(104px,28dvh,210px);max-height:min(34vh,210px);max-height:min(34dvh,210px);overflow-x:hidden;overflow-y:auto;overscroll-behavior-y:contain;-webkit-overflow-scrolling:touch;touch-action:pan-y;scrollbar-width:thin;scrollbar-color:#aebbd0 transparent;padding:1px 3px 8px}
-.activity-item{display:flex;flex:0 0 auto;gap:11px;align-items:center;min-height:66px;background:linear-gradient(145deg,rgba(255,255,255,.96),rgba(241,246,255,.88));border:1px solid rgba(132,153,187,.32);border-radius:12px;padding:10px 12px;text-align:right;width:100%;color:#192b49;backdrop-filter:blur(10px) saturate(130%);-webkit-backdrop-filter:blur(10px) saturate(130%);box-shadow:0 3px 7px rgba(25,44,78,.07),0 9px 16px rgba(25,44,78,.07),inset 0 1px 0 rgba(255,255,255,.95)}
-.activity-icon{width:30px;height:30px;color:var(--blue);display:grid;place-items:center;flex-shrink:0}
-.activity-icon svg{width:22px;height:22px;stroke-width:2}
+.activity-item{
+ display:flex;flex:0 0 auto;gap:12px;align-items:center;min-height:70px;
+ background:linear-gradient(145deg,rgba(255,255,255,.97),rgba(244,248,255,.91) 68%,rgba(237,243,252,.88));
+ border:1px solid rgba(126,151,190,.30);border-radius:12px;padding:11px 13px;
+ text-align:right;width:100%;color:var(--ink);backdrop-filter:blur(8px) saturate(118%);
+ -webkit-backdrop-filter:blur(8px) saturate(118%);
+ box-shadow:0 2px 5px rgba(25,44,78,.045),0 7px 13px rgba(25,44,78,.055),inset 0 1px 0 rgba(255,255,255,.98);
+ transition:border-color .16s ease,box-shadow .16s ease,transform .16s ease,background .16s ease;
+}
+.activity-item:hover{border-color:rgba(84,119,177,.48);box-shadow:0 4px 8px rgba(25,44,78,.055),0 10px 17px rgba(25,44,78,.075),inset 0 1px 0 rgba(255,255,255,.98)}
+.activity-item:active{transform:scale(.992);background:linear-gradient(145deg,#f0f5fc,#eaf1fb)}
+.activity-item:focus-visible{outline:3px solid rgba(49,88,214,.24);outline-offset:2px}
+.activity-icon{width:34px;height:34px;flex:0 0 34px;border:1px solid rgba(119,149,195,.22);border-radius:10px;
+ background:linear-gradient(145deg,rgba(255,255,255,.96),rgba(226,236,251,.88));color:#3158b8;display:grid;place-items:center;
+ box-shadow:0 2px 5px rgba(36,67,116,.07),inset 0 1px 0 #fff}
+.activity-icon svg{width:20px;height:20px;stroke-width:2}
 .activity-copy{flex:1;min-width:0}
-.activity-copy strong{display:block;font-size:14px;font-weight:800;line-height:1.5;white-space:normal}
-.activity-copy span{display:block;font-size:13px;line-height:1.4;color:#64748b;margin-top:4px}
-.activity-time{font-size:12px;color:#64748b;white-space:nowrap;font-weight:650}
+.activity-copy strong{display:block;font-size:14px;font-weight:800;line-height:1.5;white-space:normal;color:var(--ink)}
+.activity-copy span{display:block;font-size:12px;line-height:1.45;color:var(--muted);margin-top:3px}
+.activity-time{flex:0 0 auto;align-self:flex-start;margin-top:3px;font-size:11px;line-height:1.5;color:#64758b;white-space:nowrap;font-weight:700}
+.app.dark .activity-item{background:linear-gradient(145deg,rgba(31,48,68,.97),rgba(24,39,57,.94));border-color:rgba(118,145,181,.25);color:var(--ink);box-shadow:0 3px 9px rgba(0,0,0,.18),inset 0 1px 0 rgba(255,255,255,.035)}
+.app.dark .activity-item:hover{border-color:rgba(125,158,207,.5);box-shadow:0 5px 13px rgba(0,0,0,.22)}
+.app.dark .activity-item:active{background:#20364f}
+.app.dark .activity-icon{background:linear-gradient(145deg,#273d58,#1d3048);border-color:#405777;color:#9bb9ec;box-shadow:inset 0 1px 0 rgba(255,255,255,.06)}
+.app.dark .activity-time{color:#a9bacd}
 /* auth */
 .auth-body{display:flex;flex-direction:column;justify-content:center;padding:24px 21px 26px;background:linear-gradient(180deg,#f7f9fb,#edf3f7)}
 .auth-heading{text-align:center;font-size:23px;font-weight:900;margin:0 0 18px}
@@ -618,8 +657,21 @@ function initCarousel(){
  carouselTimer=setInterval(()=>setCarouselSlide(carouselIndex+1),5000);
 }
 /* 009-011 and 039 */
-function renderGroups(kind){const all=kind==='all',manager=kind==='manager';const title=all?'كل الجمعيات':manager?'جمعيات أديرها':'جمعيات أشارك فيها';let items=all?groupFixtures:groupFixtures.filter(g=>manager?g.kind==='manager':g.kind==='member');const cards=items.map(g=>`<button class="list-row" data-action="open-group" data-id="${g.id}" data-filter-text="${esc(g.name)}"><span class="row-icon ${g.kind==='member'?'gold':''}">${icon(g.kind==='member'?'usercheck':'users')}</span><span class="row-main"><span class="row-title">${esc(g.name)}</span></span>${icon('back','row-arrow')}</button>`).join('');return page(title,`${searchBox('ابحث عن جمعية')}<div class="list-stack" id="groupList">${cards}</div><div data-search-empty style="display:none">${empty('لا توجد نتائج مطابقة')}</div>`,{backTo:'008',active:'groups'});}
-function renderPublicChats(){const cards=groupFixtures.map(g=>`<button class="list-row" data-action="open-chat" data-id="${g.id}" data-filter-text="${esc(g.name)}"><span class="row-icon ${g.kind==='member'?'gold':''}">${icon(g.kind==='member'?'usercheck':'users')}</span><span class="row-main"><span class="row-title">${esc(g.name)}</span></span>${icon('back','row-arrow')}</button>`).join('');return page('الدردشات',`${searchBox('ابحث عن جمعية')}<div class="list-stack">${cards}</div><div data-search-empty style="display:none">${empty('لا توجد نتائج مطابقة')}</div>`,{backTo:'008',active:'chats'});}
+function relationshipCard(g,action){
+ const isMember=g.kind==='member',symbol=isMember?'usercheck':'users',tone=isMember?'is-member':'is-manager';
+ return `<button class="relationship-card ${tone}" data-action="${action}" data-id="${g.id}" data-filter-text="${esc(g.name)}"><span class="relationship-icon">${icon(symbol)}</span><span class="relationship-name">${esc(g.name)}</span>${icon('back','relationship-arrow')}</button>`;
+}
+function renderGroups(kind){
+ const all=kind==='all',manager=kind==='manager';
+ const title=all?'كل الجمعيات':manager?'جمعيات أديرها':'جمعيات أشارك فيها';
+ const items=all?groupFixtures:groupFixtures.filter(g=>manager?g.kind==='manager':g.kind==='member');
+ const cards=items.map(g=>relationshipCard(g,'open-group')).join('');
+ return page(title,`${searchBox('ابحث عن جمعية')}<div class="list-stack relationship-list" id="groupList">${cards}</div><div data-search-empty style="display:none">${empty('لا توجد نتائج مطابقة')}</div>`,{backTo:'008',active:'groups'});
+}
+function renderPublicChats(){
+ const cards=groupFixtures.map(g=>relationshipCard(g,'open-chat')).join('');
+ return page('الدردشات',`${searchBox('ابحث عن جمعية')}<div class="list-stack relationship-list">${cards}</div><div data-search-empty style="display:none">${empty('لا توجد نتائج مطابقة')}</div>`,{backTo:'008',active:'chats'});
+}
 /* 012 */
 function renderNotifications(){const cards=notifications.map(n=>`<button class="list-row" data-action="notice-open" data-id="${n.id}" data-filter-text="${esc(n.title+' '+n.group+' '+n.body)}"><span class="row-icon">${icon(n.type==='invite'?'gift':'activity')}</span><span class="row-main"><span class="row-title">${esc(n.title)}</span><span class="row-meta">${esc(n.group)} · ${esc(n.time)}</span></span><span class="status ${n.read?'':'blue'}">${n.read?'مقروء':'جديد'}</span>${icon('back','row-arrow')}</button>`).join('');return page('الإشعارات',`${searchBox('ابحث في الإشعارات')}<div class="list-stack">${cards}</div><div data-search-empty style="display:none">${empty('لا توجد نتائج مطابقة')}</div>`,{backTo:'008'});}
 /* 013 */
