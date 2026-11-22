@@ -1140,7 +1140,7 @@ if(current==='001')setTimeout(()=>{if(current==='001'){go('002');showToast('مر
       });
       if (!response.ok) return;
       const html = await response.text();
-      const match = html.match(/<meta\\s+name=["']sahm-build["']\\s+content=["']([^"']+)["']/i);
+      const match = html.match(/<meta\s+name=["']sahm-build["']\s+content=["']([^"']+)["']/i);
       if (match && match[1] !== currentBuild) {
         clearInterval(checkTimer);
         clearTimeout(showTimer);
