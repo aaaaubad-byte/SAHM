@@ -194,8 +194,9 @@ button:disabled{cursor:not-allowed;opacity:.48}
 .carousel-dot.active{width:24px;background:#3158d6;box-shadow:0 0 0 4px rgba(49,88,214,.08)}
 .carousel-dot:focus-visible{outline:3px solid rgba(49,88,214,.32);outline-offset:3px}
 @media(prefers-reduced-motion:reduce){.summary-slide,.carousel-dot{transition:none}}
-.home-tiles{margin-top:0;margin-bottom:12px}
-.home-tiles .tile-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
+.home-tiles{display:flex;flex-direction:column;gap:12px;margin-top:0;margin-bottom:14px}
+.home-tiles .home-shortcuts{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px;flex:none}
+.home-tiles .home-action-cards{gap:10px;margin:0}
 .home-tiles .tile{
  min-width:0;min-height:0;width:100%;height:auto;aspect-ratio:1.48/1;
  display:flex;flex-direction:column;align-items:center;justify-content:center;
@@ -209,6 +210,7 @@ button:disabled{cursor:not-allowed;opacity:.48}
  width:30px;height:30px;display:inline-flex;align-items:center;justify-content:center;flex:0 0 30px;color:#244da9;
 }
 .home-tiles .tile .tile-icon.gold{color:#87591e}
+.home-tiles .home-action-cards .tile{background:#fff;border:1px solid rgba(39,62,99,.07);box-shadow:0 4px 10px rgba(27,48,84,.07),0 10px 20px rgba(27,48,84,.06)}
 .home-tiles .tile .tile-icon svg{width:29px;height:29px;stroke-width:2}
 .home-tiles .tile .tile-label{
  display:block;width:100%;color:#172943;font-size:14px;font-weight:850;line-height:1.4;white-space:nowrap;text-align:center;
@@ -294,8 +296,8 @@ button:disabled{cursor:not-allowed;opacity:.48}
  .data-disclaimer{padding:4px 12px;background:#f1f5f8;width:100%;font-size:9px}
 }@media(max-width:680px){}
 @media(max-width:390px){.screen-body{padding:14px 13px 22px}.home-body{padding:12px 14px 8px}.tile{min-height:133px}.summary-window{height:112px}.summary-slide{padding:13px 15px}.auth-body{padding:20px 15px}.row-fields{gap:7px}}
-@media(max-width:360px){.home-body{padding-inline:12px}.home-tiles .tile-grid{gap:8px}}
-@media(max-height:740px){.summary-window{height:112px}.home-tiles{margin-bottom:9px}.home-tiles .tile-grid{gap:8px}.home-tiles .tile{aspect-ratio:1.7/1;gap:7px;padding:10px 12px}.activity-item{min-height:59px;padding:8px 10px}}
+@media(max-width:360px){.home-body{padding-inline:12px}.home-tiles .home-shortcuts{gap:8px}.home-tiles .home-action-cards{gap:8px}}
+@media(max-height:740px){.summary-window{height:112px}.home-tiles{gap:12px;margin-bottom:9px}.home-tiles .home-shortcuts{gap:8px}.home-tiles .home-action-cards{gap:8px}.home-tiles .tile{aspect-ratio:1.7/1;gap:7px;padding:10px 12px}.activity-item{min-height:59px;padding:8px 10px}}
 
 /* Visual tokens and component styling borrowed from the published SAHM reference.
    The new preview shell, screen catalogue, screen names, grouping, renderer
@@ -566,7 +568,10 @@ function summaryCarouselMarkup(slides,label){
 }
 function renderHome(){return `${generalHeader()}<main class="screen-body home-body">
  ${summaryCarouselMarkup(summarySlides,'ملخص الجمعيات')}
- <section class="home-tiles"><div class="tile-grid">${tile('جمعيات أديرها','users','010','blue')}${tile('جمعيات أشارك فيها','usercheck','011','gold')}${tile('جمعية جديدة','plus','014','blue')}${tile('الانضمام لجمعية','link','016','gold')}</div></section>
+ <section class="home-tiles">
+ <div class="home-shortcuts">${tile('جمعيات أديرها','users','010','blue')}${tile('جمعيات أشارك فيها','usercheck','011','gold')}</div>
+ <div class="home-shortcuts home-action-cards">${tile('جمعية جديدة','plus','014','blue')}${tile('الانضمام لجمعية','link','016','gold')}</div>
+ </section>
  <section class="home-section"><div class="section-head"><div class="section-title-wrap">${icon('activity')}<h3>أحدث النشاط</h3></div></div><div class="activity-list">${recentEvents.map(e=>`<button class="activity-item" data-action="activity" data-id="${e.id}"><span class="activity-icon">${icon(e.icon)}</span><span class="activity-copy"><strong>${e.title}</strong><span>${e.group}</span></span><span class="activity-time">${e.time}</span></button>`).join('')}</div></section>
  </main>${bottomNav('home')}`}
 function setCarouselSlide(index){
