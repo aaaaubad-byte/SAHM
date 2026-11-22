@@ -3,34 +3,41 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<meta name="theme-color" content="#f7f9fb">
+<meta name="theme-color" content="#f4f6fa">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
 <link rel="manifest" href="./manifest.webmanifest">
 <link rel="icon" href="./icon.svg" type="image/svg+xml">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Arabic:wght@400;500;600;700&family=DM+Sans:wght@400..700&display=swap" rel="stylesheet">
 <title>سهم | إدارة الجمعيات</title>
 <style>
 :root{
-  --ink:#10283f;--ink-2:#29445c;--muted:#78899a;--blue:#2856a5;--blue-2:#183f83;
-  --gold:#9a6c25;--gold-2:#c2913f;--gold-pale:#f5eddf;--bg:#f3f7fa;--paper:#fff;
-  --line:#e1e8ed;--line-2:#d5e0e7;--soft:#eef3f7;--soft-blue:#eaf1f8;
-  --shadow:0 10px 28px rgba(24,49,73,.08),0 2px 7px rgba(24,49,73,.045);
-  --shadow-gold:0 15px 30px rgba(115,79,25,.22),0 3px 8px rgba(87,64,27,.13);
-  --danger:#b94b4b;--danger-soft:#fff0ef;--success:#38765e;--success-soft:#eaf5ef;
-  --radius:19px;--radius-sm:13px;--radius-xs:10px;
+--ink:#172338;--ink-2:#2b3d59;--muted:#68778d;--blue:#3158d6;--blue-2:#2345b5;
+--gold:#a67532;--gold-2:#c18a2d;--gold-pale:#fff3dc;--bg:#f4f6fa;--paper:#fff;
+--line:#e5eaf1;--line-2:#dce3ed;--soft:#f8f9fc;--soft-blue:#edf2ff;--surface:#fff;--surface-2:#f8f9fc;
+--primary:#3158d6;--primary-dark:#2345b5;--shadow:0 8px 28px rgba(25,44,78,.07);
+--shadow-gold:0 12px 26px rgba(115,79,25,.20),0 2px 7px rgba(87,64,27,.10);
+--danger:#b42318;--danger-soft:#fbecee;--success:#18744f;--success-soft:#e5f5ed;
+--radius:12px;--radius-sm:10px;--radius-xs:8px;--radius-shell:16px;
+--font-ui:'IBM Plex Sans Arabic',sans-serif;--font-numeric:'DM Sans',sans-serif;
+--font-page-title:22px;--font-section-title:18px;--font-card-title:16px;--font-home-card-title:14px;
+--font-body:15px;--font-secondary:13px;--font-helper:12px;
+--weight-regular:400;--weight-medium:500;--weight-semibold:600;--weight-bold:700;--leading-title:1.35;--leading-body:1.6;
 }
 *{box-sizing:border-box}
-html,body{margin:0;min-height:100%;font-family:"Noto Sans Arabic",Tahoma,Arial,sans-serif;color:var(--ink);background:#eaf0f4}
+html,body{margin:0;min-height:100%;font-family:var(--font-ui);color:var(--ink);background:var(--bg)}
 body{min-height:100vh}
 button,input,select,textarea{font:inherit}
 button{cursor:pointer}
 button:disabled{cursor:not-allowed;opacity:.48}
-.preview-shell{min-height:100vh;display:grid;grid-template-columns:304px minmax(0,1fr);gap:22px;padding:20px;max-width:1480px;margin:auto}
-.inspector{background:#fff;border:1px solid #e0e7ed;border-radius:22px;box-shadow:0 8px 30px rgba(23,48,72,.06);display:flex;flex-direction:column;min-height:calc(100vh - 40px);max-height:calc(100vh - 40px);overflow:hidden}
+.preview-shell{display:block;max-width:none;padding:0;min-height:100vh}
+.inspector{position:fixed;z-index:50;top:0;bottom:0;right:0;width:min(330px,88vw);min-height:0;max-height:none;overflow:hidden;background:var(--paper);border:1px solid var(--line);border-radius:0 0 0 var(--radius-shell);box-shadow:-12px 0 36px rgba(16,45,71,.16);display:flex;flex-direction:column;transform:translateX(105%);transition:transform .24s}.inspector.open{transform:translateX(0)}
 .inspector-head{padding:20px 18px 15px;border-bottom:1px solid var(--line);background:linear-gradient(180deg,#fff,#fbfcfd)}
 .brand-line{display:flex;align-items:center;gap:11px}
-.brand-mark{width:38px;height:38px;border-radius:12px;background:linear-gradient(145deg,#173e7b,#2f62b3);color:#fff;display:grid;place-items:center;box-shadow:0 5px 12px #244d872c}
+.brand-mark{width:38px;height:38px;border-radius:var(--radius-sm);background:var(--blue);color:#fff;display:grid;place-items:center;box-shadow:0 5px 12px rgba(49,88,214,.16)}
 .brand-mark svg{width:21px;height:21px}
 .brand-title{font-size:18px;font-weight:900;letter-spacing:.1px}
 .brand-sub{font-size:11px;color:var(--muted);margin-top:2px}
@@ -59,55 +66,56 @@ button:disabled{cursor:not-allowed;opacity:.48}
 .index-foot strong{color:#3b566e}
 .demo-actions{display:flex;gap:6px;margin-top:8px}
 .demo-actions button{flex:1;border:1px solid #dce5ec;background:#fff;border-radius:9px;padding:7px 5px;font-size:10px;color:#38536b}
-.stage{display:flex;flex-direction:column;align-items:center;justify-content:flex-start;gap:12px;min-width:0}
-.stage-head{width:min(100%,560px);display:flex;align-items:center;justify-content:space-between;padding:1px 4px;color:#667b8d;font-size:11px}
+.stage{display:flex;flex-direction:column;align-items:center;justify-content:flex-start;gap:0;min-width:0;min-height:100vh}
+.stage-head{width:min(100%,460px);height:52px;display:flex;align-items:center;justify-content:space-between;padding:7px 15px;color:var(--muted);font-size:12px;background:var(--paper);border-bottom:1px solid var(--line);margin:0 auto}
 .stage-head strong{font-size:13px;color:#233e56}
 .stage-badges{display:flex;gap:6px;align-items:center}
 .stage-badge{padding:5px 9px;background:#fff;border:1px solid #dfe7ed;border-radius:30px;font-size:10px;color:#667b8d}
 .stage-badge.partial{background:#fbf5e9;border-color:#ead9b8;color:#8a662c}
-.device-frame{width:min(100%,470px);height:min(890px,calc(100vh - 112px));min-height:650px;background:#fff;border:7px solid #dce4ea;border-radius:34px;box-shadow:0 22px 60px rgba(19,45,68,.17),0 2px 8px rgba(19,45,68,.06);overflow:hidden;position:relative}
-.app{height:100%;width:100%;display:flex;flex-direction:column;background:var(--bg);overflow:hidden;position:relative}
-.app.dark{--ink:#edf3f9;--ink-2:#c4d0dc;--muted:#94a3b2;--bg:#101b27;--paper:#172533;--line:#2b3b4a;--line-2:#34495b;--soft:#1d2c3b;--soft-blue:#1d344b;--gold-pale:#3e3424;--shadow:0 12px 28px rgba(0,0,0,.25);}
-.app.dark .app-top,.app.dark .bottom-nav{background:#142230;border-color:#293948}
-.app.dark .card,.app.dark .form-card,.app.dark .info-card,.app.dark .record-card,.app.dark .list-row,.app.dark .tile,.app.dark .section-box,.app.dark .modal-card{background:var(--paper);border-color:var(--line)}
+.device-frame{margin:0 auto;width:min(100%,460px);height:calc(100dvh - 52px);min-height:0;background:var(--paper);border:0;border-radius:0;box-shadow:none;overflow:hidden;position:relative}
+.app{height:100%;width:100%;display:flex;flex-direction:column;background:var(--bg);overflow:hidden;position:relative;font-family:var(--font-ui);font-size:var(--font-body);font-weight:var(--weight-regular);line-height:var(--leading-body)}
+.app :is([dir="ltr"],.numeric,[data-numeric],.amount,.record-value,input[type="number"],input[inputmode="numeric"],input[inputmode="decimal"],input[inputmode="tel"]){font-family:var(--font-numeric);font-variant-numeric:tabular-nums}
+.app.dark{--ink:#edf3f9;--ink-2:#c4d0dc;--muted:#94a3b2;--bg:#101b27;--paper:#172533;--line:#2b3b4a;--line-2:#34495b;--soft:#1d2c3b;--soft-blue:#1d344b;--surface:var(--paper);--surface-2:#1d2c3b;--gold-pale:#3e3424;--shadow:0 12px 28px rgba(0,0,0,.25)}
+.app.dark .app-top,.app.dark .bottom-nav{height:auto;min-height:calc(64px + env(safe-area-inset-bottom,0px));flex-shrink:0;border-top:1px solid var(--line);background:var(--paper);display:flex;align-items:stretch;justify-content:space-around;gap:4px;padding:4px 12px calc(4px + env(safe-area-inset-bottom,0px));z-index:3}
+.app.dark .card,.app.dark .form-card,.app.dark .info-card,.app.dark .record-card,.app.dark .list-row,.app.dark .tile,.app.dark .section-box,.app.dark .modal-card{width:100%;max-width:390px;max-height:86%;overflow:auto;background:var(--paper);border:1px solid var(--line);border-radius:var(--radius);box-shadow:0 16px 42px rgba(6,26,43,.18);padding:18px}
 .app.dark input,.app.dark select,.app.dark textarea{background:#101d2a;color:var(--ink);border-color:#35485a}
-.app-top{height:auto;min-height:64px;background:var(--paper);border-bottom:1px solid #e8edf1;display:flex;align-items:center;padding:11px 18px;gap:12px;flex-shrink:0;z-index:2}
-.app-top.home-top{height:67px;justify-content:space-between;padding:0 21px}
+.app-top{height:auto;min-height:56px;background:var(--paper);border-bottom:1px solid var(--line);display:flex;align-items:center;padding:0 18px;gap:12px;flex-shrink:0;z-index:2}
+.app-top.home-top{height:64px;min-height:64px;justify-content:space-between;padding:0 19px}
 .top-actions{display:flex;align-items:center;gap:20px}
 .icon-btn{border:0;background:transparent;color:var(--blue);padding:4px;display:grid;place-items:center;position:relative}
-.icon-btn svg{width:28px;height:28px}
+.icon-btn svg{width:23px;height:23px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
 .icon-btn .notice-dot{position:absolute;top:1px;right:1px;width:7px;height:7px;background:#d65352;border-radius:50%;border:1px solid #fff}
 .top-back{width:38px;height:38px;border:0;background:transparent;color:var(--blue);display:grid;place-items:center;flex-shrink:0}
 .top-back svg{width:24px;height:24px}
 .top-title{font-size:16px;font-weight:900;line-height:1.35;flex:1}
 .connection-strip{background:#fff6e9;color:#8a6327;padding:7px 14px;font-size:11px;display:flex;align-items:center;gap:7px;border-bottom:1px solid #ead8b7;flex-shrink:0}
 .connection-strip svg{width:16px;height:16px}
-.screen-body{flex:1;overflow:auto;overscroll-behavior:contain;padding:17px 17px 24px;scrollbar-width:thin;scrollbar-color:#cad5df transparent}
+.screen-body{flex:1;overflow:auto;overscroll-behavior:contain;padding:15px 15px 22px;scrollbar-width:thin;scrollbar-color:#cad3e1 transparent;font-size:14px}
 .screen-body.no-pad{padding:0}
 .bottom-nav{height:73px;flex-shrink:0;border-top:1px solid #e5ebef;background:#fff;display:flex;align-items:stretch;justify-content:space-around;padding:7px 11px max(7px,env(safe-area-inset-bottom));z-index:3}
-.bottom-item{border:0;background:transparent;color:#8796a3;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;min-width:84px;font-size:11px;font-weight:700;padding:1px 8px}
-.bottom-item svg{width:25px;height:25px;stroke-width:1.9}
+.bottom-item{border:0;background:transparent;color:#8793a6;display:flex;flex:1 1 0;flex-direction:column;align-items:center;justify-content:center;gap:3px;min-width:0;min-height:52px;font-size:12px;font-weight:var(--weight-medium);padding:2px 0}
+.bottom-item svg{width:22px;height:22px;stroke-width:1.9;fill:none;stroke:currentColor;stroke-linecap:round;stroke-linejoin:round}
 .bottom-item.active{color:var(--blue);font-weight:900}
 .bottom-item.active svg{stroke-width:2.25}
 .mock-label{position:absolute;top:74px;left:12px;z-index:3;pointer-events:none;font-size:9px;color:#59718a;background:#fffdf3d9;border:1px solid #eadfca;padding:4px 7px;border-radius:20px;opacity:.92}
 .app:not(.has-top) .mock-label{top:12px}
 /* common components */
 .page-intro{margin:2px 0 16px}
-.page-intro h2{font-size:20px;margin:0 0 5px;font-weight:900}
+.page-intro h2{font-size:var(--font-page-title);margin:0 0 5px;font-weight:var(--weight-bold);line-height:var(--leading-title)}
 .page-intro p{font-size:12px;color:var(--muted);margin:0;line-height:1.8}
 .card,.form-card,.info-card,.section-box{background:var(--paper);border:1px solid var(--line);border-radius:var(--radius);box-shadow:var(--shadow)}
 .form-card{padding:17px;margin-bottom:14px}
 .info-card{padding:15px;margin-bottom:12px}
 .section-box{padding:15px;margin-bottom:13px}
 .section-head{display:flex;align-items:center;justify-content:space-between;gap:8px;margin:20px 1px 12px}
-.section-head h3{font-size:17px;font-weight:900;margin:0}
+.section-head h3{font-size:var(--font-section-title);font-weight:var(--weight-bold);line-height:var(--leading-title);margin:0}
 .section-title-wrap{display:flex;align-items:center;gap:9px}
 .section-head svg{width:23px;height:23px;color:var(--blue)}
 .section-sub{font-size:10px;color:var(--muted);font-weight:500}
 .field{margin:0 0 14px;min-width:0}
 .field:last-child{margin-bottom:0}
-.field label{display:block;font-size:12px;font-weight:800;color:var(--ink-2);margin:0 0 7px}
-.field input,.field select,.field textarea,.filter-select{width:100%;height:43px;border:1px solid var(--line-2);border-radius:11px;background:#fbfcfd;color:var(--ink);padding:0 12px;outline:none;font-size:13px;min-width:0}
+.field label{display:block;font-size:var(--font-secondary);font-weight:var(--weight-medium);color:var(--ink-2);margin:0 0 6px}
+.field input,.field select,.field textarea,.filter-select{width:100%;height:42px;min-height:42px;border:1px solid var(--line-2);border-radius:var(--radius-sm);background:#fbfcfe;color:var(--ink);padding:0 12px;outline:none;font-size:14px;min-width:0;font-weight:var(--weight-regular)}
 .field textarea{height:auto;min-height:84px;padding:10px 12px;resize:vertical}
 .field input:focus,.field select:focus,.field textarea:focus{border-color:#9bb5d4;box-shadow:0 0 0 3px #dbe7f4}
 .field .hint{font-size:10px;color:var(--muted);margin-top:5px;line-height:1.7}
@@ -117,7 +125,7 @@ button:disabled{cursor:not-allowed;opacity:.48}
 .row-fields{display:grid;grid-template-columns:1fr 1fr;gap:10px}
 .field-row{display:flex;align-items:center;gap:9px}
 .field-row>*{min-width:0}
-.btn{border:1px solid transparent;border-radius:12px;min-height:43px;padding:10px 15px;font-size:13px;font-weight:800;display:inline-flex;align-items:center;justify-content:center;gap:8px;transition:.15s ease;white-space:nowrap}
+.btn{border:1px solid transparent;border-radius:var(--radius-sm);min-height:46px;padding:10px 15px;font-size:14px;font-weight:var(--weight-semibold);display:inline-flex;align-items:center;justify-content:center;gap:8px;transition:.15s ease;white-space:nowrap}
 .btn svg{width:18px;height:18px}
 .btn.primary{background:var(--blue);color:#fff;box-shadow:0 5px 12px #224d9027}
 .btn.primary:hover{background:var(--blue-2)}
@@ -130,16 +138,16 @@ button:disabled{cursor:not-allowed;opacity:.48}
 .text-link{border:0;background:transparent;color:var(--blue);font-size:12px;font-weight:800;padding:7px 4px}
 .helper-links{display:flex;justify-content:space-between;align-items:center;margin-top:12px;padding:0 3px}
 .muted{color:var(--muted)}
-.small-note{font-size:10px;line-height:1.75;color:var(--muted)}
+.small-note{font-size:var(--font-helper);line-height:var(--leading-body);color:var(--muted)}
 .inline-note{background:#f6f9fb;border:1px solid #e5edf2;border-radius:11px;padding:10px 12px;font-size:11px;color:#62788a;line-height:1.8}
 .unresolved{border:1px dashed #d7c39e;background:#fcf8ef;color:#84652f;border-radius:11px;padding:10px 11px;font-size:11px;line-height:1.75}
-.status{display:inline-flex;align-items:center;gap:5px;font-size:10px;font-weight:800;border-radius:25px;padding:5px 9px;background:#f0f4f7;color:#65798a;white-space:nowrap}
+.status{display:inline-flex;align-items:center;gap:5px;font-size:var(--font-helper);font-weight:var(--weight-semibold);border-radius:var(--radius-xs);padding:5px 9px;background:#f0f2f6;color:#5d6b80;white-space:nowrap}
 .status.blue{background:#edf3fa;color:#2b5a96}.status.gold{background:#f8f1e5;color:#8d672d}.status.green{background:#eaf4ee;color:#39735c}.status.red{background:#fff0ef;color:#ad4f4a}
 .list-search{position:relative;margin-bottom:13px}
 .list-search input{width:100%;height:42px;border:1px solid var(--line-2);border-radius:11px;padding:0 42px 0 12px;background:#fff;color:var(--ink);outline:none;font-size:12px}
 .list-search svg{position:absolute;right:13px;top:11px;width:19px;height:19px;color:#8497a8}
 .list-stack{display:flex;flex-direction:column;gap:9px}
-.list-row{background:#fff;border:1px solid var(--line);border-radius:14px;min-height:64px;display:flex;align-items:center;gap:11px;padding:12px 13px;box-shadow:0 3px 10px rgba(23,46,68,.035);color:var(--ink);width:100%;text-align:right}
+.list-row{background:var(--paper);border:1px solid var(--line);border-radius:var(--radius);min-height:64px;display:flex;align-items:center;gap:10px;padding:11px 12px;box-shadow:0 3px 10px rgba(25,44,78,.035);color:var(--ink);width:100%;text-align:right}
 .list-row .row-icon{width:32px;height:32px;flex-shrink:0;display:grid;place-items:center;color:var(--blue)}
 .list-row .row-icon.gold{color:var(--gold)}
 .list-row .row-icon svg{width:26px;height:26px}
@@ -148,12 +156,12 @@ button:disabled{cursor:not-allowed;opacity:.48}
 .list-row .row-meta{font-size:10px;color:var(--muted);margin-top:3px}
 .list-row .row-arrow{width:17px;height:17px;color:#71879b;flex-shrink:0}
 .tile-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
-.tile{position:relative;min-height:144px;border:1px solid var(--line);border-radius:19px;background:#fff;box-shadow:var(--shadow);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:11px;padding:15px 12px 22px;text-align:center;color:var(--ink);width:100%}
+.tile{position:relative;min-width:0;min-height:0;aspect-ratio:1.48/1;border:1px solid var(--line);border-radius:var(--radius);background:var(--paper);box-shadow:var(--shadow);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:7px;padding:12px 14px;text-align:center;color:var(--ink);width:100%}
 .tile:hover{transform:translateY(-1px);box-shadow:0 13px 24px rgba(20,48,74,.1)}
 .tile .tile-icon{display:grid;place-items:center;height:42px;color:var(--blue)}
 .tile .tile-icon.gold{color:var(--gold)}
-.tile .tile-icon svg{width:43px;height:43px;stroke-width:1.9}
-.tile .tile-label{font-size:15px;font-weight:900;line-height:1.55}
+.tile .tile-icon svg{width:29px;height:29px;stroke-width:2}
+.tile .tile-label{font-size:var(--font-home-card-title);font-weight:var(--weight-bold);line-height:1.4}
 .tile .tile-arrow{position:absolute;left:13px;bottom:10px;background:#eef4f8;color:#506e89;width:26px;height:26px;border-radius:50%;display:grid;place-items:center}
 .tile .tile-arrow svg{width:17px;height:17px}
 .empty-state{border:1px dashed #d6e0e7;border-radius:15px;padding:25px 14px;text-align:center;color:#7c8d9b;background:#fbfcfd;font-size:12px;line-height:1.8}
@@ -163,14 +171,14 @@ button:disabled{cursor:not-allowed;opacity:.48}
 .kv-row:last-child{border-bottom:0}
 .kv-row .k{color:var(--muted);font-weight:650}
 .kv-row .v{font-weight:800;text-align:left;max-width:60%;overflow-wrap:anywhere}
-.pill-tabs{display:flex;gap:6px;background:#eef3f6;padding:4px;border-radius:11px;margin-bottom:14px}
-.pill-tabs button{flex:1;border:0;background:transparent;border-radius:8px;padding:8px 6px;color:#6e8293;font-size:11px;font-weight:800}
-.pill-tabs button.active{background:#fff;color:var(--blue);box-shadow:0 1px 4px #1c3c5a18}
+.pill-tabs{display:flex;gap:12px;overflow-x:auto;scrollbar-width:none;background:transparent;padding:0;border-bottom:1px solid var(--line);border-radius:0;margin:7px 0 10px}
+.pill-tabs button{position:relative;flex:0 0 auto;min-height:42px;border:0;border-bottom:2px solid transparent;background:transparent;border-radius:0;padding:11px 2px;color:#78869a;font-size:12px;font-weight:var(--weight-semibold);white-space:nowrap}
+.pill-tabs button.active{background:transparent;color:var(--blue);border-bottom-color:var(--blue);box-shadow:none}
 .filter-row{display:flex;align-items:center;gap:7px;overflow-x:auto;padding:0 0 11px;margin-bottom:4px;scrollbar-width:none}
 .filter-row::-webkit-scrollbar{display:none}
 .filter-select{width:auto;min-width:110px;height:36px;padding:0 9px;font-size:10px;border-radius:10px;flex-shrink:0;background:#fff}
 .record-section-title{font-size:13px;font-weight:900;margin:16px 2px 9px;display:flex;align-items:center;justify-content:space-between}
-.record-card{background:#fff;border:1px solid var(--line);border-radius:15px;box-shadow:0 4px 13px rgba(18,42,64,.045);overflow:hidden;margin-bottom:9px}
+.record-card{background:var(--paper);border:1px solid var(--line);border-radius:var(--radius);box-shadow:0 3px 10px rgba(25,44,78,.04);overflow:hidden;margin-bottom:9px}
 .record-summary{width:100%;border:0;background:transparent;color:var(--ink);display:flex;align-items:center;gap:11px;padding:13px 13px;text-align:right;min-height:65px}
 .record-symbol{width:30px;height:30px;display:grid;place-items:center;flex-shrink:0;color:var(--blue)}
 .record-symbol svg{width:24px;height:24px}
@@ -187,9 +195,9 @@ button:disabled{cursor:not-allowed;opacity:.48}
 /* home */
 .home-body{padding:17px 17px 26px}
 .summary-carousel{position:relative;margin-bottom:12px}
-.summary-window{overflow:hidden;border-radius:21px}
+.summary-window{overflow:hidden;border-radius:var(--radius)}
 .summary-track{display:flex;direction:rtl;transition:transform .3s ease;touch-action:pan-y}
-.summary-slide{min-width:100%;height:148px;border-radius:21px;position:relative;padding:26px 24px;background:linear-gradient(118deg,#73501d 0%,#9c6b27 46%,#c18a37 100%);box-shadow:var(--shadow-gold);color:#fff;display:flex;align-items:center;justify-content:space-between;overflow:hidden}
+.summary-slide{min-width:100%;height:144px;border-radius:var(--radius);position:relative;padding:23px 21px;background:linear-gradient(118deg,#73501d 0%,#9c6b27 46%,#c18a2d 100%);box-shadow:var(--shadow-gold);color:#fff;display:flex;align-items:center;justify-content:space-between;overflow:hidden}
 .summary-slide:before{content:"";position:absolute;width:220px;height:220px;border:1px solid #ffffff25;border-radius:50%;left:-75px;top:-128px}
 .summary-slide:after{content:"";position:absolute;width:160px;height:160px;border:1px solid #ffffff19;border-radius:50%;left:5px;bottom:-122px}
 .summary-info{display:flex;align-items:center;gap:13px;z-index:1}
@@ -215,7 +223,7 @@ button:disabled{cursor:not-allowed;opacity:.48}
 /* auth */
 .auth-body{display:flex;flex-direction:column;justify-content:center;padding:24px 21px 26px;background:linear-gradient(180deg,#f7f9fb,#edf3f7)}
 .auth-heading{text-align:center;font-size:23px;font-weight:900;margin:0 0 18px}
-.auth-card{padding:20px 18px 17px;border-radius:20px;box-shadow:0 14px 35px rgba(26,55,80,.09);background:#fff;border:1px solid #e0e8ee}
+.auth-card{padding:18px 16px 15px;border-radius:var(--radius);box-shadow:0 10px 26px rgba(25,44,78,.075);background:var(--paper);border:1px solid var(--line)}
 .auth-card .btn{margin-top:4px}
 .auth-card .btn+.btn{margin-top:8px}
 .auth-note{text-align:center;color:#728597;font-size:11px;margin-top:15px}
@@ -267,365 +275,8 @@ button:disabled{cursor:not-allowed;opacity:.48}
 /* footer labels */
 .data-disclaimer{width:min(100%,560px);text-align:center;color:#788b9a;font-size:10px;line-height:1.7;padding:0 12px 3px}
 .data-disclaimer strong{color:#526e85}
-@media(max-width:900px){.preview-shell{grid-template-columns:260px minmax(0,1fr);gap:12px;padding:12px}.inspector{min-height:calc(100vh - 24px);max-height:calc(100vh - 24px)}}
-@media(max-width:680px){
- .preview-shell{display:block;padding:0;min-height:100vh}
- .inspector{position:fixed;z-index:50;top:0;bottom:0;right:0;width:min(320px,88vw);min-height:0;max-height:none;border-radius:0 0 0 20px;transform:translateX(105%);transition:transform .24s;box-shadow:-12px 0 40px #102d4724}
- .inspector.open{transform:translateX(0)}
- .stage{min-height:100vh;gap:0}
- .stage-head{width:100%;padding:8px 13px;background:#f1f5f8}
- .device-frame{width:100%;height:calc(100dvh - 52px);min-height:0;border:0;border-radius:0;box-shadow:none}
- .data-disclaimer{padding:4px 12px;background:#f1f5f8;width:100%;font-size:9px}
- .menu-open{display:grid!important}.close-index{display:grid;place-items:center}
-}
-.menu-open{display:none;border:1px solid #dce5eb;background:#fff;border-radius:9px;width:31px;height:31px;place-items:center;color:#49647b}.close-index{display:none;width:30px;height:30px;border:1px solid #dce5eb;border-radius:9px;background:#fff;color:#526c82;font-size:22px;line-height:1}@media(max-width:680px){.close-index{display:grid!important;place-items:center}}
-.menu-open svg{width:17px;height:17px}
-@media(max-width:390px){.screen-body{padding:14px 13px 22px}.home-body{padding:14px 13px 23px}.tile{min-height:133px}.summary-slide{height:138px;padding:20px}.summary-title{font-size:16px}.auth-body{padding:20px 15px}.row-fields{gap:7px}}
 
-/* SAHM commercial design system */
-:root{--font-ui:"Noto Sans Arabic","IBM Plex Sans Arabic","Segoe UI",Tahoma,sans-serif;--ink:#132b43;--ink-2:#304b64;--muted:#718397;--blue:#2855a2;--blue-2:#1d4386;--gold:#95651f;--gold-2:#bd8b3c;--bg:#f4f7fa;--paper:#fff;--line:#e2e8ee;--line-2:#d3dde6;--soft:#f1f5f8;--soft-blue:#edf3fa;--shadow:0 8px 22px rgba(20,43,65,.075),0 2px 5px rgba(20,43,65,.035);--shadow-gold:0 12px 26px rgba(115,79,25,.20),0 2px 7px rgba(87,64,27,.10);--radius:16px;--radius-sm:12px;--radius-xs:9px}
-html,body,button,input,select,textarea{font-family:var(--font-ui)}body{background:#edf2f6}
-.preview-shell{max-width:1440px;grid-template-columns:292px minmax(0,1fr);gap:18px;padding:18px}
-.inspector{border-radius:18px;border-color:#e0e7ed;box-shadow:0 6px 24px rgba(23,48,72,.055)}.inspector-head{padding:17px 16px 13px}.brand-mark{border-radius:11px;box-shadow:0 4px 10px rgba(36,77,135,.2)}
-.index-tools{padding:10px 13px}.search-index,.field input,.field select,.field textarea,.filter-select,.list-search input{border-radius:10px;border-color:var(--line-2);background:#fbfcfe}
-.index-item{border-radius:9px;min-height:40px;padding:7px 8px}.index-item.active{background:#edf3fa;border-color:#d8e3f0}
-.stage{gap:10px}.stage-head{width:min(100%,520px);padding:2px 3px}.device-frame{width:min(100%,460px);height:min(900px,calc(100vh - 100px));min-height:650px;border:6px solid #dbe3ea;border-radius:29px;box-shadow:0 18px 48px rgba(19,45,68,.14),0 2px 7px rgba(19,45,68,.05)}
-.app{background:var(--bg)}.app-top{min-height:62px;padding:10px 17px;border-bottom-color:var(--line)}.app-top.home-top{height:64px;padding:0 19px}
-.screen-body{padding:16px 16px 22px;scrollbar-color:#cbd6e0 transparent}.bottom-nav{height:70px;border-top-color:var(--line);padding:6px 10px max(6px,env(safe-area-inset-bottom))}.bottom-item{gap:3px;font-size:11px}
-.card,.form-card,.info-card,.section-box{border-radius:var(--radius);box-shadow:var(--shadow);border-color:var(--line)}.form-card{padding:16px;margin-bottom:12px}.info-card,.section-box{padding:14px;margin-bottom:11px}
-.section-head{margin:17px 1px 10px}.section-head h3{font-size:15px;line-height:1.5}.page-intro h2{font-size:19px;line-height:1.45}.page-intro p{font-size:12px;line-height:1.75}
-.field{margin-bottom:12px}.field label{font-size:12px;margin-bottom:6px}.field input,.field select,.field textarea,.filter-select{height:42px;font-size:13px}
-.btn{min-height:42px;border-radius:10px;font-size:13px}.btn.small{min-height:33px;border-radius:8px}.btn.primary{background:var(--blue);box-shadow:0 3px 8px rgba(34,77,144,.16)}.btn.gold{background:linear-gradient(135deg,#95651f,#bd8b3c);box-shadow:0 3px 8px rgba(146,101,35,.17)}
-.list-stack{gap:8px}.list-row{border-radius:12px;box-shadow:0 2px 8px rgba(23,46,68,.035);padding:11px 12px}.record-card{border-radius:13px;box-shadow:0 3px 10px rgba(18,42,64,.04);margin-bottom:8px}.record-summary{padding:12px;min-height:61px}
-.tile-grid{gap:11px}.tile{min-height:136px;border-radius:16px;box-shadow:var(--shadow);gap:10px;padding:14px 11px 21px}.tile:hover{box-shadow:0 10px 20px rgba(20,48,74,.085)}.tile .tile-arrow{width:24px;height:24px}
-.summary-window,.summary-slide{border-radius:18px}.summary-slide{height:144px;padding:23px 21px;box-shadow:var(--shadow-gold)}.carousel-controls{height:25px}
-.auth-card{border-radius:16px;padding:18px 16px 15px;box-shadow:0 10px 26px rgba(26,55,80,.075)}.modal-card{border-radius:17px;box-shadow:0 16px 42px rgba(6,26,43,.22)}
-.inline-note,.calc-band,.empty-state{border-radius:11px}.connection-strip{font-size:11px;padding:7px 13px}.unresolved{display:none!important}.mock-label,.data-disclaimer,.preview-state,.summary-counts,.demo-actions{display:none!important}
-.stage-head{background:transparent}.menu-open{border-radius:9px;border-color:#dbe4eb}
-@media(max-width:900px){.preview-shell{grid-template-columns:260px minmax(0,1fr);gap:10px;padding:10px}.device-frame{height:calc(100vh - 84px)}}
-@media(max-width:680px){.preview-shell{display:block;padding:0;min-height:100vh}.inspector{position:fixed;z-index:50;top:0;bottom:0;right:0;width:min(320px,88vw);min-height:0;max-height:none;border-radius:0 0 0 18px;transform:translateX(105%);transition:transform .24s;box-shadow:-12px 0 36px rgba(16,45,71,.16)}.inspector.open{transform:translateX(0)}.stage{min-height:100vh;gap:0}.stage-head{width:100%;height:48px;padding:7px 13px;background:#fff;border-bottom:1px solid var(--line)}.device-frame{width:100%;height:calc(100dvh - 48px);min-height:0;border:0;border-radius:0;box-shadow:none}.screen-body{padding:15px 14px 22px}.bottom-nav{height:68px}}
-@media(max-width:390px){.screen-body{padding:13px 12px 20px}.tile{min-height:128px}.summary-slide{height:136px;padding:19px}.auth-body{padding:18px 14px}.row-fields{gap:7px}}
-
-
-/* Navigation drawer and screen canvas */
-.preview-shell{display:block;max-width:none;padding:0;min-height:100vh}
-.inspector{position:fixed;z-index:50;top:0;bottom:0;right:0;width:min(330px,88vw);min-height:0;max-height:none;border-radius:0 0 0 18px;transform:translateX(105%);transition:transform .24s;box-shadow:-12px 0 36px rgba(16,45,71,.16)}
-.inspector.open{transform:translateX(0)}
-.stage{min-height:100vh;gap:0;justify-content:flex-start}
-.stage-head{width:min(100%,460px);height:52px;padding:7px 15px;background:#fff;border-bottom:1px solid var(--line);margin:0 auto}
-.device-frame{margin:0 auto;width:min(100%,460px);height:calc(100dvh - 52px);min-height:0;border:0;border-radius:0;box-shadow:none}
-.index-status{display:none!important}
-.index-item{padding:8px 10px}
-@media(min-width:681px){.stage-head{height:58px}.device-frame{height:calc(100vh - 58px);max-height:none}}
-
-</style>
-</head>
-<body>
-<div class="preview-shell">
-  <aside class="inspector" id="inspector">
-    <div class="inspector-head">
-      <div class="brand-line"><div class="brand-mark"></div><div style="flex:1"><div class="brand-title">سهم | SAHM</div><div class="brand-sub">إدارة الجمعيات</div></div><button class="close-index" data-action="close-index" aria-label="إغلاق الفهرس">×</button></div>
-    </div>
-    <div class="index-tools"><input class="search-index" id="indexSearch" placeholder="ابحث برقم أو اسم الشاشة..." aria-label="ابحث في فهرس الشاشات"></div>
-    <div class="index-scroll" id="indexScroll"></div>
-  </aside>
-  <main class="stage">
-    <div class="stage-head"><div class="brand-line"><div class="brand-mark" id="brandMark"></div><strong>سهم</strong></div><button class="menu-open" data-action="open-index" aria-label="التنقل بين الأقسام"><span id="menuIcon"></span></button></div>
-    <div class="device-frame"><div class="app" id="app"></div></div>
-  </main>
-</div>
-<div class="overlay hidden" id="modalRoot" role="dialog" aria-modal="true"></div>
-<script>
-const svgPaths={
-  bell:'<path d="M18 8a6 6 0 0 0-12 0c0 7-3 7-3 9h18c0-2-3-2-3-9"/><path d="M10 21h4"/>',
-  user:'<circle cx="12" cy="8" r="4"/><path d="M4 21c.7-4.1 3.6-6.5 8-6.5s7.3 2.4 8 6.5"/>',
-  usercheck:'<circle cx="9" cy="7" r="4"/><path d="M2 21c.5-4 3.1-6.5 7-6.5 2.1 0 3.8.7 5 2"/><path d="m16 8 2 2 4-4"/>',
-  users:'<path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75"/>',
-  link:'<path d="M10 13a5 5 0 0 0 7.1 0l3-3a5 5 0 0 0-7.1-7.1l-1.7 1.7"/><path d="M14 11a5 5 0 0 0-7.1 0l-3 3a5 5 0 0 0 7.1 7.1l1.7-1.7"/>',
-  plus:'<circle cx="12" cy="12" r="9"/><path d="M12 8v8M8 12h8"/>',
-  back:'<path d="m15 18-6-6 6-6"/>',
-  right:'<path d="m9 18 6-6-6-6"/>',
-  home:'<path d="m3 10 9-7 9 7v10a1 1 0 0 1-1 1h-5v-7H9v7H4a1 1 0 0 1-1-1z"/>',
-  chat:'<path d="M21 11.5a8.4 8.4 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.4 8.4 0 0 1-3.8-.9L3 21l1.9-5.7a8.4 8.4 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.4 8.4 0 0 1 3.8-.9h.5a8.5 8.5 0 0 1 8 8z"/><path d="M8 11h8M8 15h5"/>',
-  activity:'<path d="M2 12h4l3-8 5 16 3-8h5"/>',
-  search:'<circle cx="10.8" cy="10.8" r="6.8"/><path d="m16 16 5 5"/>',
-  calendar:'<rect x="3" y="5" width="18" height="16" rx="2"/><path d="M16 3v4M8 3v4M3 10h18"/>',
-  wallet:'<rect x="2.5" y="5" width="19" height="15" rx="2"/><path d="M2.5 9h19M16 14h2"/><path d="M5 5V3h14v2"/>',
-  ticket:'<path d="M3 7a2 2 0 0 0 0 4v2a2 2 0 0 0 0 4h18a2 2 0 0 0 0-4v-2a2 2 0 0 0 0-4z"/><path d="M13 7v2m0 3v2m0 3v2"/>',
-  file:'<path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6M8 13h8M8 17h8"/>',
-  settings:'<circle cx="12" cy="12" r="3"/><path d="m19.4 15 .1.1 1.4 1.1-1.4 2.4-1.7-.6a8 8 0 0 1-1.5.9L16 21h-8l-.3-2.1a8 8 0 0 1-1.5-.9l-1.7.6-1.4-2.4 1.4-1.1a8 8 0 0 1 0-1.8l-1.4-1.1 1.4-2.4 1.7.6a8 8 0 0 1 1.5-.9L8 7h8l.3 2.1a8 8 0 0 1 1.5.9l1.7-.6 1.4 2.4-1.4 1.1a8 8 0 0 1-.1 2.1z"/>',
-  clock:'<circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/>',
-  check:'<path d="m5 12 4 4L19 6"/>',
-  x:'<path d="m18 6-12 12M6 6l12 12"/>',
-  down:'<path d="m6 9 6 6 6-6"/>',
-  copy:'<rect x="8" y="8" width="12" height="13" rx="2"/><path d="M16 8V5a2 2 0 0 0-2-2H5a2 2 0 0 0-2 2v11a2 2 0 0 0 2 2h3"/>',
-  eye:'<path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7-10-7-10-7z"/><circle cx="12" cy="12" r="3"/>',
-  eyeoff:'<path d="m3 3 18 18M10.6 10.6a2 2 0 0 0 2.8 2.8"/><path d="M9.9 5.2A10.8 10.8 0 0 1 12 5c6.5 0 10 7 10 7a16 16 0 0 1-3.1 3.9M6.2 6.3C3.5 8.1 2 12 2 12s3.5 7 10 7a10 10 0 0 0 4-.8"/>',
-  alert:'<path d="M12 3 2 21h20L12 3z"/><path d="M12 9v4m0 4h.01"/>',
-  info:'<circle cx="12" cy="12" r="10"/><path d="M12 11v5m0-9h.01"/>',
-  lock:'<rect x="4" y="10" width="16" height="11" rx="2"/><path d="M8 10V7a4 4 0 1 1 8 0v3"/>',
-  edit:'<path d="m15 5 4 4M4 20l4-.8L19 8a2.1 2.1 0 0 0-3-3L5 16z"/>',
-  logout:'<path d="M10 17l5-5-5-5M15 12H3"/><path d="M12 3h6a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-6"/>',
-  filter:'<path d="M4 5h16M7 12h10m-7 7h4"/>',
-  send:'<path d="m22 2-7 20-4-9-9-4z"/><path d="M22 2 11 13"/>',
-  refresh:'<path d="M20 7v5h-5M4 17v-5h5"/><path d="M5.6 9a7 7 0 0 1 11.5-2L20 12M4 12l2.9 5a7 7 0 0 0 11.5-2"/>',
-  mail:'<rect x="3" y="5" width="18" height="14" rx="2"/><path d="m3 7 9 6 9-6"/>',
-  phone:'<path d="M22 16.9v3a2 2 0 0 1-2.2 2 19.8 19.8 0 0 1-8.6-3.1 19.4 19.4 0 0 1-6-6A19.8 19.8 0 0 1 2.1 4.2 2 2 0 0 1 4.1 2h3a2 2 0 0 1 2 1.7l.5 2.7a2 2 0 0 1-.6 1.8L7.4 9.8a16 16 0 0 0 6 6l1.6-1.6a2 2 0 0 1 1.8-.6l2.7.5a2 2 0 0 1 1.7 1.8z"/>',
-  coins:'<circle cx="8" cy="8" r="5"/><path d="M3 8v4a5 5 0 0 0 8.4 3.7M13 16a5 5 0 1 0 0-10M13 16v-4a5 5 0 0 0-4.6-5"/>',
-  chart:'<path d="M3 3v18h18M7 14l4-4 3 3 6-7"/>',
-  building:'<path d="M3 21h18M5 21V7l7-4 7 4v14M9 21v-5h6v5M8 9h.01M12 9h.01M16 9h.01"/>',
-  handshake:'<path d="m2 12 4-4 4 2 4-2 6 4-3 5-5-2-3 2-5-5z"/><path d="m9 10 4 4m-7-6-3-3m13 3 3-3"/>',
-  userplus:'<circle cx="9" cy="8" r="4"/><path d="M2 21c.7-4 3-6 7-6 2 0 3.5.5 4.6 1.5M19 8v6m-3-3h6"/>',
-  list:'<path d="M9 6h12M9 12h12M9 18h12M4 6h.01M4 12h.01M4 18h.01"/>',
-  book:'<path d="M4 5.5A2.5 2.5 0 0 1 6.5 3H20v17H6.5A2.5 2.5 0 0 0 4 22z"/><path d="M4 5.5V22m4-14h8"/>',
-  award:'<circle cx="12" cy="8" r="6"/><path d="m8 13-1 9 5-3 5 3-1-9"/>',
-  shield:'<path d="M12 22s8-4 8-11V5l-8-3-8 3v6c0 7 8 11 8 11z"/><path d="m9 12 2 2 4-4"/>',
-  people:'<circle cx="9" cy="8" r="3.5"/><path d="M2 21c.5-3.6 2.8-5.8 7-5.8s6.5 2.2 7 5.8M17 5.5a3.5 3.5 0 0 1 0 6.8M19 16c1.7.6 2.8 2.3 3 5"/>',
-  gift:'<rect x="3" y="8" width="18" height="13" rx="2"/><path d="M2 8h20v4H2zM12 8v13M12 8H8a2.5 2.5 0 1 1 2.5-2.5V8m1 0h4a2.5 2.5 0 1 0-2.5-2.5V8"/>',
-  more:'<circle cx="5" cy="12" r="1"/><circle cx="12" cy="12" r="1"/><circle cx="19" cy="12" r="1"/>',
-  menu:'<path d="M4 6h16M4 12h16M4 18h16"/>',
-  close:'<path d="m18 6-12 12M6 6l12 12"/>',
-  globe:'<circle cx="12" cy="12" r="10"/><path d="M2 12h20M12 2a15 15 0 0 1 0 20M12 2a15 15 0 0 0 0 20"/>',
-  paper:'<path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6M8 13h8M8 17h6"/>',
-  homeplus:'<path d="m3 10 9-7 9 7v10a1 1 0 0 1-1 1h-5v-7H9v7H4a1 1 0 0 1-1-1zM12 8v4m-2-2h4"/>',
-  spark:'<path d="m12 3 1.7 5.3L19 10l-5.3 1.7L12 17l-1.7-5.3L5 10l5.3-1.7zM19 16l.8 2.2L22 19l-2.2.8L19 22l-.8-2.2L16 19l2.2-.8z"/>'
-};
-function icon(name,cls=''){return `<svg class="${cls}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${svgPaths[name]||svgPaths.info}</svg>`}
-const screens=[
- ['001','A-01','التهيئة وبدء تشغيل التطبيق','A'],['002','A-02','تسجيل الدخول','A'],['003','A-03','استعادة الحساب','A'],['004','A-04','إنشاء حساب','A'],['005','A-05','الشروط والأحكام','A'],['006','A-06','استكمال البيانات','A'],['007','B-01','إطار التطبيق العام','P'],['008','B-02','الرئيسية العامة','A'],['009','B-03','كل الجمعيات','A'],['010','B-04','جمعيات أديرها','A'],['011','B-05','جمعيات أشارك فيها','A'],['012','B-06','الإشعارات','A'],['013','B-07','الحساب الشخصي','A'],['014','C-01','إنشاء جمعية','A'],['015','C-02','نجاح إنشاء الجمعية','A'],['016','D-01','إدخال رابط الانضمام العام','A'],['017','D-02','تفاصيل الجمعية وطلب الانضمام عبر الرابط','A'],['018','D-03','تفاصيل الدعوة الشخصية وطلب الانضمام','A'],['019','—','معرّف متقاعد','X'],['020','—','معرّف متقاعد','X'],['021','E-01','الرئيسية الإدارية','P'],['022','E-02','التحصيل','A'],['023','E-03','القرعات','A'],['024','E-04','الأسهم','A'],['025','E-05','الأعضاء','A'],['026','E-06','الدعوات','P'],['027','E-07','دردشة الجمعية للمدير','P'],['028','E-08','الغرفة الإدارية','P'],['029','E-09','المعلومات','P'],['030','E-10','الإعدادات','P'],['031','E-11','السجل','P'],['032','F-01','الرئيسية العضوية','P'],['033','F-02','الأقساط','P'],['034','F-03','الأسهم العضوية','P'],['035','F-04','القرعات العضوية','P'],['036','F-05','الغرفة العضوية','P'],['037','F-06','الأخبار','P'],['038','F-07','دردشات الجمعية للعضو','P'],['039','B-08','الدردشات العامة','A'],['040','C-03','نتائج جهات الاتصال','A']
-];
-const sectionFor=id=>id<='006'?'دورة الحساب':id==='007'?'إطار التطبيق':id<='018'?'الشاشات العامة والإنشاء والانضمام':id==='019'||id==='020'?'معرّفات ملغاة':id>='021'&&id<='031'?'مساحة الجمعية — المدير':id>='032'&&id<='038'?'مساحة الجمعية — العضو': 'الوجهات العامة بعد مساحة الجمعية';
-const screenMap=Object.fromEntries(screens.map(s=>[s[0],s]));
-let current='001',historyStack=[],online=true,theme='light',activeGroup={name:'جمعية الوفاق',role:'مدير'},form={name:'',start:'',first:'',share:'',currency:'YER',mode:'count',count:'',installment:'',managerRole:'manager',managerShares:'1'};
-let recoverStep=1,registerAccepted=false,registration={email:'',pass:'',confirm:'',accepted:false},profileName='مستخدم سهم',profileAvatar='user',selectedContacts=[],contactRecords=[],joinShares=1,joinAck=false,joinSubmitted=false,joinType='public',linkValue='',expanded=new Set(),confirmCollectId=null,noticeCurrent=null,requestSearch='',activityPage='';
-let groupResult={name:'جمعية الوفاق',start:'',first:'',share:'',currency:'YER',mode:'count',count:'',managerRole:'manager',managerShares:'1'};
-const groupFixtures=[
- {id:'g1',name:'جمعية الوفاق',role:'manager',kind:'manager',tag:'إدارة'},
- {id:'g2',name:'جمعية النماء',role:'manager-member',kind:'manager',tag:'إدارة ومشاركة'},
- {id:'g3',name:'جمعية التعاون',role:'member',kind:'member',tag:'مشاركة'}
-];
-const notifications=[
- {id:'n1',title:'دعوة شخصية للانضمام',group:'جمعية النماء',time:'قبل 20 دقيقة',body:'وصلتك دعوة شخصية لتفاصيل الجمعية وتقديم طلب الانضمام. فتح الدعوة لا ينشئ عضوية تلقائياً.',type:'invite',read:false},
- {id:'n2',title:'تحديث مرتبط بجمعية',group:'جمعية الوفاق',time:'أمس',body:'يوجد تحديث في مساحة الجمعية. افتح السياق المرتبط بعد التحقق من الصلاحية.',type:'group',read:true}
-];
-const contactsFixture=[
- {id:'c1',name:'سالم محمد',phone:'77•••101',status:'حساب سهم موثق',kind:'registered',eligible:true},
- {id:'c2',name:'منى أحمد',phone:'71•••204',status:'غير مسجل في سهم',kind:'unregistered',eligible:true},
- {id:'c3',name:'أحمد علي',phone:'73•••318',status:'عضو في الجمعية',kind:'member',eligible:false},
- {id:'c4',name:'هدى صالح',phone:'70•••425',status:'سبق إرسال دعوة',kind:'invited',eligible:false},
- {id:'c5',name:'مازن عبدالله',phone:'77•••502',status:'تعذر تأكيد أهلية الدعوة',kind:'uncertain',eligible:false}
-];
-const collectionRecords=[
- {id:'col1',name:'سالم محمد',status:'مستحق',amount:'4,500',round:'القرعة الأولى',installment:'القسط الأول',due:'2026/12/01',shares:[{number:'01',amount:'1,500'},{number:'02',amount:'1,500'},{number:'03',amount:'1,500'}],reminded:true,paid:false},
- {id:'col2',name:'منى أحمد',status:'متأخر',amount:'1,500',round:'القرعة الأولى',installment:'القسط الأول',due:'2026/11/15',shares:[{number:'04',amount:'1,500'}],reminded:false,paid:false}
-];
-const paidRecords=[{id:'col3',name:'ناصر علي',status:'مدفوع',amount:'3,000',round:'القرعة الأولى',installment:'القسط الأول',due:'2026/10/15',paidAt:'2026/10/18',shares:[{number:'05',amount:'1,500'},{number:'06',amount:'1,500'}],paid:true}];
-const drawRecords=[
- {id:'d1',name:'القرعة الأولى',status:'مكتملة',start:'2026/08/01',end:'2026/09/01',winner:null,winningShare:null},
- {id:'d2',name:'القرعة الثانية',status:'جارية',start:'2026/10/01',end:'2026/12/01',money:68,time:52,collected:'34,000',target:'50,000'},
- {id:'d3',name:'القرعة الثالثة',status:'لم تبدأ',start:'2027/01/01',end:'2027/02/01',reason:'لم تُغلق القرعة السابقة'}
-];
-const shareRecords=[
- {id:'s1',owner:'سالم محمد',number:'01',status:'مؤهل',round:'القرعة الثانية',eligible:'مؤهل',result:'لا توجد نتيجة سابقة'},
- {id:'s2',owner:'منى أحمد',number:'02',status:'النتيجة غير متاحة',round:'القرعة الأولى',eligible:'لا توجد أهلية نهائية متاحة',result:'لا توجد نتيجة فوز موثقة'}
-];
-const memberRecords=[
- {id:'m1',name:'سالم محمد',role:'عضو',status:'نشط',shares:3,commitment:'3,600',paid:'1,200',dues:[['القسط الأول','600','مدفوع'],['القسط الثاني','600','مستحق'],['القسط الثالث','600','قادم']]},
- {id:'m2',name:'منى أحمد',role:'عضو',status:'نشط',shares:1,commitment:'1,200',paid:'400',dues:[['القسط الأول','200','مدفوع'],['القسط الثاني','200','مستحق']]},
- {id:'m3',name:'ناصر علي',role:'مدير ومشارك',status:'نشط',shares:2,commitment:'2,400',paid:'1,200',dues:[['القسط الأول','400','مدفوع'],['القسط الثاني','400','مستحق']]}
-];
-const requests=[{id:'rq1',name:'خالد عبدالله',status:'قيد المراجعة',source:'رابط عام',shares:2,total:'2,400',date:'2026/11/20'}];
-const invitations=[{id:'iv1',name:'علي حسن',status:'بانتظار الرد',phone:'77•••901',date:'2026/11/19',response:'لم يرد بعد'}];
-const memberDues=[{id:'du1',name:'القسط الأول',amount:'200',date:'2026/11/20',status:'مستحق'},{id:'du2',name:'القسط الثاني',amount:'200',date:'2026/12/20',status:'قادم'},{id:'du3',name:'قسط سابق',amount:'200',date:'2026/10/20',status:'مدفوع'}];
-const memberDraws=[{id:'md1',name:'القرعة الأولى',status:'النتيجة غير متاحة',date:'2026/09/01',detail:'لا توجد نتيجة متاحة لهذه القرعة.'},{id:'md2',name:'القرعة الثانية',status:'غير محدد',date:'2026/12/01',detail:'حالة الأهلية غير متاحة.'}];
-const recentEvents=[{id:'e1',title:'تم تحديث سجل جمعية الوفاق',group:'جمعية الوفاق',time:'قبل ساعة',route:'021',icon:'activity'},{id:'e2',title:'لديك دعوة شخصية لمعاينتها',group:'جمعية النماء',time:'قبل 20 دقيقة',route:'012',icon:'gift'}];
-function esc(v){return String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]))}
-function meta(id=current){return screenMap[id]||['','','','P']}
-function go(id,opts={}){if(!screenMap[id]||meta(id)[3]==='X')return;if(current!==id)historyStack.push(current);current=id;if(opts.replace&&historyStack.length)historyStack.pop();render();closeModal();window.scrollTo?.(0,0)}
-function back(fallback='008'){if(historyStack.length){current=historyStack.pop();render()}else{current=fallback;render()}}
-function statusLabel(s){return s==='A'?'معتمد بالكامل':s==='P'?'معتمد جزئياً':'معرّف متقاعد'}
-function renderIndex(){const grouped={};screens.forEach(s=>{const key=sectionFor(s[0]);(grouped[key]??=[]).push(s)});let html='';for(const [group,arr] of Object.entries(grouped)){html+=`<div class="index-section">${group}</div>`;for(const s of arr){const retired=s[3]==='X';html+=`<button class="index-item ${current===s[0]?'active':''} ${retired?'retired':''}" ${retired?'disabled':''} data-action="index-go" data-id="${s[0]}"><span class="index-num">${s[0]}</span><span class="index-name">${s[2]}</span></button>`}}
- document.getElementById('indexScroll').innerHTML=html;
-}
-function updateInspector(){}
-function render(){renderIndex();updateInspector();const app=document.getElementById('app');app.classList.toggle('dark',theme==='dark');app.classList.toggle('has-top',!['001','007'].includes(current));let html='';switch(current){
-case '001':html=renderSplash();break;case '002':html=renderLogin();break;case '003':html=renderRecovery();break;case '004':html=renderRegister();break;case '005':html=renderTerms();break;case '006':html=renderCompleteProfile();break;case '007':html=renderFrame();break;case '008':html=renderHome();break;case '009':html=renderGroups('all');break;case '010':html=renderGroups('manager');break;case '011':html=renderGroups('member');break;case '012':html=renderNotifications();break;case '013':html=renderProfile();break;case '014':html=renderCreateGroup();break;case '015':html=renderCreateSuccess();break;case '016':html=renderJoinLink();break;case '017':html=renderJoinPreview('public');break;case '018':html=renderJoinPreview('invite');break;case '021':html=renderAdminHome();break;case '022':html=renderCollections();break;case '023':html=renderDraws();break;case '024':html=renderShares();break;case '025':html=renderMembers();break;case '026':html=renderInvitations();break;case '027':html=renderChat('manager');break;case '028':html=renderAdminRoom();break;case '029':html=renderGroupInfo();break;case '030':html=renderGroupSettings();break;case '031':html=renderLog();break;case '032':html=renderMemberHome();break;case '033':html=renderMemberDues();break;case '034':html=renderMemberShares();break;case '035':html=renderMemberDraws();break;case '036':html=renderMemberRoom();break;case '037':html=renderNews();break;case '038':html=renderChat('member');break;case '039':html=renderPublicChats();break;case '040':html=renderContacts();break;default:html=renderHome();}
- app.innerHTML=html+`<div class="toast" id="toast">${icon('info')}<span id="toastText"></span></div>`;
- if(current==='008')initCarousel();if(current==='014')updateAssociationCalc();
-}
-function connection(){return online?'':`<div class="connection-strip">${icon('alert')}<span>لا يوجد اتصال</span></div>`}
-function generalHeader(){return `<div class="app-top home-top"><div class="top-actions"><button class="icon-btn" data-action="profile" aria-label="الحساب الشخصي">${icon('user')}</button></div><div class="top-actions"><button class="icon-btn" data-action="notifications" aria-label="الإشعارات">${icon('bell')}<i class="notice-dot"></i></button></div></div>${connection()}`}
-function topHeader(title,backTo='008'){return `<div class="app-top"><button class="top-back" data-action="back" data-fallback="${backTo}" aria-label="رجوع">${icon('right')}</button><div class="top-title">${esc(title)}</div></div>${connection()}`}
-function bottomNav(active=''){return `<nav class="bottom-nav" aria-label="التنقل العام"><button class="bottom-item ${active==='groups'?'active':''}" data-action="nav" data-id="009">${icon('users')}<span>الجمعيات</span></button><button class="bottom-item ${active==='home'?'active':''}" data-action="nav" data-id="008">${icon('home')}<span>الرئيسية</span></button><button class="bottom-item ${active==='chats'?'active':''}" data-action="nav" data-id="039">${icon('chat')}<span>الدردشات</span></button></nav>`}
-function page(title,body,{backTo='008',bottom=true,active='',home=false,bodyClass=''}={}){return `${home?generalHeader():topHeader(title,backTo)}<main class="screen-body ${bodyClass}">${body}</main>${bottom?bottomNav(active):''}`}
-function labelField(label,id,type='text',placeholder='',value='',extra=''){return `<div class="field"><label for="${id}">${label}</label><input id="${id}" name="${id}" type="${type}" placeholder="${placeholder}" value="${esc(value)}" ${extra}></div>`}
-function searchBox(ph='بحث'){return `<div class="list-search">${icon('search')}<input type="search" placeholder="${ph}" data-search-input oninput="filterVisible(this)"></div>`}
-function empty(text='لا توجد بيانات متاحة حالياً'){return `<div class="empty-state">${icon('file')}<div>${text}</div></div>`}
-function unresolved(text){return ``}
-function tile(label,ico,id,color='blue'){return `<button class="tile" data-action="nav" data-id="${id}"><span class="tile-icon ${color==='gold'?'gold':''}">${icon(ico)}</span><span class="tile-label">${label}</span><span class="tile-arrow">${icon('back')}</span></button>`}
-function row(title,value,ico=''){return `<div class="kv-row"><span class="k">${title}</span><span class="v">${value}</span></div>`}
-function detailRows(rows){return `<div class="kv-list">${rows.map(r=>row(r[0],r[1])).join('')}</div>`}
-function recordCard(id,title,subtitle,details,{iconName='file',value='',tag='',actions='',notice='',recordStatus='',recordRound='',recordInstallment='',recordRole='',recordShares=''}={}){const open=expanded.has(id),plain=(String(title)+' '+String(subtitle)).replace(/<[^>]*>/g,' ');return `<article class="record-card ${open?'open':''}" data-record="${id}" data-filter-text="${esc(plain)}" data-record-status="${esc(recordStatus)}" data-record-round="${esc(recordRound)}" data-record-installment="${esc(recordInstallment)}" data-record-role="${esc(recordRole)}" data-record-shares="${esc(recordShares)}"><button class="record-summary" data-action="expand" data-id="${id}" aria-expanded="${open}"><span class="record-symbol">${icon(iconName)}</span><span style="flex:1;min-width:0"><span class="record-title">${title}</span>${subtitle?`<span class="record-subtitle">${subtitle}</span>`:''}</span>${value?`<span class="record-value">${value}</span>`:''}<span class="record-chevron">${icon('down')}</span></button>${open?`<div class="record-details">${tag?`<div style="margin-bottom:9px">${tag}</div>`:''}${details}${notice?`<div class="small-note" style="margin-top:9px">${notice}</div>`:''}${actions?`<div class="record-actions">${actions}</div>`:''}</div>`:''}</article>`}
-function filterVisible(input){const q=input.value.trim().toLowerCase();const body=input.closest('.screen-body')||document.querySelector('.screen-body');if(!body)return;body.querySelectorAll('[data-filter-text]').forEach(el=>{el.style.display=el.dataset.filterText.toLowerCase().includes(q)?'':'none'});const visible=[...body.querySelectorAll('[data-filter-text]')].some(el=>el.style.display!=='none');const emptyEl=body.querySelector('[data-search-empty]');if(emptyEl)emptyEl.style.display=visible?'none':'';applyListFilters();}
-/* 001 */
-function renderSplash(){return `<div style="height:100%;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:30px;text-align:center;background:linear-gradient(180deg,#f9fbfc,#edf3f7)"><div style="height:72px;width:100%;margin-bottom:12px"></div><div style="font-size:29px;font-weight:950;color:#183e71;letter-spacing:.5px">سهم</div><div style="font-size:13px;color:#7e8c99;margin-top:5px">إدارة الجمعيات</div><div style="width:112px;height:4px;border-radius:20px;background:#e0e8ee;overflow:hidden;margin-top:37px"><span style="display:block;width:35%;height:100%;border-radius:20px;background:#2c5ca7;animation:load 1.2s ease-in-out infinite alternate"></span></div><div style="font-size:12px;color:#788a9a;margin-top:13px">جارٍ تهيئة التطبيق...</div><div style="margin-top:46px;font-size:10px;color:#a0adb8">A-01 · شاشة نظامية مؤقتة</div></div><style>@keyframes load{from{transform:translateX(0)}to{transform:translateX(180%)}}</style>`}
-/* 002 */
-function renderLogin(){return `${connection()}<main class="screen-body auth-body"><h1 class="auth-heading">تسجيل الدخول</h1><section class="auth-card"><div class="field" id="loginEmailWrap"><label>البريد الإلكتروني</label><input id="loginEmail" type="email" placeholder="أدخل بريدك الإلكتروني"><div class="error">أدخل بريداً إلكترونياً صحيحاً</div></div><div class="field" id="loginPassWrap"><label>كلمة المرور</label><div style="position:relative"><input id="loginPass" type="password" placeholder="أدخل كلمة المرور" style="padding-left:43px"><button class="icon-btn" style="position:absolute;left:9px;top:8px;color:#8093a4" data-action="toggle-pass" data-target="loginPass">${icon('eye')}</button></div><div class="error">أدخل كلمة المرور</div></div><button class="btn primary block" data-action="login">تسجيل الدخول</button><button class="btn secondary block" data-action="nav" data-id="004">إنشاء حساب</button></section><div class="helper-links"><span class="small-note">نسيت كلمة المرور؟</span><button class="text-link" data-action="nav" data-id="003">استعادة الحساب</button></div><div class="auth-note">حساب واحد — والسياق والصلاحيات بحسب الجمعية</div></main>`}
-/* 003 */
-function renderRecovery(){if(recoverStep===1)return `${topHeader('استعادة الحساب','002')}<main class="screen-body auth-body"><div class="auth-heading">استعادة الحساب</div><p class="auth-description">أدخل بيانات حسابك للمتابعة</p><section class="auth-card"><div class="field" id="recEmailWrap"><label>البريد الإلكتروني</label><input id="recEmail" type="email" placeholder="البريد الإلكتروني"><div class="error">أدخل بريداً إلكترونياً صحيحاً</div></div><div class="field" id="recPhoneWrap"><label>رقم الهاتف</label><div class="field-row"><button type="button" class="country-code" data-action="country-picker" aria-label="اختيار الدولة؛ اليمن محددة افتراضياً">🇾🇪</button><input id="recPhone" type="tel" placeholder="رقم الهاتف المحلي"></div><div class="error">أدخل رقم الهاتف المحلي</div></div><button class="btn primary block" data-action="recover-find">استعادة الحساب</button></section></main>`;
-return `${topHeader('استعادة الحساب','002')}<main class="screen-body auth-body"><div class="auth-heading">استعادة الحساب</div><p class="auth-description">تحقق من حسابك ثم عيّن كلمة مرور جديدة</p><div class="info-card" style="text-align:center;padding:22px 15px;margin:0 0 15px"><div style="width:54px;height:54px;border-radius:50%;border:1px solid #dbe5ed;display:grid;place-items:center;margin:-1px auto 9px;color:#2856a5">${icon('user')}</div><strong>مستخدم سهم</strong><div class="small-note">رقم الهاتف: 7•••••123</div><div class="small-note" style="margin-top:5px">معرّف الحساب: SHM-0001</div></div><section class="auth-card"><div class="field" id="recIdWrap"><label>معرّف الحساب</label><input id="recId" placeholder="أدخل معرّف الحساب"><div class="error">معرّف الحساب غير مطابق</div></div><div class="field" id="recNewWrap"><label>كلمة المرور الجديدة</label><input id="recNew" type="password" placeholder="6 أحرف أو أرقام على الأقل"><div class="error">كلمة المرور غير مستوفية للحد الأدنى</div></div><div class="field" id="recConfirmWrap"><label>تأكيد كلمة المرور</label><input id="recConfirm" type="password" placeholder="أعد إدخال كلمة المرور"><div class="error">تأكيد كلمة المرور غير مطابق</div></div><button class="btn primary block" data-action="recover-reset">متابعة</button></section></main>`}
-/* 004 */
-function renderRegister(){return `${topHeader('إنشاء حساب','002')}<main class="screen-body auth-body"><h1 class="auth-heading">إنشاء حساب</h1><p class="auth-description">أدخل بياناتك للانضمام لمجتمع سهم</p><section class="auth-card"><div class="field" id="regEmailWrap"><label>البريد الإلكتروني</label><input id="regEmail" type="email" value="${esc(registration.email)}" placeholder="البريد الإلكتروني"><div class="error">أدخل بريداً إلكترونياً صحيحاً</div></div><div class="field" id="regPassWrap"><label>كلمة المرور</label><div style="position:relative"><input id="regPass" type="password" value="${esc(registration.pass)}" placeholder="كلمة المرور" style="padding-left:42px"><button class="icon-btn" style="position:absolute;left:8px;top:8px;color:#8093a4" data-action="toggle-pass" data-target="regPass">${icon('eye')}</button></div><div class="error">كلمة المرور مطلوبة وبحد أدنى 6 أحرف أو أرقام</div></div><div class="field" id="regConfirmWrap"><label>تأكيد كلمة المرور</label><div style="position:relative"><input id="regConfirm" type="password" value="${esc(registration.confirm)}" placeholder="تأكيد كلمة المرور" style="padding-left:42px"><button class="icon-btn" style="position:absolute;left:8px;top:8px;color:#8093a4" data-action="toggle-pass" data-target="regConfirm">${icon('eye')}</button></div><div class="error">كلمتا المرور غير متطابقتين</div></div><div class="field" id="regTermsWrap" style="margin-top:3px"><label style="display:flex;align-items:center;gap:8px;font-size:11px"><input id="regTerms" type="checkbox" ${registration.accepted?'checked':''} style="width:17px;height:17px;accent-color:#2856a5"> أوافق على <button class="text-link" data-action="nav" data-id="005" style="padding:0">الشروط والأحكام</button></label><div class="error">يجب الموافقة على الشروط والأحكام</div></div><button class="btn primary block" data-action="register">إنشاء حساب</button></section><div class="auth-note">لديك حساب؟ <button class="text-link" data-action="nav" data-id="002">تسجيل الدخول</button></div></main>`}
-/* 005 */
-function renderTerms(){return `${topHeader('الشروط والأحكام','004')}<main class="screen-body"><div class="page-intro"><h2>مرحباً بك في سهم</h2><p>يرجى الاطلاع على الشروط والأحكام قبل إنشاء الحساب.</p></div><section class="form-card" style="height:calc(100% - 150px);min-height:300px;display:flex;flex-direction:column"><div style="font-size:13px;font-weight:900;margin-bottom:10px">الشروط والأحكام</div><div style="border-top:1px solid var(--line);padding-top:13px;overflow:auto;flex:1"><div class="empty-state" style="margin-top:8px">${icon('file')}<div><strong>النص القانوني النهائي مؤجل</strong><br>لم يرد النص القانوني النهائي ضمن المرجع. لن تُعرض مواد أو التزامات قانونية غير معتمدة.</div></div></div></section><button class="btn primary block" data-action="back" data-fallback="004">العودة إلى إنشاء الحساب</button></main>`}
-/* 006 */
-function renderCompleteProfile(){return `${topHeader('استكمال البيانات','002')}<main class="screen-body auth-body"><h1 class="auth-heading">استكمال البيانات</h1><p class="auth-description">مرحباً بك في سهم</p><section class="auth-card"><div class="field"><label>أيقونة الحساب (اختياري)</label><div class="icon-chooser">${['user','usercheck','users','award','shield'].map((n,i)=>`<button class="avatar-option ${i===0?'active':''}" data-action="avatar" data-value="${n}">${icon(n)}</button>`).join('')}</div></div><div class="field" id="profileNameWrap"><label>الاسم</label><input id="profileName" placeholder="الاسم"><div class="error">الاسم مطلوب</div></div><div class="field" id="profilePhoneWrap"><label>رقم الهاتف</label><div class="field-row"><button type="button" class="country-code" data-action="country-picker" aria-label="اختيار الدولة؛ اليمن محددة افتراضياً">🇾🇪</button><input id="profilePhone" type="tel" placeholder="رقم الهاتف المحلي"></div><div class="error">أدخل رقم هاتف صالحاً</div></div><button class="btn primary block" data-action="complete-profile">دخول إلى حسابي</button></section></main>`}
-/* 007 */
-function renderFrame(){return `<div class="app-top home-top"><div class="top-actions">${icon('user')} ${icon('bell')}</div><span class="status blue"></span></div>${connection()}<main class="screen-body"><div class="page-intro"><h2>إطار التطبيق العام</h2><p></p></div><section class="info-card"><div style="display:flex;align-items:center;gap:10px;font-weight:900">${icon('shield')} الشريط العلوي</div></section><section class="info-card"><div style="font-weight:900;margin-bottom:8px">مساحة المحتوى</div><div class="empty-state"></div></section><section class="info-card"><div style="font-weight:900;margin-bottom:8px"></div></section><div class="unresolved"></div></main><nav class="bottom-nav">${['الجمعيات','الرئيسية','الدردشات'].map((v,i)=>`<div class="bottom-item">${icon(['users','home','chat'][i])}<span>${v}</span></div>`).join('')}</nav>`}
-/* 008 */
-let carouselIndex=0,carouselPointer=null;
-const summarySlides=[
- {title:'جمعيات أديرها',value:'02',icon:'users'},
- {title:'جمعيات أشارك فيها',value:'01',icon:'usercheck'},
- {title:'إجمالي الجمعيات',value:'03',icon:'building'}
-];
-function renderHome(){return `${generalHeader()}<main class="screen-body home-body">
- <section class="summary-carousel" aria-label="ملخص الجمعيات المتنقل"><div class="summary-window"><div class="summary-track" id="summaryTrack">${summarySlides.map((s,i)=>`<article class="summary-slide"><div class="summary-info"><div class="summary-symbol">${icon(s.icon)}</div><div><div class="summary-title">${s.title}</div><div class="summary-number">${s.value}</div></div></div><div class="summary-index">0${i+1} / 03</div></article>`).join('')}</div></div><div class="carousel-controls">${summarySlides.map((s,i)=>`<button class="carousel-dot ${i===carouselIndex?'active':''}" aria-label="المؤشر ${i+1}" data-action="carousel" data-index="${i}"></button>`).join('')}</div></section>
- <section class="home-tiles"><div class="tile-grid">${tile('جمعيات أديرها','users','010','blue')}${tile('جمعيات أشارك فيها','usercheck','011','gold')}${tile('جمعية جديدة','plus','014','blue')}${tile('الانضمام لجمعية','link','016','gold')}</div></section>
- <section class="home-section"><div class="section-head"><div class="section-title-wrap"><h3>أحدث النشاط</h3>${icon('activity')}</div></div><div class="activity-list">${recentEvents.map(e=>`<button class="activity-item" data-action="activity" data-id="${e.id}"><span class="activity-icon">${icon(e.icon)}</span><span class="activity-copy"><strong>${e.title}</strong><span>${e.group}</span></span><span class="activity-time">${e.time}</span></button>`).join('')}</div></section>
- </main>${bottomNav('home')}`}
-function initCarousel(){const track=document.getElementById('summaryTrack');if(!track)return;track.style.transform=`translateX(${carouselIndex*100}%)`;document.querySelectorAll('.carousel-dot').forEach((d,i)=>d.classList.toggle('active',i===carouselIndex));const windowEl=track.parentElement;windowEl.onpointerdown=e=>{carouselPointer=e.clientX};windowEl.onpointerup=e=>{if(carouselPointer===null)return;const diff=e.clientX-carouselPointer;if(Math.abs(diff)>35){carouselIndex=Math.max(0,Math.min(2,carouselIndex+(diff<0?1:-1)));initCarousel()}carouselPointer=null};windowEl.onpointercancel=()=>carouselPointer=null;}
-/* 009-011 and 039 */
-function renderGroups(kind){const all=kind==='all',manager=kind==='manager';const title=all?'كل الجمعيات':manager?'جمعيات أديرها':'جمعيات أشارك فيها';let items=all?groupFixtures:groupFixtures.filter(g=>manager?g.kind==='manager':g.kind==='member');const cards=items.map(g=>`<button class="list-row" data-action="open-group" data-id="${g.id}" data-filter-text="${esc(g.name)}"><span class="row-icon ${g.kind==='member'?'gold':''}">${icon(g.kind==='member'?'usercheck':'users')}</span><span class="row-main"><span class="row-title">${esc(g.name)}</span></span>${icon('back','row-arrow')}</button>`).join('');return page(title,`${searchBox('ابحث عن جمعية')}<div class="list-stack" id="groupList">${cards}</div><div data-search-empty style="display:none">${empty('لا توجد نتائج مطابقة')}</div>`,{backTo:'008',active:'groups'});}
-function renderPublicChats(){const cards=groupFixtures.map(g=>`<button class="list-row" data-action="open-chat" data-id="${g.id}" data-filter-text="${esc(g.name)}"><span class="row-icon ${g.kind==='member'?'gold':''}">${icon(g.kind==='member'?'usercheck':'users')}</span><span class="row-main"><span class="row-title">${esc(g.name)}</span></span>${icon('back','row-arrow')}</button>`).join('');return page('الدردشات',`${searchBox('ابحث عن جمعية')}<div class="list-stack">${cards}</div><div data-search-empty style="display:none">${empty('لا توجد نتائج مطابقة')}</div>`,{backTo:'008',active:'chats'});}
-/* 012 */
-function renderNotifications(){const cards=notifications.map(n=>`<button class="list-row" data-action="notice-open" data-id="${n.id}" data-filter-text="${esc(n.title+' '+n.group+' '+n.body)}"><span class="row-icon">${icon(n.type==='invite'?'gift':'activity')}</span><span class="row-main"><span class="row-title">${esc(n.title)}</span><span class="row-meta">${esc(n.group)} · ${esc(n.time)}</span></span><span class="status ${n.read?'':'blue'}">${n.read?'مقروء':'جديد'}</span>${icon('back','row-arrow')}</button>`).join('');return page('الإشعارات',`${searchBox('ابحث في الإشعارات')}<div class="list-stack">${cards}</div><div data-search-empty style="display:none">${empty('لا توجد نتائج مطابقة')}</div>`,{backTo:'008'});}
-/* 013 */
-function renderProfile(){return page('الملف الشخصي',`<div style="display:flex;flex-direction:column;align-items:center;padding:5px 0 15px"><div style="width:70px;height:70px;border-radius:50%;display:grid;place-items:center;background:#edf3f9;color:#2856a5;border:1px solid #dce6ee">${icon(profileAvatar)}</div><h2 style="font-size:18px;margin:9px 0 0">${esc(profileName)}</h2></div><section class="form-card" style="padding:8px 15px"><div class="kv-row"><span class="k">الاسم</span><span class="v">${esc(profileName)} <button class="text-link" data-action="edit-name">${icon('edit')}</button></span></div>${row('البريد الإلكتروني',esc(accountEmail))}${row('رقم الهاتف',esc(accountPhone))}${row('معرّف الحساب',`SHM-••••-••• <button class="text-link" data-action="copy-id">${icon('copy')}</button>`)}<div class="kv-row"><span class="k">كلمة المرور</span><span class="v">•••••••• <button class="text-link" data-action="change-password">${icon('lock')}</button></span></div></section>
- <div class="section-head"><h3>إعدادات التطبيق</h3></div><section class="form-card"><div class="field"><label>سمة التطبيق</label><select id="themeSelect" data-action-change="theme"><option value="default">افتراضي</option><option value="light" ${theme==='light'?'selected':''}>فاتح</option><option value="dark" ${theme==='dark'?'selected':''}>داكن</option></select></div><div class="toggle-row"><span>قفل التطبيق</span><button class="toggle" id="lockToggle" data-action="toggle-lock"><span></span></button></div><div class="small-note" style="margin-top:9px">عند التفعيل يتطلب قفل التطبيق دعم مصادقة الجهاز، ويطلب المصادقة بعد دقيقة واحدة في الخلفية.</div></section><button class="btn danger block" data-action="logout-open">${icon('logout')} تسجيل الخروج</button>`,{backTo:'008'});}
-/* 014 */
-function currencyName(c){return c==='YER'?'ر.ي':c==='SAR'?'ر.س':'USD'}
-function getInstallments(){const total=Math.round(Number(form.share)||0);if(!Number.isFinite(total)||total<=0)return[];if(form.mode==='count'){const count=Number(form.count);if(!Number.isInteger(count)||count<=0)return[];const base=Math.floor(total/count),rem=total-base*count;return Array.from({length:count},(_,i)=>base+(i===count-1?rem:0));}const amount=Number(form.installment);if(!Number.isFinite(amount)||amount<=0||amount>total)return[];const count=Math.ceil(total/amount);return Array.from({length:count},(_,i)=>i===count-1?total-amount*(count-1):amount)}
-function renderCreateGroup(){return page('إنشاء جمعية',`<div class="field"><label>اسم الجمعية</label><input id="gName" data-form-field="name" value="${esc(form.name)}" placeholder="اسم الجمعية"><div class="error" id="errName">اسم الجمعية مطلوب ويجب ألا يقل عن حرفين</div></div><div class="section-head" style="margin-top:4px"><h3>مواعيد الجمعية</h3></div><div class="row-fields"><div class="field"><label>تاريخ البداية</label><input id="gStart" type="date" data-form-field="start" value="${esc(form.start)}"><div class="error" id="errStart">تاريخ البداية مطلوب</div></div><div class="field"><label>أول قرعة</label><input id="gFirst" type="date" data-form-field="first" value="${esc(form.first)}"><div class="error" id="errFirst">يجب أن يكون لاحقاً لتاريخ البداية</div></div></div><div class="section-head" style="margin-top:6px"><h3>قيمة السهم والعملة</h3></div><div class="row-fields"><div class="field"><label>قيمة السهم</label><input id="gShare" type="number" min="1" data-form-field="share" value="${esc(form.share)}" placeholder="0"><div class="error" id="errShare">القيمة يجب أن تكون أكبر من صفر</div></div><div class="field"><label>العملة</label><select id="gCurrency" data-form-field="currency"><option value="YER" ${form.currency==='YER'?'selected':''}>الريال اليمني</option><option value="SAR" ${form.currency==='SAR'?'selected':''}>الريال السعودي</option><option value="USD" ${form.currency==='USD'?'selected':''}>الدولار الأمريكي</option></select></div></div><div class="section-head" style="margin-top:4px"><h3>طريقة الأقساط</h3></div><div class="pill-tabs"><button data-action="install-mode" data-value="count" class="${form.mode==='count'?'active':''}">عدد الأقساط</button><button data-action="install-mode" data-value="value" class="${form.mode==='value'?'active':''}">قيمة القسط</button></div>${form.mode==='count'?`<div class="field"><label>عدد الأقساط</label><input id="gCount" type="number" min="1" step="1" data-form-field="count" value="${esc(form.count)}" placeholder="عدد الأقساط"><div class="error" id="errCount">أدخل عدداً صحيحاً موجباً</div></div>`:`<div class="field"><label>قيمة القسط</label><input id="gInstallment" type="number" min="1" data-form-field="installment" value="${esc(form.installment)}" placeholder="قيمة القسط"><div class="error" id="errInstallment">القيمة مطلوبة ولا تتجاوز قيمة السهم</div></div>`}<div class="calc-band" id="calcSummary"></div><section class="section-box" style="padding:0;overflow:hidden"><button class="record-summary" style="width:100%" data-action="toggle-preview"><span class="record-title">جدول الأقساط</span><span style="margin-right:auto">${icon('down')}</span></button><div id="installPreview" style="display:none;padding:0 12px 12px"></div></section><div class="section-head" style="margin-top:14px"><h3>صفة المدير</h3></div><div class="radio-set"><button class="radio-pill ${form.managerRole==='manager'?'active':''}" data-action="manager-role" data-value="manager">مدير فقط</button><button class="radio-pill ${form.managerRole==='manager-member'?'active':''}" data-action="manager-role" data-value="manager-member">مدير ومشارك</button></div>${form.managerRole==='manager-member'?`<div class="field" style="margin-top:13px"><label>عدد أسهم المدير</label><input id="gManagerShares" type="number" min="1" data-form-field="managerShares" value="${esc(form.managerShares)}"><div class="error" id="errManagerShares">عدد الأسهم مطلوب وموجب</div></div>`:''}<div style="height:72px"></div>`,{backTo:'008',bottom:true,bodyClass:''}).replace(/<main class="screen-body">/,'<main class="screen-body" style="padding-bottom:90px">')+`<div style="position:absolute;bottom:73px;left:0;right:0;padding:9px 17px 10px;background:linear-gradient(180deg,#f3f7fa00,#f3f7fa 24%);z-index:2"><button id="createGroupSubmit" class="btn primary block" data-action="create-group" disabled>إنشاء الجمعية</button></div>`}
-let previewOpen=false;
-function updateAssociationCalc(){
- const box=document.getElementById('calcSummary');if(!box)return;
- const installments=getInstallments(),total=Math.round(Number(form.share)||0),sum=installments.reduce((a,b)=>a+b,0),unit=currencyName(form.currency);
- let installmentLabel='—';
- if(installments.length){const first=installments[0],last=installments[installments.length-1];installmentLabel=first===last?`${first.toLocaleString('en-US')} ${unit}`:`${first.toLocaleString('en-US')} – ${last.toLocaleString('en-US')} ${unit}`}
- box.innerHTML=`<div><span class="small-note">عدد الأقساط</span><strong>${installments.length||'—'}</strong></div><div><span class="small-note">قيمة القسط</span><strong>${installmentLabel}</strong></div><div style="grid-column:1/-1;border-top:1px solid #e1e9ef;padding-top:7px"><span class="small-note">إجمالي قيمة السهم</span><strong style="font-size:13px">${total?`${total.toLocaleString('en-US')} ${unit}`:'—'}</strong></div>`;
- const pane=document.getElementById('installPreview');
- if(pane){pane.style.display=previewOpen?'block':'none';pane.innerHTML=installments.length?`<div class="installment-list">${installments.map((v,i)=>`<div class="installment-line"><span>القسط ${i+1}</span><strong>${v.toLocaleString('en-US')} ${unit}</strong></div>`).join('')}</div><div class="small-note" style="margin-top:7px">المجموع: ${sum.toLocaleString('en-US')} ${unit}</div>`:empty('أكمل قيمة السهم وطريقة الأقساط لعرض الجدول')}
- const btn=document.getElementById('createGroupSubmit');
- if(btn){const okName=String(form.name||'').trim().length>=2,okDates=!!form.start&&!!form.first&&new Date(form.first+'T00:00:00')>new Date(form.start+'T00:00:00'),okShare=total>0,okPlan=form.mode==='count'?(Number.isInteger(Number(form.count))&&Number(form.count)>0):(Number(form.installment)>0&&Number(form.installment)<=total),okManager=form.managerRole!=='manager-member'||(Number.isInteger(Number(form.managerShares))&&Number(form.managerShares)>0);btn.disabled=!(okName&&okDates&&okShare&&okPlan&&okManager&&online)}
-}
-/* 015 */
-function renderCreateSuccess(){const g=groupResult;const link='https://sahm.app/join/SAHM-2481';return page('نتيجة إنشاء الجمعية',`<section class="form-card" style="text-align:center;padding:20px 16px"><div style="width:58px;height:58px;border-radius:50%;background:#edf5ef;color:#3b785f;border:1px solid #d8eadf;display:grid;place-items:center;margin:0 auto 10px">${icon('check')}</div><h2 style="font-size:19px;margin:0 0 5px">تم إنشاء الجمعية</h2><p class="small-note" style="margin:0">${esc(g.name||'جمعية الوفاق')} · </p></section><section class="form-card" style="padding:7px 15px">${row('اسم الجمعية',esc(g.name||'جمعية الوفاق'))}${row('تاريخ البداية',esc(g.start||'غير محدد'))}${row('أول قرعة',esc(g.first||'غير محدد'))}${row('قيمة السهم',`${esc(g.share||'—')} ${currencyName(g.currency||'YER')}`)}${row('نظام الأقساط',g.mode==='value'?'قيمة القسط':'عدد الأقساط')}${row('عدد الأقساط',esc(g.count||'—'))}${row('صفة المدير',g.managerRole==='manager-member'?'مدير ومشارك':'مدير فقط')}${g.managerRole==='manager-member'?row('أسهم المدير',esc(g.managerShares||'—')):''}</section><section class="form-card"><div style="font-weight:900;font-size:13px;margin-bottom:8px">رابط الانضمام</div><div class="inline-note" style="direction:ltr;text-align:left;overflow-wrap:anywhere">${link}</div><div class="row-fields"><button class="btn secondary" data-action="copy-link">${icon('copy')} نسخ الرابط</button><button class="btn secondary" data-action="share-link">${icon('send')} مشاركة</button></div></section><section class="form-card"><div style="font-weight:900;font-size:13px;margin-bottom:5px">دعوة المشاركين</div><p class="small-note" style="margin:0 0 11px">اختيار جهات الاتصال</p><button class="btn primary block" data-action="contacts-picker">${icon('users')} اختيار من جهات الاتصال</button></section>`,{backTo:'008',active:''});}
-/* 016 */
-function renderJoinLink(){return page('الانضمام إلى جمعية',`<div style="text-align:center;padding:28px 10px 24px"><div style="color:var(--gold);margin-bottom:12px">${icon('link')}</div><h2 style="font-size:20px;margin:0 0 7px">أدخل رابط الجمعية</h2><p class="small-note" style="max-width:275px;margin:auto">استخدم رابط الانضمام العام الذي حصلت عليه من الجمعية.</p></div><section class="form-card"><div class="field" id="joinLinkWrap"><label>رابط الانضمام</label><input id="joinLink" type="url" placeholder="https://..." value="${esc(linkValue)}"><div class="error">أدخل رابطاً صحيحاً قبل المتابعة</div></div><button class="btn primary block" data-action="verify-link">تحقق وتابع</button></section>`,{backTo:'008'});}
-/* 017 / 018 */
-function renderJoinPreview(type){joinType=type;const isInvite=type==='invite',title=isInvite?'تفاصيل الدعوة وطلب الانضمام':'تفاصيل الجمعية وطلب الانضمام عبر الرابط';const state=joinSubmitted?`<div class="status gold">قيد المراجعة · قيد المراجعة</div>`:'';const plan=[200,200,200,200,200,200],total=1200*Number(joinShares||1);return page(title,`${isInvite?`<section class="form-card" style="background:linear-gradient(135deg,#f7f1e5,#fff);border-color:#e8dbc3"><div class="row-icon-box" style="color:#946a2a">${icon('gift')}<div><strong style="font-size:13px">دعوة شخصية موجهة إليك</strong></div></div></section>`:''}<section class="form-card" style="padding:8px 15px"><div style="font-weight:900;padding:9px 0 3px">بيانات الجمعية</div>${row('اسم الجمعية','جمعية الوفاق')}${row('تاريخ البداية','2026/12/01')}${row('أول قرعة','2027/01/01')}${row('الدورة','6 أقساط')}${row('قيمة السهم','1,200 ر.ي')}${row('استقبال الأعضاء','مفتوح')}</section><section class="form-card"><div class="section-head" style="margin:0 0 12px"><h3>${isInvite?'طلب الانضمام':'تحديد المشاركة'}</h3></div><div class="field" id="joinSharesWrap"><label>عدد الأسهم المطلوبة</label><input id="joinShares" type="number" min="1" step="1" value="${esc(joinShares)}" ${joinSubmitted?'disabled':''}><div class="error">أدخل عدداً صحيحاً لا يقل عن سهم واحد</div></div><div class="section-head" style="margin:8px 0 6px"><h3>الالتزامات الناتجة</h3></div><div class="calc-band" style="margin:8px 0"><div><span class="small-note">الإجمالي</span><strong id="joinTotal">${total.toLocaleString('en-US')} ر.ي</strong></div><div><span class="small-note">عدد الأقساط</span><strong>6</strong></div></div><div class="installment-list" id="joinPlan">${plan.map((v,i)=>`<div class="installment-line"><span>القسط ${i+1}</span><strong>${(v*Number(joinShares||1)).toLocaleString('en-US')} ر.ي</strong></div>`).join('')}</div></section><section class="form-card"><label style="display:flex;align-items:flex-start;gap:9px;font-size:11px;line-height:1.8"><input id="joinAck" type="checkbox" ${joinAck?'checked':''} ${joinSubmitted?'disabled':''} style="margin-top:4px;accent-color:#2856a5"> أقر باطلاعي على الالتزامات المالية الناتجة عن عدد الأسهم المحدد</label>${joinSubmitted?`<div style="margin-top:13px">${state}</div>`:''}<button class="btn primary block" style="margin-top:14px" data-action="send-join" ${joinSubmitted?'disabled':''}>${isInvite?'إرسال طلب الانضمام عبر الدعوة':'إرسال طلب الانضمام'}</button></section><div class="small-note" style="text-align:center">${isInvite?'مسار الدعوة الشخصية مستقل عن رابط الانضمام العام.':'مسار الرابط العام لا يستقبل الدعوات الشخصية.'}</div>`,{backTo:isInvite?'012':'016'});}
-/* 040 */
-function renderContacts(){const list=contactRecords;const cards=list.map(c=>{let action='';if(c.kind==='registered'&&c.eligible)action=`<button class="btn secondary small" data-action="contact-invite" data-id="${c.id}">دعوة للجمعية</button>`;else if(c.kind==='unregistered')action=`<button class="btn secondary small" data-action="contact-share" data-id="${c.id}">دعوة للتثبيت</button>`;return `<article class="record-card" data-filter-text="${esc(c.name+' '+c.phone+' '+c.status)}"><div class="record-summary"><span class="record-symbol">${icon('user')}</span><span style="flex:1;min-width:0"><span class="record-title">${esc(c.name)}</span><span class="record-subtitle" dir="ltr" style="text-align:right">${esc(c.phone)}</span></span><span class="record-chevron">${icon('right')}</span></div><div class="record-details" style="border-top:0;padding-top:0"><div class="kv-row"><span class="k">حالة الفحص</span><span class="v">${esc(c.status)}</span></div>${action?`<div style="margin-top:10px">${action}</div>`:''}</div></article>`}).join('');return page('نتائج جهات الاتصال',`${searchBox('ابحث بالاسم أو الرقم')}${cards?`<div class="list-stack">${cards}</div><div data-search-empty style="display:none">${empty('لا توجد نتائج مطابقة')}</div>`:empty('لم يتم اختيار جهات اتصال. ارجع إلى نتيجة إنشاء الجمعية ثم افتح منتقي جهات الاتصال.')}`,{backTo:'015'});}
-/* 021 */
-const adminSections=[['التحصيل','wallet','022'],['القرعات','ticket','023'],['الأسهم','coins','024'],['الأعضاء','users','025'],['الدعوات','gift','026'],['الدردشة','chat','027'],['الغرفة','activity','028'],['المعلومات','file','029'],['الإعدادات','settings','030'],['السجل','list','031']];
-function renderAdminHome(){return `<div class="app-top"><button class="top-back" data-action="back" data-fallback="010">${icon('right')}</button><div class="top-title">الرئيسية الإدارية</div></div>${connection()}<main class="screen-body"><section class="group-identity"><div><h2>${esc(activeGroup.name||'جمعية الوفاق')}</h2><p>السياق الإداري للجمعية</p></div>${icon('building')}</section><div class="section-head" style="margin-top:4px"><h3>ملخص الجمعية</h3><span class="status gold"></span></div><div class="tile-grid" style="margin-bottom:13px"><div class="info-card" style="margin:0"><div class="small-note">مؤشرات التحصيل</div><div style="font-size:23px;font-weight:900;margin-top:5px">—</div></div><div class="info-card" style="margin:0"><div class="small-note">مؤشرات القرعات</div><div style="font-size:23px;font-weight:900;margin-top:5px">—</div></div><div class="info-card" style="margin:0"><div class="small-note">الأسهم والأعضاء</div><div style="font-size:23px;font-weight:900;margin-top:5px">—</div></div><div class="info-card" style="margin:0"><div class="small-note">حالة الجمعية والاتفاق</div><div style="margin-top:6px">${statusChip('—','gold')}</div></div></div><div class="section-head"><h3>أقسام الجمعية</h3></div><div class="tile-grid manager-tiles">${adminSections.map(a=>tile(a[0],a[1],a[2],['التحصيل','الأسهم','الغرفة'].includes(a[0])?'gold':'blue')).join('')}</div><div style="margin-top:14px">${unresolved('الشاشة 021 معتمدة جزئياً: محتوى بعض المؤشرات وحالة الجمعية/الاتفاق —، لذلك لا تعرض أرقاماً أو تفاصيل تخمينية.')}</div></main>`}
-function statusChip(text,color='blue'){return `<span class="status ${color}">${text}</span>`}
-/* 022 */
-function renderCollections(){const records=collectionRecords.filter(x=>!x.paid),paid=paidRecords;const f=`<div class="filter-row"><select class="filter-select" aria-label="القرعة" data-list-filter="recordRound"><option value="all">كل القرعات</option><option value="القرعة الأولى">القرعة الأولى</option></select><select class="filter-select" data-list-filter="recordInstallment"><option value="all">كل الأقساط</option><option value="القسط الأول">القسط الأول</option></select><select class="filter-select" data-list-filter="recordStatus"><option value="all">كل الحالات</option><option value="مستحق">مستحق</option><option value="متأخر">متأخر</option><option value="مدفوع">مدفوع</option></select></div>`;const cards=records.map(r=>recordCard(r.id,esc(r.name),esc(r.status),`${detailRows([['القرعة / الدورة',r.round],['القسط',r.installment],['تاريخ الاستحقاق',r.due],['عدد الأسهم',r.shares.length]])}<div class="small-note" style="margin-top:8px">تفاصيل الاستحقاقات الفعلية لكل سهم</div>${r.shares.map(s=>`<div class="installment-line"><span>السهم ${s.number}</span><strong>${s.amount} ر.ي</strong></div>`).join('')}${confirmCollectId===r.id?`<div class="unresolved" style="margin-top:10px"></div><div class="record-actions"><button class="btn secondary small" data-action="collect-cancel" data-id="${r.id}">إلغاء</button><button class="btn primary small" data-action="collect-confirm" data-id="${r.id}">تأكيد التحصيل</button></div>`:''}`,{iconName:'wallet',value:`${r.amount} ر.ي`,tag:statusChip(r.status,r.status==='متأخر'?'red':'gold'),recordStatus:r.status,recordRound:r.round,recordInstallment:r.installment,actions:`<button class="btn secondary small" data-action="collect-start" data-id="${r.id}">تحصيل</button><button class="btn ghost small" data-action="remind" data-id="${r.id}">تذكير</button>`})).join('');const paidCards=paid.map(r=>recordCard(r.id,esc(r.name),'مدفوع',`${detailRows([['القرعة / الدورة',r.round],['القسط',r.installment],['تاريخ الاستحقاق',r.due],['تاريخ التحصيل',r.paidAt]])}${r.shares.map(s=>`<div class="installment-line"><span>السهم ${s.number}</span><strong>${s.amount} ر.ي</strong></div>`).join('')}`,{iconName:'check',value:`${r.amount} ر.ي`,tag:statusChip('مدفوع','green'),recordStatus:'مدفوع',recordRound:r.round,recordInstallment:r.installment})).join('');return page('التحصيل',`${f}<div class="record-section-title">الاستحقاقات غير المحصلة</div>${cards||empty('لا توجد استحقاقات غير محصلة') }<div class="record-section-title">الأقساط المحصلة</div>${paidCards||empty('لا توجد أقساط محصلة')}`,{backTo:'021',bottom:false});}
-/* 023 */
-function renderDraws(){const cards=drawRecords.map(d=>{let details=detailRows([['فترة القرعة',`${d.start} — ${d.end}`]]);if(d.status==='مكتملة')details+=`<div class="inline-note" style="margin-top:10px">اكتملت هذه القرعة.</div>`;else if(d.status==='جارية')details+=`<div style="margin-top:12px"><div class="kv-row"><span class="k">الاقتراب المالي</span><strong>${d.money}%</strong></div><div class="progress-line"><span style="width:${d.money}%"></span></div><div class="kv-row"><span class="k">الاقتراب الزمني</span><strong>${d.time}%</strong></div><div class="progress-line"><span style="width:${d.time}%"></span></div>${detailRows([['المحصل',d.collected+' ر.ي'],['المستهدف',d.target+' ر.ي']])}</div>`;else details+=`<div class="unresolved" style="margin-top:10px">سبب عدم البدء: ${d.reason}</div>`;return recordCard(d.id,d.name,d.status,details,{iconName:'ticket',tag:statusChip(d.status,d.status==='مكتملة'?'green':d.status==='جارية'?'blue':'gold'),recordStatus:d.status,recordRound:d.name})}).join('');return page('القرعات',`<div class="filter-row"><select class="filter-select" data-list-filter="recordRound"><option value="all">كل القرعات</option><option value="القرعة الأولى">القرعة الأولى</option><option value="القرعة الثانية">القرعة الثانية</option><option value="القرعة الثالثة">القرعة الثالثة</option></select><select class="filter-select" data-list-filter="recordStatus"><option value="all">كل الحالات</option><option value="مكتملة">مكتملة</option><option value="جارية">جارية</option><option value="لم تبدأ">لم تبدأ</option></select><select class="filter-select" data-list-filter="recordPeriod" aria-label="الفترة الزمنية"><option value="all">كل الفترات</option></select></div>${cards}`,{backTo:'021',bottom:false});}
-/* 024 */
-function renderShares(){const cards=shareRecords.map(s=>recordCard(s.id,`السهم ${s.number}`,s.owner,detailRows([['بيانات المالك',s.owner],['القرعة المرتبطة',s.round],['حالة الأهلية',s.eligible],['النتيجة السابقة',s.result]]),{iconName:'coins',tag:statusChip(s.status,s.status==='مؤهل'?'blue':'gold'),recordStatus:s.status,recordRound:s.round,recordRole:s.owner})).join('');return page('الأسهم',`<div class="filter-row"><select class="filter-select" data-list-filter="recordRole"><option value="all">كل الأعضاء</option><option value="سالم محمد">سالم محمد</option><option value="منى أحمد">منى أحمد</option></select><select class="filter-select" data-list-filter="recordRound"><option value="all">كل القرعات</option><option value="القرعة الأولى">القرعة الأولى</option><option value="القرعة الثانية">القرعة الثانية</option></select><select class="filter-select" data-list-filter="recordStatus"><option value="all">كل الحالات</option><option value="مؤهل">مؤهل</option><option value="النتيجة غير متاحة">النتيجة غير متاحة</option></select></div><div class="small-note" style="margin-bottom:8px">كل بطاقة تمثل سهماً محدداً. لا تتضمن هذه الشاشة إجراءات إضافة أو حذف أو نقل أو تعديل الأسهم.</div>${cards}`,{backTo:'021',bottom:false});}
-/* 025 */
-function renderMembers(){const cards=memberRecords.map(m=>recordCard(m.id,esc(m.name),`${m.role} · ${m.status}`,`${detailRows([['عدد الأسهم',m.shares],['إجمالي الالتزام المالي',m.commitment+' ر.ي'],['المسدّد',m.paid+' ر.ي'],['المتبقي', (Number(m.commitment.replace(',',''))-Number(m.paid.replace(',',''))).toLocaleString('en-US')+' ر.ي']])}<div class="small-note" style="margin:10px 0 5px">تفاصيل الأقساط</div>${m.dues.map(d=>`<div class="installment-line"><span>${d[0]}</span><strong>${d[1]} ر.ي · ${d[2]}</strong></div>`).join('')}`,{iconName:'user',tag:statusChip(m.status,'green'),recordStatus:m.status,recordRole:m.role,recordShares:m.shares===1?'one':'many'})).join('');return page('الأعضاء',`<div class="list-search">${icon('search')}<input type="search" placeholder="ابحث باسم العضو" oninput="filterVisible(this)"></div><div class="filter-row"><select class="filter-select" data-list-filter="recordRole"><option value="all">كل الصفات</option><option value="عضو">عضو</option><option value="مدير ومشارك">مدير ومشارك</option></select><select class="filter-select" data-list-filter="recordShares"><option value="all">كل أعداد الأسهم</option><option value="one">سهم واحد</option><option value="many">أكثر من سهم</option></select></div><div class="list-stack">${cards}</div><div data-search-empty style="display:none">${empty('لا توجد نتائج مطابقة')}</div>`,{backTo:'021',bottom:false});}
-/* 026 */
-function renderInvitations(){const reqCards=requests.map(r=>recordCard(r.id,esc(r.name),esc(r.status),`${detailRows([['مصدر الطلب',r.source],['عدد الأسهم',r.shares],['الالتزام المالي',r.total+' ر.ي'],['تاريخ التقديم',r.date]])}${unresolved('تفاصيل تأكيد وتنفيذ قرار قبول/رفض الطلب —ة، لذلك لا تظهر أزرار قرار في .')}`,{iconName:'userplus',tag:statusChip(r.status,'gold')})).join('');const invCards=invitations.map(i=>recordCard(i.id,esc(i.name),esc(i.status),detailRows([['رقم الهاتف',i.phone],['تاريخ الإنشاء',i.date],['الحالة',i.status],['رد المدعو',i.response]]),{iconName:'gift',tag:statusChip(i.status,'blue')})).join('');return page('الدعوات',`<div class="record-section-title" style="margin-top:3px">طلبات الانضمام</div>${reqCards}<div class="record-section-title">الدعوات الصادرة</div>${invCards}${unresolved('الجزء المعتمد: قائمتان منفصلتان وبطاقات مختصرة بتوسعة داخلية. —: إضافة الدعوة وإلغاؤها وطريقة الإرسال والبحث والتصفية وتفاصيل قرار الطلب.')}`,{backTo:'021',bottom:false});}
-/* 027 / 038 shared chat component */
-function renderChat(role){const isManager=role==='manager';const title=isManager?'دردشة الجمعية للمدير':'دردشات الجمعية للعضو';return page(title,`<section class="form-card"><div class="row-icon-box" style="margin-bottom:12px">${icon('chat')}<div><strong>${esc(activeGroup.name||'جمعية الوفاق')}</strong><div class="small-note">${isManager?'سياق إداري':'سياق عضوية'}</div></div></div><div class="empty-state" style="min-height:180px;display:flex;flex-direction:column;align-items:center;justify-content:center">${icon('chat')}<strong>منطقة المحادثة</strong><span class="small-note">لا توجد رسائل بعد.</span></div><div style="margin-top:13px"><label class="small-note" style="display:block;margin-bottom:7px">عنصر الرسالة — نموذج المكوّن المشترك</label><div class="list-row" style="min-height:52px"><span class="row-icon">${icon('user')}</span><span class="row-main"><span class="row-title">اسم المرسل والوقت</span><span class="row-meta">محتوى الرسالة</span></span></div></div><div class="field" style="margin-top:13px"><label>محرر الرسالة</label><div class="field-row"><input disabled placeholder="اكتب رسالة" style="flex:1"><button class="btn secondary" disabled>${icon('send')}</button></div></div></section>${unresolved('')}`,{backTo:isManager?'021':'032',bottom:false});}
-/* 028 */
-function renderAdminRoom(){return page('الغرفة',`<section class="form-card"><div class="section-head" style="margin:0 0 9px"><h3>الجولة الحالية</h3><span class="status gold">التفاصيل —ة</span></div><div class="empty-state">${icon('activity')}<div>لا توجد تفاصيل متاحة حالياً.</div></div></section><section class="form-card"><div class="section-head" style="margin:0 0 9px"><h3>بيانات الجولة والموعد</h3></div>${detailRows([['موعد الجولة','غير متاح'],['حالة الجولة','غير محددة']])}</section><section class="form-card"><div class="section-head" style="margin:0 0 9px"><h3>المؤهلون</h3></div>${empty('لا توجد أسماء مؤهلين حالياً.')}</section><section class="form-card"><div class="section-head" style="margin:0 0 9px"><h3>النتيجة ومجريات العرض</h3></div>${empty('لا توجد نتيجة جولة معتمدة للعرض.')}</section><section class="form-card"><div class="section-head" style="margin:0 0 9px"><h3>سجل الجولات السابقة</h3></div>${empty('لا توجد سجلات متاحة.')}</section>${unresolved('الغرفة مستقلة عن القرعات. الهيكل العام معروف، أما تفاصيل التنفيذ والعرض المباشر وآلياته فلم تُحسم في المرجع الجزئي.')}`,{backTo:'021',bottom:false});}
-/* 029 */
-function renderGroupInfo(){return page('المعلومات',`<section class="form-card" style="padding:8px 15px"><div style="font-weight:900;padding:9px 0">معلومات الجمعية</div>${row('اسم الجمعية',esc(activeGroup.name||'غير متاح'))}${row('تاريخ البداية','غير متاح')}${row('أول قرعة','غير متاح')}${row('قيمة السهم','غير متاح')}</section><section class="form-card" style="padding:8px 15px"><div style="font-weight:900;padding:9px 0">بيانات الدورة والالتزامات</div>${row('نظام الأقساط','غير متاح')}${row('عدد الأقساط','غير متاح')}${row('الالتزامات','غير متاح')}</section>${unresolved('تفاصيل الحقول القابلة للتعديل وصلاحياتها تحتاج اعتماداً. لا يظهر إجراء تعديل أو نافذة حفظ —ة.')}`,{backTo:'021',bottom:false});}
-/* 030 */
-function renderGroupSettings(){return page('الإعدادات',`<section class="form-card"><div class="record-section-title" style="margin-top:0">إعدادات الجمعية</div><div class="list-row" style="cursor:default"><span class="row-icon">${icon('building')}</span><span class="row-main"><span class="row-title">إعدادات الجمعية</span><span class="row-meta"></span></span></div><div class="record-section-title">إعدادات القرعة والدورة</div><div class="list-row" style="cursor:default"><span class="row-icon">${icon('ticket')}</span><span class="row-main"><span class="row-title">إعدادات القرعة والدورة</span><span class="row-meta">بحسب الصلاحيات — الحقول والقيم —ة</span></span></div></section><section class="form-card"><div class="record-section-title" style="margin-top:0">مجموعات —ة</div><div class="list-row" style="cursor:default"><span class="row-icon">${icon('chat')}</span><span class="row-main"><span class="row-title">إعدادات الأخبار والدردشة</span><span class="row-meta">—ة</span></span><span class="status gold">—</span></div><div class="list-row" style="cursor:default"><span class="row-icon">${icon('bell')}</span><span class="row-main"><span class="row-title">إعدادات الإشعارات</span><span class="row-meta">—ة</span></span><span class="status gold">—</span></div></section>${unresolved('لا تُعرض مفاتيح تشغيل أو خيارات افتراضية أو زر حفظ فعّال قبل اعتماد تفاصيل إعدادات الجمعية.')}`,{backTo:'021',bottom:false});}
-/* 031 */
-function renderLog(){return page('السجل',`<div class="page-intro"><h2>سجل الأنشطة والأحداث</h2><p>يعرض السجلات المرتبطة بهذه الجمعية وفق الصلاحيات.</p></div>${empty('لا توجد سجلات حالياً.')}${unresolved('تصنيف السجلات وأدوات الترشيح وتفاصيل الحدث وطريقة عرضها لم تعتمد تفصيلياً.')}`,{backTo:'021',bottom:false});}
-/* 032 */
-const memberSections=[['الأقساط','wallet','033'],['الأسهم','coins','034'],['القرعات','ticket','035'],['الغرفة','activity','036'],['الأخبار','book','037'],['الدردشات','chat','038']];
-function renderMemberHome(){return `<div class="app-top"><button class="top-back" data-action="back" data-fallback="011">${icon('right')}</button><div class="top-title">الرئيسية العضوية</div></div>${connection()}<main class="screen-body"><section class="group-identity"><div><h2>${esc(activeGroup.name||'جمعية التعاون')}</h2><p>مساحة المشاركة في الجمعية</p></div>${icon('users')}</section><div class="section-head" style="margin-top:4px"><h3>ملخص المشاركة</h3></div><div class="tile-grid" style="margin-bottom:15px"><div class="info-card" style="margin:0"><div class="small-note">عدد الأسهم</div><div style="font-size:22px;font-weight:900;margin-top:5px">01</div></div><div class="info-card" style="margin:0"><div class="small-note">الالتزامات الشخصية</div><div style="font-size:18px;font-weight:900;margin-top:5px">1,200 ر.ي</div></div><div class="info-card" style="margin:0"><div class="small-note">حالة الأقساط</div><div style="font-size:14px;font-weight:900;margin-top:7px">قسط مستحق</div></div><div class="info-card" style="margin:0"><div class="small-note">القرعة القادمة</div><div style="font-size:14px;font-weight:900;margin-top:7px">01/12/2026</div></div></div><div class="section-head"><h3>أقسام المشاركة</h3></div><div class="tile-grid manager-tiles">${memberSections.map(a=>tile(a[0],a[1],a[2],['الأسهم','الغرفة'].includes(a[0])?'gold':'blue')).join('')}</div></main>`}
-/* 033 */
-function renderMemberDues(){const cards=memberDues.map(d=>recordCard(d.id,d.name,d.status,detailRows([['تاريخ الاستحقاق',d.date],['المبلغ',d.amount+' ر.ي'],['الحالة',d.status]]),{iconName:'wallet',value:d.amount+' ر.ي',tag:statusChip(d.status,d.status==='مدفوع'?'green':d.status==='مستحق'?'gold':'blue')})).join('');return page('الأقساط',`<section class="form-card" style="padding:9px 14px"><div class="section-head" style="margin:0 0 6px"><h3>ملخص التزام العضو</h3></div>${row('إجمالي الالتزام','1,200 ر.ي')}${row('المسدّد','200 ر.ي')}${row('المتبقي','1,000 ر.ي')}</section><div class="record-section-title">الأقساط والاستحقاقات</div>${cards}<div class="record-section-title">سجل المدفوعات</div>${recordCard('member-paid','قسط سابق','مدفوع',detailRows([['المبلغ','200 ر.ي'],['التاريخ','2026/10/20']]),{iconName:'check',tag:statusChip('مدفوع','green')})}`,{backTo:'032',bottom:false});}
-/* 034 */
-function renderMemberShares(){return page('الأسهم',`<section class="form-card"><div class="section-head" style="margin:0 0 8px"><h3>ملخص حصة الأسهم</h3></div><div style="font-size:27px;font-weight:950;color:var(--blue)">01 <span style="font-size:12px;color:var(--muted);font-weight:700">سهم</span></div></section><section class="form-card"><div class="section-head" style="margin:0 0 8px"><h3>تفاصيل الحصة والالتزام</h3></div>${detailRows([['رقم السهم','01'],['قيمة السهم','1,200 ر.ي'],['إجمالي الالتزام','1,200 ر.ي'],['القرعة المرتبطة','القرعة الثانية'],['حالة الأهلية','مؤهل']])}</section><section class="form-card"><div class="section-head" style="margin:0 0 8px"><h3>سجل التغيرات</h3></div>${empty('لا توجد تغييرات مسجلة.')}</section>`,{backTo:'032',bottom:false});}
-/* 035 */
-function renderMemberDraws(){const cards=memberDraws.map(d=>recordCard(d.id,d.name,d.status,detailRows([['الموعد',d.date],['الأهلية',d.status],['التفاصيل',d.detail]]),{iconName:'ticket',tag:statusChip(d.status,d.status==='مؤهل'?'blue':'gold')})).join('');return page('القرعات',`<section class="form-card"><div class="section-head" style="margin:0 0 8px"><h3>ملخص وضع العضو</h3></div>${detailRows([['حالة الأهلية','تختلف حسب القرعة'],['القرعة القادمة','القرعة الثانية']])}</section><div class="record-section-title">القرعات المرتبطة بالعضو</div>${cards}<section class="form-card"><div class="section-head" style="margin:0 0 8px"><h3>النتيجة</h3></div>${empty('لا توجد نتيجة متاحة.')}</section>`,{backTo:'032',bottom:false});}
-/* 036 */
-function renderMemberRoom(){return page('الغرفة',`<section class="form-card"><div class="section-head" style="margin:0 0 9px"><h3>حالة الجولة الحالية</h3></div>${statusChip('غير متاحة','gold')}${row('موعد الجولة','غير متاح')}</section><section class="form-card"><div class="section-head" style="margin:0 0 9px"><h3>المؤهلون المسموح بعرضهم</h3></div>${empty('لا توجد بيانات مؤهلين متاحة للعرض.')}</section><section class="form-card"><div class="section-head" style="margin:0 0 9px"><h3>النتيجة ومجريات العرض</h3></div>${empty('لا توجد نتيجة أو مجريات موثقة.')}</section><section class="form-card"><div class="section-head" style="margin:0 0 9px"><h3>سجل الجولات ذات الصلة</h3></div>${empty('لا توجد سجلات متاحة.')}</section>${unresolved('الهيكل العضوي للغرفة معروف، لكن تفاصيل العرض والبيانات المتاحة للعضو ما زالت ضمن الاعتماد الجزئي.')}`,{backTo:'032',bottom:false});}
-/* 037 */
-function renderNews(){return page('الأخبار',`${recordCard('news1','أخبار الجمعية','جديد',`<p class="small-note">لا توجد أخبار جديدة.</p>`,{iconName:'book',tag:statusChip('جديد','blue')})}${unresolved('')}`,{backTo:'032',bottom:false});}
-/* 039 list done earlier; 040 done earlier */
-
-/* Local interaction layer — all actions remain inside this browser preview. */
-let toastTimer=null,accountEmail='hello@sahm.app',accountPhone='7•••••123',avatarChoice='user';
-function showToast(message){const t=document.getElementById('toast');if(!t)return;const span=t.querySelector('#toastText');if(span)span.textContent=message;t.classList.add('show');clearTimeout(toastTimer);toastTimer=setTimeout(()=>t.classList.remove('show'),2600)}
-function closeModal(){const root=document.getElementById('modalRoot');if(root){root.classList.add('hidden');root.innerHTML=''}}
-function openModal(title,content,actions=''){const root=document.getElementById('modalRoot');root.innerHTML=`<section class="modal-card"><div class="modal-head"><h3>${esc(title)}</h3><button class="modal-close" data-action="modal-close" aria-label="إغلاق">${icon('close')}</button></div><div class="modal-content">${content}</div>${actions?`<div class="modal-actions">${actions}</div>`:''}</section>`;root.classList.remove('hidden')}
-function validEmail(v){return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(String(v||'').trim())}
-function setInvalid(id,on=true){const el=document.getElementById(id);if(el)el.classList.toggle('invalid',!!on)}
-function setFieldError(id,on=true){const el=document.getElementById(id);const field=el?.closest('.field');if(field)field.classList.toggle('invalid',!!on);else if(el)el.classList.toggle('invalid',!!on)}
-function copyText(value,label){if(navigator.clipboard&&navigator.clipboard.writeText){navigator.clipboard.writeText(value).then(()=>showToast(`تم نسخ ${label}`)).catch(()=>openModal(`نسخ ${label}`,`<p>تعذر الوصول إلى الحافظة في هذه البيئة. يمكنك نسخ النص يدوياً:</p><textarea readonly style="width:100%;direction:ltr;text-align:left">${esc(value)}</textarea>`))}else{openModal(`نسخ ${label}`,`<p>انسخ النص:</p><textarea readonly style="width:100%;direction:ltr;text-align:left">${esc(value)}</textarea>`)}}
-function openContactsPicker(){selectedContacts=[];const opts=contactsFixture.map(c=>`<label class="contact-option"><input type="checkbox" data-contact-check="${c.id}"><div><strong>${esc(c.name)}</strong><small dir="ltr">${esc(c.phone)}</small></div></label>`).join('');openModal('اختيار جهات الاتصال',`<p>اختر جهات الاتصال التي تريد إضافتها.</p><div style="border:1px solid var(--line);border-radius:12px;overflow:hidden">${opts}</div>`,`<button class="btn secondary" data-action="modal-close">إلغاء</button><button class="btn primary" data-action="contacts-confirm">تأكيد الاختيار</button>`)}
-function renderContactRows(){const selected=contactsFixture.filter(c=>selectedContacts.includes(c.id));contactRecords=selected.length?selected:[];}
-function updateJoinCalc(){const total=1200*Math.max(1,Math.floor(Number(joinShares)||1));const t=document.getElementById('joinTotal');if(t)t.textContent=total.toLocaleString('en-US')+' ر.ي';const p=document.getElementById('joinPlan');if(p)p.innerHTML=Array.from({length:6},(_,i)=>`<div class="installment-line"><span>القسط ${i+1}</span><strong>${(200*Math.max(1,Math.floor(Number(joinShares)||1))).toLocaleString('en-US')} ر.ي</strong></div>`).join('')}
-function saveRegistrationFromDom(){const e=document.getElementById('regEmail'),p=document.getElementById('regPass'),c=document.getElementById('regConfirm'),a=document.getElementById('regTerms');if(e)registration.email=e.value;if(p)registration.pass=p.value;if(c)registration.confirm=c.value;if(a)registration.accepted=a.checked}
-function submitCreateGroup(){
- const name=String(form.name||'').trim(),start=form.start,first=form.first,share=Number(form.share),installments=getInstallments();
- const okName=name.length>=2,okStart=!!start,okFirst=!!first&&!!start&&new Date(first+'T00:00:00')>new Date(start+'T00:00:00'),okShare=Number.isFinite(share)&&share>0;
- const okPlan=form.mode==='count'?(Number.isInteger(Number(form.count))&&Number(form.count)>0):(Number(form.installment)>0&&Number(form.installment)<=share);
- const okManager=form.managerRole!=='manager-member'||(Number.isInteger(Number(form.managerShares))&&Number(form.managerShares)>0);
- setFieldError('errName',!okName);setFieldError('errStart',!okStart);setFieldError('errFirst',!okFirst);setFieldError('errShare',!okShare);setFieldError(form.mode==='count'?'errCount':'errInstallment',!okPlan);if(form.managerRole==='manager-member')setFieldError('errManagerShares',!okManager);
- if(!(okName&&okStart&&okFirst&&okShare&&okPlan&&okManager)){showToast('راجع الحقول المحددة قبل المتابعة');return}
- if(!online){showToast('إنشاء الجمعية يتطلب الاتصال بالإنترنت');return}
- groupResult={...form,name,share:String(share),count:String(installments.length)};
- go('015');
-}
-function searchFilter(input){filterVisible(input)}
-function applyListFilters(){
- const body=document.querySelector('#app .screen-body');if(!body)return;
- const search=body.querySelector('[data-search-input],.list-search input');const q=(search?.value||'').trim().toLowerCase();
- const selectors=[...body.querySelectorAll('[data-list-filter]')];
- const chosen=selectors.map(s=>({key:s.dataset.listFilter,value:s.value})).filter(x=>x.value&&x.value!=='all');
- const items=[...body.querySelectorAll('[data-filter-text],.record-card')];let shown=0;
- items.forEach(el=>{const text=(el.dataset.filterText||el.textContent||'').toLowerCase();let ok=!q||text.includes(q);for(const f of chosen){const val=String(el.dataset[f.key]||'');if(!val||val!==f.value)ok=false;}el.style.display=ok?'':'none';if(ok)shown++});
- const emptyEl=body.querySelector('[data-search-empty]');if(emptyEl)emptyEl.style.display=shown?'none':'';
-}
-
-/* Click delegation keeps the prototype lightweight and works after every local render. */
-document.addEventListener('click',e=>{
- const actionEl=e.target.closest('[data-action]');
- if(!actionEl)return;
- const action=actionEl.dataset.action,id=actionEl.dataset.id,value=actionEl.dataset.value;
- if(action==='modal-close'){closeModal();return}
- if(action==='open-index'){document.getElementById('inspector').classList.add('open');return}
- if(action==='close-index'){document.getElementById('inspector').classList.remove('open');return}
- if(action==='index-go'){go(id);document.getElementById('inspector').classList.remove('open');return}
- if(action==='nav'){if(id==='005')saveRegistrationFromDom();go(id);return}
- if(action==='back'){back(actionEl.dataset.fallback||'008');return}
- if(action==='profile'){go('013');return}
- if(action==='notifications'){go('012');return}
- if(action==='activity'){const ev=recentEvents.find(x=>x.id===id);if(ev?.route==='012'){go('012')}else{activeGroup=groupFixtures.find(g=>g.name===ev?.group)||groupFixtures[0];go('021')}return}
- if(action==='open-group'){activeGroup=groupFixtures.find(g=>g.id===id)||groupFixtures[0];go(activeGroup.kind==='manager'?'021':'032');return}
- if(action==='open-chat'){activeGroup=groupFixtures.find(g=>g.id===id)||groupFixtures[0];go(activeGroup.kind==='manager'?'027':'038');return}
- if(action==='carousel'){carouselIndex=Math.max(0,Math.min(2,Number(actionEl.dataset.index)||0));initCarousel();return}
- if(action==='country-picker'){openModal('اختيار الدولة','اليمن','<button class="btn primary" data-action="modal-close">إغلاق</button>');return}
- if(action==='toggle-pass'){const input=document.getElementById(actionEl.dataset.target);if(input)input.type=input.type==='password'?'text':'password';return}
- if(action==='login'){
-   const email=document.getElementById('loginEmail')?.value.trim()||'',pass=document.getElementById('loginPass')?.value||'';setInvalid('loginEmailWrap',!validEmail(email));setInvalid('loginPassWrap',!pass);
-   if(!validEmail(email)||!pass){showToast('تحقق من البريد الإلكتروني وكلمة المرور');return}
-   if(!online){showToast('تحقق من اتصالك بالإنترنت');return}
-   accountEmail=email;showToast('تعذر تسجيل الدخول. تحقق من بياناتك وحاول مجدداً.');go('008');setTimeout(()=>showToast('مرحباً بك في سهم'),30);return;
- }
+@media(max-width:680px){.stage-head,.device-frame{width:100%}}
  if(action==='recover-find'){
    const email=document.getElementById('recEmail')?.value.trim()||'',phone=document.getElementById('recPhone')?.value.trim()||'';setInvalid('recEmailWrap',!validEmail(email));setInvalid('recPhoneWrap',!phone);
    if(!validEmail(email)||!phone){showToast('أكمل البريد الإلكتروني ورقم الهاتف');return}if(!online){showToast('استعادة الحساب تتطلب الاتصال بالإنترنت');return}recoverStep=2;go('003');showToast('تم العثور على الحساب');return;
