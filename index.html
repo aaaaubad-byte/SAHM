@@ -608,12 +608,12 @@ body{background:var(--bg);color:var(--ink)}
  .app[data-screen="001"] .splash-glass{padding:38px 24px 28px}
 }
 @media(max-height:760px){
- .app:is([data-screen="002"],[data-screen="003"],[data-screen="004"],[data-screen="006"]) .auth-body{justify-content:flex-start;padding-top:16px;padding-bottom:max(20px,env(safe-area-inset-bottom,0px))}
+ .app:is([data-screen="002"],[data-screen="003"],[data-screen="004"],[data-screen="006"]) .auth-body{justify-content:safe center;padding-top:clamp(16px,3vh,24px);padding-bottom:max(20px,env(safe-area-inset-bottom,0px))}
  .app:is([data-screen="002"],[data-screen="003"],[data-screen="004"],[data-screen="006"]) .auth-heading{margin-bottom:10px}
  .app:is([data-screen="003"],[data-screen="004"],[data-screen="006"]) .auth-description{margin-top:-3px;margin-bottom:10px}
  .app:is([data-screen="002"],[data-screen="003"],[data-screen="004"],[data-screen="006"]) .auth-card{padding-top:15px;padding-bottom:14px}
  .app:is([data-screen="002"],[data-screen="003"],[data-screen="004"],[data-screen="006"]) .field{margin-bottom:11px}
- .app[data-screen="005"] .auth-terms-body{justify-content:flex-start;padding-top:14px;padding-bottom:16px}
+ .app[data-screen="005"] .auth-terms-body{justify-content:safe center;padding-top:clamp(14px,2.5vh,22px);padding-bottom:16px}
  .app[data-screen="005"] .terms-card{min-height:170px}
  .app[data-screen="005"] .terms-scroll{max-height:24vh}
 }
