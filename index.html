@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <meta name="theme-color" content="#3158d6">
-<meta name="sahm-build" content="sahm-20261123-activity-restore-wheel-room-12">
+<meta name="sahm-build" content="sahm-20261123-wheel-physics-winner-modal-13">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
@@ -284,26 +284,37 @@ button:disabled{cursor:not-allowed;opacity:.48}
 .app.dark .activity-icon{background:linear-gradient(145deg,#273d58,#1d3048);border-color:#405777;color:#9bb9ec;box-shadow:inset 0 1px 0 rgba(255,255,255,.06)}
 .app.dark .activity-time{color:#a9bacd}
 /* Administrative lottery wheel */
-.room-screen-body{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:13px;padding:16px 14px 22px;overflow-y:auto}
+.room-screen-body{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:17px;padding:16px 14px 22px;overflow-y:auto}
 .room-wheel-heading{text-align:center;margin:0}
-.room-wheel-heading h2{font-size:19px;line-height:1.4;font-weight:900;margin:0;color:var(--ink)}
-.room-wheel-heading p{font-size:11px;line-height:1.7;margin:4px 0 0;color:var(--muted)}
-.room-wheel-shell{position:relative;width:min(78vw,340px);max-width:100%;aspect-ratio:1;display:grid;place-items:center;margin:2px auto 0;filter:drop-shadow(0 13px 17px rgba(19,45,78,.18))}
-.room-wheel-rotor{width:100%;height:100%;border-radius:50%;transform:rotate(0deg);will-change:transform;overflow:hidden;border:7px solid #f8fafc;box-shadow:0 0 0 2px rgba(40,86,165,.28),inset 0 0 0 2px rgba(255,255,255,.55);background:#2856a5}
+.room-wheel-heading h2{font-size:20px;line-height:1.4;font-weight:900;margin:0;color:var(--ink)}
+.room-wheel-shell{position:relative;width:min(82vw,360px);max-width:100%;aspect-ratio:1;display:grid;place-items:center;margin:4px auto 0;filter:drop-shadow(0 15px 20px rgba(19,45,78,.20))}
+.room-wheel-rotor{width:100%;height:100%;border-radius:50%;transform:rotate(0deg);will-change:transform;overflow:hidden;border:8px solid #f8fafc;box-shadow:0 0 0 2px rgba(40,86,165,.30),inset 0 0 0 2px rgba(255,255,255,.58);background:#2856a5}
 .room-wheel-rotor svg{display:block;width:100%;height:100%;overflow:visible}
-.room-wheel-rotor .wheel-sector{stroke:rgba(255,255,255,.92);stroke-width:2}
-.room-wheel-rotor .wheel-name{font-family:var(--font-ui);font-weight:800;fill:#fff;paint-order:stroke;stroke:rgba(15,35,65,.28);stroke-width:1.5px;stroke-linejoin:round;text-anchor:middle;dominant-baseline:middle}
+.room-wheel-rotor .wheel-sector{stroke:rgba(255,255,255,.94);stroke-width:2}
+.room-wheel-rotor .wheel-name{font-family:var(--font-ui);font-weight:850;fill:#fff;paint-order:stroke;stroke:rgba(15,35,65,.34);stroke-width:1.7px;stroke-linejoin:round;text-anchor:middle;dominant-baseline:middle}
 .room-wheel-rotor .wheel-center{fill:#fff;stroke:#d5e0ed;stroke-width:4}
 .room-wheel-rotor .wheel-center-label{font-family:var(--font-ui);font-size:16px;font-weight:950;fill:#2856a5;text-anchor:middle;dominant-baseline:middle}
-.room-wheel-pointer{position:absolute;z-index:3;top:-7px;left:50%;transform:translateX(-50%);width:0;height:0;border-left:14px solid transparent;border-right:14px solid transparent;border-top:27px solid #b1813b;filter:drop-shadow(0 3px 3px rgba(35,42,52,.28))}
-.room-wheel-count{font-size:11px;color:var(--muted);font-weight:700;text-align:center}
-.room-wheel-result{width:min(100%,360px);min-height:42px;display:flex;align-items:center;justify-content:center;text-align:center;padding:9px 12px;border:1px solid var(--line);border-radius:13px;background:var(--paper);color:var(--ink-2);font-size:12px;font-weight:750;line-height:1.6}
-.room-wheel-result.winner{background:var(--success-soft);border-color:rgba(56,118,94,.28);color:var(--success);font-size:14px;font-weight:900}
-.room-wheel-spin{width:min(100%,300px);min-height:48px;border-radius:14px;font-size:14px;letter-spacing:.1px}
+.room-wheel-pointer{position:absolute;z-index:3;top:-8px;left:50%;transform:translateX(-50%);width:0;height:0;border-left:15px solid transparent;border-right:15px solid transparent;border-top:30px solid #b1813b;filter:drop-shadow(0 3px 3px rgba(35,42,52,.28))}
+.room-wheel-count{font-size:12px;color:var(--muted);font-weight:750;text-align:center}
+.room-wheel-spin{width:min(100%,310px);min-height:52px;border-radius:15px;font-size:15px;font-weight:850;letter-spacing:.1px;box-shadow:0 6px 15px rgba(40,86,165,.20)}
+.room-wheel-spin:disabled{opacity:.72;cursor:default}
+.lottery-winner-modal{position:relative;overflow:hidden;text-align:center;border:1px solid rgba(190,151,77,.36);box-shadow:0 22px 65px rgba(10,25,48,.28)}
+.lottery-celebration{position:relative;isolation:isolate;overflow:hidden;padding:15px 8px 8px;text-align:center}
+.lottery-confetti{position:absolute;inset:0;z-index:-1;pointer-events:none;overflow:hidden}
+.lottery-confetti i{position:absolute;top:-18px;left:calc((var(--i) * 17 + 4) % 100 * 1%);width:7px;height:12px;border-radius:2px;background:#bd8b43;opacity:0;animation:lottery-confetti-fall 2.8s ease-out var(--delay) forwards;transform:rotate(var(--rot))}
+.lottery-confetti i:nth-child(3n){background:#3158a5}
+.lottery-confetti i:nth-child(3n + 1){background:#d4ad68}
+.lottery-confetti i:nth-child(4n){background:#7d9cc9;width:5px;height:8px}
+.lottery-winner-medal{width:72px;height:72px;margin:0 auto 12px;border-radius:50%;display:grid;place-items:center;background:linear-gradient(145deg,#f5e4bd,#d3a65d);color:#704d1b;box-shadow:0 8px 22px rgba(174,130,57,.25),inset 0 2px 0 rgba(255,255,255,.8)}
+.lottery-winner-medal svg{width:36px;height:36px;stroke-width:1.9}
+.lottery-winner-caption{font-size:13px;font-weight:750;color:var(--muted);margin:0 0 7px}
+.lottery-winner-name{font-size:23px;line-height:1.45;font-weight:950;color:var(--ink);overflow-wrap:anywhere;margin:0}
+.lottery-winner-subtitle{font-size:12px;line-height:1.7;color:var(--muted);margin:9px 0 0}
+@keyframes lottery-confetti-fall{0%{opacity:0;transform:translate3d(0,-12px,0) rotate(0)}12%{opacity:1}100%{opacity:0;transform:translate3d(20px,330px,0) rotate(620deg)}}
 .app.dark .room-wheel-rotor{border-color:#dbe4ed;box-shadow:0 0 0 2px rgba(129,164,211,.38),inset 0 0 0 2px rgba(255,255,255,.5)}
-.app.dark .room-wheel-result{background:#172635;border-color:#354a5e;color:#d8e2ed}
-.app.dark .room-wheel-result.winner{background:#1c3a32;border-color:#396e58;color:#9ed1b6}
-@media(max-width:390px){.room-screen-body{gap:11px;padding:12px 12px 18px}.room-wheel-shell{width:min(76vw,310px)}.room-wheel-heading h2{font-size:18px}}
+.app.dark .lottery-winner-modal{background:#172635;border-color:#765d36}
+.app.dark .lottery-winner-name{color:#f1f5fa}
+@media(max-width:390px){.room-screen-body{gap:14px;padding:12px 12px 18px}.room-wheel-shell{width:min(80vw,330px)}.room-wheel-heading h2{font-size:19px}.lottery-winner-name{font-size:21px}}
 /* auth */
 .auth-body{display:flex;flex-direction:column;justify-content:center;padding:24px 21px 26px;background:linear-gradient(180deg,var(--bg),var(--soft))}
 .auth-heading{text-align:center;font-size:23px;font-weight:900;margin:0 0 18px}
@@ -1010,30 +1021,42 @@ function roomWheelMarkup(){
 function renderAdminRoom(){
  roomWheelSpinning=false;roomWheelFinished=false;
  const count=roomWheelMembers().length;
- const content=`<div class="room-wheel-heading"><h2>قرعة الجمعية</h2><p>كل قطاع يمثل عضواً واحداً لم يُسجل فوزه في بيانات المعاينة</p></div>${roomWheelMarkup()}<div class="room-wheel-count">${count} أعضاء ضمن قائمة القرعة التجريبية</div><div class="room-wheel-result" id="roomWheelResult">${count?'العجلة جاهزة للتدوير':'لا يوجد أعضاء مؤهلون للقرعة'}</div><button class="btn primary room-wheel-spin" id="roomWheelSpin" data-action="spin-wheel" ${count?'':'disabled'}>${icon('spark')} تدوير العجلة</button>`;
- return page('الغرفة',content,{backTo:'021',bottom:true,active:'groups',bodyClass:'room-screen-body'});
+ const content=`<div class="room-wheel-heading"><h2>عجلة القرعة</h2></div>${roomWheelMarkup()}<div class="room-wheel-count">${count.toLocaleString('en-US')} عضو مؤهل</div><button class="btn primary room-wheel-spin" id="roomWheelSpin" data-action="spin-wheel" ${count?'':'disabled'}>${icon('spark')} ابدأ القرعة</button>`;
+ return page('عجلة القرعة',content,{backTo:'021',bottom:true,active:'groups',bodyClass:'room-screen-body'});
+}
+function showLotteryWinner(name){
+ const confetti=Array.from({length:34},(_,i)=>`<i style="--i:${i};--delay:${(i%9)*.07}s;--rot:${(i*37)%180}deg"></i>`).join('');
+ openModal('اكتمل الاختيار',`<div class="lottery-celebration"><div class="lottery-confetti">${confetti}</div><div class="lottery-winner-medal">${icon('trophy')}</div><p class="lottery-winner-caption">الفائز في القرعة</p><h2 class="lottery-winner-name">${esc(name)}</h2><p class="lottery-winner-subtitle">تم اختيار الفائز بواسطة عجلة القرعة.</p></div>`,`<button class="btn primary" data-action="modal-close">تم</button>`);
+ const card=document.querySelector('#modalRoot .modal-card');if(card)card.classList.add('lottery-winner-modal');
 }
 function spinRoomWheel(){
- const members=roomWheelMembers(),rotor=document.getElementById('roomWheelRotor'),button=document.getElementById('roomWheelSpin'),result=document.getElementById('roomWheelResult');
- if(roomWheelSpinning||roomWheelFinished||!members.length||!rotor||!button||!result)return;
- roomWheelSpinning=true;button.disabled=true;button.textContent='تدور العجلة...';result.classList.remove('winner');result.textContent='جارٍ إجراء القرعة...';
+ const members=roomWheelMembers(),rotor=document.getElementById('roomWheelRotor'),button=document.getElementById('roomWheelSpin');
+ if(roomWheelSpinning||roomWheelFinished||!members.length||!rotor||!button)return;
+ roomWheelSpinning=true;button.disabled=true;button.textContent='تدور العجلة...';
  let randomValue=0;
  if(window.crypto&&window.crypto.getRandomValues){const bytes=new Uint32Array(1);window.crypto.getRandomValues(bytes);randomValue=bytes[0]/4294967296;}
  else randomValue=Math.random();
  const winnerIndex=Math.min(members.length-1,Math.floor(randomValue*members.length)),winner=members[winnerIndex],slice=360/members.length;
- const align=(360-(((winnerIndex+.5)*slice)%360))%360,turns=7+Math.floor(Math.random()*3),target=turns*360+align;
- rotor.style.transition='transform 7.4s cubic-bezier(.10,.78,.12,1)';
- requestAnimationFrame(()=>requestAnimationFrame(()=>{rotor.style.transform=`rotate(${target}deg)`;}));
- let settled=false;
+ const align=(360-(((winnerIndex+.5)*slice)%360))%360,turns=10+Math.floor(Math.random()*3),target=turns*360+align;
+ const duration=15000,startAngle=Number(rotor.dataset.angle||0),distance=target;
+ const startTime=performance.now();
+ let frame=0;
  const finish=()=>{
-  if(settled)return;settled=true;roomWheelSpinning=false;roomWheelFinished=true;
-  result.classList.add('winner');result.textContent='الفائز في القرعة: '+winner.name;
+  if(!roomWheelSpinning)return;
+  roomWheelSpinning=false;roomWheelFinished=true;rotor.dataset.angle=String(startAngle+distance);
   button.textContent='اكتملت القرعة';button.disabled=true;
-  rotor.removeEventListener('transitionend',onEnd);
+  showLotteryWinner(winner.name);
  };
- const onEnd=e=>{if(e.propertyName==='transform')finish();};
- rotor.addEventListener('transitionend',onEnd);
- setTimeout(finish,7800);
+ const animate=now=>{
+  if(!roomWheelSpinning)return;
+  const progress=Math.min(1,(now-startTime)/duration);
+  // Constant angular deceleration: high initial speed, smooth falloff, zero speed at rest.
+  const eased=2*progress-progress*progress;
+  rotor.style.transform=`rotate(${startAngle+distance*eased}deg)`;
+  if(progress<1)frame=requestAnimationFrame(animate);
+  else{cancelAnimationFrame(frame);finish();}
+ };
+ requestAnimationFrame(animate);
 }
 /* 029 */
 function renderGroupInfo(){return page('المعلومات',`<section class="form-card" style="padding:8px 15px"><div style="font-weight:900;padding:9px 0">معلومات الجمعية</div>${row('اسم الجمعية',esc(activeGroup.name||'غير متاح'))}${row('تاريخ البداية','غير متاح')}${row('أول قرعة','غير متاح')}${row('قيمة السهم','غير متاح')}</section><section class="form-card" style="padding:8px 15px"><div style="font-weight:900;padding:9px 0">بيانات الدورة والالتزامات</div>${row('نظام الأقساط','غير متاح')}${row('عدد الأقساط','غير متاح')}${row('الالتزامات','غير متاح')}</section>${unresolved('تفاصيل الحقول القابلة للتعديل وصلاحياتها تحتاج اعتماداً. لا يظهر إجراء تعديل أو نافذة حفظ —ة.')}`,{backTo:'021',bottom:false});}
