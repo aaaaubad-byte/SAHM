@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <meta name="theme-color" content="#3158d6">
-<meta name="sahm-build" content="sahm-20261124-pwa-cache-fix-22a">
+<meta name="sahm-build" content="sahm-20261124-membership-ledger-22b">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
@@ -807,9 +807,21 @@ const sectionFor=id=>id<='006'?'دورة الحساب':id==='007'?'إطار ال
 const screenMap=Object.fromEntries(screens.map(s=>[s[0],s]));
 try{localStorage.removeItem('sahm-commercial-preview-v1')}catch(e){}
 const LOCAL_DATA_KEY='sahm-app-data-v1';
-function emptyLocalData(){return {version:1,activeAccountId:null,accounts:[],groups:[],joinRequests:[],invitations:[],notifications:[],activities:[]}}
-function loadLocalData(){try{const x=JSON.parse(localStorage.getItem(LOCAL_DATA_KEY)||'null');if(!x||x.version!==1)return emptyLocalData();return {version:1,activeAccountId:x.activeAccountId||null,accounts:Array.isArray(x.accounts)?x.accounts:[],groups:Array.isArray(x.groups)?x.groups:[],joinRequests:Array.isArray(x.joinRequests)?x.joinRequests:[],invitations:Array.isArray(x.invitations)?x.invitations:[],notifications:Array.isArray(x.notifications)?x.notifications:[],activities:Array.isArray(x.activities)?x.activities:[]}}catch(e){console.warn('تعذر قراءة البيانات المحفوظة',e);return emptyLocalData()}}
+let localDataNeedsMigration=false,localDataLoadBlocked=false;
+function emptyLocalData(){return {version:2,activeAccountId:null,accounts:[],groups:[],joinRequests:[],invitations:[],notifications:[],activities:[]}}
+function normalizeLocalData(x){
+ if(!x||typeof x!=='object'||![1,2].includes(Number(x.version)))throw new Error('إصدار بيانات غير مدعوم');
+ if(Number(x.version)!==2)localDataNeedsMigration=true;
+ const list=v=>Array.isArray(v)?v:[];
+ return {version:2,activeAccountId:typeof x.activeAccountId==='string'?x.activeAccountId:null,accounts:list(x.accounts).filter(a=>a&&typeof a==='object'),groups:list(x.groups).filter(g=>g&&typeof g==='object').map(g=>({...g,memberships:list(g.memberships).filter(m=>m&&typeof m==='object').map(m=>({...m,dues:list(m.dues),shareItems:list(m.shareItems)})),collections:list(g.collections),paidRecords:list(g.paidRecords),draws:list(g.draws),roomInvitedIds:list(g.roomInvitedIds),roomAttendeeIds:list(g.roomAttendeeIds)})),joinRequests:list(x.joinRequests),invitations:list(x.invitations),notifications:list(x.notifications),activities:list(x.activities)};
+}
+function loadLocalData(){
+ let raw=null;try{raw=localStorage.getItem(LOCAL_DATA_KEY)}catch(e){localDataLoadBlocked=true;console.warn('تعذر الوصول إلى التخزين المحلي',e);return emptyLocalData()}
+ if(!raw)return emptyLocalData();
+ try{return normalizeLocalData(JSON.parse(raw))}catch(e){console.warn('تعذر قراءة البيانات المحفوظة؛ لن تُستبدل النسخة غير المقروءة',e);try{localStorage.setItem(LOCAL_DATA_KEY+'-recovery',raw)}catch(_){ }localDataLoadBlocked=true;return emptyLocalData()}
+}
 let localData=loadLocalData();
+let lastPersistedJSON=(()=>{try{return localStorage.getItem(LOCAL_DATA_KEY)}catch(e){return null}})();
 let activeAccountId=localData.activeAccountId&&localData.accounts.some(a=>a.id===localData.activeAccountId)?localData.activeAccountId:null;
 let current='001',historyStack=[],online=navigator.onLine!==false,theme='light';
 let activeGroup={},form={name:'',start:'',first:'',share:'',currency:'YER',mode:'count',count:'',installment:'',managerRole:'manager',managerShares:'1'};
@@ -821,7 +833,23 @@ let roomInvitedIds=[],roomAttendeeIds=[];
 let groupResult={name:'',start:'',first:'',share:'',currency:'YER',mode:'count',count:'',managerRole:'manager',managerShares:'1',joinLink:'',groupId:''};
 let groupFixtures=[],notifications=[],contactsFixture=[],collectionRecords=[],paidRecords=[],drawRecords=[],shareRecords=[],memberRecords=[],requests=[],invitations=[],memberDues=[],memberDraws=[],recentEvents=[];
 function makeId(p){return p+'-'+(crypto.randomUUID?crypto.randomUUID():Date.now().toString(36)+'-'+Math.random().toString(36).slice(2,10))}
-function saveLocalData(){try{localStorage.setItem(LOCAL_DATA_KEY,JSON.stringify(localData));return true}catch(e){console.error('تعذر حفظ البيانات',e);showToast('تعذر حفظ البيانات على هذا الجهاز');return false}}
+function ensureMembershipLedger(group,membership){
+ if(!group||!membership||membership.status!=='active'||membership.role==='manager')return false;
+ const count=Number(membership.shares||0);if(!Number.isSafeInteger(count)||count<1)return false;
+ let changed=false;const shares=Array.isArray(membership.shareItems)?membership.shareItems:[];
+ for(let number=1;number<=count;number++)if(!shares.some(item=>Number(item.number)===number)){shares.push({id:makeId('shr'),number,status:'مسجل',eligible:null,drawId:null,result:null});changed=true}
+ membership.shareItems=shares.sort((a,b)=>Number(a.number)-Number(b.number));
+ if(!Array.isArray(membership.dues))membership.dues=[];
+ if(!membership.dues.length&&Array.isArray(group.installments)&&group.installments.length){
+  membership.shareItems.forEach(share=>group.installments.forEach((amount,index)=>{const value=Number(amount);if(!Number.isFinite(value)||value<0)return;membership.dues.push({id:makeId('due'),shareId:share.id,shareNumber:share.number,installmentNumber:index+1,amount:value,dueDate:null,status:'مجدول',paidAt:null,reminded:false})}));changed=true;
+ }
+ return changed;
+}
+function saveLocalData(){
+ if(localDataLoadBlocked){showToast('تعذر قراءة البيانات المحفوظة؛ لم يتم استبدالها');return false}
+ try{localData.version=2;const serialized=JSON.stringify(localData);localStorage.setItem(LOCAL_DATA_KEY,serialized);lastPersistedJSON=serialized;return true}
+ catch(e){console.error('تعذر حفظ البيانات',e);try{if(lastPersistedJSON){localData=normalizeLocalData(JSON.parse(lastPersistedJSON));activeAccountId=localData.activeAccountId&&localData.accounts.some(a=>a.id===localData.activeAccountId)?localData.activeAccountId:null;activeGroup={};refreshLocalViews()}else{localData=emptyLocalData();activeAccountId=null;activeGroup={};refreshLocalViews()}}catch(restoreError){console.error('تعذر استعادة آخر نسخة محفوظة',restoreError)}showToast('تعذر حفظ البيانات؛ لم يُعتمد التعديل');return false}
+}
 function getActiveAccount(){return localData.accounts.find(a=>a.id===activeAccountId)||null}
 function findGroup(id){return localData.groups.find(g=>g.id===id)||null}
 function membershipFor(g,accountId){return (g?.memberships||[]).find(m=>m.accountId===accountId&&m.status==='active')||null}
@@ -842,7 +870,7 @@ function refreshLocalViews(){
 }
 function addActivity(accountId,title,groupId='',route='008',activityIcon='activity'){const g=findGroup(groupId);localData.activities.push({id:makeId('act'),accountId,title,groupId:groupId||'',group:g?.name||'',time:'الآن',route,icon:activityIcon,createdAt:new Date().toISOString()})}
 function addNotification(accountId,title,groupId,body,type='group'){const g=findGroup(groupId);localData.notifications.push({id:makeId('ntf'),accountId,groupId,title,group:g?.name||'',time:'الآن',body,type,read:false,createdAt:new Date().toISOString()})}
-function activateAccount(id){const a=localData.accounts.find(x=>x.id===id);if(!a)return false;activeAccountId=id;localData.activeAccountId=id;activeGroup={};theme=a.theme||'light';form={name:'',start:'',first:'',share:'',currency:'YER',mode:'count',count:'',installment:'',managerRole:'manager',managerShares:'1'};groupResult={name:'',start:'',first:'',share:'',currency:'YER',mode:'count',count:'',managerRole:'manager',managerShares:'1',joinLink:'',groupId:''};selectedJoinGroupId=null;joinSubmitted=false;joinShares=1;joinAck=false;historyStack=[];refreshLocalViews();saveLocalData();return true}
+function activateAccount(id){const a=localData.accounts.find(x=>x.id===id);if(!a)return false;const previous=activeAccountId,previousStored=localData.activeAccountId;activeAccountId=id;localData.activeAccountId=id;if(!saveLocalData()){activeAccountId=previous;localData.activeAccountId=previousStored;return false}activeGroup={};theme=a.theme||'light';form={name:'',start:'',first:'',share:'',currency:'YER',mode:'count',count:'',installment:'',managerRole:'manager',managerShares:'1'};groupResult={name:'',start:'',first:'',share:'',currency:'YER',mode:'count',count:'',installment:'',managerRole:'manager',managerShares:'1',joinLink:'',groupId:''};selectedJoinGroupId=null;joinSubmitted=false;joinShares=1;joinAck=false;historyStack=[];refreshLocalViews();return true}
 function createJoinLink(code){return window.location.origin+window.location.pathname+'?join='+encodeURIComponent(code)}
 function extractJoinCode(raw){try{const u=new URL(raw,window.location.href);if(u.origin!==window.location.origin)return null;return u.searchParams.get('join')}catch{return null}}
 function currentJoinGroup(){return findGroup(selectedJoinGroupId)}
@@ -851,6 +879,7 @@ function hexToBytes(x){return new Uint8Array((x.match(/.{1,2}/g)||[]).map(v=>par
 async function hashPassword(password,salt){if(!crypto.subtle||!window.TextEncoder)throw new Error('Web Crypto unavailable');const key=await crypto.subtle.importKey('raw',new TextEncoder().encode(password),'PBKDF2',false,['deriveBits']);const bits=await crypto.subtle.deriveBits({name:'PBKDF2',salt:hexToBytes(salt),iterations:100000,hash:'SHA-256'},key,256);return Array.from(new Uint8Array(bits),x=>x.toString(16).padStart(2,'0')).join('')}
 async function newPasswordRecord(password){const salt=createSalt();return {salt,passwordHash:await hashPassword(password,salt)}}
 async function verifyPassword(account,password){return !!account?.salt&&!!account?.passwordHash&&(await hashPassword(password,account.salt))===account.passwordHash}
+let ledgersChanged=false;localData.groups.forEach(g=>(g.memberships||[]).forEach(m=>{if(ensureMembershipLedger(g,m))ledgersChanged=true}));if(localDataNeedsMigration||ledgersChanged)saveLocalData();
 refreshLocalViews();
 function esc(v){return String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]))}
 function meta(id=current){return screenMap[id]||['','','','P']}
@@ -1147,8 +1176,10 @@ function submitCreateGroup(){
  if(!(okName&&okStart&&okFirst&&okShare&&okPlan&&okManager)){showToast('راجع الحقول المحددة قبل المتابعة');return}
  const owner=getActiveAccount();if(!owner){showToast('سجل الدخول أولاً');go('002');return}
  const code=makeId('join').replace(/[^a-zA-Z0-9]/g,'').slice(-18);
- const group={id:makeId('grp'),name,start,first,share,currency:form.currency,mode:form.mode,count:installments.length,installments,managerRole:form.managerRole,managerShares:form.managerRole==='manager-member'?Number(form.managerShares):0,creatorAccountId:activeAccountId,joinCode:code,createdAt:new Date().toISOString(),memberships:[{accountId:activeAccountId,role:form.managerRole==='manager-member'?'manager-member':'manager',status:'active',shares:form.managerRole==='manager-member'?Number(form.managerShares):0,paid:0,dues:[]}]};
- localData.groups.push(group);addActivity(activeAccountId,'تم إنشاء جمعية '+name,group.id,'021','building');groupResult={...form,name,share:String(share),count:String(installments.length),joinLink:createJoinLink(code),groupId:group.id};activeGroup=group;saveLocalData();refreshLocalViews();go('015');
+  const membership={accountId:activeAccountId,role:form.managerRole==='manager-member'?'manager-member':'manager',status:'active',shares:form.managerRole==='manager-member'?Number(form.managerShares):0,paid:0,dues:[],shareItems:[]};
+  const group={id:makeId('grp'),name,start,first,share,currency:form.currency,mode:form.mode,count:installments.length,installments,managerRole:form.managerRole,managerShares:form.managerRole==='manager-member'?Number(form.managerShares):0,creatorAccountId:activeAccountId,joinCode:code,createdAt:new Date().toISOString(),memberships:[membership]};
+  ensureMembershipLedger(group,membership);localData.groups.push(group);addActivity(activeAccountId,'تم إنشاء جمعية '+name,group.id,'021','building');
+  if(!saveLocalData())return;groupResult={...form,name,share:String(share),count:String(installments.length),joinLink:createJoinLink(code),groupId:group.id};activeGroup=group;refreshLocalViews();go('015');
 }
 function searchFilter(input){filterVisible(input)}
 function applyListFilters(){
