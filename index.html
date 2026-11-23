@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <meta name="theme-color" content="#3158d6">
-<meta name="sahm-build" content="sahm-20261124-home-label-23s">
+<meta name="sahm-build" content="sahm-20261124-relative-activity-time-23q">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
@@ -844,6 +844,7 @@ const MAX_LOCAL_INSTALLMENTS=10000,MAX_LOCAL_LEDGER_ENTRIES=10000;
 function moneyToMinor(value){if(value===null||value===undefined||typeof value==='boolean')return null;const raw=typeof value==='string'?value.trim():value;if(raw==='')return null;const amount=Number(raw);if(!Number.isFinite(amount)||amount<0)return null;const scaled=amount*100,minor=Math.round(scaled);if(Math.abs(scaled-minor)>1e-7)return null;return Number.isSafeInteger(minor)?minor:null}
 function minorToMoney(value){return Number.isSafeInteger(value)?value/100:NaN}
 function formatMoney(value){if(value===null||value===undefined||value===''||typeof value==='boolean')return '—';const amount=Number(value);return Number.isFinite(amount)?amount.toLocaleString('en-US',{maximumFractionDigits:2}):'—'}
+function relativeTime(value,fallback=''){const date=new Date(value);if(!Number.isFinite(date.getTime()))return fallback||'—';const seconds=Math.floor((Date.now()-date.getTime())/1000);if(seconds<60)return 'الآن';const minutes=Math.floor(seconds/60);if(minutes<60)return minutes===1?'منذ دقيقة':`منذ ${minutes} دقائق`;const hours=Math.floor(minutes/60);if(hours<24)return hours===1?'منذ ساعة':hours===2?'منذ ساعتين':`منذ ${hours} ساعات`;const days=Math.floor(hours/24);if(days<7)return days===1?'منذ يوم':days===2?'منذ يومين':`منذ ${days} أيام`;return date.toLocaleDateString('ar',{day:'numeric',month:'short',year:'numeric'})}
 function membershipFinancials(group,membership){const shareMinor=Number.isSafeInteger(group?.shareMinor)?group.shareMinor:moneyToMinor(group?.share),shares=Number(membership?.shares),totalMinor=Number.isSafeInteger(shareMinor)&&Number.isSafeInteger(shares)&&shares>=0?shareMinor*shares:NaN,dues=Array.isArray(membership?.dues)?membership.dues:[];let paidFromDues=0,paidValid=true;for(const d of dues){if(Array.isArray(d)||!(d?.status==='مدفوع'||d?.paidAt))continue;const amount=Number.isSafeInteger(d.amountMinor)?d.amountMinor:moneyToMinor(d.amount);if(!Number.isSafeInteger(amount)||!Number.isSafeInteger(paidFromDues+amount)){paidValid=false;break}paidFromDues+=amount}const storedPaid=membership?.paid===null||membership?.paid===undefined?0:moneyToMinor(membership.paid),paidMinor=paidValid&&Number.isSafeInteger(storedPaid)?Math.max(storedPaid,paidFromDues):NaN;return {shares,totalMinor:Number.isSafeInteger(totalMinor)?totalMinor:null,paidMinor:Number.isSafeInteger(paidMinor)?paidMinor:null,total:Number.isSafeInteger(totalMinor)?minorToMoney(totalMinor):null,paid:Number.isSafeInteger(paidMinor)?minorToMoney(paidMinor):null,remaining:Number.isSafeInteger(totalMinor)&&Number.isSafeInteger(paidMinor)?minorToMoney(Math.max(0,totalMinor-paidMinor)):null}}
 function ensureMembershipLedger(group,membership){
  if(!group||!membership||membership.status!=='active'||membership.role==='manager')return false;
@@ -970,7 +971,7 @@ function summaryCarouselMarkup(slides,label){
 }
 function summaryStaticMarkup(slides,label){return '<section class="summary-static-grid" aria-label="'+esc(label)+'">'+slides.map(s=>'<article class="summary-static-card '+esc(s.tone)+'"><strong>'+esc(s.title)+'</strong><b>'+esc(s.value)+'</b></article>').join('')+'</section>'}
 function renderHome(){
- const activity=recentEvents.map(e=>'<button class="activity-item" data-action="activity" data-id="'+esc(e.id)+'"><span class="activity-icon">'+icon(e.icon||'activity')+'</span><span class="activity-copy"><strong>'+esc(e.title)+'</strong><span>'+esc(e.group)+'</span></span><span class="activity-time">'+esc(e.time)+'</span></button>').join('');
+ const activity=recentEvents.map(e=>'<button class="activity-item" data-action="activity" data-id="'+esc(e.id)+'"><span class="activity-icon">'+icon(e.icon||'activity')+'</span><span class="activity-copy"><strong>'+esc(e.title)+'</strong><span>'+esc(e.group)+'</span></span><span class="activity-time">'+esc(relativeTime(e.createdAt,e.time))+'</span></button>').join('');
  return generalHeader()+'<main class="screen-body home-body">'+summaryStaticMarkup(getSummarySlides(),'ملخص الجمعيات')+'<section class="home-tiles"><div class="home-shortcuts">'+tile('جمعيات أديرها','users','010','blue')+tile('جمعيات أشارك فيها','usercheck','011','gold')+'</div><div class="home-shortcuts home-action-cards">'+tile('جمعية جديدة','plus','014','blue')+tile('الانضمام لجمعية','link','016','gold')+'</div></section><section class="home-section"><div class="section-head"><div class="section-title-wrap">'+icon('activity')+'<h3>أحدث النشاط</h3></div></div><div class="activity-list">'+(activity||empty('لا يوجد نشاط مسجل حالياً.'))+'</div></section></main>'+bottomNav('home');
 }function setCarouselSlide(index){
  const track=document.getElementById('summaryTrack');
@@ -1013,7 +1014,7 @@ function renderGroups(kind){
 }
 /* 012 */
 function renderNotifications(){
- const cards=notifications.map(n=>'<button class="list-row" data-action="notice-open" data-id="'+esc(n.id)+'" data-filter-text="'+esc(n.title+' '+n.group+' '+n.body)+'"><span class="row-icon">'+icon(n.type==='invite'?'gift':n.type==='room-invite'?'users':n.type==='room-attendance'?'usercheck':'activity')+'</span><span class="row-main"><span class="row-title">'+esc(n.title)+'</span><span class="row-meta">'+esc(n.group)+' · '+esc(n.time)+'</span></span><span class="status '+(n.read?'':'blue')+'">'+(n.read?'مقروء':'جديد')+'</span>'+icon('back','row-arrow')+'</button>').join('');
+ const cards=notifications.map(n=>'<button class="list-row" data-action="notice-open" data-id="'+esc(n.id)+'" data-filter-text="'+esc(n.title+' '+n.group+' '+n.body)+'"><span class="row-icon">'+icon(n.type==='invite'?'gift':n.type==='room-invite'?'users':n.type==='room-attendance'?'usercheck':'activity')+'</span><span class="row-main"><span class="row-title">'+esc(n.title)+'</span><span class="row-meta">'+esc(n.group)+' · '+esc(relativeTime(n.createdAt,n.time))+'</span></span><span class="status '+(n.read?'':'blue')+'">'+(n.read?'مقروء':'جديد')+'</span>'+icon('back','row-arrow')+'</button>').join('');
  return page('الإشعارات',searchBox('ابحث في الإشعارات')+(cards?'<div class="list-stack">'+cards+'</div><div data-search-empty style="display:none">'+empty('لا توجد نتائج مطابقة')+'</div>':empty('لا توجد إشعارات حالياً.')),{backTo:'008'});
 }function renderProfile(){
  const accounts=localData.accounts.map(a=>'<button class="list-row" style="width:100%;text-align:right" data-action="switch-account" data-id="'+esc(a.id)+'"><span class="row-icon">'+icon('user')+'</span><span class="row-main"><span class="row-title">'+esc(a.name)+'</span><span class="row-meta" dir="ltr">'+esc(a.email)+'</span></span><span class="status '+(a.id===activeAccountId?'green':'blue')+'">'+(a.id===activeAccountId?'الحساب الحالي':'تبديل')+'</span></button>').join('');
@@ -1131,7 +1132,7 @@ function renderGroupInfo(){
 /* 031 */
 function renderLog(){
  const events=localData.activities.filter(e=>e.groupId===activeGroup?.id).sort((a,b)=>(b.createdAt||'').localeCompare(a.createdAt||''));
- const cards=events.map(e=>'<article class="list-row"><span class="row-icon">'+icon(e.icon||'activity')+'</span><span class="row-main"><span class="row-title">'+esc(e.title)+'</span><span class="row-meta">'+esc(localData.accounts.find(a=>a.id===e.accountId)?.name||'حساب')+' · '+esc(e.time||'')+'</span></span></article>').join('');
+ const cards=events.map(e=>'<article class="list-row"><span class="row-icon">'+icon(e.icon||'activity')+'</span><span class="row-main"><span class="row-title">'+esc(e.title)+'</span><span class="row-meta">'+esc(localData.accounts.find(a=>a.id===e.accountId)?.name||'حساب')+' · '+esc(relativeTime(e.createdAt,e.time||''))+'</span></span></article>').join('');
  return page('السجل','<div class="page-intro"><h2>سجل الأنشطة والأحداث</h2><p>الأحداث المسجلة في هذه الجمعية.</p></div>'+(cards?'<div class="list-stack">'+cards+'</div>':empty('لا توجد سجلات حالياً.')),{backTo:'021',bottom:false});
 }function renderMemberHome(){
  const own=membershipFor(activeGroup,activeAccountId),finance=membershipFinancials(activeGroup,own),shares=finance.shares,total=finance.total,paid=finance.paid,unit=currencyName(activeGroup.currency||'YER'),completion=finance.totalMinor>0&&finance.paidMinor!==null?Math.min(100,Math.round(finance.paidMinor/finance.totalMinor*100)):'—';
