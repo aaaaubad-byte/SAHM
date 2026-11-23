@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <meta name="theme-color" content="#3158d6">
-<meta name="sahm-build" content="sahm-20261124-notice-reference-23d">
+<meta name="sahm-build" content="sahm-20261124-empty-money-23e">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
@@ -1032,7 +1032,7 @@ function updateAssociationCalc(){
  const installments=getInstallments(),totalMinor=moneyToMinor(form.share)||0,total=minorToMoney(totalMinor),sumMinor=installments.reduce((a,b)=>a+(moneyToMinor(b)||0),0),sum=minorToMoney(sumMinor),unit=currencyName(form.currency);
  let installmentLabel='—';
  if(installments.length){const first=installments[0],last=installments[installments.length-1];installmentLabel=first===last?`${formatMoney(first)} ${unit}`:`${formatMoney(first)} – ${formatMoney(last)} ${unit}`}
- box.innerHTML=`<div><span class="small-note">عدد الأقساط</span><strong>${installments.length||'—'}</strong></div><div><span class="small-note">قيمة القسط</span><strong>${installmentLabel}</strong></div><div style="grid-column:1/-1;border-top:1px solid #e1e9ef;padding-top:7px"><span class="small-note">إجمالي قيمة السهم</span><strong style="font-size:13px">${Number.isFinite(total)?`${formatMoney(total)} ${unit}`:'—'}</strong></div>`;
+ box.innerHTML=`<div><span class="small-note">عدد الأقساط</span><strong>${installments.length||'—'}</strong></div><div><span class="small-note">قيمة القسط</span><strong>${installmentLabel}</strong></div><div style="grid-column:1/-1;border-top:1px solid #e1e9ef;padding-top:7px"><span class="small-note">إجمالي قيمة السهم</span><strong style="font-size:13px">${totalMinor>0&&Number.isFinite(total)?`${formatMoney(total)} ${unit}`:'—'}</strong></div>`;
  const pane=document.getElementById('installPreview');
  if(pane){pane.style.display=previewOpen?'block':'none';pane.innerHTML=installments.length?`<div class="installment-list">${installments.map((v,i)=>`<div class="installment-line"><span>القسط ${i+1}</span><strong>${formatMoney(v)} ${unit}</strong></div>`).join('')}</div><div class="small-note" style="margin-top:7px">المجموع: ${formatMoney(sum)} ${unit}</div>`:empty('أكمل قيمة السهم وطريقة الأقساط لعرض الجدول')}
  const btn=document.getElementById('createGroupSubmit');
