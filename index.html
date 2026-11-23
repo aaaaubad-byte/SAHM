@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <meta name="theme-color" content="#3158d6">
-<meta name="sahm-build" content="sahm-20261124-join-ledger-display-22t">
+<meta name="sahm-build" content="sahm-20261124-manager-member-attendance-22u">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
@@ -1200,7 +1200,7 @@ document.addEventListener('click',async e=>{
  if(action==='room-invite'){openRoomInviteModal();return}
  if(action==='room-invite-confirm'){const checks=[...document.querySelectorAll('[data-room-invite-check]')],nextInvited=checks.filter(x=>x.checked).map(x=>x.dataset.roomInviteCheck),nextAttendees=roomAttendeeIds.filter(id=>nextInvited.includes(id));if(activeGroup?.id){activeGroup.roomInvitedIds=nextInvited;activeGroup.roomAttendeeIds=nextAttendees;if(!saveLocalData()){refreshLocalViews();closeModal();render();return}}roomInvitedIds=nextInvited;roomAttendeeIds=nextAttendees;closeModal();render();showToast('تم تحديث قائمة المدعوين');return}
  if(action==='room-checkin'){if(!roomInvitedIds.includes(id)){showToast('يجب دعوة العضو أولاً');return}const nextAttendees=roomAttendeeIds.includes(id)?roomAttendeeIds.slice():[...roomAttendeeIds,id];if(activeGroup?.id){activeGroup.roomAttendeeIds=nextAttendees;if(!saveLocalData()){refreshLocalViews();render();return}}roomAttendeeIds=nextAttendees;render();return}
- if(action==='room-member-attendance'){const membership=membershipFor(activeGroup,activeAccountId);if(!membership||membership.role!=='member'||!roomInvitedIds.includes(activeAccountId)){showToast('لا توجد دعوة حضور صالحة لهذا الحساب');return}const nextAttendees=roomAttendeeIds.includes(activeAccountId)?roomAttendeeIds.slice():[...roomAttendeeIds,activeAccountId];activeGroup.roomAttendeeIds=nextAttendees;if(!saveLocalData()){refreshLocalViews();render();return}roomAttendeeIds=nextAttendees;refreshLocalViews();render();showToast('تم تأكيد حضورك');return}
+ if(action==='room-member-attendance'){const membership=membershipFor(activeGroup,activeAccountId);if(!membership||!['member','manager-member'].includes(membership.role)||!roomInvitedIds.includes(activeAccountId)){showToast('لا توجد دعوة حضور صالحة لهذا الحساب');return}const nextAttendees=roomAttendeeIds.includes(activeAccountId)?roomAttendeeIds.slice():[...roomAttendeeIds,activeAccountId];activeGroup.roomAttendeeIds=nextAttendees;if(!saveLocalData()){refreshLocalViews();render();return}roomAttendeeIds=nextAttendees;refreshLocalViews();render();showToast('تم تأكيد حضورك');return}
  if(action==='modal-close'){closeModal();return}
  if(action==='open-index'){document.getElementById('inspector').classList.add('open');return}
  if(action==='close-index'){document.getElementById('inspector').classList.remove('open');return}
