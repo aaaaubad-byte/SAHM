@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <meta name="theme-color" content="#3158d6">
-<meta name="sahm-build" content="sahm-20261124-room-activity-audit-23l">
+<meta name="sahm-build" content="sahm-20261124-storage-block-23m">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
@@ -860,7 +860,7 @@ function ensureMembershipLedger(group,membership){
  return changed;
 }
 function saveLocalData(){
- if(localDataLoadBlocked){showToast('تعذر قراءة البيانات المحفوظة؛ لم يتم استبدالها');return false}
+ if(localDataLoadBlocked){localData=emptyLocalData();activeAccountId=null;activeGroup={};historyStack=[];current='002';refreshLocalViews();render();showToast('تعذر قراءة البيانات المحفوظة؛ لم يتم اعتماد أي تعديل');return false}
  try{localData.version=2;const serialized=JSON.stringify(localData);localStorage.setItem(LOCAL_DATA_KEY,serialized);lastPersistedJSON=serialized;return true}
  catch(e){console.error('تعذر حفظ البيانات',e);try{if(lastPersistedJSON){localData=normalizeLocalData(JSON.parse(lastPersistedJSON));activeAccountId=localData.activeAccountId&&localData.accounts.some(a=>a.id===localData.activeAccountId)?localData.activeAccountId:null;activeGroup={};refreshLocalViews()}else{localData=emptyLocalData();activeAccountId=null;activeGroup={};refreshLocalViews()}}catch(restoreError){console.error('تعذر استعادة آخر نسخة محفوظة',restoreError)}showToast('تعذر حفظ البيانات؛ لم يُعتمد التعديل');return false}
 }
@@ -893,7 +893,7 @@ function refreshLocalViews(){
 }
 function addActivity(accountId,title,groupId='',route='008',activityIcon='activity'){const g=findGroup(groupId);localData.activities.push({id:makeId('act'),accountId,title,groupId:groupId||'',group:g?.name||'',time:'الآن',route,icon:activityIcon,createdAt:new Date().toISOString()})}
 function addNotification(accountId,title,groupId,body,type='group'){const g=findGroup(groupId);localData.notifications.push({id:makeId('ntf'),accountId,groupId,title,group:g?.name||'',time:'الآن',body,type,read:false,createdAt:new Date().toISOString()})}
-function activateAccount(id){const a=localData.accounts.find(x=>x.id===id);if(!a)return false;const previous=activeAccountId,previousStored=localData.activeAccountId;activeAccountId=id;localData.activeAccountId=id;if(!saveLocalData()){activeAccountId=previous;localData.activeAccountId=previousStored;return false}activeGroup={};applyThemePreference();form={name:'',start:'',first:'',share:'',currency:'YER',mode:'count',count:'',installment:'',managerRole:'manager',managerShares:'1'};groupResult={name:'',start:'',first:'',share:'',currency:'YER',mode:'count',count:'',installment:'',managerRole:'manager',managerShares:'1',joinLink:'',groupId:''};selectedJoinGroupId=null;joinSubmitted=false;joinShares=1;joinAck=false;historyStack=[];refreshLocalViews();return true}
+function activateAccount(id){const a=localData.accounts.find(x=>x.id===id);if(!a)return false;const previous=activeAccountId,previousStored=localData.activeAccountId;activeAccountId=id;localData.activeAccountId=id;if(!saveLocalData()){if(!localDataLoadBlocked){activeAccountId=previous;localData.activeAccountId=previousStored}return false}activeGroup={};applyThemePreference();form={name:'',start:'',first:'',share:'',currency:'YER',mode:'count',count:'',installment:'',managerRole:'manager',managerShares:'1'};groupResult={name:'',start:'',first:'',share:'',currency:'YER',mode:'count',count:'',installment:'',managerRole:'manager',managerShares:'1',joinLink:'',groupId:''};selectedJoinGroupId=null;joinSubmitted=false;joinShares=1;joinAck=false;historyStack=[];refreshLocalViews();return true}
 function createJoinLink(code){return window.location.origin+window.location.pathname+'?join='+encodeURIComponent(code)}
 function extractJoinCode(raw){try{const u=new URL(raw,window.location.href);if(u.origin!==window.location.origin)return null;return u.searchParams.get('join')}catch{return null}}
 function currentJoinGroup(){return findGroup(selectedJoinGroupId)}
