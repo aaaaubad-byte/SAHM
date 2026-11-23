@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <meta name="theme-color" content="#3158d6">
-<meta name="sahm-build" content="sahm-20261124-relative-activity-time-23q">
+<meta name="sahm-build" content="sahm-20261124-ledger-helper-cleanup-23t">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
@@ -878,7 +878,6 @@ function refreshLocalViews(){
  const members=(activeGroup?.memberships||[]).filter(m=>m.status==='active'&&m.role!=='manager');
  const memberDueAmount=d=>Array.isArray(d)?Number(d[1]||0):Number.isSafeInteger(d?.amountMinor)?minorToMoney(d.amountMinor):Number(d?.amount||0);
  const memberDueMinor=d=>Array.isArray(d)?(moneyToMinor(d[1])||0):Number.isSafeInteger(d?.amountMinor)?d.amountMinor:(moneyToMinor(d?.amount)||0);
- const memberIsPaid=d=>!Array.isArray(d)&&(d?.status==='مدفوع'||!!d?.paidAt);
  memberRecords=members.map(m=>{const u=localData.accounts.find(x=>x.id===m.accountId),finance=membershipFinancials(activeGroup,m),dues=Array.isArray(m.dues)?m.dues:[];return {id:m.accountId,name:u?.name||'حساب غير متاح',role:m.role==='manager-member'?'مدير ومشارك':'عضو',status:'نشط',shares:finance.shares,commitment:finance.total===null?'غير متاح':formatMoney(finance.total),commitmentMinor:finance.totalMinor,commitmentValue:finance.total,paid:finance.paid===null?'غير متاح':formatMoney(finance.paid),paidMinor:finance.paidMinor,paidValue:finance.paid,dues,shareItems:Array.isArray(m.shareItems)?m.shareItems:[],drawWinner:m.drawWinner===true}});
  requests=localData.joinRequests.filter(r=>r.groupId===activeGroup?.id);invitations=localData.invitations.filter(r=>r.groupId===activeGroup?.id);
  const dueGroups=new Map();
