@@ -1,4 +1,4 @@
-const CACHE_NAME = "sahm-pwa-shell-v8";
+const CACHE_NAME = "sahm-pwa-shell-v9";
 const CACHE_PREFIX = "sahm-pwa-shell-";
 const APP_SHELL = ["./", "./index.html", "./manifest.webmanifest", "./icon.svg"];
 const SHELL_URLS = new Set(APP_SHELL.map(path => new URL(path, self.location.href).href));
