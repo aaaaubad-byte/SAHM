@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <meta name="theme-color" content="#3158d6">
-<meta name="sahm-build" content="sahm-20261124-member-attendance-22h">
+<meta name="sahm-build" content="sahm-20261124-clean-copy-22i">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
@@ -833,7 +833,7 @@ let pendingJoinCode=new URLSearchParams(window.location.search).get('join');
 let expanded=new Set(),confirmCollectId=null,noticeCurrent=null,requestSearch='',activityPage='';
 let roomInvitedIds=[],roomAttendeeIds=[];
 let groupResult={name:'',start:'',first:'',share:'',currency:'YER',mode:'count',count:'',managerRole:'manager',managerShares:'1',joinLink:'',groupId:''};
-let groupFixtures=[],notifications=[],contactsFixture=[],collectionRecords=[],paidRecords=[],drawRecords=[],shareRecords=[],memberRecords=[],requests=[],invitations=[],memberDues=[],memberDraws=[],recentEvents=[];
+let groupFixtures=[],notifications=[],collectionRecords=[],paidRecords=[],drawRecords=[],shareRecords=[],memberRecords=[],requests=[],invitations=[],memberDues=[],memberDraws=[],recentEvents=[];
 function makeId(p){return p+'-'+(crypto.randomUUID?crypto.randomUUID():Date.now().toString(36)+'-'+Math.random().toString(36).slice(2,10))}
 function ensureMembershipLedger(group,membership){
  if(!group||!membership||membership.status!=='active'||membership.role==='manager')return false;
@@ -899,7 +899,7 @@ function esc(v){return String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&l
 function meta(id=current){return screenMap[id]||['','','','P']}
 function go(id,opts={}){if(!screenMap[id]||meta(id)[3]==='X')return;if(current!==id)historyStack.push(current);current=id;if(opts.replace&&historyStack.length)historyStack.pop();render();closeModal();window.scrollTo?.(0,0)}
 function back(fallback='008'){if(historyStack.length){current=historyStack.pop();render()}else{current=fallback;render()}}
-function statusLabel(s){return s==='A'?'معتمد بالكامل':s==='P'?'معتمد جزئياً':'معرّف متقاعد'}
+
 function renderIndex(){const grouped={};screens.forEach(s=>{const key=sectionFor(s[0]);(grouped[key]??=[]).push(s)});let html='';for(const [group,arr] of Object.entries(grouped)){html+=`<div class="index-section">${group}</div>`;for(const s of arr){const retired=s[3]==='X';html+=`<button class="index-item ${current===s[0]?'active':''} ${retired?'retired':''}" ${retired?'disabled':''} data-action="index-go" data-id="${s[0]}"><span class="index-num">${s[0]}</span><span class="index-name">${s[2]}</span></button>`}}
  document.getElementById('indexScroll').innerHTML=html;
 }
@@ -914,7 +914,7 @@ function generalHeader(){return `<div class="app-top home-top"><div class="top-a
 function topHeader(title,backTo='008'){return `<div class="app-top"><button class="top-back" data-action="back" data-fallback="${backTo}" aria-label="رجوع">${icon('right')}</button><div class="top-title">${esc(title)}</div></div>${connection()}`}
 function bottomNav(active=''){return `<nav class="bottom-nav" aria-label="التنقل العام"><button class="bottom-item ${active==='groups'?'active':''}" data-action="nav" data-id="009">${icon('users')}<span>الجمعيات</span></button><button class="bottom-item ${active==='home'?'active':''}" data-action="nav" data-id="008">${icon('home')}<span>الرئيسية</span></button><button class="bottom-item ${active==='chats'?'active':''}" data-action="nav" data-id="039">${icon('chat')}<span>الدردشات</span></button></nav>`}
 function page(title,body,{backTo='008',bottom=true,active='',home=false,bodyClass=''}={}){return `${home?generalHeader():topHeader(title,backTo)}<main class="screen-body ${bodyClass}">${body}</main>${bottomNav(active)}`}
-function labelField(label,id,type='text',placeholder='',value='',extra=''){return `<div class="field"><label for="${id}">${label}</label><input id="${id}" name="${id}" type="${type}" value="${esc(value)}" ${extra}></div>`}
+
 function searchBox(ph='بحث'){return '<div class="list-search">'+icon('search')+'<input type="search" data-search-input aria-label="'+esc(ph)+'" placeholder="'+esc(ph)+'"></div>'}
 function empty(text='لا توجد بيانات متاحة حالياً'){return `<div class="empty-state">${icon('file')}<div>${text}</div></div>`}
 function unresolved(text){return ``}
@@ -1024,7 +1024,7 @@ function renderCreateSuccess(){
  return page('نتيجة إنشاء الجمعية','<section class="form-card" style="padding:18px 16px"><div style="text-align:center;padding:2px 0 15px"><div style="width:58px;height:58px;border-radius:50%;background:#edf5ef;color:#3b785f;border:1px solid #d8eadf;display:grid;place-items:center;margin:0 auto 10px">'+icon('check')+'</div><h2 style="font-size:19px;margin:0 0 5px">تم إنشاء الجمعية</h2><p class="small-note" style="margin:0">'+esc(g.name||'—')+'</p></div><div class="kv-list">'+details+'</div><div style="border-top:1px solid var(--line);margin-top:12px;padding-top:13px"><div style="font-weight:900;font-size:13px;margin-bottom:8px">رابط الانضمام</div>'+linkArea+'</div><div style="border-top:1px solid var(--line);margin-top:15px;padding-top:13px"><div style="font-weight:900;font-size:13px;margin-bottom:5px">دعوة المشاركين</div><p class="small-note" style="margin:0 0 11px">اختيار جهات الاتصال</p><button class="btn primary block" data-action="contacts-picker">'+icon('users')+' اختيار من جهات الاتصال</button></div></section>',{backTo:'008',active:''});
 }
 /* 016 */
-function renderJoinLink(){return page('الانضمام إلى جمعية',`<div style="text-align:center;padding:28px 10px 24px"><div style="color:var(--gold);margin-bottom:12px">${icon('link')}</div><h2 style="font-size:20px;margin:0 0 7px">أدخل رابط الجمعية</h2><p class="small-note" style="max-width:275px;margin:auto">استخدم رابط الانضمام العام الذي حصلت عليه من الجمعية.</p></div><section class="form-card"><div class="field" id="joinLinkWrap"><label>رابط الانضمام</label><input id="joinLink" type="url" value="${esc(linkValue)}"><div class="error">أدخل رابطاً صحيحاً قبل المتابعة</div></div><button class="btn primary block" data-action="verify-link">تحقق وتابع</button></section>`,{backTo:'008'});}
+function renderJoinLink(){return page('الانضمام إلى جمعية',`<div style="text-align:center;padding:28px 10px 24px"><div style="color:var(--gold);margin-bottom:12px">${icon('link')}</div><h2 style="font-size:20px;margin:0 0 7px">أدخل رابط الجمعية</h2><p class="small-note" style="max-width:275px;margin:auto">استخدم رابط الانضمام العام الذي حصلت عليه من الجمعية.</p></div><section class="form-card"><div class="field" id="joinLinkWrap"><label for="joinLink">رابط الانضمام</label><input id="joinLink" type="url" value="${esc(linkValue)}"><div class="error">أدخل رابطاً صحيحاً قبل المتابعة</div></div><button class="btn primary block" data-action="verify-link">تحقق وتابع</button></section>`,{backTo:'008'});}
 /* 017 / 018 */
 function renderJoinPreview(type){
  joinType=type;const g=currentJoinGroup();if(!g)return page('تفاصيل الجمعية وطلب الانضمام',empty('رابط الجمعية غير صالح أو لم يعد متاحاً.'),{backTo:'016'});
@@ -1137,7 +1137,7 @@ function renderGroupInfo(){
  if(!activeGroup?.id)return page('المعلومات',empty('لا توجد جمعية محددة.'),{backTo:'021',bottom:false});
  const body='<section class="form-card" style="padding:8px 15px"><div style="font-weight:900;padding:9px 0">معلومات الجمعية</div>'+row('اسم الجمعية',esc(activeGroup.name))+row('تاريخ البداية',esc(activeGroup.start))+row('أول قرعة',esc(activeGroup.first))+row('قيمة السهم',Number(activeGroup.share).toLocaleString('en-US')+' '+currencyName(activeGroup.currency))+row('نظام الأقساط',activeGroup.mode==='value'?'قيمة القسط':'عدد الأقساط')+row('عدد الأقساط',String((activeGroup.installments||[]).length))+'</section>';
  return page('المعلومات',body,{backTo:'021',bottom:false});
-}function renderGroupSettings(){return page('الإعدادات',`<section class="form-card"><div class="record-section-title" style="margin-top:0">إعدادات الجمعية</div><div class="list-row" style="cursor:default"><span class="row-icon">${icon('building')}</span><span class="row-main"><span class="row-title">إعدادات الجمعية</span><span class="row-meta"></span></span></div><div class="record-section-title">إعدادات القرعة والدورة</div><div class="list-row" style="cursor:default"><span class="row-icon">${icon('ticket')}</span><span class="row-main"><span class="row-title">إعدادات القرعة والدورة</span><span class="row-meta">بحسب الصلاحيات — الحقول والقيم —ة</span></span></div></section><section class="form-card"><div class="record-section-title" style="margin-top:0">مجموعات —ة</div><div class="list-row" style="cursor:default"><span class="row-icon">${icon('chat')}</span><span class="row-main"><span class="row-title">إعدادات الأخبار والدردشة</span><span class="row-meta">—ة</span></span><span class="status gold">—</span></div><div class="list-row" style="cursor:default"><span class="row-icon">${icon('bell')}</span><span class="row-main"><span class="row-title">إعدادات الإشعارات</span><span class="row-meta">—ة</span></span><span class="status gold">—</span></div></section>${unresolved('لا تُعرض مفاتيح تشغيل أو خيارات افتراضية أو زر حفظ فعّال قبل اعتماد تفاصيل إعدادات الجمعية.')}`,{backTo:'021',bottom:false});}
+}function renderGroupSettings(){return page('الإعدادات',`<section class="form-card"><div class="record-section-title" style="margin-top:0">إعدادات الجمعية</div><div class="list-row" style="cursor:default"><span class="row-icon">${icon('building')}</span><span class="row-main"><span class="row-title">إعدادات الجمعية</span><span class="row-meta"></span></span></div><div class="record-section-title">إعدادات القرعة والدورة</div><div class="list-row" style="cursor:default"><span class="row-icon">${icon('ticket')}</span><span class="row-main"><span class="row-title">إعدادات القرعة والدورة</span><span class="row-meta">تُعرض تفاصيل الإعدادات بعد اعتماد صلاحياتها.</span></span></div></section><section class="form-card"><div class="record-section-title" style="margin-top:0">إعدادات إضافية</div><div class="list-row" style="cursor:default"><span class="row-icon">${icon('chat')}</span><span class="row-main"><span class="row-title">إعدادات الأخبار والدردشة</span><span class="row-meta">غير متاح حالياً</span></span><span class="status gold">غير محدد</span></div><div class="list-row" style="cursor:default"><span class="row-icon">${icon('bell')}</span><span class="row-main"><span class="row-title">إعدادات الإشعارات</span><span class="row-meta">غير متاح حالياً</span></span><span class="status gold">غير محدد</span></div></section>${unresolved('لا تُعرض مفاتيح تشغيل أو خيارات افتراضية أو زر حفظ فعّال قبل اعتماد تفاصيل إعدادات الجمعية.')}`,{backTo:'021',bottom:false});}
 /* 031 */
 function renderLog(){
  const events=localData.activities.filter(e=>e.groupId===activeGroup?.id).sort((a,b)=>(b.createdAt||'').localeCompare(a.createdAt||''));
@@ -1190,7 +1190,7 @@ function submitCreateGroup(){
   ensureMembershipLedger(group,membership);localData.groups.push(group);addActivity(activeAccountId,'تم إنشاء جمعية '+name,group.id,'021','building');
   if(!saveLocalData())return;groupResult={...form,name,share:String(share),count:String(installments.length),joinLink:createJoinLink(code),groupId:group.id};activeGroup=group;refreshLocalViews();go('015');
 }
-function searchFilter(input){filterVisible(input)}
+
 function applyListFilters(){
  const body=document.querySelector('#app .screen-body');if(!body)return;
  const search=body.querySelector('[data-search-input],.list-search input');const q=(search?.value||'').trim().toLowerCase();
