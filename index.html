@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <meta name="theme-color" content="#3158d6">
-<meta name="sahm-build" content="sahm-20261124-network-state-22w">
+<meta name="sahm-build" content="sahm-20261124-join-cap-22x">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
@@ -1301,7 +1301,7 @@ document.addEventListener('click',async e=>{
    if(n*(g.installments||[]).length>MAX_LOCAL_LEDGER_ENTRIES){showToast('عدد الأسهم يتجاوز السعة المحلية المتاحة لتكوين سجل الالتزامات');return}
    if(localData.joinRequests.some(r=>r.groupId===g.id&&r.accountId===activeAccountId)){joinSubmitted=true;showToast('سبق إرسال طلب الانضمام');render();return}
    const a=getActiveAccount(),partsMinor=(Array.isArray(g.installmentsMinor)?g.installmentsMinor:(g.installments||[]).map(v=>moneyToMinor(v)||0)).map(v=>v*n);
-   if(!partsMinor.length||partsMinor.some(v=>!Number.isSafeInteger(v)||v<0)){showToast('تعذر حساب التزامات الجمعية من البيانات المتاحة');return}
+   if(!partsMinor.length||n*partsMinor.length>MAX_LOCAL_LEDGER_ENTRIES||partsMinor.some(v=>!Number.isSafeInteger(v)||v<0)){showToast('تعذر حساب التزامات الجمعية من البيانات المتاحة');return}
    const totalMinor=partsMinor.reduce((x,y)=>x+y,0);if(!Number.isSafeInteger(totalMinor)){showToast('إجمالي الالتزام يتجاوز النطاق الحسابي الآمن');return}const total=minorToMoney(totalMinor);
    const request={id:makeId('req'),groupId:g.id,accountId:activeAccountId,name:a?.name||accountEmail,source:'رابط عام',shares:n,total:formatMoney(total)+' '+currencyName(g.currency),amount:total,amountMinor:totalMinor,createdAt:new Date().toISOString(),date:new Date().toLocaleDateString('en-GB'),status:'قيد المراجعة'};
    localData.joinRequests.push(request);addNotification(g.creatorAccountId,'طلب انضمام جديد',g.id,'تقدم '+request.name+' بطلب للانضمام إلى الجمعية.','join-request');addActivity(activeAccountId,'تم إرسال طلب انضمام إلى '+g.name,g.id,'012','userplus');
