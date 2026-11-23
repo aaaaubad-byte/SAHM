@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <meta name="theme-color" content="#3158d6">
-<meta name="sahm-build" content="sahm-20261124-join-cap-22x">
+<meta name="sahm-build" content="sahm-20261124-contact-normalization-22y">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
@@ -1004,7 +1004,7 @@ function renderJoinPreview(type){
   let action='';
   if(c.kind==='registered'&&c.eligible) action='<button class="btn secondary small" data-action="contact-invite" data-id="'+c.id+'">دعوة للجمعية</button>';
   else if(c.kind==='unregistered') action='<button class="btn secondary small" data-action="contact-share" data-id="'+c.id+'">دعوة للتثبيت</button>';
-  const statusColor=c.kind==='registered'?'blue':c.kind==='unregistered'?'gold':c.kind==='member'?'green':'red';
+  const statusColor=c.kind==='registered'?'blue':c.kind==='unregistered'?'gold':c.kind==='member'?'green':c.kind==='error'?'red':'';
   return '<article class="list-row contact-result" data-filter-text="'+esc(c.name+' '+c.phone+' '+c.status)+'"><span class="row-icon">'+icon('user')+'</span><span class="row-main"><span class="row-title">'+esc(c.name)+'</span><span class="row-meta" dir="ltr" style="text-align:right">'+esc(c.phone)+'</span><span class="status '+statusColor+'" style="margin-top:7px">'+esc(c.status)+'</span></span>'+action+'</article>';
  }).join('');
  return page('نتائج جهات الاتصال',searchBox('ابحث بالاسم أو الرقم')+(cards?'<div class="list-stack">'+cards+'</div><div data-search-empty style="display:none">'+empty('لا توجد نتائج مطابقة')+'</div>':empty('لم يتم اختيار جهات اتصال. ارجع إلى نتيجة إنشاء الجمعية ثم افتح منتقي جهات الاتصال.')),{backTo:'015'});
@@ -1098,7 +1098,7 @@ function validEmail(v){return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(String(v||'').tr
 function setInvalid(id,on=true){const el=document.getElementById(id);if(el)el.classList.toggle('invalid',!!on)}
 function setFieldError(id,on=true){const el=document.getElementById(id);const field=el?.closest('.field');if(field)field.classList.toggle('invalid',!!on);else if(el)el.classList.toggle('invalid',!!on)}
 function copyText(value,label){if(navigator.clipboard&&navigator.clipboard.writeText){navigator.clipboard.writeText(value).then(()=>showToast(`تم نسخ ${label}`)).catch(()=>openModal(`نسخ ${label}`,`<p>تعذر الوصول إلى الحافظة في هذه البيئة. يمكنك نسخ النص يدوياً:</p><textarea readonly style="width:100%;direction:ltr;text-align:left">${esc(value)}</textarea>`))}else{openModal(`نسخ ${label}`,`<p>انسخ النص:</p><textarea readonly style="width:100%;direction:ltr;text-align:left">${esc(value)}</textarea>`)}}
-function normalizeE164(value){const phone=String(value||'').trim().replace(/[\s().-]/g,'');return /^\+[1-9]\d{7,14}$/.test(phone)?phone:null}
+function normalizeE164(value){let phone=String(value||'').trim().replace(/[\s().-]/g,'');if(phone.startsWith('00'))phone='+'+phone.slice(2);return /^\+[1-9]\d{7,14}$/.test(phone)?phone:null}
 function normalizeContacts(records){const seen=new Set();return (Array.isArray(records)?records:[]).map(c=>{const name=Array.isArray(c.name)?c.name[0]:c.name,raw=Array.isArray(c.tel)?c.tel[0]:c.tel,phone=String(raw||'').trim(),normalized=normalizeE164(phone),key=normalized||phone.replace(/\D/g,'');if(!name||!phone||!key||seen.has(key))return null;seen.add(key);return {id:'contact-'+key,name:String(name).trim(),phone,normalizedPhone:normalized,kind:'unknown',status:'لم يتم التحقق من حالة الحساب'}}).filter(Boolean)}
 async function openContactsPicker(){selectedContacts=[];contactRecords=[];if(navigator.contacts&&typeof navigator.contacts.select==='function'){try{const rows=await navigator.contacts.select(['name','tel'],{multiple:true});contactRecords=normalizeContacts(rows);selectedContacts=contactRecords.slice();if(!contactRecords.length){showToast('لم يتم اختيار جهات اتصال صالحة');return}go('040');return}catch(error){if(error?.name==='AbortError')return;showToast('تعذر الوصول إلى جهات الاتصال على هذا الجهاز');return}}openModal('اختيار جهات الاتصال','<p class="small-note">منتقي جهات الاتصال غير مدعوم في هذا المتصفح. يمكنك إدخال رقم دولي يدوياً باستخدام صيغة + ورمز الدولة والرقم.</p><div class="field"><label for="manualContactName">اسم جهة الاتصال</label><input id="manualContactName" type="text" autocomplete="name"></div><div class="field"><label for="manualContactPhone">رقم الهاتف الدولي</label><input id="manualContactPhone" type="tel" inputmode="tel" placeholder="+XXXXXXXXXXX" dir="ltr"></div>','<button class="btn secondary" data-action="modal-close">إلغاء</button><button class="btn primary" data-action="manual-contact-add">إضافة جهة الاتصال</button>')}
 function renderContactRows(){contactRecords=selectedContacts.slice()}
