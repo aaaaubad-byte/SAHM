@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <meta name="theme-color" content="#3158d6">
-<meta name="sahm-build" content="sahm-20261124-room-invite-validation-23o">
+<meta name="sahm-build" content="sahm-20261124-room-invite-empty-23p">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
@@ -1120,7 +1120,7 @@ function renderAdminRoom(){
 }
 function openRoomInviteModal(){
  const options=memberRecords.filter(m=>m.id!==activeAccountId).map(m=>`<label class="room-invite-option"><input type="checkbox" data-room-invite-check="${esc(m.id)}" ${roomInvitedIds.includes(m.id)?'checked':''}><span><strong>${esc(m.name)}</strong><small>${roomInvitedIds.includes(m.id)?'سبق دعوته لهذه الجلسة':'عضو في الجمعية'}</small></span></label>`).join('');
- openModal('دعوة الأعضاء لمشاهدة القرعة',`<p class="small-note">اختر الأعضاء الذين تريد دعوتهم لمشاهدة جلسة القرعة. الدعوة لا تمنحهم صلاحية إدارة العجلة.</p><div class="room-invite-list">${options}</div><p class="small-note" style="margin-top:10px">تُحفظ قائمة المدعوين والحضور ضمن بيانات الجمعية.</p>`,`<button class="btn secondary" data-action="modal-close">إلغاء</button><button class="btn primary" data-action="room-invite-confirm">تأكيد الدعوات</button>`);
+ openModal('دعوة الأعضاء لمشاهدة القرعة',`<p class="small-note">اختر الأعضاء الذين تريد دعوتهم لمشاهدة جلسة القرعة. الدعوة لا تمنحهم صلاحية إدارة العجلة.</p>${options?`<div class="room-invite-list">${options}</div>`:`<div class="empty-state" style="padding:18px 8px">${icon('users')}<div>لا يوجد أعضاء متاحون لدعوتهم حالياً.</div></div>`}<p class="small-note" style="margin-top:10px">تُحفظ قائمة المدعوين والحضور ضمن بيانات الجمعية.</p>`,`<button class="btn secondary" data-action="modal-close">إلغاء</button><button class="btn primary" data-action="room-invite-confirm">تأكيد الدعوات</button>`);
 }
 function spinRoomWheel(){showToast('لا يمكن اعتماد نتيجة القرعة دون التحقق من أهلية الأسهم واكتمال شروط الجولة من مصدر البيانات المعتمد');}
 /* 029 */
