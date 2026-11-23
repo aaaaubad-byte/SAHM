@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <meta name="theme-color" content="#3158d6">
-<meta name="sahm-build" content="sahm-20261124-collection-groups-22l">
+<meta name="sahm-build" content="sahm-20261124-dashboard-room-22m">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
@@ -1055,8 +1055,8 @@ function renderJoinPreview(type){
 /* 021 */
 const adminSections=[['التحصيل','wallet','022'],['القرعات','ticket','023'],['الأسهم','coins','024'],['الأعضاء','users','025'],['الدعوات','gift','026'],['الدردشة','chat','027'],['الغرفة','activity','028'],['المعلومات','file','029'],['الإعدادات','settings','030'],['السجل','list','031']];
 function renderAdminHome(){
- const members=memberRecords.length,shares=memberRecords.reduce((n,m)=>n+Number(m.shares||0),0),draws=drawRecords.length,completed=drawRecords.filter(d=>d.status==='مكتملة').length,paid=paidRecords.reduce((n,r)=>n+Number(String(r.amount||0).replace(/,/g,'')),0),due=collectionRecords.reduce((n,r)=>n+Number(String(r.amount||0).replace(/,/g,'')),0)+paid;
- const slides=[{title:'أعضاء الجمعية',value:String(members),note:'إجمالي الأعضاء',icon:'users',tone:'blue'},{title:'إجمالي الأسهم',value:String(shares),note:'الأسهم المسجلة في الجمعية',icon:'coins',tone:'gold'},{title:'إنجاز القرعات',value:draws?completed+' / '+draws:'—',note:'القرعات المكتملة من الإجمالي',icon:'ticket',tone:'dark'},{title:'تحصيل القرعة الحالية',value:due?Math.round(paid/due*100)+'%':'—',note:'نسبة الالتزامات المسددة',icon:'wallet',tone:'blue'}];
+ const members=memberRecords.length,shares=memberRecords.reduce((n,m)=>n+Number(m.shares||0),0),draws=drawRecords.length,completed=drawRecords.filter(d=>d.status==='مكتملة').length,paid=memberRecords.reduce((n,m)=>n+Number(String(m.paid||0).replace(/,/g,'')),0),due=memberRecords.reduce((n,m)=>n+Number(String(m.commitment||0).replace(/,/g,'')),0);
+ const slides=[{title:'أعضاء الجمعية',value:String(members),note:'إجمالي الأعضاء',icon:'users',tone:'blue'},{title:'إجمالي الأسهم',value:String(shares),note:'الأسهم المسجلة في الجمعية',icon:'coins',tone:'gold'},{title:'إنجاز القرعات',value:draws?completed+' / '+draws:'—',note:'القرعات المكتملة من الإجمالي',icon:'ticket',tone:'dark'},{title:'تحصيل القرعة الحالية',value:due?Math.max(0,Math.min(100,Math.round(paid/due*100)))+'%':'—',note:'نسبة الالتزامات المسددة',icon:'wallet',tone:'blue'}];
  return '<div class="app-top"><button class="top-back" data-action="back" data-fallback="010">'+icon('right')+'</button><div class="top-title">الرئيسية الإدارية</div></div>'+connection()+'<main class="screen-body">'+summaryCarouselMarkup(slides,'ملخص الجمعية')+'<div class="tile-grid manager-tiles">'+adminSections.map(a=>tile(a[0],a[1],a[2],['التحصيل','الأسهم','الغرفة'].includes(a[0])?'gold':'blue')).join('')+'</div></main>'+bottomNav('groups');
 }function statusChip(text,color='blue'){return `<span class="status ${color}">${text}</span>`}
 /* 022 */
@@ -1102,13 +1102,8 @@ function renderAdminRoom(){
  return page('عجلة القرعة',content,{backTo:'021',bottom:true,active:'groups',bodyClass:'room-screen-body'});
 }
 function openRoomInviteModal(){
- const options=memberRecords.map(m=>`<label class="room-invite-option"><input type="checkbox" data-room-invite-check="${m.id}" ${roomInvitedIds.includes(m.id)?'checked':''}><span><strong>${esc(m.name)}</strong><small>${roomInvitedIds.includes(m.id)?'سبق دعوته لهذه الجلسة':'عضو في الجمعية'}</small></span></label>`).join('');
+ const options=memberRecords.filter(m=>m.id!==activeAccountId).map(m=>`<label class="room-invite-option"><input type="checkbox" data-room-invite-check="${m.id}" ${roomInvitedIds.includes(m.id)?'checked':''}><span><strong>${esc(m.name)}</strong><small>${roomInvitedIds.includes(m.id)?'سبق دعوته لهذه الجلسة':'عضو في الجمعية'}</small></span></label>`).join('');
  openModal('دعوة الأعضاء لمشاهدة القرعة',`<p class="small-note">اختر الأعضاء الذين تريد دعوتهم لمشاهدة جلسة القرعة. الدعوة لا تمنحهم صلاحية إدارة العجلة.</p><div class="room-invite-list">${options}</div><p class="small-note" style="margin-top:10px">تُحفظ قائمة المدعوين والحضور ضمن بيانات الجمعية.</p>`,`<button class="btn secondary" data-action="modal-close">إلغاء</button><button class="btn primary" data-action="room-invite-confirm">تأكيد الدعوات</button>`);
-}
-function showLotteryWinner(name){
- const confetti=Array.from({length:34},(_,i)=>`<i style="--i:${i};--delay:${(i%9)*.07}s;--rot:${(i*37)%180}deg"></i>`).join('');
- openModal('اكتمل الاختيار',`<div class="lottery-celebration"><div class="lottery-confetti">${confetti}</div><div class="lottery-winner-medal">${icon('trophy')}</div><p class="lottery-winner-caption">الفائز في القرعة</p><h2 class="lottery-winner-name">${esc(name)}</h2><p class="lottery-winner-subtitle">تم اختيار الفائز بواسطة عجلة القرعة.</p></div>`,`<button class="btn primary" data-action="modal-close">تم</button>`);
- const card=document.querySelector('#modalRoot .modal-card');if(card)card.classList.add('lottery-winner-modal');
 }
 function spinRoomWheel(){showToast('لا يمكن اعتماد نتيجة القرعة دون التحقق من أهلية الأسهم واكتمال شروط الجولة من مصدر البيانات المعتمد');}
 /* 029 */
