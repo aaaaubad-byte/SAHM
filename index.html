@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <meta name="theme-color" content="#3158d6">
-<meta name="sahm-build" content="sahm-20261124-local-scope-disclosure-23s">
+<meta name="sahm-build" content="sahm-20261124-navigation-state-23u">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
@@ -918,8 +918,21 @@ let ledgersChanged=false;localData.groups.forEach(g=>(g.memberships||[]).forEach
 refreshLocalViews();
 function esc(v){return String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]))}
 function meta(id=current){return screenMap[id]||['','','','P']}
-function go(id,opts={}){if(!screenMap[id]||meta(id)[3]==='X')return;if(current!==id)historyStack.push(current);current=id;if(opts.replace&&historyStack.length)historyStack.pop();render();closeModal();window.scrollTo?.(0,0)}
-function back(fallback='008'){if(historyStack.length){current=historyStack.pop();render()}else{current=fallback;render()}}
+function captureScreenState(){
+ const root=document.getElementById('app');if(!root)return null;
+ const controls=[...root.querySelectorAll('input,select,textarea')].map((el,index)=>({id:el.id||'',index,type:el.type||el.tagName.toLowerCase(),value:el.value,checked:!!el.checked,keep:!!(el.id||el.hasAttribute('data-search')||el.hasAttribute('data-filter')||el.hasAttribute('data-date-filter')||el.hasAttribute('data-form-field'))})).filter(x=>x.keep&&!['password','file','hidden','submit','button'].includes(x.type));
+ return {scrollTop:root.querySelector('.screen-body')?.scrollTop||0,controls,carouselIndex};
+}
+function restoreScreenState(state){
+ if(!state)return;const root=document.getElementById('app');if(!root)return;
+ const elements=[...root.querySelectorAll('input,select,textarea')];
+ state.controls?.forEach(item=>{const el=item.id?document.getElementById(item.id):elements[item.index];if(!el||el.type==='password'||el.type==='file')return;if(el.type==='checkbox'||el.type==='radio')el.checked=item.checked;else el.value=item.value});
+ applyListFilters();
+ const body=root.querySelector('.screen-body');if(body)body.scrollTop=state.scrollTop||0;
+ if(['021','032'].includes(current)&&Number.isInteger(state.carouselIndex)){carouselIndex=state.carouselIndex;setCarouselSlide(carouselIndex)}
+}
+function go(id,opts={}){if(!screenMap[id]||meta(id)[3]==='X')return;if(current!==id&&!opts.replace)historyStack.push({screen:current,state:captureScreenState()});current=id;render();closeModal();window.scrollTo?.(0,0)}
+function back(fallback='008'){if(historyStack.length){const entry=historyStack.pop();current=typeof entry==='string'?entry:entry.screen;render();if(typeof entry==='object')setTimeout(()=>restoreScreenState(entry.state),0)}else{current=fallback;render()}}
 
 function renderIndex(){const grouped={};screens.forEach(s=>{const key=sectionFor(s[0]);(grouped[key]??=[]).push(s)});let html='';for(const [group,arr] of Object.entries(grouped)){html+=`<div class="index-section">${group}</div>`;for(const s of arr){const retired=s[3]==='X';html+=`<button class="index-item ${current===s[0]?'active':''} ${retired?'retired':''}" ${retired?'disabled':''} data-action="index-go" data-id="${s[0]}"><span class="index-num">${s[0]}</span><span class="index-name">${s[2]}</span></button>`}}
  document.getElementById('indexScroll').innerHTML=html;
