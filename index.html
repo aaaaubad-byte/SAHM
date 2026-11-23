@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <meta name="theme-color" content="#3158d6">
-<meta name="sahm-build" content="sahm-20261124-noop-cleanup-23q">
+<meta name="sahm-build" content="sahm-20261124-name-save-cleanup-23r">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
@@ -1264,7 +1264,7 @@ document.addEventListener('click',async e=>{
  if(action==='avatar'){avatarChoice=value||'user';const preview=document.getElementById('avatarPreview');if(preview)preview.innerHTML='<span style="width:32px;height:32px;display:grid;place-items:center">'+icon(avatarChoice)+'</span>';document.querySelectorAll('.avatar-option').forEach(b=>{const selected=b.dataset.value===avatarChoice;b.classList.toggle('active',selected);b.setAttribute('aria-pressed',String(selected))});const chooser=document.getElementById('avatarOptions');if(chooser)chooser.hidden=true;document.querySelector('[data-action="avatar-picker"]')?.setAttribute('aria-expanded','false');return}
  if(action==='toggle-lock'){showToast('قفل التطبيق غير متاح حالياً لعدم توفر مصادقة الجهاز');return}
  if(action==='edit-name'){openModal('تعديل الاسم',`<div class="field"><label>الاسم</label><input id="editNameInput" value="${esc(profileName)}"></div>`,`<button class="btn secondary" data-action="modal-close">إلغاء</button><button class="btn primary" data-action="save-name">حفظ</button>`);return}
- if(action==='save-name'){const v=document.getElementById('editNameInput')?.value.trim()||'';if(!v){showToast('الاسم مطلوب');return}const a=getActiveAccount();if(!a)return;const previous=a.name;a.name=v;if(!saveLocalData()){refreshLocalViews();render();return}profileName=v;refreshLocalViews();closeModal();render();showToast('تم تحديث الاسم');return}
+ if(action==='save-name'){const v=document.getElementById('editNameInput')?.value.trim()||'';if(!v){showToast('الاسم مطلوب');return}const a=getActiveAccount();if(!a)return;a.name=v;if(!saveLocalData()){refreshLocalViews();render();return}profileName=v;refreshLocalViews();closeModal();render();showToast('تم تحديث الاسم');return}
  if(action==='change-password'){openModal('تغيير كلمة المرور',`<div class="field"><label>كلمة المرور الحالية</label><input id="oldPassword" type="password"></div><div class="field"><label>كلمة المرور الجديدة</label><input id="newPassword" type="password"></div><div class="field"><label>تأكيد كلمة المرور الجديدة</label><input id="confirmPassword" type="password"></div>`,`<button class="btn secondary" data-action="modal-close">إلغاء</button><button class="btn primary" data-action="save-password">متابعة</button>`);return}
  if(action==='save-password'){const old=document.getElementById('oldPassword')?.value||'',p=document.getElementById('newPassword')?.value||'',c=document.getElementById('confirmPassword')?.value||'',a=getActiveAccount();if(!a||!old||p.length<6||p!==c){showToast('تحقق من الحقول ومطابقة كلمة المرور');return}try{if(!(await verifyPassword(a,old))){showToast('كلمة المرور الحالية غير صحيحة');return}const r=await newPasswordRecord(p);a.salt=r.salt;a.passwordHash=r.passwordHash;if(!saveLocalData())return;closeModal();showToast('تم تحديث كلمة المرور')}catch(e){showToast('تعذر تحديث كلمة المرور')}return}
  if(action==='copy-id'){copyText(getActiveAccount()?.publicId||'','معرّف الحساب');return}
