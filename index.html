@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <meta name="theme-color" content="#3158d6">
-<meta name="sahm-build" content="sahm-20261124-ui-data-wiring-22c">
+<meta name="sahm-build" content="sahm-20261124-join-routing-22d">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
@@ -828,6 +828,7 @@ let activeGroup={},form={name:'',start:'',first:'',share:'',currency:'YER',mode:
 let recoverStep=1,registerAccepted=false,registration={email:'',pass:'',confirm:'',accepted:false},pendingRegistration=null,recoveryAccountId=null;
 let profileName='',profileAvatar='user',accountEmail='',accountPhone='',avatarChoice='user';
 let selectedContacts=[],contactRecords=[],joinShares=1,joinAck=false,joinSubmitted=false,joinType='public',linkValue='',selectedJoinGroupId=null;
+let pendingJoinCode=new URLSearchParams(window.location.search).get('join');
 let expanded=new Set(),confirmCollectId=null,noticeCurrent=null,requestSearch='',activityPage='';
 let roomInvitedIds=[],roomAttendeeIds=[];
 let groupResult={name:'',start:'',first:'',share:'',currency:'YER',mode:'count',count:'',managerRole:'manager',managerShares:'1',joinLink:'',groupId:''};
@@ -874,6 +875,18 @@ function activateAccount(id){const a=localData.accounts.find(x=>x.id===id);if(!a
 function createJoinLink(code){return window.location.origin+window.location.pathname+'?join='+encodeURIComponent(code)}
 function extractJoinCode(raw){try{const u=new URL(raw,window.location.href);if(u.origin!==window.location.origin)return null;return u.searchParams.get('join')}catch{return null}}
 function currentJoinGroup(){return findGroup(selectedJoinGroupId)}
+function continuePendingJoin(){
+ if(!pendingJoinCode)return false;
+ const code=String(pendingJoinCode);pendingJoinCode=null;
+ const link=createJoinLink(code),group=localData.groups.find(item=>item.joinCode===code);
+ try{window.history.replaceState({},'',window.location.pathname)}catch(e){}
+ if(!group){linkValue=link;go('016');showToast('رابط الجمعية غير صالح أو غير متاح على هذا الجهاز');return true}
+ if(!activeAccountId)return false;
+ if(group.creatorAccountId===activeAccountId){activeGroup=group;refreshLocalViews();go('021');showToast('هذه الجمعية مرتبطة بحسابك');return true}
+ const membership=membershipFor(group,activeAccountId);
+ if(membership){activeGroup=group;refreshLocalViews();go(membership.role==='manager'||membership.role==='manager-member'?'021':'032');showToast('لديك عضوية حالية في هذه الجمعية');return true}
+ activeGroup={};selectedJoinGroupId=group.id;linkValue=link;const prior=localData.joinRequests.find(r=>r.groupId===group.id&&r.accountId===activeAccountId);joinShares=prior?.shares||1;joinAck=false;joinSubmitted=!!prior;joinType='public';go('017');return true;
+}
 function createSalt(){const b=new Uint8Array(16);crypto.getRandomValues(b);return Array.from(b,x=>x.toString(16).padStart(2,'0')).join('')}
 function hexToBytes(x){return new Uint8Array((x.match(/.{1,2}/g)||[]).map(v=>parseInt(v,16)))}
 async function hashPassword(password,salt){if(!crypto.subtle||!window.TextEncoder)throw new Error('Web Crypto unavailable');const key=await crypto.subtle.importKey('raw',new TextEncoder().encode(password),'PBKDF2',false,['deriveBits']);const bits=await crypto.subtle.deriveBits({name:'PBKDF2',salt:hexToBytes(salt),iterations:100000,hash:'SHA-256'},key,256);return Array.from(new Uint8Array(bits),x=>x.toString(16).padStart(2,'0')).join('')}
@@ -1214,7 +1227,7 @@ document.addEventListener('click',async e=>{
    if(!validEmail(email)||!pass){showToast('تحقق من البريد الإلكتروني وكلمة المرور');return}
    const a=localData.accounts.find(x=>x.email.toLowerCase()===email);if(!a){showToast('لم يتم العثور على حساب بهذه البيانات');return}
    try{if(!(await verifyPassword(a,pass))){showToast('كلمة المرور غير صحيحة');return}}catch(e){showToast('تعذر التحقق من كلمة المرور في هذا المتصفح');return}
-   activateAccount(a.id);current='008';render();showToast('مرحباً بك في سهم');return;
+   if(!activateAccount(a.id))return;if(continuePendingJoin())return;current='008';render();showToast('مرحباً بك في سهم');return;
  }
  if(action==='recover-find'){
    const email=(document.getElementById('recEmail')?.value||'').trim().toLowerCase(),phone=(document.getElementById('recPhone')?.value||'').trim().replace(/[\s-]/g,'');setInvalid('recEmailWrap',!validEmail(email));setInvalid('recPhoneWrap',!phone);
@@ -1241,7 +1254,7 @@ document.addEventListener('click',async e=>{
    if(!pendingRegistration){showToast('أعد بدء إنشاء الحساب');go('004');return}
    if(localData.accounts.some(a=>a.email.toLowerCase()===pendingRegistration.email)){showToast('هذا البريد الإلكتروني مسجل بالفعل');go('004');return}
    const a={id:makeId('acc'),publicId:'SHM-'+Date.now().toString(36).toUpperCase()+'-'+Math.random().toString(36).slice(2,6).toUpperCase(),email:pendingRegistration.email,salt:pendingRegistration.salt,passwordHash:pendingRegistration.passwordHash,name,phone,avatar:avatarChoice||'user',theme:'light',createdAt:new Date().toISOString()};
-   localData.accounts.push(a);pendingRegistration=null;registration={email:'',pass:'',confirm:'',accepted:false};activateAccount(a.id);current='008';refreshLocalViews();saveLocalData();render();showToast('تم إنشاء الحساب');return;
+   localData.accounts.push(a);if(!activateAccount(a.id)){showToast('تعذر حفظ الحساب على هذا الجهاز');return}pendingRegistration=null;registration={email:'',pass:'',confirm:'',accepted:false};if(continuePendingJoin())return;current='008';refreshLocalViews();render();showToast('تم إنشاء الحساب');return;
  }
  if(action==='avatar'){avatarChoice=value||'user';document.querySelectorAll('.avatar-option').forEach(b=>b.classList.toggle('active',b.dataset.value===avatarChoice));return}
  if(action==='toggle-lock'){showToast('');return}
@@ -1264,22 +1277,39 @@ document.addEventListener('click',async e=>{
  if(action==='contact-invite'){openModal('دعوة للجمعية','','<button class="btn secondary" data-action="modal-close">إغلاق</button><button class="btn primary" data-action="modal-close">مفهوم</button>');return}
  if(action==='contact-share'){openModal('دعوة للتثبيت','','<button class="btn primary" data-action="modal-close">إغلاق</button>');return}
  if(action==='verify-link'){
-   const raw=(document.getElementById('joinLink')?.value||'').trim();linkValue=raw;const code=extractJoinCode(raw),g=localData.groups.find(x=>x.joinCode===code),valid=!!g&&g.creatorAccountId!==activeAccountId;setInvalid('joinLinkWrap',!valid);
+   const raw=(document.getElementById('joinLink')?.value||'').trim();linkValue=raw;
+   const code=extractJoinCode(raw),g=localData.groups.find(x=>x.joinCode===code);
+   const valid=!!g&&!!activeAccountId&&g.creatorAccountId!==activeAccountId;setInvalid('joinLinkWrap',!valid);
    if(!valid){showToast('رابط الجمعية غير صالح أو غير متاح');return}
-   selectedJoinGroupId=g.id;joinShares=1;joinAck=false;joinSubmitted=localData.joinRequests.some(r=>r.groupId===g.id&&r.accountId===activeAccountId);joinType='public';go('017');return;
+   if(g.acceptingMembers===false||g.joinOpen===false){showToast('الجمعية لا تستقبل طلبات انضمام حالياً');return}
+   const membership=membershipFor(g,activeAccountId);
+   if(membership){activeGroup=g;refreshLocalViews();go(membership.role==='manager'||membership.role==='manager-member'?'021':'032');showToast('لديك عضوية حالية في هذه الجمعية');return}
+   const prior=localData.joinRequests.find(r=>r.groupId===g.id&&r.accountId===activeAccountId);
+   selectedJoinGroupId=g.id;joinShares=prior?.shares||1;joinAck=false;joinSubmitted=!!prior;joinType='public';go('017');return;
  }
+
  if(action==='send-join'){
-   const g=currentJoinGroup(),n=Number(document.getElementById('joinShares')?.value||joinShares);joinShares=n;setInvalid('joinSharesWrap',!Number.isInteger(n)||n<1);joinAck=!!document.getElementById('joinAck')?.checked;
-   if(!g){showToast('تعذر العثور على الجمعية');return}if(!Number.isInteger(n)||n<1||!joinAck){showToast('حدد عدد الأسهم وأكد الاطلاع على الالتزامات');return}
+   const g=currentJoinGroup(),n=Number(document.getElementById('joinShares')?.value||joinShares);
+   joinShares=n;setInvalid('joinSharesWrap',!Number.isSafeInteger(n)||n<1);joinAck=!!document.getElementById('joinAck')?.checked;
+   if(!activeAccountId){showToast('سجل الدخول أولاً لمتابعة الطلب');go('002');return}
+   if(!g){showToast('تعذر العثور على الجمعية');return}
+   if(g.creatorAccountId===activeAccountId||membershipFor(g,activeAccountId)){showToast('لا يمكن إرسال طلب انضمام؛ يوجد ارتباط سابق بهذه الجمعية');return}
+   if(g.acceptingMembers===false||g.joinOpen===false){showToast('الجمعية لا تستقبل طلبات انضمام حالياً');return}
+   if(!Number.isSafeInteger(n)||n<1||!joinAck){showToast('حدد عدد الأسهم وأكد الاطلاع على الالتزامات');return}
    if(localData.joinRequests.some(r=>r.groupId===g.id&&r.accountId===activeAccountId)){joinSubmitted=true;showToast('سبق إرسال طلب الانضمام');render();return}
-   const a=getActiveAccount(),parts=(g.installments||[]).map(v=>Number(v)*n),total=parts.reduce((x,y)=>x+y,0);
+   const a=getActiveAccount(),parts=(g.installments||[]).map(v=>Number(v)*n);
+   if(!parts.length||parts.some(v=>!Number.isFinite(v)||v<0)){showToast('تعذر حساب التزامات الجمعية من البيانات المتاحة');return}
+   const total=parts.reduce((x,y)=>x+y,0);
    const request={id:makeId('req'),groupId:g.id,accountId:activeAccountId,name:a?.name||accountEmail,source:'رابط عام',shares:n,total:total.toLocaleString('en-US')+' '+currencyName(g.currency),amount:total,createdAt:new Date().toISOString(),date:new Date().toLocaleDateString('en-GB'),status:'قيد المراجعة'};
-   localData.joinRequests.push(request);addNotification(g.creatorAccountId,'طلب انضمام جديد',g.id,'تقدم '+request.name+' بطلب للانضمام إلى الجمعية.');addActivity(activeAccountId,'تم إرسال طلب انضمام إلى '+g.name,g.id,'012','userplus');saveLocalData();joinSubmitted=true;refreshLocalViews();render();showToast('تم إرسال طلب الانضمام');return;
+   localData.joinRequests.push(request);addNotification(g.creatorAccountId,'طلب انضمام جديد',g.id,'تقدم '+request.name+' بطلب للانضمام إلى الجمعية.');addActivity(activeAccountId,'تم إرسال طلب انضمام إلى '+g.name,g.id,'012','userplus');
+   if(!saveLocalData())return;
+   joinSubmitted=true;refreshLocalViews();render();showToast('تم إرسال طلب الانضمام');return;
  }
+
  if(action==='notice-open'){
    noticeCurrent=notifications.find(n=>n.id===id);if(!noticeCurrent)return;const saved=localData.notifications.find(n=>n.id===id);if(saved){saved.read=true;saveLocalData();refreshLocalViews()}render();const n=noticeCurrent;const cta=n.type==='invite'?`<button class="btn primary" data-action="notice-action" data-id="${n.id}">تفاصيل الدعوة ومتابعة الطلب</button>`:`<button class="btn primary" data-action="notice-action" data-id="${n.id}">فتح الوجهة المرتبطة</button>`;openModal('تفاصيل الإشعار',`<div class="row-icon-box" style="margin-bottom:12px">${icon(n.type==='invite'?'gift':'activity')}<strong>${esc(n.title)}</strong></div><div class="small-note">${esc(n.group)} · ${esc(n.time)} · مقروء</div><p>${esc(n.body)}</p>`,n.type==='invite'?`<button class="btn secondary" data-action="modal-close">إغلاق</button>${cta}`:`<button class="btn secondary" data-action="modal-close">إغلاق</button>${cta}`);return;
  }
- if(action==='notice-action'){const n=localData.notifications.find(x=>x.id===id)||noticeCurrent;closeModal();if(n?.groupId){activeGroup=findGroup(n.groupId)||{};refreshLocalViews();go('021')}return}
+ if(action==='notice-action'){const n=localData.notifications.find(x=>x.id===id)||noticeCurrent;closeModal();if(n?.type==='invite'){showToast('تعذر التحقق من مرجع الدعوة الشخصية؛ لم يتم فتح بيانات الجمعية');return}if(n?.groupId){activeGroup=findGroup(n.groupId)||{};refreshLocalViews();const membership=membershipFor(activeGroup,activeAccountId);go(membership?.role==='manager'||membership?.role==='manager-member'?'021':membership?.role==='member'?'032':'009')}return}
  if(action==='expand'){if(expanded.has(id))expanded.delete(id);else expanded.add(id);render();return}
  if(action==='collect-start'||action==='collect-confirm'){openModal('تسجيل التحصيل','تسجيل استلام المبلغ يتطلب خدمة الخادم والتحقق من الاستحقاقات المرتبطة بصورة ذرية. لم تتغير حالة القسط.','<button class="btn secondary" data-action="modal-close">إغلاق</button>');return}
  if(action==='collect-cancel'){confirmCollectId=null;render();return}
@@ -1306,7 +1336,7 @@ document.getElementById('indexSearch').addEventListener('input',e=>{const q=e.ta
 document.getElementById('modalRoot').addEventListener('click',e=>{if(e.target.id==='modalRoot')closeModal()});
 
 render();
-if(current==='001')setTimeout(()=>{if(current==='001'){if(activeAccountId&&getActiveAccount()){theme=getActiveAccount().theme||'light';current='008';refreshLocalViews();render()}else go('002')}},900);
+if(current==='001')setTimeout(()=>{if(current==='001'){if(activeAccountId&&getActiveAccount()){theme=getActiveAccount().theme||'light';if(!continuePendingJoin()){current='008';refreshLocalViews();render()}}else go('002')}},900);
 </script>
 
 <script>
