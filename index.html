@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <meta name="theme-color" content="#3158d6">
-<meta name="sahm-build" content="sahm-20261124-home-summary-static-23c">
+<meta name="sahm-build" content="sahm-20261124-notice-reference-23d">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
@@ -1316,7 +1316,7 @@ document.addEventListener('click',async e=>{
  }
 
  if(action==='notice-open'){
-   noticeCurrent=notifications.find(n=>n.id===id);if(!noticeCurrent)return;const saved=localData.notifications.find(n=>n.id===id);if(saved){saved.read=true;if(!saveLocalData()){noticeCurrent=null;refreshLocalViews();render();return}refreshLocalViews();noticeCurrent=notifications.find(n=>n.id===id)||noticeCurrent}render();const n=noticeCurrent;const cta=n.type==='invite'?`<button class="btn primary" data-action="notice-action" data-id="${esc(n.id)}">تفاصيل الدعوة ومتابعة الطلب</button>`:`<button class="btn primary" data-action="notice-action" data-id="${esc(n.id)}">فتح الوجهة المرتبطة</button>`;openModal('تفاصيل الإشعار',`<div class="row-icon-box" style="margin-bottom:12px">${icon(n.type==='invite'?'gift':'activity')}<strong>${esc(n.title)}</strong></div><div class="small-note">${esc(n.group)} · ${esc(n.time)} · مقروء</div><p>${esc(n.body)}</p>`,n.type==='invite'?`<button class="btn secondary" data-action="modal-close">إغلاق</button>${cta}`:`<button class="btn secondary" data-action="modal-close">إغلاق</button>${cta}`);return;
+   noticeCurrent=notifications.find(n=>n.id===id);if(!noticeCurrent)return;const saved=localData.notifications.find(n=>n.id===id);if(saved){saved.read=true;if(!saveLocalData()){noticeCurrent=null;refreshLocalViews();render();return}refreshLocalViews();noticeCurrent=notifications.find(n=>n.id===id)||noticeCurrent}render();const n=noticeCurrent,relatedGroup=n.groupId?findGroup(n.groupId):null,relatedMembership=membershipFor(relatedGroup,activeAccountId),canOpenGroup=!!relatedGroup&&!!relatedMembership&&(n.type!=='join-request'||relatedMembership.role==='manager'||relatedMembership.role==='manager-member'),cta=n.type!=='invite'&&canOpenGroup?`<button class="btn primary" data-action="notice-action" data-id="${esc(n.id)}">فتح الوجهة المرتبطة</button>`:'';openModal('تفاصيل الإشعار',`<div class="row-icon-box" style="margin-bottom:12px">${icon(n.type==='invite'?'gift':'activity')}<strong>${esc(n.title)}</strong></div><div class="small-note">${esc(n.group)} · ${esc(n.time)} · مقروء</div><p>${esc(n.body)}</p>`,`<button class="btn secondary" data-action="modal-close">إغلاق</button>${cta}`);return;
  }
  if(action==='notice-action'){const n=localData.notifications.find(x=>x.id===id)||noticeCurrent;closeModal();if(n?.type==='invite'){showToast('تعذر التحقق من مرجع الدعوة الشخصية؛ لم يتم فتح بيانات الجمعية');return}if(n?.groupId){activeGroup=findGroup(n.groupId)||{};refreshLocalViews();const membership=membershipFor(activeGroup,activeAccountId);if(n?.type==='join-request'&&(membership?.role==='manager'||membership?.role==='manager-member'))go('026');else go(membership?.role==='manager'||membership?.role==='manager-member'?'021':membership?.role==='member'?'032':'009')}return}
  if(action==='expand'){if(expanded.has(id))expanded.delete(id);else expanded.add(id);render();return}
