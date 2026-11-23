@@ -809,50 +809,52 @@ const screens=[
 ];
 const sectionFor=id=>id<='006'?'دورة الحساب':id==='007'?'إطار التطبيق':id<='018'?'الشاشات العامة والإنشاء والانضمام':id==='019'||id==='020'?'معرّفات ملغاة':id>='021'&&id<='031'?'مساحة الجمعية — المدير':id>='032'&&id<='038'?'مساحة الجمعية — العضو': 'الوجهات العامة بعد مساحة الجمعية';
 const screenMap=Object.fromEntries(screens.map(s=>[s[0],s]));
-let current='001',historyStack=[],online=true,theme='light',activeGroup={name:'جمعية الوفاق',role:'مدير'},form={name:'',start:'',first:'',share:'',currency:'YER',mode:'count',count:'',installment:'',managerRole:'manager',managerShares:'1'};
-let recoverStep=1,registerAccepted=false,registration={email:'',pass:'',confirm:'',accepted:false},profileName='مستخدم سهم',profileAvatar='user',selectedContacts=[],contactRecords=[],joinShares=1,joinAck=false,joinSubmitted=false,joinType='public',linkValue='',expanded=new Set(),confirmCollectId=null,noticeCurrent=null,requestSearch='',activityPage='';
+const LOCAL_DATA_KEY='sahm-commercial-preview-v1';
+function emptyLocalData(){return {version:1,activeAccountId:null,accounts:[],groups:[],joinRequests:[],invitations:[],notifications:[],activities:[]}}
+function loadLocalData(){try{const x=JSON.parse(localStorage.getItem(LOCAL_DATA_KEY)||'null');if(!x||x.version!==1)return emptyLocalData();return {version:1,activeAccountId:x.activeAccountId||null,accounts:Array.isArray(x.accounts)?x.accounts:[],groups:Array.isArray(x.groups)?x.groups:[],joinRequests:Array.isArray(x.joinRequests)?x.joinRequests:[],invitations:Array.isArray(x.invitations)?x.invitations:[],notifications:Array.isArray(x.notifications)?x.notifications:[],activities:Array.isArray(x.activities)?x.activities:[]}}catch(e){console.warn('تعذر قراءة البيانات المحفوظة',e);return emptyLocalData()}}
+let localData=loadLocalData();
+let activeAccountId=localData.activeAccountId&&localData.accounts.some(a=>a.id===localData.activeAccountId)?localData.activeAccountId:null;
+let current='001',historyStack=[],online=navigator.onLine!==false,theme='light';
+let activeGroup={},form={name:'',start:'',first:'',share:'',currency:'YER',mode:'count',count:'',installment:'',managerRole:'manager',managerShares:'1'};
+let recoverStep=1,registerAccepted=false,registration={email:'',pass:'',confirm:'',accepted:false},pendingRegistration=null,recoveryAccountId=null;
+let profileName='',profileAvatar='user',accountEmail='',accountPhone='',avatarChoice='user';
+let selectedContacts=[],contactRecords=[],joinShares=1,joinAck=false,joinSubmitted=false,joinType='public',linkValue='',selectedJoinGroupId=null;
+let expanded=new Set(),confirmCollectId=null,noticeCurrent=null,requestSearch='',activityPage='';
 let roomInvitedIds=[],roomAttendeeIds=[];
-let groupResult={name:'',start:'',first:'',share:'',currency:'YER',mode:'count',count:'',managerRole:'manager',managerShares:'1',joinLink:''};
-const groupFixtures=[
- {id:'g1',name:'جمعية الوفاق',role:'manager',kind:'manager',tag:'إدارة'},
- {id:'g2',name:'جمعية النماء',role:'manager-member',kind:'manager',tag:'إدارة ومشاركة'},
- {id:'g3',name:'جمعية التعاون',role:'member',kind:'member',tag:'مشاركة'}
-];
-const notifications=[
- {id:'n1',title:'دعوة شخصية للانضمام',group:'جمعية النماء',time:'قبل 20 دقيقة',body:'وصلتك دعوة شخصية لتفاصيل الجمعية وتقديم طلب الانضمام. فتح الدعوة لا ينشئ عضوية تلقائياً.',type:'invite',read:false},
- {id:'n2',title:'تحديث مرتبط بجمعية',group:'جمعية الوفاق',time:'أمس',body:'يوجد تحديث في مساحة الجمعية. افتح السياق المرتبط بعد التحقق من الصلاحية.',type:'group',read:true}
-];
-const contactsFixture=[
- {id:'c1',name:'سالم محمد',phone:'77•••101',status:'حساب سهم موثق',kind:'registered',eligible:true},
- {id:'c2',name:'منى أحمد',phone:'71•••204',status:'غير مسجل في سهم',kind:'unregistered',eligible:true},
- {id:'c3',name:'أحمد علي',phone:'73•••318',status:'عضو في الجمعية',kind:'member',eligible:false},
- {id:'c4',name:'هدى صالح',phone:'70•••425',status:'سبق إرسال دعوة',kind:'invited',eligible:false},
- {id:'c5',name:'مازن عبدالله',phone:'77•••502',status:'تعذر تأكيد أهلية الدعوة',kind:'uncertain',eligible:false}
-];
-const collectionRecords=[
- {id:'col1',name:'سالم محمد',status:'مستحق',amount:'4,500',round:'القرعة الأولى',installment:'القسط الأول',due:'2026/12/01',shares:[{number:'01',amount:'1,500'},{number:'02',amount:'1,500'},{number:'03',amount:'1,500'}],reminded:true,paid:false},
- {id:'col2',name:'منى أحمد',status:'متأخر',amount:'1,500',round:'القرعة الأولى',installment:'القسط الأول',due:'2026/11/15',shares:[{number:'04',amount:'1,500'}],reminded:false,paid:false}
-];
-const paidRecords=[{id:'col3',name:'ناصر علي',status:'مدفوع',amount:'3,000',round:'القرعة الأولى',installment:'القسط الأول',due:'2026/10/15',paidAt:'2026/10/18',shares:[{number:'05',amount:'1,500'},{number:'06',amount:'1,500'}],paid:true}];
-const drawRecords=[
- {id:'d1',name:'القرعة الأولى',status:'مكتملة',start:'2026/08/01',end:'2026/09/01',winner:null,winningShare:null},
- {id:'d2',name:'القرعة الثانية',status:'جارية',start:'2026/10/01',end:'2026/12/01',money:68,time:52,collected:'34,000',target:'50,000'},
- {id:'d3',name:'القرعة الثالثة',status:'لم تبدأ',start:'2027/01/01',end:'2027/02/01',reason:'لم تُغلق القرعة السابقة'}
-];
-const shareRecords=[
- {id:'s1',owner:'سالم محمد',number:'01',status:'مؤهل',round:'القرعة الثانية',eligible:'مؤهل',result:'لا توجد نتيجة سابقة'},
- {id:'s2',owner:'منى أحمد',number:'02',status:'النتيجة غير متاحة',round:'القرعة الأولى',eligible:'لا توجد أهلية نهائية متاحة',result:'لا توجد نتيجة فوز موثقة'}
-];
-const memberRecords=[
- {id:'m1',name:'سالم محمد',role:'عضو',status:'نشط',shares:3,commitment:'3,600',paid:'1,200',dues:[['القسط الأول','600','مدفوع'],['القسط الثاني','600','مستحق'],['القسط الثالث','600','قادم']]},
- {id:'m2',name:'منى أحمد',role:'عضو',status:'نشط',shares:1,commitment:'1,200',paid:'400',dues:[['القسط الأول','200','مدفوع'],['القسط الثاني','200','مستحق']]},
- {id:'m3',name:'ناصر علي',role:'مدير ومشارك',status:'نشط',shares:2,commitment:'2,400',paid:'1,200',dues:[['القسط الأول','400','مدفوع'],['القسط الثاني','400','مستحق']]}
-];
-const requests=[{id:'rq1',name:'خالد عبدالله',status:'قيد المراجعة',source:'رابط عام',shares:2,total:'2,400',date:'2026/11/20'}];
-const invitations=[{id:'iv1',name:'علي حسن',status:'بانتظار الرد',phone:'77•••901',date:'2026/11/19',response:'لم يرد بعد'}];
-const memberDues=[{id:'du1',name:'القسط الأول',amount:'200',date:'2026/11/20',status:'مستحق'},{id:'du2',name:'القسط الثاني',amount:'200',date:'2026/12/20',status:'قادم'},{id:'du3',name:'قسط سابق',amount:'200',date:'2026/10/20',status:'مدفوع'}];
-const memberDraws=[{id:'md1',name:'القرعة الأولى',status:'النتيجة غير متاحة',date:'2026/09/01',detail:'لا توجد نتيجة متاحة لهذه القرعة.'},{id:'md2',name:'القرعة الثانية',status:'غير محدد',date:'2026/12/01',detail:'حالة الأهلية غير متاحة.'}];
-const recentEvents=[{id:'e1',title:'تم تحديث سجل جمعية الوفاق',group:'جمعية الوفاق',time:'قبل ساعة',route:'021',icon:'activity'},{id:'e2',title:'لديك دعوة شخصية لمعاينتها',group:'جمعية النماء',time:'قبل 20 دقيقة',route:'012',icon:'gift'}];
+let groupResult={name:'',start:'',first:'',share:'',currency:'YER',mode:'count',count:'',managerRole:'manager',managerShares:'1',joinLink:'',groupId:''};
+let groupFixtures=[],notifications=[],contactsFixture=[],collectionRecords=[],paidRecords=[],drawRecords=[],shareRecords=[],memberRecords=[],requests=[],invitations=[],memberDues=[],memberDraws=[],recentEvents=[];
+function makeId(p){return p+'-'+(crypto.randomUUID?crypto.randomUUID():Date.now().toString(36)+'-'+Math.random().toString(36).slice(2,10))}
+function saveLocalData(){try{localStorage.setItem(LOCAL_DATA_KEY,JSON.stringify(localData));return true}catch(e){console.error('تعذر حفظ البيانات',e);showToast('تعذر حفظ البيانات على هذا الجهاز');return false}}
+function getActiveAccount(){return localData.accounts.find(a=>a.id===activeAccountId)||null}
+function findGroup(id){return localData.groups.find(g=>g.id===id)||null}
+function membershipFor(g,accountId){return (g?.memberships||[]).find(m=>m.accountId===accountId&&m.status==='active')||null}
+function getMyGroups(accountId=activeAccountId){return localData.groups.filter(g=>!!membershipFor(g,accountId))}
+function refreshLocalViews(){
+ const a=getActiveAccount();accountEmail=a?.email||'';accountPhone=a?.phone||'';profileName=a?.name||'';profileAvatar=a?.avatar||'user';
+ groupFixtures=getMyGroups().map(g=>{const m=membershipFor(g,activeAccountId),manager=m.role==='manager'||m.role==='manager-member';return {id:g.id,name:g.name,role:m.role,kind:manager?'manager':'member',tag:m.role==='manager-member'?'إدارة ومشاركة':manager?'إدارة':'مشاركة'}});
+ notifications=localData.notifications.filter(n=>n.accountId===activeAccountId).sort((x,y)=>(y.createdAt||'').localeCompare(x.createdAt||''));
+ recentEvents=localData.activities.filter(x=>x.accountId===activeAccountId).sort((x,y)=>(y.createdAt||'').localeCompare(x.createdAt||'')).slice(0,12);
+ if(activeGroup?.id){activeGroup=findGroup(activeGroup.id)||{};if(activeGroup.id&&!membershipFor(activeGroup,activeAccountId))activeGroup={}}else activeGroup={};
+ const members=(activeGroup?.memberships||[]).filter(m=>m.status==='active'&&m.role!=='manager');
+ memberRecords=members.map(m=>{const u=localData.accounts.find(x=>x.id===m.accountId),shares=Number(m.shares||0),total=Number(activeGroup.share||0)*shares,paid=Number(m.paid||0);return {id:m.accountId,name:u?.name||'حساب غير متاح',role:m.role==='manager-member'?'مدير ومشارك':'عضو',status:'نشط',shares,commitment:total.toLocaleString('en-US'),paid:paid.toLocaleString('en-US'),dues:Array.isArray(m.dues)?m.dues:[],drawWinner:m.drawWinner===true}});
+ requests=localData.joinRequests.filter(r=>r.groupId===activeGroup?.id);invitations=localData.invitations.filter(r=>r.groupId===activeGroup?.id);
+ collectionRecords=Array.isArray(activeGroup?.collections)?activeGroup.collections:[];paidRecords=Array.isArray(activeGroup?.paidRecords)?activeGroup.paidRecords:[];drawRecords=Array.isArray(activeGroup?.draws)?activeGroup.draws:[];
+ shareRecords=memberRecords.flatMap(m=>Array.from({length:Math.max(0,Math.min(100,m.shares))},(_,i)=>({id:m.id+'-'+(i+1),owner:m.name,number:String(i+1).padStart(2,'0'),status:'مسجل',round:'—',eligible:'—',result:'لا توجد نتيجة مسجلة'})));
+ const own=membershipFor(activeGroup,activeAccountId);memberDues=Array.isArray(own?.dues)?own.dues:[];memberDraws=Array.isArray(activeGroup?.memberDraws)?activeGroup.memberDraws:[];
+ roomInvitedIds=Array.isArray(activeGroup?.roomInvitedIds)?activeGroup.roomInvitedIds:[];roomAttendeeIds=Array.isArray(activeGroup?.roomAttendeeIds)?activeGroup.roomAttendeeIds:[];
+}
+function addActivity(accountId,title,groupId='',route='008',activityIcon='activity'){const g=findGroup(groupId);localData.activities.push({id:makeId('act'),accountId,title,groupId:groupId||'',group:g?.name||'',time:'الآن',route,icon:activityIcon,createdAt:new Date().toISOString()})}
+function addNotification(accountId,title,groupId,body,type='group'){const g=findGroup(groupId);localData.notifications.push({id:makeId('ntf'),accountId,groupId,title,group:g?.name||'',time:'الآن',body,type,read:false,createdAt:new Date().toISOString()})}
+function activateAccount(id){const a=localData.accounts.find(x=>x.id===id);if(!a)return false;activeAccountId=id;localData.activeAccountId=id;activeGroup={};theme=a.theme||'light';form={name:'',start:'',first:'',share:'',currency:'YER',mode:'count',count:'',installment:'',managerRole:'manager',managerShares:'1'};groupResult={name:'',start:'',first:'',share:'',currency:'YER',mode:'count',count:'',managerRole:'manager',managerShares:'1',joinLink:'',groupId:''};selectedJoinGroupId=null;joinSubmitted=false;joinShares=1;joinAck=false;historyStack=[];refreshLocalViews();saveLocalData();return true}
+function createJoinLink(code){return window.location.origin+window.location.pathname+'?join='+encodeURIComponent(code)}
+function extractJoinCode(raw){try{const u=new URL(raw,window.location.href);if(u.origin!==window.location.origin)return null;return u.searchParams.get('join')}catch{return null}}
+function currentJoinGroup(){return findGroup(selectedJoinGroupId)}
+function createSalt(){const b=new Uint8Array(16);crypto.getRandomValues(b);return Array.from(b,x=>x.toString(16).padStart(2,'0')).join('')}
+function hexToBytes(x){return new Uint8Array((x.match(/.{1,2}/g)||[]).map(v=>parseInt(v,16)))}
+async function hashPassword(password,salt){if(!crypto.subtle||!window.TextEncoder)throw new Error('Web Crypto unavailable');const key=await crypto.subtle.importKey('raw',new TextEncoder().encode(password),'PBKDF2',false,['deriveBits']);const bits=await crypto.subtle.deriveBits({name:'PBKDF2',salt:hexToBytes(salt),iterations:100000,hash:'SHA-256'},key,256);return Array.from(new Uint8Array(bits),x=>x.toString(16).padStart(2,'0')).join('')}
+async function newPasswordRecord(password){const salt=createSalt();return {salt,passwordHash:await hashPassword(password,salt)}}
+async function verifyPassword(account,password){return !!account?.salt&&!!account?.passwordHash&&(await hashPassword(password,account.salt))===account.passwordHash}
+refreshLocalViews();
 function esc(v){return String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]))}
 function meta(id=current){return screenMap[id]||['','','','P']}
 function go(id,opts={}){if(!screenMap[id]||meta(id)[3]==='X')return;if(current!==id)historyStack.push(current);current=id;if(opts.replace&&historyStack.length)historyStack.pop();render();closeModal();window.scrollTo?.(0,0)}
@@ -899,18 +901,14 @@ function renderCompleteProfile(){return `<main class="screen-body auth-body"><se
 function renderFrame(){return `${topHeader('إطار التطبيق العام')}<main class="screen-body"><div class="page-intro"><h2>إطار التطبيق العام</h2><p></p></div><section class="info-card"><div style="display:flex;align-items:center;gap:10px;font-weight:900">${icon('shield')} الشريط العلوي</div></section><section class="info-card"><div style="font-weight:900;margin-bottom:8px">مساحة المحتوى</div><div class="empty-state"></div></section></main>${bottomNav()}`}
 /* 008 */
 let carouselIndex=0,carouselTimer=null;
-const summarySlides=[
- {title:'جمعيات تديرها',value:'02',icon:'users',tone:'blue'},
- {title:'جمعيات أشارك فيها',value:'01',icon:'usercheck',tone:'gold'},
- {title:'إجمالي الجمعيات',value:'03',icon:'building',tone:'dark'}
-];
+function getSummarySlides(){const m=groupFixtures.filter(g=>g.kind==='manager').length,n=groupFixtures.filter(g=>g.kind==='member').length;return [{title:'جمعيات تديرها',value:String(m).padStart(2,'0'),icon:'users',tone:'blue'},{title:'جمعيات أشارك فيها',value:String(n).padStart(2,'0'),icon:'usercheck',tone:'gold'},{title:'إجمالي الجمعيات',value:String(groupFixtures.length).padStart(2,'0'),icon:'building',tone:'dark'}]}
 function summaryCarouselMarkup(slides,label){
  const cards=slides.map((s,i)=>'<article class="summary-slide '+s.tone+' '+(i===0?'active':'')+'" data-summary-slide="'+i+'" aria-hidden="'+(i!==0)+'"><span class="summary-icon">'+icon(s.icon)+'</span><span class="summary-copy"><strong>'+esc(s.title)+'</strong><b>'+esc(s.value)+'</b>'+(s.note?'<small>'+esc(s.note)+'</small>':'')+'</span><span class="summary-index">'+String(i+1).padStart(2,'0')+' / '+String(slides.length).padStart(2,'0')+'</span></article>').join('');
  const dots=slides.map((s,i)=>'<button type="button" class="carousel-dot '+(i===0?'active':'')+'" data-action="carousel" data-index="'+i+'" aria-label="عرض '+esc(s.title)+'" aria-pressed="'+(i===0)+'"></button>').join('');
  return '<section class="summary-carousel" aria-label="'+esc(label)+'"><div class="summary-window"><div class="summary-track" id="summaryTrack">'+cards+'</div></div><div class="carousel-controls" role="group" aria-label="التنقل بين الملخصات">'+dots+'</div></section>';
 }
 function renderHome(){return `${generalHeader()}<main class="screen-body home-body">
- ${summaryCarouselMarkup(summarySlides,'ملخص الجمعيات')}
+ ${summaryCarouselMarkup(getSummarySlides(),'ملخص الجمعيات')}
  <section class="home-tiles">
  <div class="home-shortcuts">${tile('جمعيات أديرها','users','010','blue')}${tile('جمعيات أشارك فيها','usercheck','011','gold')}</div>
  <div class="home-shortcuts home-action-cards">${tile('جمعية جديدة','plus','014','blue')}${tile('الانضمام لجمعية','link','016','gold')}</div>
