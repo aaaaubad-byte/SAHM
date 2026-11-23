@@ -1234,7 +1234,7 @@ document.addEventListener('click',async e=>{
    const entered=(document.getElementById('recId')?.value||'').trim(),p=document.getElementById('recNew')?.value||'',c=document.getElementById('recConfirm')?.value||'',a=localData.accounts.find(x=>x.id===recoveryAccountId);
    setInvalid('recIdWrap',!a||entered!==a.publicId);setInvalid('recNewWrap',p.length<6);setInvalid('recConfirmWrap',!c||c!==p);
    if(!a||entered!==a.publicId||p.length<6||c!==p){showToast('تحقق من معرّف الحساب وكلمتي المرور');return}
-   try{const r=await newPasswordRecord(p);a.salt=r.salt;a.passwordHash=r.passwordHash;if(!saveLocalData())return;recoveryAccountId=null;recoverStep=1;go('002');showToast('تم تحديث كلمة المرور')}catch(e){showToast('تعذر تحديث كلمة المرور')}return;
+   try{const r=await newPasswordRecord(p),previous={salt:a.salt,passwordHash:a.passwordHash},wasActive=activeAccountId===a.id;a.salt=r.salt;a.passwordHash=r.passwordHash;if(wasActive){activeAccountId=null;localData.activeAccountId=null;activeGroup={}}if(!saveLocalData()){a.salt=previous.salt;a.passwordHash=previous.passwordHash;return}recoveryAccountId=null;recoverStep=1;historyStack=[];current='002';refreshLocalViews();render();showToast('تم تحديث كلمة المرور؛ سجّل الدخول مجدداً')}catch(e){showToast('تعذر تحديث كلمة المرور')}return;
  }
  if(action==='register'){
    saveRegistrationFromDom();registration.email=registration.email.trim().toLowerCase();const okE=validEmail(registration.email),okP=registration.pass.length>=6,okC=registration.confirm===registration.pass&&!!registration.confirm,okA=registration.accepted;
