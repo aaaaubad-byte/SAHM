@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <meta name="theme-color" content="#3158d6">
-<meta name="sahm-build" content="sahm-20261124-ledger-helper-cleanup-23t">
+<meta name="sahm-build" content="sahm-20261124-native-share-23r">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
@@ -1276,7 +1276,7 @@ document.addEventListener('click',async e=>{
  if(action==='toggle-preview'){previewOpen=!previewOpen;updateAssociationCalc();return}
  if(action==='create-group'){submitCreateGroup();return}
  if(action==='copy-link'){const link=String(groupResult.joinLink||'').trim();if(!link){showToast('رابط الانضمام غير متاح حالياً');return}copyText(link,'رابط الانضمام');return}
- if(action==='share-link'){const link=String(groupResult.joinLink||'').trim();if(!link){showToast('رابط الانضمام غير متاح حالياً');return}openModal('مشاركة رابط الانضمام',`<div class="inline-note" dir="ltr" style="text-align:left">${esc(link)}</div>`,`<button class="btn secondary" data-action="modal-close">إغلاق</button><button class="btn primary" data-action="copy-link">نسخ النص</button>`);return}
+ if(action==='share-link'){const link=String(groupResult.joinLink||'').trim();if(!link){showToast('رابط الانضمام غير متاح حالياً');return}const name=String(groupResult.name||'الجمعية');const shareText='رابط الانضمام إلى '+name+'. بيانات الجمعية محفوظة على الجهاز الذي أنشأها؛ افتح الرابط على الجهاز نفسه حالياً.';if(navigator.share){navigator.share({title:'رابط الانضمام إلى '+name,text:shareText,url:link}).catch(error=>{if(error?.name!=='AbortError')showToast('تعذر فتح واجهة المشاركة')});return}openModal('مشاركة رابط الانضمام',`<div class="inline-note" dir="ltr" style="text-align:left">${esc(link)}</div><p class="small-note">${esc(shareText)}</p>`,`<button class="btn secondary" data-action="modal-close">إغلاق</button><button class="btn primary" data-action="copy-link">نسخ الرابط</button>`);return}
  if(action==='contacts-picker'){openContactsPicker();return}
  if(action==='retry-join-link'){const g=findGroup(groupResult.groupId);if(g){groupResult.joinLink=createJoinLink(g.joinCode);render()}else showToast('تعذر تجهيز رابط الانضمام حالياً');return}
   if(action==='contacts-confirm'){renderContactRows();if(!contactRecords.length){showToast('اختر جهة اتصال واحدة على الأقل');return}closeModal();go('040');return}
