@@ -1182,7 +1182,7 @@ document.addEventListener('click',e=>{
  if(action==='add-account'){registration={email:'',pass:'',confirm:'',accepted:false};pendingRegistration=null;avatarChoice='user';go('004');return}
  if(action==='switch-account'){if(id!==activeAccountId&&activateAccount(id)){current='008';render();showToast('تم التبديل إلى الحساب المحدد')}return}
  if(action==='notifications'){go('012');return}
- if(action==='activity'){const ev=recentEvents.find(x=>x.id===id);if(ev?.groupId){activeGroup=findGroup(ev.groupId)||{};refreshLocalViews();go(membershipFor(activeGroup,activeAccountId)?.role==='member'?'032':'021')}else if(ev?.route==='012')go('012');return}
+ if(action==='activity'){const ev=recentEvents.find(x=>x.id===id);if(ev?.route==='012'){go('012')}else if(ev?.groupId){activeGroup=findGroup(ev.groupId)||{};refreshLocalViews();if(activeGroup?.id)go(membershipFor(activeGroup,activeAccountId)?.role==='member'?'032':'021')}return}
  if(action==='open-group'){const card=groupFixtures.find(g=>g.id===id);if(!card)return;activeGroup=findGroup(id)||{};refreshLocalViews();go(card.kind==='manager'?'021':'032');return}
  if(action==='open-chat'){const card=groupFixtures.find(g=>g.id===id);if(!card)return;activeGroup=findGroup(id)||{};refreshLocalViews();go(card.kind==='manager'?'027':'038');return}
  if(action==='carousel'){setCarouselSlide(Number(actionEl.dataset.index)||0);return}
