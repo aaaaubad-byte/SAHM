@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <meta name="theme-color" content="#3158d6">
-<meta name="sahm-build" content="sahm-20261124-events-contacts-23h">
+<meta name="sahm-build" content="sahm-20261124-dead-state-cleanup-23h">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
@@ -831,11 +831,11 @@ let activeAccountId=localData.activeAccountId&&localData.accounts.some(a=>a.id==
 let current='001',historyStack=[],online=navigator.onLine!==false,theme='light';
 const DEVICE_THEME_KEY='sahm-device-theme-v1';let themePreference='system';try{const savedTheme=localStorage.getItem(DEVICE_THEME_KEY);if(['system','light','dark'].includes(savedTheme))themePreference=savedTheme}catch(e){}function applyThemePreference(){let dark=false;if(themePreference==='dark')dark=true;else if(themePreference==='system')try{dark=!!window.matchMedia&&window.matchMedia('(prefers-color-scheme: dark)').matches}catch(e){}theme=dark?'dark':'light'}
 let activeGroup={},form={name:'',start:'',first:'',share:'',currency:'YER',mode:'count',count:'',installment:'',managerRole:'manager',managerShares:'1'};
-let recoverStep=1,registerAccepted=false,registration={email:'',pass:'',confirm:'',accepted:false},pendingRegistration=null,recoveryAccountId=null;
+let recoverStep=1,registration={email:'',pass:'',confirm:'',accepted:false},pendingRegistration=null,recoveryAccountId=null;
 let profileName='',profileAvatar='user',accountEmail='',accountPhone='',avatarChoice='user';
 let selectedContacts=[],contactRecords=[],joinShares=1,joinAck=false,joinSubmitted=false,joinType='public',linkValue='',selectedJoinGroupId=null;
 let pendingJoinCode=new URLSearchParams(window.location.search).get('join');
-let expanded=new Set(),confirmCollectId=null,noticeCurrent=null,requestSearch='',activityPage='';
+let expanded=new Set(),noticeCurrent=null;
 let roomInvitedIds=[],roomAttendeeIds=[];
 let groupResult={name:'',start:'',first:'',share:'',currency:'YER',mode:'count',count:'',managerRole:'manager',managerShares:'1',joinLink:'',groupId:''};
 let groupFixtures=[],notifications=[],collectionRecords=[],paidRecords=[],drawRecords=[],shareRecords=[],memberRecords=[],requests=[],invitations=[],memberDues=[],memberDraws=[],recentEvents=[];
