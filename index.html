@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <meta name="theme-color" content="#3158d6">
-<meta name="sahm-build" content="sahm-20261123-local-accounts-groups-18a">
+<meta name="sahm-build" content="sahm-20261123-local-accounts-groups-19a">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
@@ -805,7 +805,7 @@ const screens=[
 ];
 const sectionFor=id=>id<='006'?'دورة الحساب':id==='007'?'إطار التطبيق':id<='018'?'الشاشات العامة والإنشاء والانضمام':id==='019'||id==='020'?'معرّفات ملغاة':id>='021'&&id<='031'?'مساحة الجمعية — المدير':id>='032'&&id<='038'?'مساحة الجمعية — العضو': 'الوجهات العامة بعد مساحة الجمعية';
 const screenMap=Object.fromEntries(screens.map(s=>[s[0],s]));
-const LOCAL_DATA_KEY='sahm-commercial-preview-v1';
+const LOCAL_DATA_KEY='sahm-app-data-v1';
 function emptyLocalData(){return {version:1,activeAccountId:null,accounts:[],groups:[],joinRequests:[],invitations:[],notifications:[],activities:[]}}
 function loadLocalData(){try{const x=JSON.parse(localStorage.getItem(LOCAL_DATA_KEY)||'null');if(!x||x.version!==1)return emptyLocalData();return {version:1,activeAccountId:x.activeAccountId||null,accounts:Array.isArray(x.accounts)?x.accounts:[],groups:Array.isArray(x.groups)?x.groups:[],joinRequests:Array.isArray(x.joinRequests)?x.joinRequests:[],invitations:Array.isArray(x.invitations)?x.invitations:[],notifications:Array.isArray(x.notifications)?x.notifications:[],activities:Array.isArray(x.activities)?x.activities:[]}}catch(e){console.warn('تعذر قراءة البيانات المحفوظة',e);return emptyLocalData()}}
 let localData=loadLocalData();
