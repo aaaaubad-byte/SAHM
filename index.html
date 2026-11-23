@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <meta name="theme-color" content="#3158d6">
-<meta name="sahm-build" content="sahm-20261124-phone-normalization-23p">
+<meta name="sahm-build" content="sahm-20261124-home-label-23s">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
@@ -962,7 +962,7 @@ function renderCompleteProfile(){return `<main class="screen-body auth-body"><se
 function renderFrame(){return `${topHeader('إطار التطبيق العام')}<main class="screen-body"><div class="page-intro"><h2>إطار التطبيق العام</h2><p></p></div><section class="info-card"><div style="display:flex;align-items:center;gap:10px;font-weight:900">${icon('shield')} الشريط العلوي</div></section><section class="info-card"><div style="font-weight:900;margin-bottom:8px">مساحة المحتوى</div><div class="empty-state"></div></section></main>${bottomNav()}`}
 /* 008 */
 let carouselIndex=0,carouselTimer=null;
-function getSummarySlides(){const m=groupFixtures.filter(g=>g.kind==='manager').length,n=groupFixtures.filter(g=>g.kind==='member').length;return [{title:'جمعيات تديرها',value:String(m).padStart(2,'0'),icon:'users',tone:'blue'},{title:'جمعيات أشارك فيها',value:String(n).padStart(2,'0'),icon:'usercheck',tone:'gold'},{title:'إجمالي الجمعيات',value:String(groupFixtures.length).padStart(2,'0'),icon:'building',tone:'dark'}]}
+function getSummarySlides(){const m=groupFixtures.filter(g=>g.kind==='manager').length,n=groupFixtures.filter(g=>g.kind==='member').length;return [{title:'جمعيات أديرها',value:String(m).padStart(2,'0'),icon:'users',tone:'blue'},{title:'جمعيات أشارك فيها',value:String(n).padStart(2,'0'),icon:'usercheck',tone:'gold'},{title:'إجمالي الجمعيات',value:String(groupFixtures.length).padStart(2,'0'),icon:'building',tone:'dark'}]}
 function summaryCarouselMarkup(slides,label){
  const cards=slides.map((s,i)=>'<article class="summary-slide '+s.tone+' '+(i===0?'active':'')+'" data-summary-slide="'+i+'" aria-hidden="'+(i!==0)+'"><span class="summary-icon">'+icon(s.icon)+'</span><span class="summary-copy"><strong>'+esc(s.title)+'</strong><b>'+esc(s.value)+'</b>'+(s.note?'<small>'+esc(s.note)+'</small>':'')+'</span><span class="summary-index">'+String(i+1).padStart(2,'0')+' / '+String(slides.length).padStart(2,'0')+'</span></article>').join('');
  const dots=slides.map((s,i)=>'<button type="button" class="carousel-dot '+(i===0?'active':'')+'" data-action="carousel" data-index="'+i+'" aria-label="عرض '+esc(s.title)+'" aria-pressed="'+(i===0)+'"></button>').join('');
