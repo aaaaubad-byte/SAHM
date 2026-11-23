@@ -810,10 +810,13 @@ const LOCAL_DATA_KEY='sahm-app-data-v1';
 let localDataNeedsMigration=false,localDataLoadBlocked=false;
 function emptyLocalData(){return {version:2,activeAccountId:null,accounts:[],groups:[],joinRequests:[],invitations:[],notifications:[],activities:[]}}
 function normalizeLocalData(x){
- if(!x||typeof x!=='object'||![1,2].includes(Number(x.version)))throw new Error('إصدار بيانات غير مدعوم');
+ if(!x||typeof x!=='object'||Array.isArray(x)||![1,2].includes(Number(x.version)))throw new Error('إصدار بيانات غير مدعوم');
  if(Number(x.version)!==2)localDataNeedsMigration=true;
- const list=v=>Array.isArray(v)?v:[];
- return {version:2,activeAccountId:typeof x.activeAccountId==='string'?x.activeAccountId:null,accounts:list(x.accounts).filter(a=>a&&typeof a==='object'),groups:list(x.groups).filter(g=>g&&typeof g==='object').map(g=>({...g,memberships:list(g.memberships).filter(m=>m&&typeof m==='object').map(m=>({...m,dues:list(m.dues),shareItems:list(m.shareItems)})),collections:list(g.collections),paidRecords:list(g.paidRecords),draws:list(g.draws),roomInvitedIds:list(g.roomInvitedIds),roomAttendeeIds:list(g.roomAttendeeIds)})),joinRequests:list(x.joinRequests),invitations:list(x.invitations),notifications:list(x.notifications),activities:list(x.activities)};
+ const list=v=>Array.isArray(v)?v:[],records=v=>list(v).filter(item=>item&&typeof item==='object'&&!Array.isArray(item)),str=v=>typeof v==='string'?v:'';
+ const accounts=records(x.accounts).map(a=>({...a,id:str(a.id),email:str(a.email),name:str(a.name),phone:str(a.phone)}));
+ const groups=records(x.groups).map(g=>({...g,id:str(g.id),name:str(g.name),creatorAccountId:str(g.creatorAccountId),joinCode:str(g.joinCode),memberships:records(g.memberships).map(m=>({...m,accountId:str(m.accountId),role:str(m.role),status:str(m.status),dues:list(m.dues),shareItems:records(m.shareItems)})),collections:records(g.collections),paidRecords:records(g.paidRecords),draws:records(g.draws),memberDraws:records(g.memberDraws),roomInvitedIds:list(g.roomInvitedIds).filter(v=>typeof v==='string'),roomAttendeeIds:list(g.roomAttendeeIds).filter(v=>typeof v==='string')}));
+ if(accounts.length!==list(x.accounts).length||groups.length!==list(x.groups).length||records(x.joinRequests).length!==list(x.joinRequests).length||records(x.invitations).length!==list(x.invitations).length||records(x.notifications).length!==list(x.notifications).length||records(x.activities).length!==list(x.activities).length)localDataNeedsMigration=true;
+ return {version:2,activeAccountId:typeof x.activeAccountId==='string'?x.activeAccountId:null,accounts,groups,joinRequests:records(x.joinRequests),invitations:records(x.invitations),notifications:records(x.notifications),activities:records(x.activities)};
 }
 function loadLocalData(){
  let raw=null;try{raw=localStorage.getItem(LOCAL_DATA_KEY)}catch(e){localDataLoadBlocked=true;console.warn('تعذر الوصول إلى التخزين المحلي',e);return emptyLocalData()}
