@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <meta name="theme-color" content="#3158d6">
-<meta name="sahm-build" content="sahm-20261124-name-save-cleanup-23r">
+<meta name="sahm-build" content="sahm-20261124-phone-normalization-23p">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
@@ -1156,7 +1156,8 @@ function validEmail(v){return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(String(v||'').tr
 function setInvalid(id,on=true){const el=document.getElementById(id);if(el)el.classList.toggle('invalid',!!on)}
 function setFieldError(id,on=true){const el=document.getElementById(id);const field=el?.closest('.field');if(field)field.classList.toggle('invalid',!!on);else if(el)el.classList.toggle('invalid',!!on)}
 function copyText(value,label){if(navigator.clipboard&&navigator.clipboard.writeText){navigator.clipboard.writeText(value).then(()=>showToast(`تم نسخ ${label}`)).catch(()=>openModal(`نسخ ${label}`,`<p>تعذر الوصول إلى الحافظة في هذه البيئة. يمكنك نسخ النص يدوياً:</p><textarea readonly style="width:100%;direction:ltr;text-align:left">${esc(value)}</textarea>`))}else{openModal(`نسخ ${label}`,`<p>انسخ النص:</p><textarea readonly style="width:100%;direction:ltr;text-align:left">${esc(value)}</textarea>`)}}
-function normalizeE164(value){let phone=String(value||'').trim().replace(/[\s().-]/g,'');if(phone.startsWith('00'))phone='+'+phone.slice(2);return /^\+[1-9]\d{7,14}$/.test(phone)?phone:null}
+function toWesternDigits(value){return String(value??'').replace(/[٠-٩۰-۹]/g,d=>String(d.charCodeAt(0)>=0x06f0?d.charCodeAt(0)-0x06f0:d.charCodeAt(0)-0x0660))}
+function normalizeE164(value){let phone=toWesternDigits(value).trim().replace(/[\s().\-/]/g,'');if(phone.startsWith('00'))phone='+'+phone.slice(2);return /^\+[1-9]\d{7,14}$/.test(phone)?phone:null}
 function normalizeContacts(records){const seen=new Set(),out=[];(Array.isArray(records)?records:[]).forEach((c,contactIndex)=>{const name=Array.isArray(c.name)?c.name[0]:c.name,tels=Array.isArray(c.tel)?c.tel:[c.tel];tels.forEach((raw,phoneIndex)=>{const phone=String(raw||'').trim(),normalized=normalizeE164(phone);if(!name||!phone)return;if(normalized&&seen.has(normalized))return;if(normalized)seen.add(normalized);out.push({id:normalized?'contact-'+normalized:'contact-invalid-'+contactIndex+'-'+phoneIndex,name:String(name).trim(),phone,normalizedPhone:normalized,kind:normalized?'unknown':'invalid',status:normalized?'لم يتم التحقق من حالة الحساب':'يتطلب الرقم مفتاح دولة أو تصحيحاً'})})});return out}
 async function openContactsPicker(){const previous=selectedContacts.slice();if(navigator.contacts&&typeof navigator.contacts.select==='function'){try{const rows=await navigator.contacts.select(['name','tel'],{multiple:true});const chosen=normalizeContacts(rows);if(!chosen.length){selectedContacts=previous;contactRecords=previous.slice();showToast('لم يتم اختيار جهات اتصال صالحة');return}selectedContacts=chosen;contactRecords=chosen.slice();go('040');return}catch(error){selectedContacts=previous;contactRecords=previous.slice();if(error?.name==='AbortError')return;showToast('تعذر الوصول إلى جهات الاتصال على هذا الجهاز');return}}openModal('اختيار جهات الاتصال','<p class="small-note">منتقي جهات الاتصال غير مدعوم في هذا المتصفح. يمكنك إدخال رقم دولي يدوياً باستخدام صيغة + ورمز الدولة والرقم.</p><div class="field"><label for="manualContactName">اسم جهة الاتصال</label><input id="manualContactName" type="text" autocomplete="name"></div><div class="field"><label for="manualContactPhone">رقم الهاتف الدولي</label><input id="manualContactPhone" type="tel" inputmode="tel" placeholder="+XXXXXXXXXXX" dir="ltr"></div>','<button class="btn secondary" data-action="modal-close">إلغاء</button><button class="btn primary" data-action="manual-contact-add">إضافة جهة الاتصال</button>')}
 function renderContactRows(){contactRecords=selectedContacts.slice()}
@@ -1234,7 +1235,7 @@ document.addEventListener('click',async e=>{
    if(!activateAccount(a.id))return;if(continuePendingJoin())return;current='008';render();showToast('مرحباً بك في سهم');return;
  }
  if(action==='recover-find'){
-   const email=(document.getElementById('recEmail')?.value||'').trim().toLowerCase(),phone=(document.getElementById('recPhone')?.value||'').trim().replace(/[\s-]/g,'');setInvalid('recEmailWrap',!validEmail(email));setInvalid('recPhoneWrap',!phone);
+   const email=(document.getElementById('recEmail')?.value||'').trim().toLowerCase(),phone=toWesternDigits(document.getElementById('recPhone')?.value||'').replace(/\D/g,'');setInvalid('recEmailWrap',!validEmail(email));setInvalid('recPhoneWrap',!phone);
    if(!validEmail(email)||!phone){showToast('أكمل البريد الإلكتروني ورقم الهاتف');return}
    const a=localData.accounts.find(x=>(x.email||'').toLowerCase()===email&&(x.phone||'')===phone);if(!a){showToast('لم يتم العثور على حساب مطابق');return}
    recoveryAccountId=a.id;recoverStep=2;go('003');return;
@@ -1253,11 +1254,11 @@ document.addEventListener('click',async e=>{
    try{const r=await newPasswordRecord(registration.pass);pendingRegistration={email:registration.email,salt:r.salt,passwordHash:r.passwordHash};avatarChoice='user';go('006');showToast('أكمل بيانات الملف الشخصي')}catch(e){showToast('تعذر إنشاء الحساب في هذا المتصفح')}return;
  }
  if(action==='complete-profile'){
-   const name=document.getElementById('profileName')?.value.trim()||'',phone=(document.getElementById('profilePhone')?.value||'').trim().replace(/[\s-]/g,'');setInvalid('profileNameWrap',!name);setInvalid('profilePhoneWrap',!/^\d{7,15}$/.test(phone));
+   const name=document.getElementById('profileName')?.value.trim()||'',phone=toWesternDigits(document.getElementById('profilePhone')?.value||'').replace(/\D/g,'');setInvalid('profileNameWrap',!name);setInvalid('profilePhoneWrap',!/^\d{7,15}$/.test(phone));
    if(!name||!/^\d{7,15}$/.test(phone)){showToast('أدخل الاسم ورقم هاتف صالحاً');return}
    if(!pendingRegistration){showToast('أعد بدء إنشاء الحساب');go('004');return}
    if(localData.accounts.some(a=>(a.email||'').toLowerCase()===pendingRegistration.email)){showToast('هذا البريد الإلكتروني مسجل بالفعل');go('004');return}
-   const a={id:makeId('acc'),publicId:'SHM-'+Date.now().toString(36).toUpperCase()+'-'+Math.random().toString(36).slice(2,6).toUpperCase(),email:pendingRegistration.email,salt:pendingRegistration.salt,passwordHash:pendingRegistration.passwordHash,name,phone,avatar:avatarChoice||'user',theme:'light',createdAt:new Date().toISOString()};
+   const a={id:makeId('acc'),publicId:'SHM-'+makeId('pid').replace(/^pid-/,'').replace(/-/g,'').slice(0,16).toUpperCase(),email:pendingRegistration.email,salt:pendingRegistration.salt,passwordHash:pendingRegistration.passwordHash,name,phone,avatar:avatarChoice||'user',theme:'light',createdAt:new Date().toISOString()};
    localData.accounts.push(a);if(!activateAccount(a.id)){showToast('تعذر حفظ الحساب على هذا الجهاز');return}pendingRegistration=null;registration={email:'',pass:'',confirm:'',accepted:false};if(continuePendingJoin())return;current='008';refreshLocalViews();render();showToast('تم إنشاء الحساب');return;
  }
  if(action==='avatar-picker'){const chooser=document.getElementById('avatarOptions'),trigger=actionEl;if(chooser){chooser.hidden=!chooser.hidden;trigger.setAttribute('aria-expanded',String(!chooser.hidden))}return}
