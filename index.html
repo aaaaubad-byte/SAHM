@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <meta name="theme-color" content="#3158d6">
-<meta name="sahm-build" content="sahm-20261123-local-accounts-groups-21a">
+<meta name="sahm-build" content="sahm-20261124-pwa-cache-fix-22a">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
@@ -1327,7 +1327,7 @@ if(current==='001')setTimeout(()=>{if(current==='001'){if(activeAccountId&&getAc
 
   // Check immediately, then keep checking while the app remains open.
   checkForPublishedUpdate();
-  checkTimer = setInterval(checkForPublishedUpdate, 1500);
+  checkTimer = setInterval(checkForPublishedUpdate, 5000);
   document.addEventListener('visibilitychange', () => {
     if (document.visibilityState === 'visible') checkForPublishedUpdate();
   });
