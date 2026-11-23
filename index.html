@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <meta name="theme-color" content="#3158d6">
-<meta name="sahm-build" content="sahm-20261124-navigation-state-23u">
+<meta name="sahm-build" content="sahm-20261124-contact-isolation-23t">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
@@ -893,7 +893,7 @@ function refreshLocalViews(){
 }
 function addActivity(accountId,title,groupId='',route='008',activityIcon='activity'){const g=findGroup(groupId);localData.activities.push({id:makeId('act'),accountId,title,groupId:groupId||'',group:g?.name||'',time:'الآن',route,icon:activityIcon,createdAt:new Date().toISOString()})}
 function addNotification(accountId,title,groupId,body,type='group'){const g=findGroup(groupId);localData.notifications.push({id:makeId('ntf'),accountId,groupId,title,group:g?.name||'',time:'الآن',body,type,read:false,createdAt:new Date().toISOString()})}
-function activateAccount(id){const a=localData.accounts.find(x=>x.id===id);if(!a)return false;const previous=activeAccountId,previousStored=localData.activeAccountId;activeAccountId=id;localData.activeAccountId=id;if(!saveLocalData()){if(!localDataLoadBlocked){activeAccountId=previous;localData.activeAccountId=previousStored}return false}activeGroup={};applyThemePreference();form={name:'',start:'',first:'',share:'',currency:'YER',mode:'count',count:'',installment:'',managerRole:'manager',managerShares:'1'};groupResult={name:'',start:'',first:'',share:'',currency:'YER',mode:'count',count:'',installment:'',managerRole:'manager',managerShares:'1',joinLink:'',groupId:''};selectedJoinGroupId=null;joinSubmitted=false;joinShares=1;joinAck=false;historyStack=[];refreshLocalViews();return true}
+function activateAccount(id){const a=localData.accounts.find(x=>x.id===id);if(!a)return false;const previous=activeAccountId,previousStored=localData.activeAccountId;activeAccountId=id;localData.activeAccountId=id;if(!saveLocalData()){if(!localDataLoadBlocked){activeAccountId=previous;localData.activeAccountId=previousStored}return false}activeGroup={};selectedContacts=[];contactRecords=[];applyThemePreference();form={name:'',start:'',first:'',share:'',currency:'YER',mode:'count',count:'',installment:'',managerRole:'manager',managerShares:'1'};groupResult={name:'',start:'',first:'',share:'',currency:'YER',mode:'count',count:'',installment:'',managerRole:'manager',managerShares:'1',joinLink:'',groupId:''};selectedJoinGroupId=null;joinSubmitted=false;joinShares=1;joinAck=false;historyStack=[];refreshLocalViews();return true}
 function createJoinLink(code){return window.location.origin+window.location.pathname+'?join='+encodeURIComponent(code)}
 function extractJoinCode(raw){try{const u=new URL(raw,window.location.href);if(u.origin!==window.location.origin)return null;return u.searchParams.get('join')}catch{return null}}
 function currentJoinGroup(){return findGroup(selectedJoinGroupId)}
@@ -1197,7 +1197,7 @@ function submitCreateGroup(){
   const membership={accountId:activeAccountId,role:form.managerRole==='manager-member'?'manager-member':'manager',status:'active',shares:form.managerRole==='manager-member'?Number(form.managerShares):0,paid:0,dues:[],shareItems:[]};
   const group={id:makeId('grp'),name,start,first,share,shareMinor,installmentsMinor,currency:form.currency,mode:form.mode,count:installments.length,installments,managerRole:form.managerRole,managerShares:form.managerRole==='manager-member'?Number(form.managerShares):0,creatorAccountId:activeAccountId,joinCode:code,createdAt:new Date().toISOString(),memberships:[membership]};
   ensureMembershipLedger(group,membership);localData.groups.push(group);addActivity(activeAccountId,'تم إنشاء جمعية '+name,group.id,'021','building');
-  if(!saveLocalData())return;groupResult={...form,name,share:String(share),count:String(installments.length),joinLink:createJoinLink(code),groupId:group.id};activeGroup=group;refreshLocalViews();go('015');
+  if(!saveLocalData())return;selectedContacts=[];contactRecords=[];groupResult={...form,name,share:String(share),count:String(installments.length),joinLink:createJoinLink(code),groupId:group.id};activeGroup=group;refreshLocalViews();go('015');
 }
 
 function applyListFilters(){
@@ -1323,7 +1323,7 @@ document.addEventListener('click',async e=>{
    if(!partsMinor.length||n*partsMinor.length>MAX_LOCAL_LEDGER_ENTRIES||partsMinor.some(v=>!Number.isSafeInteger(v)||v<0)){showToast('تعذر حساب التزامات الجمعية من البيانات المتاحة');return}
    const totalMinor=partsMinor.reduce((x,y)=>x+y,0);if(!Number.isSafeInteger(totalMinor)){showToast('إجمالي الالتزام يتجاوز النطاق الحسابي الآمن');return}const total=minorToMoney(totalMinor);
    const request={id:makeId('req'),groupId:g.id,accountId:activeAccountId,name:a?.name||accountEmail,source:'رابط عام',shares:n,total:formatMoney(total)+' '+currencyName(g.currency),amount:total,amountMinor:totalMinor,createdAt:new Date().toISOString(),date:new Date().toLocaleDateString('en-GB'),status:'قيد المراجعة'};
-   localData.joinRequests.push(request);addNotification(g.creatorAccountId,'طلب انضمام جديد',g.id,'تقدم '+request.name+' بطلب للانضمام إلى الجمعية.','join-request');addActivity(g.creatorAccountId,'استلمت الجمعية طلب انضمام جديداً',g.id,'026','userplus');addActivity(activeAccountId,'تم إرسال طلب انضمام إلى '+g.name,g.id,'012','userplus');
+   localData.joinRequests.push(request);addNotification(g.creatorAccountId,'طلب انضمام جديد',g.id,'تقدم '+request.name+' بطلب للانضمام إلى الجمعية.','join-request');addActivity(g.creatorAccountId,'استلمت الجمعية طلب انضمام جديداً',g.id,'026','userplus');addActivity(activeAccountId,'تم حفظ طلب انضمام إلى '+g.name,g.id,'012','userplus');
    if(!saveLocalData())return;
    joinSubmitted=true;refreshLocalViews();render();showToast('تم حفظ طلب الانضمام على هذا الجهاز');return;
  }
