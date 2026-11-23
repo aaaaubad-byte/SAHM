@@ -909,15 +909,10 @@ function summaryCarouselMarkup(slides,label){
  const dots=slides.map((s,i)=>'<button type="button" class="carousel-dot '+(i===0?'active':'')+'" data-action="carousel" data-index="'+i+'" aria-label="عرض '+esc(s.title)+'" aria-pressed="'+(i===0)+'"></button>').join('');
  return '<section class="summary-carousel" aria-label="'+esc(label)+'"><div class="summary-window"><div class="summary-track" id="summaryTrack">'+cards+'</div></div><div class="carousel-controls" role="group" aria-label="التنقل بين الملخصات">'+dots+'</div></section>';
 }
-function renderHome(){return `${generalHeader()}<main class="screen-body home-body">
- ${summaryCarouselMarkup(getSummarySlides(),'ملخص الجمعيات')}
- <section class="home-tiles">
- <div class="home-shortcuts">${tile('جمعيات أديرها','users','010','blue')}${tile('جمعيات أشارك فيها','usercheck','011','gold')}</div>
- <div class="home-shortcuts home-action-cards">${tile('جمعية جديدة','plus','014','blue')}${tile('الانضمام لجمعية','link','016','gold')}</div>
- </section>
- <section class="home-section"><div class="section-head"><div class="section-title-wrap">${icon('activity')}<h3>أحدث النشاط</h3></div></div><div class="activity-list">${recentEvents.map(e=>`<button class="activity-item" data-action="activity" data-id="${e.id}"><span class="activity-icon">${icon(e.icon)}</span><span class="activity-copy"><strong>${e.title}</strong><span>${e.group}</span></span><span class="activity-time">${e.time}</span></button>`).join('')}</div></section>
- </main>${bottomNav('home')}`}
-function setCarouselSlide(index){
+function renderHome(){
+ const activity=recentEvents.map(e=>'<button class="activity-item" data-action="activity" data-id="'+esc(e.id)+'"><span class="activity-icon">'+icon(e.icon||'activity')+'</span><span class="activity-copy"><strong>'+esc(e.title)+'</strong><span>'+esc(e.group)+'</span></span><span class="activity-time">'+esc(e.time)+'</span></button>').join('');
+ return generalHeader()+'<main class="screen-body home-body">'+summaryCarouselMarkup(getSummarySlides(),'ملخص الجمعيات')+'<section class="home-tiles"><div class="home-shortcuts">'+tile('جمعيات أديرها','users','010','blue')+tile('جمعيات أشارك فيها','usercheck','011','gold')+'</div><div class="home-shortcuts home-action-cards">'+tile('جمعية جديدة','plus','014','blue')+tile('الانضمام لجمعية','link','016','gold')+'</div></section><section class="home-section"><div class="section-head"><div class="section-title-wrap">'+icon('activity')+'<h3>أحدث النشاط</h3></div></div><div class="activity-list">'+(activity||empty('لا يوجد نشاط مسجل حالياً.'))+'</div></section></main>'+bottomNav('home');
+}function setCarouselSlide(index){
  const track=document.getElementById('summaryTrack');
  if(!track)return;
  const slides=Array.from(track.querySelectorAll('.summary-slide'));
@@ -1011,15 +1006,10 @@ function renderJoinPreview(type){
 /* 021 */
 const adminSections=[['التحصيل','wallet','022'],['القرعات','ticket','023'],['الأسهم','coins','024'],['الأعضاء','users','025'],['الدعوات','gift','026'],['الدردشة','chat','027'],['الغرفة','activity','028'],['المعلومات','file','029'],['الإعدادات','settings','030'],['السجل','list','031']];
 function renderAdminHome(){
- const adminSummarySlides=[
-  {title:'أعضاء الجمعية',value:'—',note:'إجمالي الأعضاء',icon:'users',tone:'blue'},
-  {title:'إجمالي الأسهم',value:'—',note:'الأسهم المسجلة في الجمعية',icon:'coins',tone:'gold'},
-  {title:'إنجاز القرعات',value:'—',note:'القرعات المكتملة من الإجمالي',icon:'ticket',tone:'dark'},
-  {title:'تحصيل القرعة الحالية',value:'—',note:'الالتزامات المسددة في القرعة الحالية',icon:'wallet',tone:'blue'}
- ];
- return `<div class="app-top"><button class="top-back" data-action="back" data-fallback="010">${icon('right')}</button><div class="top-title">الرئيسية الإدارية</div></div>${connection()}<main class="screen-body">${summaryCarouselMarkup(adminSummarySlides,'ملخص الجمعيات')}<div class="tile-grid manager-tiles">${adminSections.map(a=>tile(a[0],a[1],a[2],['التحصيل','الأسهم','الغرفة'].includes(a[0])?'gold':'blue')).join('')}</div><div style="margin-top:14px">${unresolved('الشاشة 021 معتمدة جزئياً: محتوى بعض المؤشرات وحالة الجمعية/الاتفاق —، لذلك لا تعرض أرقاماً أو تفاصيل تخمينية.')}</div></main>${bottomNav('groups')}`;
-}
-function statusChip(text,color='blue'){return `<span class="status ${color}">${text}</span>`}
+ const members=memberRecords.length,shares=memberRecords.reduce((n,m)=>n+Number(m.shares||0),0),draws=drawRecords.length,completed=drawRecords.filter(d=>d.status==='مكتملة').length,paid=paidRecords.reduce((n,r)=>n+Number(String(r.amount||0).replace(/,/g,'')),0),due=collectionRecords.reduce((n,r)=>n+Number(String(r.amount||0).replace(/,/g,'')),0)+paid;
+ const slides=[{title:'أعضاء الجمعية',value:String(members),note:'إجمالي الأعضاء',icon:'users',tone:'blue'},{title:'إجمالي الأسهم',value:String(shares),note:'الأسهم المسجلة في الجمعية',icon:'coins',tone:'gold'},{title:'إنجاز القرعات',value:draws?completed+' / '+draws:'—',note:'القرعات المكتملة من الإجمالي',icon:'ticket',tone:'dark'},{title:'تحصيل القرعة الحالية',value:due?Math.round(paid/due*100)+'%':'—',note:'نسبة الالتزامات المسددة',icon:'wallet',tone:'blue'}];
+ return '<div class="app-top"><button class="top-back" data-action="back" data-fallback="010">'+icon('right')+'</button><div class="top-title">الرئيسية الإدارية</div></div>'+connection()+'<main class="screen-body">'+summaryCarouselMarkup(slides,'ملخص الجمعية')+'<div class="tile-grid manager-tiles">'+adminSections.map(a=>tile(a[0],a[1],a[2],['التحصيل','الأسهم','الغرفة'].includes(a[0])?'gold':'blue')).join('')+'</div></main>'+bottomNav('groups');
+}function statusChip(text,color='blue'){return `<span class="status ${color}">${text}</span>`}
 /* 022 */
 function renderCollections(){
  const pending=collectionRecords.filter(x=>!x.paid),paid=paidRecords,rounds=[...new Set([...pending,...paid].map(x=>x.round).filter(Boolean))],installments=[...new Set([...pending,...paid].map(x=>x.installment).filter(Boolean))],unit=currencyName(activeGroup.currency||'YER');
@@ -1116,10 +1106,11 @@ function renderGroupInfo(){
  return page('المعلومات',body,{backTo:'021',bottom:false});
 }function renderGroupSettings(){return page('الإعدادات',`<section class="form-card"><div class="record-section-title" style="margin-top:0">إعدادات الجمعية</div><div class="list-row" style="cursor:default"><span class="row-icon">${icon('building')}</span><span class="row-main"><span class="row-title">إعدادات الجمعية</span><span class="row-meta"></span></span></div><div class="record-section-title">إعدادات القرعة والدورة</div><div class="list-row" style="cursor:default"><span class="row-icon">${icon('ticket')}</span><span class="row-main"><span class="row-title">إعدادات القرعة والدورة</span><span class="row-meta">بحسب الصلاحيات — الحقول والقيم —ة</span></span></div></section><section class="form-card"><div class="record-section-title" style="margin-top:0">مجموعات —ة</div><div class="list-row" style="cursor:default"><span class="row-icon">${icon('chat')}</span><span class="row-main"><span class="row-title">إعدادات الأخبار والدردشة</span><span class="row-meta">—ة</span></span><span class="status gold">—</span></div><div class="list-row" style="cursor:default"><span class="row-icon">${icon('bell')}</span><span class="row-main"><span class="row-title">إعدادات الإشعارات</span><span class="row-meta">—ة</span></span><span class="status gold">—</span></div></section>${unresolved('لا تُعرض مفاتيح تشغيل أو خيارات افتراضية أو زر حفظ فعّال قبل اعتماد تفاصيل إعدادات الجمعية.')}`,{backTo:'021',bottom:false});}
 /* 031 */
-function renderLog(){return page('السجل',`<div class="page-intro"><h2>سجل الأنشطة والأحداث</h2><p>يعرض السجلات المرتبطة بهذه الجمعية وفق الصلاحيات.</p></div>${empty('لا توجد سجلات حالياً.')}${unresolved('تصنيف السجلات وأدوات الترشيح وتفاصيل الحدث وطريقة عرضها لم تعتمد تفصيلياً.')}`,{backTo:'021',bottom:false});}
-/* 032 */
-const memberSections=[['الأقساط','wallet','033'],['الأسهم','coins','034'],['القرعات','ticket','035'],['الغرفة','activity','036'],['الأخبار','book','037'],['الدردشات','chat','038']];
-function renderMemberHome(){
+function renderLog(){
+ const events=localData.activities.filter(e=>e.groupId===activeGroup?.id).sort((a,b)=>(b.createdAt||'').localeCompare(a.createdAt||''));
+ const cards=events.map(e=>'<article class="list-row"><span class="row-icon">'+icon(e.icon||'activity')+'</span><span class="row-main"><span class="row-title">'+esc(e.title)+'</span><span class="row-meta">'+esc(localData.accounts.find(a=>a.id===e.accountId)?.name||'حساب')+' · '+esc(e.time||'')+'</span></span></article>').join('');
+ return page('السجل','<div class="page-intro"><h2>سجل الأنشطة والأحداث</h2><p>الأحداث المسجلة في هذه الجمعية.</p></div>'+(cards?'<div class="list-stack">'+cards+'</div>':empty('لا توجد سجلات حالياً.')),{backTo:'021',bottom:false});
+}function renderMemberHome(){
  const own=membershipFor(activeGroup,activeAccountId),shares=Number(own?.shares||0),total=Number(activeGroup.share||0)*shares,paid=Number(own?.paid||0),unit=currencyName(activeGroup.currency||'YER');
  const slides=[{title:'أسهمك',value:String(shares).padStart(2,'0'),note:'إجمالي الأسهم المسجلة باسمك',icon:'coins',tone:'blue'},{title:'الأسهم الفائزة',value:String(own?.winningShares||0),note:'الأسهم التي فازت في القرعات',icon:'award',tone:'gold'},{title:'إنجاز السداد',value:total?Math.round(paid/total*100)+'%':'—',note:'الالتزامات المسددة من الإجمالي',icon:'check',tone:'dark'},{title:'إجمالي التزامك',value:total.toLocaleString('en-US')+' '+unit,note:'قيمة التزاماتك المسجلة في الجمعية',icon:'wallet',tone:'blue'}];
  return '<div class="app-top"><button class="top-back" data-action="back" data-fallback="011">'+icon('right')+'</button><div class="top-title">الرئيسية العضوية</div></div>'+connection()+'<main class="screen-body">'+summaryCarouselMarkup(slides,'ملخص الجمعيات')+'<div class="tile-grid manager-tiles">'+memberSections.map(a=>tile(a[0],a[1],a[2],['الأسهم','الغرفة'].includes(a[0])?'gold':'blue')).join('')+'</div></main>'+bottomNav('groups');
@@ -1179,8 +1170,8 @@ document.addEventListener('click',e=>{
  const action=actionEl.dataset.action,id=actionEl.dataset.id,value=actionEl.dataset.value;
  if(action==='spin-wheel'){spinRoomWheel();return}
  if(action==='room-invite'){openRoomInviteModal();return}
- if(action==='room-invite-confirm'){const checks=[...document.querySelectorAll('[data-room-invite-check]')];roomInvitedIds=checks.filter(x=>x.checked).map(x=>x.dataset.roomInviteCheck);roomAttendeeIds=roomAttendeeIds.filter(id=>roomInvitedIds.includes(id));closeModal();render();showToast('تم تحديث قائمة المدعوين في المعاينة');return}
- if(action==='room-checkin'){if(!roomInvitedIds.includes(id)){showToast('يجب دعوة العضو أولاً');return}if(!roomAttendeeIds.includes(id))roomAttendeeIds.push(id);render();return}
+ if(action==='room-invite-confirm'){const checks=[...document.querySelectorAll('[data-room-invite-check]')];roomInvitedIds=checks.filter(x=>x.checked).map(x=>x.dataset.roomInviteCheck);roomAttendeeIds=roomAttendeeIds.filter(id=>roomInvitedIds.includes(id));if(activeGroup?.id){activeGroup.roomInvitedIds=roomInvitedIds;activeGroup.roomAttendeeIds=roomAttendeeIds;saveLocalData()}closeModal();render();showToast('تم تحديث قائمة المدعوين');return}
+ if(action==='room-checkin'){if(!roomInvitedIds.includes(id)){showToast('يجب دعوة العضو أولاً');return}if(!roomAttendeeIds.includes(id))roomAttendeeIds.push(id);if(activeGroup?.id){activeGroup.roomAttendeeIds=roomAttendeeIds;saveLocalData()}render();return}
  if(action==='modal-close'){closeModal();return}
  if(action==='open-index'){document.getElementById('inspector').classList.add('open');return}
  if(action==='close-index'){document.getElementById('inspector').classList.remove('open');return}
@@ -1247,7 +1238,7 @@ document.addEventListener('click',e=>{
  if(action==='copy-link'){const link=String(groupResult.joinLink||'').trim();if(!link){showToast('رابط الانضمام غير متاح حالياً');return}copyText(link,'رابط الانضمام');return}
  if(action==='share-link'){const link=String(groupResult.joinLink||'').trim();if(!link){showToast('رابط الانضمام غير متاح حالياً');return}openModal('مشاركة رابط الانضمام',`<div class="inline-note" dir="ltr" style="text-align:left">${esc(link)}</div>`,`<button class="btn secondary" data-action="modal-close">إغلاق</button><button class="btn primary" data-action="copy-link">نسخ النص</button>`);return}
  if(action==='contacts-picker'){openContactsPicker();return}
- if(action==='retry-join-link'){showToast('خدمة تجهيز رابط الانضمام غير متصلة بهذه المعاينة');return}
+ if(action==='retry-join-link'){const g=findGroup(groupResult.groupId);if(g){groupResult.joinLink=createJoinLink(g.joinCode);render()}else showToast('تعذر تجهيز رابط الانضمام حالياً');return}
  if(action==='contacts-confirm'){renderContactRows();if(!contactRecords.length){showToast('اختر جهة اتصال واحدة على الأقل');return}closeModal();go('040');return}
  if(action==='contact-invite'){openModal('دعوة للجمعية','','<button class="btn secondary" data-action="modal-close">إغلاق</button><button class="btn primary" data-action="modal-close">مفهوم</button>');return}
  if(action==='contact-share'){openModal('دعوة للتثبيت','','<button class="btn primary" data-action="modal-close">إغلاق</button>');return}
@@ -1265,9 +1256,9 @@ document.addEventListener('click',e=>{
    localData.joinRequests.push(request);addNotification(g.creatorAccountId,'طلب انضمام جديد',g.id,'تقدم '+request.name+' بطلب للانضمام إلى الجمعية.');addActivity(activeAccountId,'تم إرسال طلب انضمام إلى '+g.name,g.id,'012','userplus');saveLocalData();joinSubmitted=true;refreshLocalViews();render();showToast('تم إرسال طلب الانضمام');return;
  }
  if(action==='notice-open'){
-   noticeCurrent=notifications.find(n=>n.id===id)||notifications[0];noticeCurrent.read=true;render();const n=noticeCurrent;const cta=n.type==='invite'?`<button class="btn primary" data-action="notice-action" data-id="${n.id}">تفاصيل الدعوة ومتابعة الطلب</button>`:`<button class="btn primary" data-action="notice-action" data-id="${n.id}">فتح الوجهة المرتبطة</button>`;openModal('تفاصيل الإشعار',`<div class="row-icon-box" style="margin-bottom:12px">${icon(n.type==='invite'?'gift':'activity')}<strong>${esc(n.title)}</strong></div><div class="small-note">${esc(n.group)} · ${esc(n.time)} · مقروء</div><p>${esc(n.body)}</p>`,n.type==='invite'?`<button class="btn secondary" data-action="modal-close">إغلاق</button>${cta}`:`<button class="btn secondary" data-action="modal-close">إغلاق</button>${cta}`);return;
+   noticeCurrent=notifications.find(n=>n.id===id);if(!noticeCurrent)return;const saved=localData.notifications.find(n=>n.id===id);if(saved){saved.read=true;saveLocalData();refreshLocalViews()}render();const n=noticeCurrent;const cta=n.type==='invite'?`<button class="btn primary" data-action="notice-action" data-id="${n.id}">تفاصيل الدعوة ومتابعة الطلب</button>`:`<button class="btn primary" data-action="notice-action" data-id="${n.id}">فتح الوجهة المرتبطة</button>`;openModal('تفاصيل الإشعار',`<div class="row-icon-box" style="margin-bottom:12px">${icon(n.type==='invite'?'gift':'activity')}<strong>${esc(n.title)}</strong></div><div class="small-note">${esc(n.group)} · ${esc(n.time)} · مقروء</div><p>${esc(n.body)}</p>`,n.type==='invite'?`<button class="btn secondary" data-action="modal-close">إغلاق</button>${cta}`:`<button class="btn secondary" data-action="modal-close">إغلاق</button>${cta}`);return;
  }
- if(action==='notice-action'){const n=notifications.find(x=>x.id===id)||noticeCurrent;closeModal();if(n?.type==='invite'){joinType='invite';joinSubmitted=false;joinShares=1;joinAck=false;go('018')}else{activeGroup=groupFixtures[0];go('021')}return}
+ if(action==='notice-action'){const n=localData.notifications.find(x=>x.id===id)||noticeCurrent;closeModal();if(n?.groupId){activeGroup=findGroup(n.groupId)||{};refreshLocalViews();go('021')}return}
  if(action==='expand'){if(expanded.has(id))expanded.delete(id);else expanded.add(id);render();return}
  if(action==='collect-start'){confirmCollectId=id;expanded.add(id);render();return}
  if(action==='collect-cancel'){confirmCollectId=null;render();return}
