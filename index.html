@@ -948,7 +948,8 @@ function renderGroups(kind){
  return page(title,searchBox('ابحث عن جمعية')+body,{backTo:'008',active:'groups'});
 }function renderPublicChats(){
  const cards=groupFixtures.map(g=>relationshipCard(g,'open-chat')).join('');
- return page('الدردشات',`${searchBox('ابحث عن جمعية')}<div class="list-stack relationship-list">${cards}</div><div data-search-empty style="display:none">${empty('لا توجد نتائج مطابقة')}</div>`,{backTo:'008',active:'chats'});
+ const body=cards?'<div class="list-stack relationship-list">'+cards+'</div><div data-search-empty style="display:none">'+empty('لا توجد نتائج مطابقة')+'</div>':empty('لا توجد جمعيات مرتبطة بحسابك حالياً.');
+ return page('الدردشات',searchBox('ابحث عن جمعية')+body,{backTo:'008',active:'chats'});
 }
 /* 012 */
 function renderNotifications(){
