@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <meta name="theme-color" content="#3158d6">
-<meta name="sahm-build" content="sahm-20261124-dead-state-cleanup-23h">
+<meta name="sahm-build" content="sahm-20261124-collection-inline-23i">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
@@ -1077,7 +1077,6 @@ function renderAdminHome(){
  return '<div class="app-top"><button class="top-back" data-action="back" data-fallback="010">'+icon('right')+'</button><div class="top-title">الرئيسية الإدارية</div></div>'+connection()+'<main class="screen-body">'+summaryCarouselMarkup(slides,'ملخص الجمعية')+'<div class="tile-grid manager-tiles">'+adminSections.map(a=>tile(a[0],a[1],a[2],['التحصيل','الأسهم','الغرفة'].includes(a[0])?'gold':'blue')).join('')+'</div></main>'+bottomNav('groups');
 }function statusChip(text,color='blue'){return `<span class="status ${color}">${text}</span>`}
 /* 022 */
-function collectionActionDetails(record,unit){if(!record)return '';const shares=Array.isArray(record.shares)?record.shares:[];return detailRows([['اسم العضو',esc(record.name)],['القرعة / الدورة',esc(record.round)],['القسط',esc(record.installment)],['تاريخ الاستحقاق',esc(record.due)],['إجمالي المبلغ',formatMoney(record.amount)+' '+unit],['عدد الأسهم الداخلة',shares.length]])+(shares.length?'<div class="small-note" style="margin:10px 0 5px">تفصيل المبالغ حسب السهم</div>'+shares.map(item=>'<div class="installment-line"><span>السهم '+esc(item.number)+'<small class="small-note">'+esc(item.due||'غير محدد')+'</small></span><strong>'+formatMoney(item.amount)+' '+unit+'</strong></div>').join(''):'');}
 function renderCollections(){
  const pending=collectionRecords.filter(x=>!x.paid),paid=paidRecords,rounds=[...new Set([...pending,...paid].map(x=>x.round).filter(Boolean))],installments=[...new Set([...pending,...paid].map(x=>x.installment).filter(Boolean))],unit=currencyName(activeGroup.currency||'YER');
  const filters='<div class="filter-row"><select class="filter-select" data-list-filter="recordRound"><option value="all">كل القرعات</option>'+rounds.map(x=>'<option value="'+esc(x)+'">'+esc(x)+'</option>').join('')+'</select><select class="filter-select" data-list-filter="recordInstallment"><option value="all">كل الأقساط</option>'+installments.map(x=>'<option value="'+esc(x)+'">'+esc(x)+'</option>').join('')+'</select><select class="filter-select" data-list-filter="recordStatus"><option value="all">كل الحالات</option><option value="مجدول">مجدول</option><option value="مستحق">مستحق</option><option value="متأخر">متأخر</option><option value="يحتاج مراجعة">يحتاج مراجعة</option><option value="مدفوع">مدفوع</option></select></div>';
@@ -1320,8 +1319,8 @@ document.addEventListener('click',async e=>{
  }
  if(action==='notice-action'){const n=localData.notifications.find(x=>x.id===id)||noticeCurrent;closeModal();if(n?.type==='invite'){showToast('تعذر التحقق من مرجع الدعوة الشخصية؛ لم يتم فتح بيانات الجمعية');return}if(n?.groupId){activeGroup=findGroup(n.groupId)||{};refreshLocalViews();const membership=membershipFor(activeGroup,activeAccountId),isManager=membership?.role==='manager'||membership?.role==='manager-member';if(n?.type==='join-request'&&isManager)go('026');else if(n?.type==='room-invite')go(isManager?'028':'036');else go(isManager?'021':membership?.role==='member'?'032':'009')}return}
  if(action==='expand'){if(expanded.has(id))expanded.delete(id);else expanded.add(id);render();return}
- if(action==='collect-start'){const record=collectionRecords.find(x=>x.id===id);if(!record)return;const unit=currencyName(activeGroup.currency||'YER');openModal('مراجعة التحصيل',collectionActionDetails(record,unit)+'<p class="small-note" style="margin-top:12px">تسجيل التحصيل إقرار باستلام المبلغ، ولا ينفذ تحويلاً مالياً. يتطلب اعتماد العملية اتصالاً بالخادم لمنع التكرار وتحديث جميع استحقاقات الأسهم معاً.</p>','<button class="btn secondary" data-action="modal-close">إغلاق</button><button class="btn primary" disabled aria-disabled="true">تأكيد التحصيل غير متاح دون اتصال بالخادم</button>');return}
- if(action==='remind'){const record=collectionRecords.find(x=>x.id===id);if(!record)return;const unit=currencyName(activeGroup.currency||'YER');openModal('مراجعة التذكير',detailRows([['اسم العضو',esc(record.name)],['القرعة / الدورة',esc(record.round)],['القسط',esc(record.installment)],['المبلغ المستحق',formatMoney(record.amount)+' '+unit]])+'<p class="small-note" style="margin-top:12px">إرسال التذكير يتطلب التحقق من العضو والقسط وتسجيل نتيجة الإرسال لدى الخادم. لم يتم إرسال أي تذكير.</p>','<button class="btn secondary" data-action="modal-close">إغلاق</button>');return}
+ if(action==='collect-start'){const record=collectionRecords.find(x=>x.id===id);if(!record)return;showToast('تسجيل التحصيل غير متاح قبل ربط الخدمة؛ لم تتغير حالة الاستحقاق');return}
+ if(action==='remind'){const record=collectionRecords.find(x=>x.id===id);if(!record)return;showToast('إرسال التذكير غير متاح قبل ربط الخدمة؛ لم يتم إرسال أي تذكير');return}
 });
 
 document.addEventListener('input',e=>{
