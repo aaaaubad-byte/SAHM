@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <meta name="theme-color" content="#3158d6">
-<meta name="sahm-build" content="sahm-20261124-account-record-guards-23b">
+<meta name="sahm-build" content="sahm-20261124-invite-boundary-23b">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
@@ -1040,7 +1040,9 @@ function renderCreateSuccess(){
 function renderJoinLink(){return page('الانضمام إلى جمعية',`<div style="text-align:center;padding:28px 10px 24px"><div style="color:var(--gold);margin-bottom:12px">${icon('link')}</div><h2 style="font-size:20px;margin:0 0 7px">أدخل رابط الجمعية</h2><p class="small-note" style="max-width:275px;margin:auto">استخدم رابط الانضمام العام الذي حصلت عليه من الجمعية.</p></div><section class="form-card"><div class="field" id="joinLinkWrap"><label for="joinLink">رابط الانضمام</label><input id="joinLink" type="url" value="${esc(linkValue)}"><div class="error">أدخل رابطاً صحيحاً قبل المتابعة</div></div><button class="btn primary block" data-action="verify-link">تحقق وتابع</button></section>`,{backTo:'008'});}
 /* 017 / 018 */
 function renderJoinPreview(type){
- joinType=type;const g=currentJoinGroup();if(!g)return page('تفاصيل الجمعية وطلب الانضمام',empty('رابط الجمعية غير صالح أو لم يعد متاحاً.'),{backTo:'016'});
+ joinType=type;
+ if(type==='invite')return page('تفاصيل الدعوة الشخصية',empty('تعذر التحقق من مرجع الدعوة الشخصية أو أنها غير متاحة حالياً.'),{backTo:'012'});
+ const g=currentJoinGroup();if(!g)return page('تفاصيل الجمعية وطلب الانضمام',empty('رابط الجمعية غير صالح أو لم يعد متاحاً.'),{backTo:'016'});
  const oldRequest=localData.joinRequests.find(r=>r.groupId===g.id&&r.accountId===activeAccountId);joinSubmitted=!!oldRequest;
  const n=Number(joinShares),unit=currencyName(g.currency),base=Array.isArray(g.installmentsMinor)?g.installmentsMinor:(g.installments||[]).map(v=>moneyToMinor(v));
  const valid=Number.isSafeInteger(n)&&n>=1&&base.length>0&&base.every(Number.isSafeInteger),partsMinor=valid?base.map(v=>v*n):[],safe=valid&&n*base.length<=MAX_LOCAL_LEDGER_ENTRIES&&partsMinor.every(Number.isSafeInteger),totalMinor=safe?partsMinor.reduce((a,b)=>a+b,0):NaN,total=Number.isSafeInteger(totalMinor)?minorToMoney(totalMinor):NaN;
@@ -1285,6 +1287,7 @@ document.addEventListener('click',async e=>{
  }
 
  if(action==='send-join'){
+   if(joinType==='invite'){showToast('تعذر التحقق من الدعوة الشخصية؛ لم يتم إرسال الطلب');return}
    const g=currentJoinGroup(),n=Number(document.getElementById('joinShares')?.value||joinShares);
    joinShares=n;setInvalid('joinSharesWrap',!Number.isSafeInteger(n)||n<1);joinAck=!!document.getElementById('joinAck')?.checked;
    if(!activeAccountId){showToast('سجل الدخول أولاً لمتابعة الطلب');go('002');return}
