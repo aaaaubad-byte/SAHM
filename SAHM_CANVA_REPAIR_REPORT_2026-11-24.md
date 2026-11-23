@@ -14,7 +14,7 @@
 - blob SHA للملف `index.html`: `2f3852bb98e495a18b8bf90521156551bc454463`
 - blob SHA للملف `sw.js`: `fa301ddfa8ca75e698b3a598f7afcfb7828879f2`
 - Cache Name: `sahm-pwa-shell-v8`
-- آخر commit إصلاح موثق: `e009a938a88cdce51f455324187b4fcad7c2d310`
+- آخر بصمة مصدر لـ `index.html`: `2f3852bb98e495a18b8bf90521156551bc454463`
 
 ## الإصلاحات المنفذة
 
