@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <meta name="theme-color" content="#3158d6">
-<meta name="sahm-build" content="sahm-20261124-contacts-22e">
+<meta name="sahm-build" content="sahm-20261124-device-preferences-22f">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
@@ -824,6 +824,7 @@ let localData=loadLocalData();
 let lastPersistedJSON=(()=>{try{return localStorage.getItem(LOCAL_DATA_KEY)}catch(e){return null}})();
 let activeAccountId=localData.activeAccountId&&localData.accounts.some(a=>a.id===localData.activeAccountId)?localData.activeAccountId:null;
 let current='001',historyStack=[],online=navigator.onLine!==false,theme='light';
+const DEVICE_THEME_KEY='sahm-device-theme-v1';let themePreference='system';try{const savedTheme=localStorage.getItem(DEVICE_THEME_KEY);if(['system','light','dark'].includes(savedTheme))themePreference=savedTheme}catch(e){}function applyThemePreference(){let dark=false;if(themePreference==='dark')dark=true;else if(themePreference==='system')try{dark=!!window.matchMedia&&window.matchMedia('(prefers-color-scheme: dark)').matches}catch(e){}theme=dark?'dark':'light'}
 let activeGroup={},form={name:'',start:'',first:'',share:'',currency:'YER',mode:'count',count:'',installment:'',managerRole:'manager',managerShares:'1'};
 let recoverStep=1,registerAccepted=false,registration={email:'',pass:'',confirm:'',accepted:false},pendingRegistration=null,recoveryAccountId=null;
 let profileName='',profileAvatar='user',accountEmail='',accountPhone='',avatarChoice='user';
@@ -871,7 +872,7 @@ function refreshLocalViews(){
 }
 function addActivity(accountId,title,groupId='',route='008',activityIcon='activity'){const g=findGroup(groupId);localData.activities.push({id:makeId('act'),accountId,title,groupId:groupId||'',group:g?.name||'',time:'الآن',route,icon:activityIcon,createdAt:new Date().toISOString()})}
 function addNotification(accountId,title,groupId,body,type='group'){const g=findGroup(groupId);localData.notifications.push({id:makeId('ntf'),accountId,groupId,title,group:g?.name||'',time:'الآن',body,type,read:false,createdAt:new Date().toISOString()})}
-function activateAccount(id){const a=localData.accounts.find(x=>x.id===id);if(!a)return false;const previous=activeAccountId,previousStored=localData.activeAccountId;activeAccountId=id;localData.activeAccountId=id;if(!saveLocalData()){activeAccountId=previous;localData.activeAccountId=previousStored;return false}activeGroup={};theme=a.theme||'light';form={name:'',start:'',first:'',share:'',currency:'YER',mode:'count',count:'',installment:'',managerRole:'manager',managerShares:'1'};groupResult={name:'',start:'',first:'',share:'',currency:'YER',mode:'count',count:'',installment:'',managerRole:'manager',managerShares:'1',joinLink:'',groupId:''};selectedJoinGroupId=null;joinSubmitted=false;joinShares=1;joinAck=false;historyStack=[];refreshLocalViews();return true}
+function activateAccount(id){const a=localData.accounts.find(x=>x.id===id);if(!a)return false;const previous=activeAccountId,previousStored=localData.activeAccountId;activeAccountId=id;localData.activeAccountId=id;if(!saveLocalData()){activeAccountId=previous;localData.activeAccountId=previousStored;return false}activeGroup={};applyThemePreference();form={name:'',start:'',first:'',share:'',currency:'YER',mode:'count',count:'',installment:'',managerRole:'manager',managerShares:'1'};groupResult={name:'',start:'',first:'',share:'',currency:'YER',mode:'count',count:'',installment:'',managerRole:'manager',managerShares:'1',joinLink:'',groupId:''};selectedJoinGroupId=null;joinSubmitted=false;joinShares=1;joinAck=false;historyStack=[];refreshLocalViews();return true}
 function createJoinLink(code){return window.location.origin+window.location.pathname+'?join='+encodeURIComponent(code)}
 function extractJoinCode(raw){try{const u=new URL(raw,window.location.href);if(u.origin!==window.location.origin)return null;return u.searchParams.get('join')}catch{return null}}
 function currentJoinGroup(){return findGroup(selectedJoinGroupId)}
@@ -996,7 +997,7 @@ function renderNotifications(){
 }function renderProfile(){
  const accounts=localData.accounts.map(a=>'<button class="list-row" style="width:100%;text-align:right" data-action="switch-account" data-id="'+esc(a.id)+'"><span class="row-icon">'+icon('user')+'</span><span class="row-main"><span class="row-title">'+esc(a.name)+'</span><span class="row-meta" dir="ltr">'+esc(a.email)+'</span></span><span class="status '+(a.id===activeAccountId?'green':'blue')+'">'+(a.id===activeAccountId?'الحساب الحالي':'تبديل')+'</span></button>').join('');
  const pid=profileIdMask();
- const body='<div style="display:flex;flex-direction:column;align-items:center;padding:5px 0 15px"><div style="width:70px;height:70px;border-radius:50%;display:grid;place-items:center;background:#edf3f9;color:#2856a5;border:1px solid #dce6ee">'+icon(profileAvatar)+'</div><h2 style="font-size:18px;margin:9px 0 0">'+esc(profileName)+'</h2></div><section class="form-card" style="padding:8px 15px"><div class="kv-row"><span class="k">الاسم</span><span class="v">'+esc(profileName)+' <button class="text-link" data-action="edit-name">'+icon('edit')+'</button></span></div>'+row('البريد الإلكتروني',esc(accountEmail))+row('رقم الهاتف',esc(accountPhone))+row('معرّف الحساب',pid+' <button class="text-link" data-action="copy-id">'+icon('copy')+'</button>')+'<div class="kv-row"><span class="k">كلمة المرور</span><span class="v">•••••••• <button class="text-link" data-action="change-password">'+icon('lock')+'</button></span></div></section><section class="form-card"><div class="section-head" style="margin-top:0"><h3>الحسابات</h3><span class="section-sub">'+localData.accounts.length+' حسابات</span></div><div class="list-stack">'+(accounts||empty('لا توجد حسابات أخرى.'))+'</div><button class="btn secondary block" style="margin-top:12px" data-action="add-account">'+icon('userplus')+' إضافة حساب آخر</button></section><div class="section-head"><h3>إعدادات التطبيق</h3></div><section class="form-card"><div class="field"><label>سمة التطبيق</label><select id="themeSelect"><option value="default">افتراضي</option><option value="light" '+(theme==='light'?'selected':'')+'>فاتح</option><option value="dark" '+(theme==='dark'?'selected':'')+'>داكن</option></select></div><div class="toggle-row"><span>قفل التطبيق</span><button class="toggle" id="lockToggle" data-action="toggle-lock"><span></span></button></div><div class="small-note" style="margin-top:9px">عند التفعيل يتطلب قفل التطبيق دعم مصادقة الجهاز، ويطلب المصادقة بعد دقيقة واحدة في الخلفية.</div></section><button class="btn danger block" data-action="logout-open">'+icon('logout')+' تسجيل الخروج</button>';
+ const body='<div style="display:flex;flex-direction:column;align-items:center;padding:5px 0 15px"><div style="width:70px;height:70px;border-radius:50%;display:grid;place-items:center;background:#edf3f9;color:#2856a5;border:1px solid #dce6ee">'+icon(profileAvatar)+'</div><h2 style="font-size:18px;margin:9px 0 0">'+esc(profileName)+'</h2></div><section class="form-card" style="padding:8px 15px"><div class="kv-row"><span class="k">الاسم</span><span class="v">'+esc(profileName)+' <button class="text-link" data-action="edit-name">'+icon('edit')+'</button></span></div>'+row('البريد الإلكتروني',esc(accountEmail))+row('رقم الهاتف',esc(accountPhone))+row('معرّف الحساب',pid+' <button class="text-link" data-action="copy-id">'+icon('copy')+'</button>')+'<div class="kv-row"><span class="k">كلمة المرور</span><span class="v">•••••••• <button class="text-link" data-action="change-password">'+icon('lock')+'</button></span></div></section><section class="form-card"><div class="section-head" style="margin-top:0"><h3>الحسابات</h3><span class="section-sub">'+localData.accounts.length+' حسابات</span></div><div class="list-stack">'+(accounts||empty('لا توجد حسابات أخرى.'))+'</div><button class="btn secondary block" style="margin-top:12px" data-action="add-account">'+icon('userplus')+' إضافة حساب آخر</button></section><div class="section-head"><h3>إعدادات التطبيق</h3></div><section class="form-card"><div class="field"><label>سمة التطبيق</label><select id="themeSelect"><option value="default" selected>افتراضي</option><option value="light" '+(themePreference==='light'?'selected':'')+'>فاتح</option><option value="dark" '+(themePreference==='dark'?'selected':'')+'>داكن</option></select></div><div class="toggle-row"><span>قفل التطبيق</span><button class="toggle" id="lockToggle" data-action="toggle-lock" disabled aria-label="قفل التطبيق غير متاح حالياً"><span></span></button></div><div class="small-note" style="margin-top:9px">قفل التطبيق غير متاح حالياً لعدم توفر تكامل مصادقة الجهاز.</div></section><button class="btn danger block" data-action="logout-open">'+icon('logout')+' تسجيل الخروج</button>';
  return page('الملف الشخصي',body,{backTo:'008'});
 }
 function profileIdMask(){const id=getActiveAccount()?.publicId||'';return id?'SHM-••••-'+esc(id.slice(-4)):'—'}function currencyName(c){return c==='YER'?'ر.ي':c==='SAR'?'ر.س':'USD'}
@@ -1201,6 +1202,7 @@ function applyListFilters(){
 }
 
 /* Click delegation keeps the prototype lightweight and works after every local render. */
+const themeMedia=window.matchMedia?window.matchMedia('(prefers-color-scheme: dark)'):null;if(themeMedia){const handleSystemTheme=()=>{if(themePreference==='system'){applyThemePreference();const app=document.getElementById('app');if(app)app.classList.toggle('dark',theme==='dark')}};if(themeMedia.addEventListener)themeMedia.addEventListener('change',handleSystemTheme);else if(themeMedia.addListener)themeMedia.addListener(handleSystemTheme)}
 document.addEventListener('click',async e=>{
  const actionEl=e.target.closest('[data-action]');
  if(!actionEl)return;
@@ -1223,7 +1225,7 @@ document.addEventListener('click',async e=>{
  if(action==='open-group'){const card=groupFixtures.find(g=>g.id===id);if(!card)return;activeGroup=findGroup(id)||{};refreshLocalViews();go(card.kind==='manager'?'021':'032');return}
  if(action==='open-chat'){const card=groupFixtures.find(g=>g.id===id);if(!card)return;activeGroup=findGroup(id)||{};refreshLocalViews();go(card.kind==='manager'?'027':'038');return}
  if(action==='carousel'){setCarouselSlide(Number(actionEl.dataset.index)||0);return}
- if(action==='country-picker'){openModal('اختيار الدولة','اليمن','<button class="btn primary" data-action="modal-close">إغلاق</button>');return}
+ if(action==='country-picker'){openModal('اختيار الدولة','قائمة الدول ومفاتيح الاتصال الكاملة غير متاحة في هذا الفرع حالياً. لم يتم تغيير دولة الحساب أو مفتاح الاتصال.','<button class="btn primary" data-action="modal-close">إغلاق</button>');return}
  if(action==='toggle-pass'){const input=document.getElementById(actionEl.dataset.target);if(input)input.type=input.type==='password'?'text':'password';return}
  if(action==='login'){
    const email=(document.getElementById('loginEmail')?.value||'').trim().toLowerCase(),pass=document.getElementById('loginPass')?.value||'';setInvalid('loginEmailWrap',!validEmail(email));setInvalid('loginPassWrap',!pass);
@@ -1242,7 +1244,7 @@ document.addEventListener('click',async e=>{
    const entered=(document.getElementById('recId')?.value||'').trim(),p=document.getElementById('recNew')?.value||'',c=document.getElementById('recConfirm')?.value||'',a=localData.accounts.find(x=>x.id===recoveryAccountId);
    setInvalid('recIdWrap',!a||entered!==a.publicId);setInvalid('recNewWrap',p.length<6);setInvalid('recConfirmWrap',!c||c!==p);
    if(!a||entered!==a.publicId||p.length<6||c!==p){showToast('تحقق من معرّف الحساب وكلمتي المرور');return}
-   try{const r=await newPasswordRecord(p);a.salt=r.salt;a.passwordHash=r.passwordHash;saveLocalData();recoveryAccountId=null;recoverStep=1;go('002');showToast('تم تحديث كلمة المرور')}catch(e){showToast('تعذر تحديث كلمة المرور')}return;
+   try{const r=await newPasswordRecord(p);a.salt=r.salt;a.passwordHash=r.passwordHash;if(!saveLocalData())return;recoveryAccountId=null;recoverStep=1;go('002');showToast('تم تحديث كلمة المرور')}catch(e){showToast('تعذر تحديث كلمة المرور')}return;
  }
  if(action==='register'){
    saveRegistrationFromDom();registration.email=registration.email.trim().toLowerCase();const okE=validEmail(registration.email),okP=registration.pass.length>=6,okC=registration.confirm===registration.pass&&!!registration.confirm,okA=registration.accepted;
@@ -1260,14 +1262,14 @@ document.addEventListener('click',async e=>{
    localData.accounts.push(a);if(!activateAccount(a.id)){showToast('تعذر حفظ الحساب على هذا الجهاز');return}pendingRegistration=null;registration={email:'',pass:'',confirm:'',accepted:false};if(continuePendingJoin())return;current='008';refreshLocalViews();render();showToast('تم إنشاء الحساب');return;
  }
  if(action==='avatar'){avatarChoice=value||'user';document.querySelectorAll('.avatar-option').forEach(b=>b.classList.toggle('active',b.dataset.value===avatarChoice));return}
- if(action==='toggle-lock'){showToast('');return}
+ if(action==='toggle-lock'){showToast('قفل التطبيق غير متاح حالياً لعدم توفر مصادقة الجهاز');return}
  if(action==='edit-name'){openModal('تعديل الاسم',`<div class="field"><label>الاسم</label><input id="editNameInput" value="${esc(profileName)}"></div>`,`<button class="btn secondary" data-action="modal-close">إلغاء</button><button class="btn primary" data-action="save-name">حفظ</button>`);return}
- if(action==='save-name'){const v=document.getElementById('editNameInput')?.value.trim()||'';if(!v){showToast('الاسم مطلوب');return}profileName=v;const a=getActiveAccount();if(a){a.name=v;saveLocalData();refreshLocalViews()}closeModal();render();showToast('تم تحديث الاسم');return}
+ if(action==='save-name'){const v=document.getElementById('editNameInput')?.value.trim()||'';if(!v){showToast('الاسم مطلوب');return}const a=getActiveAccount();if(!a)return;const previous=a.name;a.name=v;if(!saveLocalData()){refreshLocalViews();render();return}profileName=v;refreshLocalViews();closeModal();render();showToast('تم تحديث الاسم');return}
  if(action==='change-password'){openModal('تغيير كلمة المرور',`<div class="field"><label>كلمة المرور الحالية</label><input id="oldPassword" type="password"></div><div class="field"><label>كلمة المرور الجديدة</label><input id="newPassword" type="password"></div><div class="field"><label>تأكيد كلمة المرور الجديدة</label><input id="confirmPassword" type="password"></div>`,`<button class="btn secondary" data-action="modal-close">إلغاء</button><button class="btn primary" data-action="save-password">متابعة</button>`);return}
- if(action==='save-password'){const old=document.getElementById('oldPassword')?.value||'',p=document.getElementById('newPassword')?.value||'',c=document.getElementById('confirmPassword')?.value||'',a=getActiveAccount();if(!a||!old||p.length<6||p!==c){showToast('تحقق من الحقول ومطابقة كلمة المرور');return}try{if(!(await verifyPassword(a,old))){showToast('كلمة المرور الحالية غير صحيحة');return}const r=await newPasswordRecord(p);a.salt=r.salt;a.passwordHash=r.passwordHash;saveLocalData();closeModal();showToast('تم تحديث كلمة المرور')}catch(e){showToast('تعذر تحديث كلمة المرور')}return}
+ if(action==='save-password'){const old=document.getElementById('oldPassword')?.value||'',p=document.getElementById('newPassword')?.value||'',c=document.getElementById('confirmPassword')?.value||'',a=getActiveAccount();if(!a||!old||p.length<6||p!==c){showToast('تحقق من الحقول ومطابقة كلمة المرور');return}try{if(!(await verifyPassword(a,old))){showToast('كلمة المرور الحالية غير صحيحة');return}const r=await newPasswordRecord(p);a.salt=r.salt;a.passwordHash=r.passwordHash;if(!saveLocalData())return;closeModal();showToast('تم تحديث كلمة المرور')}catch(e){showToast('تعذر تحديث كلمة المرور')}return}
  if(action==='copy-id'){copyText(getActiveAccount()?.publicId||'','معرّف الحساب');return}
  if(action==='logout-open'){openModal('تسجيل الخروج','هل تريد إنهاء الجلسة الحالية؟ لا يؤدي ذلك إلى حذف أي بيانات أو تفضيلات.','<button class="btn secondary" data-action="modal-close">إلغاء</button><button class="btn danger" data-action="logout-confirm">تسجيل الخروج</button>');return}
- if(action==='logout-confirm'){closeModal();activeAccountId=null;localData.activeAccountId=null;activeGroup={};historyStack=[];refreshLocalViews();saveLocalData();current='002';render();showToast('تم تسجيل الخروج');return}
+ if(action==='logout-confirm'){closeModal();const previous=activeAccountId;activeAccountId=null;localData.activeAccountId=null;if(!saveLocalData()){activeAccountId=previous;return}activeGroup={};historyStack=[];refreshLocalViews();current='002';render();showToast('تم تسجيل الخروج');return}
  if(action==='install-mode'){form.mode=value;previewOpen=false;render();return}
  if(action==='manager-role'){form.managerRole=value;render();return}
  if(action==='toggle-preview'){previewOpen=!previewOpen;updateAssociationCalc();return}
@@ -1330,7 +1332,7 @@ document.addEventListener('input',e=>{
 });
 document.addEventListener('change',e=>{
  const t=e.target;
- if(t.id==='themeSelect'){theme=t.value==='dark'?'dark':'light';const a=document.getElementById('app');a.classList.toggle('dark',theme==='dark');const account=getActiveAccount();if(account){account.theme=theme;saveLocalData()}showToast('تم تطبيق السمة');}
+  if(t.id==='themeSelect'){themePreference=['light','dark'].includes(t.value)?t.value:'system';try{localStorage.setItem(DEVICE_THEME_KEY,themePreference)}catch(e){showToast('تعذر حفظ تفضيل السمة على هذا الجهاز');return}applyThemePreference();document.getElementById('app').classList.toggle('dark',theme==='dark');showToast('تم تطبيق السمة');}
  if(t.id==='regTerms')registration.accepted=t.checked;
  if(t.id==='joinAck')joinAck=t.checked;
  if(t.matches('[data-contact-check]')){const cid=t.dataset.contactCheck;if(t.checked&&!selectedContacts.includes(cid))selectedContacts.push(cid);if(!t.checked)selectedContacts=selectedContacts.filter(x=>x!==cid)}
@@ -1340,7 +1342,7 @@ document.getElementById('indexSearch').addEventListener('input',e=>{const q=e.ta
 document.getElementById('modalRoot').addEventListener('click',e=>{if(e.target.id==='modalRoot')closeModal()});
 
 render();
-if(current==='001')setTimeout(()=>{if(current==='001'){if(activeAccountId&&getActiveAccount()){theme=getActiveAccount().theme||'light';if(!continuePendingJoin()){current='008';refreshLocalViews();render()}}else go('002')}},900);
+if(current==='001')setTimeout(()=>{if(current==='001'){if(activeAccountId&&getActiveAccount()){applyThemePreference();if(!continuePendingJoin()){current='008';refreshLocalViews();render()}}else go('002')}},900);
 </script>
 
 <script>
