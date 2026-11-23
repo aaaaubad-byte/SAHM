@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <meta name="theme-color" content="#3158d6">
-<meta name="sahm-build" content="sahm-20261124-css-duplicate-cleanup-23w">
+<meta name="sahm-build" content="sahm-20261124-collection-label-23x">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
@@ -1085,7 +1085,7 @@ function renderJoinPreview(type){
 const adminSections=[['التحصيل','wallet','022'],['القرعات','ticket','023'],['الأسهم','coins','024'],['الأعضاء','users','025'],['الدعوات','gift','026'],['الدردشة','chat','027'],['الغرفة','activity','028'],['المعلومات','file','029'],['الإعدادات','settings','030'],['السجل','list','031']];
 function renderAdminHome(){
  const members=memberRecords.length,shares=memberRecords.reduce((n,m)=>n+Number(m.shares||0),0),draws=drawRecords.length,completed=drawRecords.filter(d=>d.status==='مكتملة').length,financeValid=memberRecords.every(m=>Number.isSafeInteger(m.commitmentMinor)&&Number.isSafeInteger(m.paidMinor)),paidMinor=financeValid?memberRecords.reduce((n,m)=>n+m.paidMinor,0):null,dueMinor=financeValid?memberRecords.reduce((n,m)=>n+m.commitmentMinor,0):null,collectionRate=financeValid&&Number.isSafeInteger(paidMinor)&&Number.isSafeInteger(dueMinor)&&dueMinor>0?Math.max(0,Math.min(100,Math.round(paidMinor/dueMinor*100)))+'%':'—';
- const slides=[{title:'أعضاء الجمعية',value:String(members),note:'إجمالي الأعضاء',icon:'users',tone:'blue'},{title:'إجمالي الأسهم',value:String(shares),note:'الأسهم المسجلة في الجمعية',icon:'coins',tone:'gold'},{title:'إنجاز القرعات',value:draws?completed+' / '+draws:'—',note:'القرعات المكتملة من الإجمالي',icon:'ticket',tone:'dark'},{title:'تحصيل القرعة الحالية',value:collectionRate,note:'نسبة الالتزامات المسددة',icon:'wallet',tone:'blue'}];
+ const slides=[{title:'أعضاء الجمعية',value:String(members),note:'إجمالي الأعضاء',icon:'users',tone:'blue'},{title:'إجمالي الأسهم',value:String(shares),note:'الأسهم المسجلة في الجمعية',icon:'coins',tone:'gold'},{title:'إنجاز القرعات',value:draws?completed+' / '+draws:'—',note:'القرعات المكتملة من الإجمالي',icon:'ticket',tone:'dark'},{title:'نسبة التحصيل',value:collectionRate,note:'الالتزامات المسددة من إجمالي الالتزامات',icon:'wallet',tone:'blue'}];
  return '<div class="app-top"><button class="top-back" data-action="back" data-fallback="010">'+icon('right')+'</button><div class="top-title">الرئيسية الإدارية</div></div>'+connection()+'<main class="screen-body">'+summaryCarouselMarkup(slides,'ملخص الجمعية')+'<div class="tile-grid manager-tiles">'+adminSections.map(a=>tile(a[0],a[1],a[2],['التحصيل','الأسهم','الغرفة'].includes(a[0])?'gold':'blue')).join('')+'</div></main>'+bottomNav('groups');
 }function statusChip(text,color='blue'){return `<span class="status ${color}">${text}</span>`}
 /* 022 */
