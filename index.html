@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <meta name="theme-color" content="#3158d6">
-<meta name="sahm-build" content="sahm-20261124-room-invite-empty-23p">
+<meta name="sahm-build" content="sahm-20261124-crypto-ids-23n">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
@@ -839,7 +839,7 @@ let expanded=new Set(),noticeCurrent=null;
 let roomInvitedIds=[],roomAttendeeIds=[];
 let groupResult={name:'',start:'',first:'',share:'',currency:'YER',mode:'count',count:'',managerRole:'manager',managerShares:'1',joinLink:'',groupId:''};
 let groupFixtures=[],notifications=[],collectionRecords=[],paidRecords=[],drawRecords=[],shareRecords=[],memberRecords=[],requests=[],invitations=[],memberDues=[],memberDraws=[],recentEvents=[];
-function makeId(p){return p+'-'+(crypto.randomUUID?crypto.randomUUID():Date.now().toString(36)+'-'+Math.random().toString(36).slice(2,10))}
+function makeId(p){if(crypto.randomUUID)return p+'-'+crypto.randomUUID();const bytes=new Uint8Array(16);crypto.getRandomValues(bytes);return p+'-'+Array.from(bytes,b=>b.toString(16).padStart(2,'0')).join('')}
 const MAX_LOCAL_INSTALLMENTS=10000,MAX_LOCAL_LEDGER_ENTRIES=10000;
 function moneyToMinor(value){if(value===null||value===undefined||typeof value==='boolean')return null;const raw=typeof value==='string'?value.trim():value;if(raw==='')return null;const amount=Number(raw);if(!Number.isFinite(amount)||amount<0)return null;const scaled=amount*100,minor=Math.round(scaled);if(Math.abs(scaled-minor)>1e-7)return null;return Number.isSafeInteger(minor)?minor:null}
 function minorToMoney(value){return Number.isSafeInteger(value)?value/100:NaN}
