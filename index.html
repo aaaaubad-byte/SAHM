@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <meta name="theme-color" content="#3158d6">
-<meta name="sahm-build" content="sahm-20261124-finance-precision-22v">
+<meta name="sahm-build" content="sahm-20261124-network-state-22w">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
@@ -1191,6 +1191,8 @@ function applyListFilters(){
  const emptyEl=body.querySelector('[data-search-empty]');if(emptyEl)emptyEl.style.display=shown?'none':'';
 }
 
+window.addEventListener('online',()=>{if(!online){online=true;render()}});
+window.addEventListener('offline',()=>{if(online){online=false;render()}});
 /* Click delegation keeps the prototype lightweight and works after every local render. */
 const themeMedia=window.matchMedia?window.matchMedia('(prefers-color-scheme: dark)'):null;if(themeMedia){const handleSystemTheme=()=>{if(themePreference==='system'){applyThemePreference();const app=document.getElementById('app');if(app)app.classList.toggle('dark',theme==='dark')}};if(themeMedia.addEventListener)themeMedia.addEventListener('change',handleSystemTheme);else if(themeMedia.addListener)themeMedia.addListener(handleSystemTheme)}
 document.addEventListener('click',async e=>{
