@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <meta name="theme-color" content="#3158d6">
-<meta name="sahm-build" content="sahm-20261124-css-cleanup-23a">
+<meta name="sahm-build" content="sahm-20261124-account-record-guards-23b">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
@@ -1220,14 +1220,14 @@ document.addEventListener('click',async e=>{
  if(action==='login'){
    const email=(document.getElementById('loginEmail')?.value||'').trim().toLowerCase(),pass=document.getElementById('loginPass')?.value||'';setInvalid('loginEmailWrap',!validEmail(email));setInvalid('loginPassWrap',!pass);
    if(!validEmail(email)||!pass){showToast('تحقق من البريد الإلكتروني وكلمة المرور');return}
-   const a=localData.accounts.find(x=>x.email.toLowerCase()===email);if(!a){showToast('لم يتم العثور على حساب بهذه البيانات');return}
+   const a=localData.accounts.find(x=>(x.email||'').toLowerCase()===email);if(!a){showToast('لم يتم العثور على حساب بهذه البيانات');return}
    try{if(!(await verifyPassword(a,pass))){showToast('كلمة المرور غير صحيحة');return}}catch(e){showToast('تعذر التحقق من كلمة المرور في هذا المتصفح');return}
    if(!activateAccount(a.id))return;if(continuePendingJoin())return;current='008';render();showToast('مرحباً بك في سهم');return;
  }
  if(action==='recover-find'){
    const email=(document.getElementById('recEmail')?.value||'').trim().toLowerCase(),phone=(document.getElementById('recPhone')?.value||'').trim().replace(/[\s-]/g,'');setInvalid('recEmailWrap',!validEmail(email));setInvalid('recPhoneWrap',!phone);
    if(!validEmail(email)||!phone){showToast('أكمل البريد الإلكتروني ورقم الهاتف');return}
-   const a=localData.accounts.find(x=>x.email.toLowerCase()===email&&x.phone===phone);if(!a){showToast('لم يتم العثور على حساب مطابق');return}
+   const a=localData.accounts.find(x=>(x.email||'').toLowerCase()===email&&(x.phone||'')===phone);if(!a){showToast('لم يتم العثور على حساب مطابق');return}
    recoveryAccountId=a.id;recoverStep=2;go('003');return;
  }
  if(action==='recover-reset'){
@@ -1240,14 +1240,14 @@ document.addEventListener('click',async e=>{
    saveRegistrationFromDom();registration.email=registration.email.trim().toLowerCase();const okE=validEmail(registration.email),okP=registration.pass.length>=6,okC=registration.confirm===registration.pass&&!!registration.confirm,okA=registration.accepted;
    setInvalid('regEmailWrap',!okE);setInvalid('regPassWrap',!okP);setInvalid('regConfirmWrap',!okC);setInvalid('regTermsWrap',!okA);
    if(!(okE&&okP&&okC&&okA)){showToast('راجع بيانات التسجيل والموافقة على الشروط');return}
-   if(localData.accounts.some(a=>a.email.toLowerCase()===registration.email)){showToast('هذا البريد الإلكتروني مسجل بالفعل');return}
+   if(localData.accounts.some(a=>(a.email||'').toLowerCase()===registration.email)){showToast('هذا البريد الإلكتروني مسجل بالفعل');return}
    try{const r=await newPasswordRecord(registration.pass);pendingRegistration={email:registration.email,salt:r.salt,passwordHash:r.passwordHash};avatarChoice='user';go('006');showToast('أكمل بيانات الملف الشخصي')}catch(e){showToast('تعذر إنشاء الحساب في هذا المتصفح')}return;
  }
  if(action==='complete-profile'){
    const name=document.getElementById('profileName')?.value.trim()||'',phone=(document.getElementById('profilePhone')?.value||'').trim().replace(/[\s-]/g,'');setInvalid('profileNameWrap',!name);setInvalid('profilePhoneWrap',!/^\d{7,15}$/.test(phone));
    if(!name||!/^\d{7,15}$/.test(phone)){showToast('أدخل الاسم ورقم هاتف صالحاً');return}
    if(!pendingRegistration){showToast('أعد بدء إنشاء الحساب');go('004');return}
-   if(localData.accounts.some(a=>a.email.toLowerCase()===pendingRegistration.email)){showToast('هذا البريد الإلكتروني مسجل بالفعل');go('004');return}
+   if(localData.accounts.some(a=>(a.email||'').toLowerCase()===pendingRegistration.email)){showToast('هذا البريد الإلكتروني مسجل بالفعل');go('004');return}
    const a={id:makeId('acc'),publicId:'SHM-'+Date.now().toString(36).toUpperCase()+'-'+Math.random().toString(36).slice(2,6).toUpperCase(),email:pendingRegistration.email,salt:pendingRegistration.salt,passwordHash:pendingRegistration.passwordHash,name,phone,avatar:avatarChoice||'user',theme:'light',createdAt:new Date().toISOString()};
    localData.accounts.push(a);if(!activateAccount(a.id)){showToast('تعذر حفظ الحساب على هذا الجهاز');return}pendingRegistration=null;registration={email:'',pass:'',confirm:'',accepted:false};if(continuePendingJoin())return;current='008';refreshLocalViews();render();showToast('تم إنشاء الحساب');return;
  }
