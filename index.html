@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <meta name="theme-color" content="#3158d6">
-<meta name="sahm-build" content="sahm-20261124-contact-e164-23c">
+<meta name="sahm-build" content="sahm-20261124-home-summary-static-23c">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
@@ -207,6 +207,14 @@ button:disabled{cursor:not-allowed;opacity:.48}
 .summary-slide.blue{background:linear-gradient(118deg,#0b2850 0%,#174a91 48%,#2867e8 100%)}
 .summary-slide.gold{background:linear-gradient(118deg,#49300f 0%,#95601e 50%,#d99a35 100%)}
 .summary-slide.dark{background:linear-gradient(118deg,#101f35 0%,#263f62 52%,#476b98 100%)}
+.summary-static-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px;margin:0 0 12px}
+.summary-static-card{display:flex;min-width:0;min-height:86px;flex-direction:column;align-items:center;justify-content:center;gap:7px;padding:10px 6px;border:1px solid rgba(255,255,255,.58);border-radius:14px;color:#fff;text-align:center;box-shadow:inset 0 1px 0 rgba(255,255,255,.35),0 5px 13px rgba(12,31,58,.13)}
+.summary-static-card.blue{background:linear-gradient(135deg,#0b2850,#174a91 55%,#2867e8)}
+.summary-static-card.gold{background:linear-gradient(135deg,#49300f,#95601e 55%,#d99a35)}
+.summary-static-card.dark{background:linear-gradient(135deg,#101f35,#263f62 55%,#476b98)}
+.summary-static-card strong{font-size:10px;line-height:1.45;font-weight:750;color:#fff}
+.summary-static-card b{font-size:23px;line-height:1.1;font-weight:800;color:#fff;font-variant-numeric:tabular-nums}
+@media(max-width:360px){.summary-static-grid{gap:6px}.summary-static-card{min-height:80px;padding:8px 4px}.summary-static-card strong{font-size:9px}.summary-static-card b{font-size:20px}}
 .summary-icon{position:relative;z-index:1;display:inline-flex;align-items:center;justify-content:center;flex:0 0 30px;width:30px;height:30px;color:#fff;line-height:1}
 .summary-icon svg{display:block;width:28px;height:28px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
 .summary-copy{position:relative;z-index:1;display:flex;flex:1;min-width:0;flex-direction:column;gap:5px}
@@ -920,7 +928,7 @@ function render(){if(carouselTimer){clearInterval(carouselTimer);carouselTimer=n
 case '001':html=renderSplash();break;case '002':html=renderLogin();break;case '003':html=renderRecovery();break;case '004':html=renderRegister();break;case '005':html=renderTerms();break;case '006':html=renderCompleteProfile();break;case '007':html=renderFrame();break;case '008':html=renderHome();break;case '009':html=renderGroups('all');break;case '010':html=renderGroups('manager');break;case '011':html=renderGroups('member');break;case '012':html=renderNotifications();break;case '013':html=renderProfile();break;case '014':html=renderCreateGroup();break;case '015':html=renderCreateSuccess();break;case '016':html=renderJoinLink();break;case '017':html=renderJoinPreview('public');break;case '018':html=renderJoinPreview('invite');break;case '021':html=renderAdminHome();break;case '022':html=renderCollections();break;case '023':html=renderDraws();break;case '024':html=renderShares();break;case '025':html=renderMembers();break;case '026':html=renderInvitations();break;case '027':html=renderChat('manager');break;case '028':html=renderAdminRoom();break;case '029':html=renderGroupInfo();break;case '030':html=renderGroupSettings();break;case '031':html=renderLog();break;case '032':html=renderMemberHome();break;case '033':html=renderMemberDues();break;case '034':html=renderMemberShares();break;case '035':html=renderMemberDraws();break;case '036':html=renderMemberRoom();break;case '037':html=renderNews();break;case '038':html=renderChat('member');break;case '039':html=renderPublicChats();break;case '040':html=renderContacts();break;default:html=renderHome();}
  app.innerHTML=html+`<div class="toast" id="toast">${icon('info')}<span id="toastText"></span></div>`;
  app.classList.toggle('has-bottom-nav',!!app.querySelector('.bottom-nav'));
- if(['008','021','032'].includes(current)){carouselIndex=0;initCarousel()}if(current==='014')updateAssociationCalc();
+ if(['021','032'].includes(current)){carouselIndex=0;initCarousel()}if(current==='014')updateAssociationCalc();
 }
 function connection(){return online?'':`<div class="connection-strip">${icon('alert')}<span>لا يوجد اتصال</span></div>`}
 function generalHeader(){return `<div class="app-top home-top"><div class="top-actions"><button class="icon-btn" data-action="profile" aria-label="الحساب الشخصي">${icon('user')}</button></div><div class="top-actions"><button class="icon-btn" data-action="notifications" aria-label="الإشعارات">${icon('bell')}${notifications.some(n=>!n.read)?'<i class="notice-dot"></i>':''}</button></div></div>${connection()}`}
@@ -961,9 +969,10 @@ function summaryCarouselMarkup(slides,label){
  const dots=slides.map((s,i)=>'<button type="button" class="carousel-dot '+(i===0?'active':'')+'" data-action="carousel" data-index="'+i+'" aria-label="عرض '+esc(s.title)+'" aria-pressed="'+(i===0)+'"></button>').join('');
  return '<section class="summary-carousel" aria-label="'+esc(label)+'"><div class="summary-window"><div class="summary-track" id="summaryTrack">'+cards+'</div></div><div class="carousel-controls" role="group" aria-label="التنقل بين الملخصات">'+dots+'</div></section>';
 }
+function summaryStaticMarkup(slides,label){return '<section class="summary-static-grid" aria-label="'+esc(label)+'">'+slides.map(s=>'<article class="summary-static-card '+esc(s.tone)+'"><strong>'+esc(s.title)+'</strong><b>'+esc(s.value)+'</b></article>').join('')+'</section>'}
 function renderHome(){
  const activity=recentEvents.map(e=>'<button class="activity-item" data-action="activity" data-id="'+esc(e.id)+'"><span class="activity-icon">'+icon(e.icon||'activity')+'</span><span class="activity-copy"><strong>'+esc(e.title)+'</strong><span>'+esc(e.group)+'</span></span><span class="activity-time">'+esc(e.time)+'</span></button>').join('');
- return generalHeader()+'<main class="screen-body home-body">'+summaryCarouselMarkup(getSummarySlides(),'ملخص الجمعيات')+'<section class="home-tiles"><div class="home-shortcuts">'+tile('جمعيات أديرها','users','010','blue')+tile('جمعيات أشارك فيها','usercheck','011','gold')+'</div><div class="home-shortcuts home-action-cards">'+tile('جمعية جديدة','plus','014','blue')+tile('الانضمام لجمعية','link','016','gold')+'</div></section><section class="home-section"><div class="section-head"><div class="section-title-wrap">'+icon('activity')+'<h3>أحدث النشاط</h3></div></div><div class="activity-list">'+(activity||empty('لا يوجد نشاط مسجل حالياً.'))+'</div></section></main>'+bottomNav('home');
+ return generalHeader()+'<main class="screen-body home-body">'+summaryStaticMarkup(getSummarySlides(),'ملخص الجمعيات')+'<section class="home-tiles"><div class="home-shortcuts">'+tile('جمعيات أديرها','users','010','blue')+tile('جمعيات أشارك فيها','usercheck','011','gold')+'</div><div class="home-shortcuts home-action-cards">'+tile('جمعية جديدة','plus','014','blue')+tile('الانضمام لجمعية','link','016','gold')+'</div></section><section class="home-section"><div class="section-head"><div class="section-title-wrap">'+icon('activity')+'<h3>أحدث النشاط</h3></div></div><div class="activity-list">'+(activity||empty('لا يوجد نشاط مسجل حالياً.'))+'</div></section></main>'+bottomNav('home');
 }function setCarouselSlide(index){
  const track=document.getElementById('summaryTrack');
  if(!track)return;
